@@ -1,4 +1,4 @@
-import * as Plyr from 'plyr';
+﻿import * as Plyr from 'plyr';
 import { DefaultPlyrDriver } from './default-plyr-driver';
 
 describe('DefaultPlyrDriver', () => {
@@ -19,7 +19,7 @@ describe('DefaultPlyrDriver', () => {
     it('should created Plyr by a given video tag', () => {
       const driver = new DefaultPlyrDriver();
       expect(driver.create({ videoElement: createVideo(), options: {} })).toBeTruthy();
-      expect(driver.create({ videoElement: createVideo(), options: {} }) instanceof Plyr).toBeTruthy();
+      expect(driver.create({ videoElement: createVideo(), options: {} }) instanceof (Plyr as any)).toBeTruthy();
     });
   });
 
@@ -53,3 +53,4 @@ describe('DefaultPlyrDriver', () => {
   });
 
 });
+

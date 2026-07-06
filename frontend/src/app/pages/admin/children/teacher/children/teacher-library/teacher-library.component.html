@@ -1,7 +1,0 @@
-@if (user()) {
-    <app-ictu-library [userId]="user().id" [donviId]="user().donvi_id"></app-ictu-library>
-} @else {
-    <section class="admin-section--table teacher-library position-relative">
-        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
-    </section>
-}

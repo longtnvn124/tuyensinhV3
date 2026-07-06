@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtGiaoVienComponent } from './qt-giao-vien.component';
+import QtGiaoVienComponent from './qt-giao-vien.component';
 
 describe('QtGiaoVienComponent', () => {
   let component: QtGiaoVienComponent;

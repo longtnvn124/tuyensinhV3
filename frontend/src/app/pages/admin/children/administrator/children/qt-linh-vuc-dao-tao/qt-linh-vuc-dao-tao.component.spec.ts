@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtLinhVucDaoTaoComponent } from './qt-linh-vuc-dao-tao.component';
+import QtLinhVucDaoTaoComponent from './qt-linh-vuc-dao-tao.component';
 
 describe('QtLinhVucDaoTaoComponent', () => {
   let component: QtLinhVucDaoTaoComponent;

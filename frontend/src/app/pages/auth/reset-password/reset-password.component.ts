@@ -11,8 +11,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
-import { MatButton } from '@angular/material/button';
-import { NgScrollbar } from 'ngx-scrollbar';
 import { SharedModule } from '@shared/shared.module';
 
 interface ForgotPasswordFields {
@@ -27,9 +25,9 @@ const RePasswordValidator : ValidatorFn = ( control : AbstractControl ) : Valida
 
 @Component( {
 	selector    : 'app-reset-password' ,
-	imports     : [ LoadingProgressComponent , MatButton , NgScrollbar , ReactiveFormsModule , RouterLink , SharedModule ] ,
+	imports     : [ LoadingProgressComponent , ReactiveFormsModule , RouterLink , SharedModule ] ,
 	templateUrl : './reset-password.component.html' ,
-	styleUrls   : [ '../login/login.component.css' , './reset-password.component.css' ]
+	styleUrl    : './reset-password.component.css'
 } )
 export default class ResetPasswordComponent implements OnInit , OnDestroy {
 
@@ -64,7 +62,7 @@ export default class ResetPasswordComponent implements OnInit , OnDestroy {
 	private submitDataObserver : Subject<number> = new Subject<number>();
 
 	constructor() {
-		this.title.setTitle( '.:: Cập nhật khẩu - [AMS] ::.' );
+		this.title.setTitle( '.:: Cập nhật khẩu ::.' );
 		this.submitDataObserver.asObservable().pipe(
 			takeUntilDestroyed() ,
 			distinctUntilChanged()

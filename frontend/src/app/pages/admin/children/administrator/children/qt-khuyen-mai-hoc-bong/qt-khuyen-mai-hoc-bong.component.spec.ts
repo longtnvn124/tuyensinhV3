@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtKhuyenMaiHocBongComponent } from './qt-khuyen-mai-hoc-bong.component';
+import QtKhuyenMaiHocBongComponent from './qt-khuyen-mai-hoc-bong.component';
 
 describe('QtKhuyenMaiHocBongComponent', () => {
   let component: QtKhuyenMaiHocBongComponent;

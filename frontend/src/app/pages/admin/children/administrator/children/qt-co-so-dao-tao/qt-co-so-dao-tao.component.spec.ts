@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtCoSoDaoTaoComponent } from './qt-co-so-dao-tao.component';
+import QtCoSoDaoTaoComponent from './qt-co-so-dao-tao.component';
 
 describe('QtCoSoDaoTaoComponent', () => {
   let component: QtCoSoDaoTaoComponent;

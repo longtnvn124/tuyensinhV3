@@ -15,8 +15,8 @@ import { ACCESS_TOKEN_KEY , AUTH_OPTIONS , EMPLOYEE_STORAGE_KEY , ENCRYPT_KEY , 
 import { refreshTokenSetter , tokenGetter , tokenSetter } from '@app/app.config';
 import { SysConfigsService } from '@services//sys-configs.service';
 import { IctuNavigation , IctuNavigationItemPms } from '@theme/types/navigation';
-import { Employee } from '@models/employee';
-import { EmployeesService } from '@services/employees.service';
+
+
 import { HocSinh } from '@models/hoc-sinh';
 import { Socket , SocketIoConfig } from 'ngx-socket-io';
 import { ManagerOptions } from 'socket.io-client';
@@ -27,9 +27,7 @@ import { PhuHuynhService } from '@services/phu-huynh.service';
 
 interface IdentityStoreData {
 	user : User | null,
-	employee : Employee | null,
-	student : HocSinh | null,
-	parent : AmsParent | null,
+	
 	permission : Permission | null
 }
 
@@ -44,9 +42,6 @@ const extractPms : ( menu : IctuNavigation ) => IctuNavigationItemPms = ( { pms 
 interface AuthResponse {
 	user : User,
 	permissions : Permission,
-	employee : Employee,
-	student : HocSinh,
-	parent : AmsParent,
 	configs : PickSystemConfig[],
 }
 
@@ -92,7 +87,6 @@ export class AuthenticationService {
 
 	private appRef : ApplicationRef = inject( ApplicationRef );
 
-	private readonly employeesService : EmployeesService = inject( EmployeesService );
 
 	private readonly phuHuynhService : PhuHuynhService = inject( PhuHuynhService );
 
@@ -114,19 +108,12 @@ export class AuthenticationService {
 
 	private readonly userSetupBehavior : BehaviorSubject<User | null> = new BehaviorSubject<User | null>( null );
 
-	private readonly employeeSetupBehavior : BehaviorSubject<Employee | null> = new BehaviorSubject<Employee | null>( null );
-
 	private readonly parentSetupBehavior : BehaviorSubject<AmsParent | null> = new BehaviorSubject<AmsParent | null>( null );
 
 	private readonly studentSetupBehavior : BehaviorSubject<HocSinh | null> = new BehaviorSubject<HocSinh | null>( null );
 
 	private readonly permissionSetupBehavior : BehaviorSubject<Permission | null> = new BehaviorSubject<Permission | null>( null );
 
-	private _parent : AmsParent | null = null;
-
-	private _student : HocSinh | null = null;
-
-	private _employee : Employee | null = null;
 
 	private _user : User | null = null;
 
@@ -137,11 +124,9 @@ export class AuthenticationService {
 	private _options : any[] = [];
 
 	constructor() {
-		const { employee , user , permission , parent } : IdentityStoreData = this.loadDataFromStores();
-		this.employee                                                       = employee;
+		const {user , permission  } : IdentityStoreData = this.loadDataFromStores();
 		this.user                                                           = user;
 		this.permission                                                     = permission || nullPermission;
-		this.parent                                                         = parent;
 		const apConfigs : string | null                                     = localStorage.getItem( '__ap_configs' );
 		this._configs                                                       = apConfigs ? JSON.parse( apConfigs ) : [];
 		dayjs.extend( weekday );
@@ -164,42 +149,7 @@ export class AuthenticationService {
 		this.userSetupBehavior.next( user ? Object.freeze<User>( { ... user } ) : null );
 	}
 
-	/******************************************************
-	 * Employee
-	 * ****************************************************/
-	get employee() : Employee | null {
-		return this._employee;
-	}
 
-	set employee( employee : Employee | null ) {
-		this.employeeSetupBehavior.next( employee ? Object.freeze<Employee>( { ... employee } ) : null );
-		this._employee = employee;
-	}
-
-	/******************************************************
-	 * Parent
-	 * ****************************************************/
-	get parent() : AmsParent | null {
-		return this._parent;
-	}
-
-	set parent( parent : AmsParent | null ) {
-		this.parentSetupBehavior.next( parent ? Object.freeze<AmsParent>( { ... parent } ) : null );
-		this._parent = parent;
-	}
-
-	/******************************************************
-	 * student
-	 * ****************************************************/
-
-	get student() : HocSinh | null {
-		return this._student;
-	}
-
-	set student( student : HocSinh | null ) {
-		this.studentSetupBehavior.next( student ? Object.freeze<HocSinh>( { ... student } ) : null );
-		this._student = student;
-	}
 
 	get permission() : Permission | null {
 		return this._permission;
@@ -268,10 +218,6 @@ export class AuthenticationService {
 			return reducer ? ( role.ordering < reducer.ordering ? role : reducer ) : role;
 		} , undefined );
 		return _maxPowerRoleUse ? Object.freeze<PickRole>( { ... _maxPowerRoleUse } ) : undefined;
-	}
-
-	get onEmployeeSetup() : Observable<Employee | null> {
-		return this.employeeSetupBehavior;
 	}
 
 	get onUserSetup() : Observable<User> {
@@ -399,7 +345,6 @@ export class AuthenticationService {
 
 	clearSession() : void {
 		this._user       = null;
-		this._employee   = null;
 		this._permission = nullPermission;
 		localStorage.removeItem( USER_STORAGE_KEY );
 		// localStorage.removeItem( MY_SALE_TEAM_STORAGE_KEY );
@@ -422,20 +367,6 @@ export class AuthenticationService {
 		return nonce;
 	}
 
-	private saveEmployee( employee : Employee | null ) : void {
-		this.storeData( EMPLOYEE_STORAGE_KEY , employee );
-		this.employee = employee;
-	}
-
-	private saveStudent( student : HocSinh | null ) : void {
-		this.storeData( STUDENT_STORAGE_KEY , student );
-		this.student = student;
-	}
-
-	private saveParent( parent : AmsParent | null ) : void {
-		this.storeData( PARENT_STORAGE_KEY , parent );
-		this.parent = parent;
-	}
 
 	saveConfigs( configs : PickSystemConfig[] ) : void {
 		this._configs = configs;
@@ -527,12 +458,9 @@ export class AuthenticationService {
 	}
 
 	private loadDataFromStores() : IdentityStoreData {
-		const employee : Employee | null     = this.getStoredData<Employee | null>( EMPLOYEE_STORAGE_KEY , null );
 		const user : User | null             = this.getStoredData<User | null>( USER_STORAGE_KEY , null );
 		const permission : Permission | null = this.getStoredData<Permission | null>( PERMISSION_STORAGE_KEY , null );
-		const student : HocSinh | null       = this.getStoredData<HocSinh | null>( STUDENT_STORAGE_KEY , null );
-		const parent : AmsParent | null      = this.getStoredData<AmsParent | null>( PARENT_STORAGE_KEY , null );
-		return { employee , user , permission , student , parent };
+		return {   user , permission};
 	}
 
 	private async _signIn( signIn : UserSignIn | GoogleSignIn , provider : 'LOCAL' | 'GOOGLE' ) : Promise<boolean> {
@@ -561,24 +489,15 @@ export class AuthenticationService {
 		} ).pipe(
 			switchMap( ( { user , permissions , configs } : Pick<AuthResponse , 'user' | 'permissions' | 'configs'> ) : Observable<AuthResponse> => {
 				const userRoles : PickRole[]    = permissions.data?.roles && isArray( permissions.data.roles ) ? permissions.data.roles : [];
-				const hasEmployeeRole : boolean = userRoles.some( ( _role : PickRole ) : boolean => ARRAY_EMPLOYEE_ROLES.includes( _role.name ) );
-				const hasParenRole : boolean    = userRoles.some( ( { name } : PickRole ) : boolean => name === 'parent' );
-				const hasStudentRole : boolean  = userRoles.some( ( { name } : PickRole ) : boolean => name === 'student' );
 				return joinSources<AuthResponse>( {
 					user        : of( user ) ,
 					permissions : of( permissions ) ,
 					configs     : of( configs ) ,
-					employee    : hasEmployeeRole ? this.employeesService.getEmployeeInfo( user ) : of( null ) ,
-					student     : of( null ) ,
-					parent      : hasParenRole ? this.loadParenInfo( user ) : of( null )
 				} );
 			} ) ,
-			map( ( { user , permissions , employee , configs , student , parent } : AuthResponse ) : boolean => {
+			map( ( { user , permissions  , configs } : AuthResponse ) : boolean => {
 				this.saveUser( user );
 				this.savePermissions( permissions );
-				this.saveEmployee( employee );
-				this.saveStudent( student );
-				this.saveParent( parent );
 				this.saveConfigs( configs );
 				this.connectSocket();
 				return true;

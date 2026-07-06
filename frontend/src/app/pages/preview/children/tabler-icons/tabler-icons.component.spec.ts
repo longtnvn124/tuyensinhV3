@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TablerIconsComponent } from './tabler-icons.component';
+import TablerIconsComponent from './tabler-icons.component';
 
 describe('TablerIconsComponent', () => {
   let component: TablerIconsComponent;

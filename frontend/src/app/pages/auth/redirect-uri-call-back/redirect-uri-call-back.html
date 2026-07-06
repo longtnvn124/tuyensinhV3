@@ -1,28 +1,49 @@
-<div class="redirect-uri-call-back-layout d-flex">
-	<div class="redirect-uri-call-back-layout__inside d-flex justify-content-center align-items-center">
-		@switch (state()) {
-			@case ('loading') {
-				<div class="redirect-uri-call-back-layout__content d-flex justify-content-center align-items-center flex-column">
-					<h4 class="redirect-uri-call-back-layout__heading font-roboto f-14 fw-normal">{{ heading() }}</h4>
-					<p-progressBar mode="indeterminate" [style]="{ height: '6px' }"></p-progressBar>
-				</div>
-			}
-			@case ('checking') {
-				<div class="redirect-uri-call-back-layout__content d-flex justify-content-center align-items-center flex-column">
-					<h4 class="redirect-uri-call-back-layout__heading font-roboto f-14 fw-normal">{{ heading() }}</h4>
-					<p-progressBar mode="indeterminate" [style]="{ height: '6px' }"></p-progressBar>
-				</div>
-			}
-			@case ('invalid') {
-				<div class="alert alert-danger m-0" style="border-radius: 4px;">
-					<h4 class="redirect-uri-call-back-layout__heading font-roboto f-14 fw-normal m-0">{{ heading() }}</h4>
-				</div>
-			}
-			@case ('error') {
-				<div class="alert alert-danger m-0" style="border-radius: 4px;">
-					<h4 class="redirect-uri-call-back-layout__heading font-roboto f-14 fw-normal m-0">{{ heading() }}</h4>
-				</div>
-			}
-		}
-	</div>
+<div class="auth-page">
+    <div class="auth-page__bg">
+        <div class="auth-page__grid"></div>
+        <div class="auth-page__glow auth-page__glow--1"></div>
+        <div class="auth-page__glow auth-page__glow--2"></div>
+    </div>
+    <div class="auth-page__container">
+        <div class="auth-card auth-card--compact">
+            @switch (state()) {
+                @case ('loading') {
+                    <div class="auth-card__processing">
+                        <div class="auth-card__spinner"></div>
+                        <p class="auth-card__processing-text">{{ heading() }}</p>
+                    </div>
+                }
+                @case ('checking') {
+                    <div class="auth-card__processing">
+                        <div class="auth-card__spinner"></div>
+                        <p class="auth-card__processing-text">{{ heading() }}</p>
+                    </div>
+                }
+                @case ('invalid') {
+                    <div class="auth-card__result">
+                        <div class="auth-card__icon auth-card__icon--error">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <p class="auth-card__processing-text">{{ heading() }}</p>
+                    </div>
+                }
+                @case ('error') {
+                    <div class="auth-card__result">
+                        <div class="auth-card__icon auth-card__icon--error">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                        </div>
+                        <p class="auth-card__processing-text">{{ heading() }}</p>
+                    </div>
+                }
+            }
+        </div>
+    </div>
 </div>

@@ -1,17 +1,12 @@
 import { Component , computed , inject , OnDestroy , OnInit , Signal , signal , WritableSignal } from '@angular/core';
 import { FormBuilder , FormControl , ReactiveFormsModule , Validators } from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatButton , MatIconButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatSuffix } from '@angular/material/form-field';
 import { Title } from '@angular/platform-browser';
 import { AuthenticationService } from '@services/authentication.service';
 import { UserSignIn } from '@models/auth';
 import { ActivatedRoute , Router , RouterLink } from '@angular/router';
 import { APP_REDIRECT_LINKS , PickRole , SysRoleName } from '@models/role';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
-import { AuthLayoutComponent } from '@pages/auth/auth-layout/auth-layout.component';
-import { NgScrollbar } from 'ngx-scrollbar';
 import { debounceTime , map , Subject , takeUntil , timer } from 'rxjs';
 import { currentUserTimeZone } from '@utilities/syscats';
 import { ENVIRONMENT , getApiRouteLink } from '@env';
@@ -20,12 +15,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient , HttpParams } from '@angular/common/http';
 import { NotificationService } from '@services/notification.service';
 import { FormGroupType } from '@models/common';
+import { A11yModule } from "@angular/cdk/a11y";
+import { ButtonDirective } from "primeng/button";
 
 type FormLogin = FormGroupType<UserSignIn>
 
 @Component( {
 	selector    : 'app-login' ,
-	imports     : [ ReactiveFormsModule , MatCheckbox , MatButton , MatIcon , MatIconButton , MatSuffix , LoadingProgressComponent , NgScrollbar , RouterLink ] ,
+	imports: [ReactiveFormsModule, MatCheckbox,  LoadingProgressComponent, RouterLink, A11yModule, ButtonDirective] ,
 	templateUrl : './login.component.html' ,
 	styleUrl    : './login.component.css'
 } )
@@ -81,6 +78,7 @@ export default class LoginComponent implements OnInit , OnDestroy {
 		if ( this.auth.userLoggedIn ) {
 			void this.redirectAfterAuthenticated();
 		} else {
+			this.title.setTitle( '.:: Đăng nhập ::.' );
 			setTimeout( () : void => this.loading.set( false ) , 500 );
 		}
 	}

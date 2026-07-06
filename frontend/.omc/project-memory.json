@@ -1,0 +1,250 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1783304522667,
+  "projectRoot": "D:\\data\\project\\angular\\v19\\tuyensinh\\frontend",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "@angular/core",
+        "version": "21.2.0",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": "npm test",
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run start",
+    "scripts": {
+      "ng": "ng",
+      "start": "ng serve -o",
+      "build": "ng build --configuration production",
+      "watch": "ng build --watch --configuration development",
+      "test": "ng test",
+      "lint": "ng lint",
+      "lint:fix": "ng lint --fix",
+      "prettier": "prettier --write ./src"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "src"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 0,
+      "lastAccessed": 1783304522632,
+      "keyFiles": []
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 1,
+      "lastAccessed": 1783304522633,
+      "keyFiles": [
+        "favicon.ico"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 3,
+      "lastAccessed": 1783304522640,
+      "keyFiles": [
+        "index.html",
+        "main.ts",
+        "styles.scss"
+      ]
+    },
+    "src\\app": {
+      "path": "src\\app",
+      "purpose": "Application code",
+      "fileCount": 5,
+      "lastAccessed": 1783304522642,
+      "keyFiles": [
+        "app.component.css",
+        "app.component.html",
+        "app.component.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src\\app",
+      "accessCount": 6,
+      "lastAccessed": 1783305854982,
+      "type": "directory"
+    },
+    {
+      "path": "src\\app\\components\\class-curriculums\\class-curriculum-lecture-media-document\\class-curriculum-lecture-media-document.component.ts",
+      "accessCount": 3,
+      "lastAccessed": 1783305844190,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\models\\course-lesson.ts",
+      "accessCount": 2,
+      "lastAccessed": 1783305836989,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-co-so-dao-tao\\qt-co-so-dao-tao.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304614198,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-hoc-sinh\\qt-hoc-sinh.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304614316,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-doi-tac-tuyen-sinh\\qt-doi-tac-tuyen-sinh.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304614601,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-giao-vien\\qt-giao-vien.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304614706,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-bac-dao-tao\\qt-bac-dao-tao.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304614917,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-hop-dong-lao-dong\\qt-hop-dong-lao-dong.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304615205,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-khuyen-mai-hoc-bong\\qt-khuyen-mai-hoc-bong.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304627226,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-linh-vuc-dao-tao\\qt-linh-vuc-dao-tao.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304627618,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-lop-hoc\\qt-lop-hoc.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304627694,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-tuyen-dung\\qt-tuyen-dung.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304627823,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\preview\\children\\chart-table\\chart-table.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304627910,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\preview\\children\\tabler-icons\\tabler-icons.component.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304628189,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\app.routes.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304659748,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\scan-cccd\\scan-cccd.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304660455,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\module\\ngx-plyr\\lib\\plyr-driver\\default-plyr-driver.spec.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304660628,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\review-and-approval\\children\\review-and-approval-contents\\review-and-approval-contents.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304660772,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\scan-cccd\\scan-cccd.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783304660894,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\components\\class-curriculums\\class-curriculum-lecture-media-audio\\class-curriculum-lecture-media-audio.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783305309362,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\components\\class-curriculums\\class-curriculum-lecture-media-video\\class-curriculum-lecture-media-video.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783305309748,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\components\\class-curriculums\\class-curriculum-lecture-media-picture\\class-curriculum-lecture-media-picture.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783305309812,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

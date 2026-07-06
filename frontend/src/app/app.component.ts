@@ -105,7 +105,7 @@ export class AppComponent implements OnDestroy {
             this.userCloseNotice.set( false );
         } );
 
-        window.oncontextmenu = () : boolean => false;
+        // window.oncontextmenu = () : boolean => false;
 
         // this.observeWindowResize$.asObservable().pipe(
         //     debounceTime( 500 ) ,

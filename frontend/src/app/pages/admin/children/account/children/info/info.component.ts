@@ -7,9 +7,7 @@ import { User } from '@models/user';
 import { debounceTime , merge , take } from 'rxjs';
 import { Employee } from '@models/employee';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
-import { AccountInfoEmployeeProfileComponent } from '@pages/admin/children/account/children/info/children/account-info-employee-profile/account-info-employee-profile.component';
-import { AccountInfoTabAboutMeComponent } from '@pages/admin/children/account/children/info/children/account-info-tab-about-me/account-info-tab-about-me.component';
-import { AccountInfoParentProfileComponent } from '@pages/admin/children/account/children/info/children/account-info-parent-profile/account-info-parent-profile.component';
+
 import { AccountInfoTabSettingsComponent } from '@pages/admin/children/account/children/info/children/account-info-tab-settings/account-info-tab-settings.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AccountInfoTabUserComponent } from '@pages/admin/children/account/children/info/children/account-info-tab-user/account-info-tab-user.component';
@@ -20,7 +18,7 @@ type InfoProfileType = 'employee' | 'parent' | 'student';
 
 @Component( {
 	selector    : 'app-info' ,
-	imports     : [ LoadingProgressComponent , ReactiveFormsModule , AccountInfoEmployeeProfileComponent , AccountInfoTabAboutMeComponent , AccountInfoParentProfileComponent , AccountInfoTabSettingsComponent , AccountInfoTabUserComponent ] ,
+	imports     : [ LoadingProgressComponent , ReactiveFormsModule , AccountInfoTabSettingsComponent , AccountInfoTabUserComponent ] ,
 	templateUrl : './info.component.html' ,
 	styleUrl    : './info.component.css'
 } )
@@ -52,9 +50,9 @@ export default class InfoComponent {
 	protected dmLinhVuc : WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>( [] );
 
 	constructor() {
-		merge<[ any , any ]>(
+		merge<[ any  ]>(
 			this.auth.onUserSetup ,
-			this.auth.onEmployeeSetup
+			
 		).pipe(
 			takeUntilDestroyed() ,
 			debounceTime( 500 ) ,
@@ -69,11 +67,7 @@ export default class InfoComponent {
 			this.user.set( u );
 		} );
 
-		this.auth.onEmployeeSetup.pipe(
-			takeUntilDestroyed()
-		).subscribe( ( e : Employee ) : void => {
-			this.employee.set( e );
-		} );
+		
 
 	}
 

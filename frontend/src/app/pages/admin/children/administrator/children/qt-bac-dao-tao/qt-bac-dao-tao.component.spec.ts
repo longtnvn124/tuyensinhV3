@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtBacDaoTaoComponent } from './qt-bac-dao-tao.component';
+import QtBacDaoTaoComponent from './qt-bac-dao-tao.component';
 
 describe('QtBacDaoTaoComponent', () => {
   let component: QtBacDaoTaoComponent;

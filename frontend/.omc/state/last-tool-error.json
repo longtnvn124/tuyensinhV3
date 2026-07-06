@@ -1,7 +1,7 @@
 {
   "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; git status src/app/pages/auth/login/ 2>&1\",\"description\":\"Check git status for login files\"}",
-  "error": "Exit code 128\ngit : fatal: not a git repository (or any of the parent directories): .git\r\nAt line:1 char:52\r\n+ ... lar\\v19\\tuyensinh\\frontend; git status src/app/pages/auth/login/ 2>&1\r\n+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (fatal: not a gi...ectories): .git:String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError",
-  "timestamp": "2026-07-05T02:50:32.081Z",
+  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx tsc --noEmit 2>&1 | Select-Object -First 60\",\"timeout\":120000,\"description\":\"Verify tsc after remaining fixes\"}",
+  "error": "Exit code 2\nsrc/app/components/class-curriculums/class-curriculum-lecture-media-document/class-curriculum-lecture-media-document.component.ts(71,17): error TS2322: Type 'string' is not assignable to type 'ICTUFileHostingService'.\r\nsrc/app/models/course-lesson.ts(59,11): error TS2740: Type 'CourseLessonChapter' is missing the following properties from type 'CourseLesson[]': length, pop, push, concat, and 29 more.\r\nsrc/app/models/course-lesson.ts(59,63): error TS2769: No overload matches this call...",
+  "timestamp": "2026-07-06T02:43:50.641Z",
   "retry_count": 1
 }

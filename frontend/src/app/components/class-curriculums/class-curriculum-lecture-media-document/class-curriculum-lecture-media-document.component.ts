@@ -1,4 +1,4 @@
-import { Component , computed , inject , input , InputSignal , signal , Signal , WritableSignal } from '@angular/core';
+﻿import { Component , computed , inject , input , InputSignal , signal , Signal , WritableSignal } from '@angular/core';
 import { ClassCurriculumLectureMediaComponent } from '@components/class-curriculums/class-curriculum-lecture-media-component';
 import { CourseLessonStructureMedia } from '@pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/course-lesson-structure-media';
 import { IctuTokenFile , matchIctuFileString , str2IctuTokenFile } from '@pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/components/edit-course-lesson-structure-media-upload/edit-course-lesson-structure-media-model';
@@ -68,10 +68,11 @@ export class ClassCurriculumLectureMediaDocumentComponent implements ClassCurric
                 title    : this.fileInfo().title ,
                 ext      : this.fileInfo().ext ,
                 size     : this.fileInfo().size ,
-                location : this.fileInfo().location ,
+                location : this.fileInfo().location as any,
                 type     : this.fileInfo().mineType
             }
             this.notification.previewFile( { info : [ _fileInfo ] } )
         }
     }
 }
+

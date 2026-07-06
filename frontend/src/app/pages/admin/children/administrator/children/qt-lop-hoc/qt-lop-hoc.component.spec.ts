@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtLopHocComponent } from './qt-lop-hoc.component';
+import QtLopHocComponent from './qt-lop-hoc.component';
 
 describe('QtLopHocComponent', () => {
   let component: QtLopHocComponent;

@@ -42,19 +42,10 @@
                                     <account-info-tab-user></account-info-tab-user>
                                 }
                                 @case ('PROFILE') {
-                                    @switch (profileType()) {
-                                        @case ('parent') {
-                                            <account-info-parent-profile></account-info-parent-profile>
-                                        }
-                                        @case ('student') {
-                                        }
-                                        @default {
-                                            <account-info-employee-profile [(dmLinhVuc)]="dmLinhVuc"></account-info-employee-profile>
-                                        }
-                                    }
+                
                                 }
                                 @case ('ABOUT_ME') {
-                                    <account-info-tab-about-me></account-info-tab-about-me>
+                                  
                                 }
                                 @default {
                                     <account-info-tab-settings></account-info-tab-settings>

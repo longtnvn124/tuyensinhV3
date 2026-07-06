@@ -1,5 +1,4 @@
 import { Component , inject , OnDestroy , signal , WritableSignal } from '@angular/core';
-import { MatButton } from '@angular/material/button';
 import { FormBuilder , FormControl , ReactiveFormsModule , Validators } from '@angular/forms';
 import { SharedModule } from '@shared/shared.module';
 import { Title } from '@angular/platform-browser';
@@ -14,6 +13,8 @@ import { distinctUntilChanged } from 'rxjs/operators';
 import { ENVIRONMENT } from '@env';
 import { currentUserTimeZone } from '@utilities/syscats';
 import { RouterLink } from '@angular/router';
+import { ButtonDirective } from "primeng/button";
+import { Ripple } from "primeng/ripple";
 
 type forgotPasswordState = 'waiting' | 'loading' | 'success';
 
@@ -25,9 +26,9 @@ type ForgotPasswordFormGroup = FormGroupType<ForgotPasswordFields>
 
 @Component( {
 	selector    : 'app-forgot-password' ,
-	imports     : [ MatButton , ReactiveFormsModule , SharedModule , LoadingProgressComponent , RouterLink ] ,
+	imports: [ReactiveFormsModule, SharedModule, LoadingProgressComponent, RouterLink, ButtonDirective, Ripple] ,
 	templateUrl : './forgot-password.component.html' ,
-	styleUrls   : [ '../login/login.component.css' , './forgot-password.component.css' ]
+	styleUrl    : './forgot-password.component.css'
 } )
 export default class ForgotPasswordComponent implements OnDestroy {
 
@@ -58,7 +59,7 @@ export default class ForgotPasswordComponent implements OnDestroy {
 	}
 
 	constructor() {
-		this.title.setTitle( '.:: Quên mật khẩu - [AMS] ::.' );
+		this.title.setTitle( '.:: Quên mật khẩu ::.' );
 		this.submitObserver.asObservable().pipe(
 			takeUntilDestroyed() ,
 			distinctUntilChanged()

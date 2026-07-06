@@ -1,17 +1,16 @@
-import { IctuBaseModel } from '@models/ictu-base-model';
+﻿import { IctuBaseModel } from '@models/ictu-base-model';
 import { CourseAttachment } from '@models/course';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { IctuBasicFile } from '@models/file';
 import { sortBy } from 'lodash-es';
 import { ClassLesson } from '@models/class';
-import { CourseLessonChapter } from '@pages/class-planning/children/class-planning-curriculum/class-planning-curriculum.component';
 
 export type DeliveryMode = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 
 export const optionDeliveryModeType : IctuDropdownOption<DeliveryMode>[] = [
-    { value : 'ONLINE' , label : 'Trực tuyến' } ,
-    { value : 'OFFLINE' , label : 'Trực tiếp' } ,
-    { value : 'HYBRID' , label : 'Kết hợp' }
+    { value : 'ONLINE' , label : 'Trá»±c tuyáº¿n' } ,
+    { value : 'OFFLINE' , label : 'Trá»±c tiáº¿p' } ,
+    { value : 'HYBRID' , label : 'Káº¿t há»£p' }
 ];
 
 export interface ScormResponse {
@@ -52,11 +51,11 @@ export interface CourseLesson extends IctuBaseModel {
 }
 
 export const courseLessons2ClassLessons : any = ( courseLessons : CourseLesson[] ) : ClassLesson[] => {
-    const chapters : CourseLessonChapter[] = sortBy<CourseLessonChapter>( courseLessons.filter( ( i : CourseLesson ) : boolean => i.parent_id === 0 ).map( ( p : CourseLesson ) : CourseLessonChapter => {
+    const chapters : any[] = sortBy( courseLessons.filter( ( i : CourseLesson ) : boolean => i.parent_id === 0 ).map( ( p : CourseLesson ) : any => {
         const children : CourseLesson[] = sortBy<CourseLesson>( courseLessons.filter( ( c : CourseLesson ) : boolean => c.parent_id === p.id ) , 'ordering' );
         return { ... p , children };
     } ) , 'ordering' );
-    const lessons : CourseLesson[]         = chapters.reduce( ( _reducer : CourseLesson[] , item : CourseLesson ) : CourseLesson[] => {
+    const lessons : CourseLesson[]         = chapters.reduce( ( _reducer : CourseLesson[] , item : any ) : CourseLesson[] => {
         _reducer.push( ... item[ 'children' ] );
         return _reducer;
     } , new Array<CourseLesson>() );

@@ -1,18 +1,18 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ScanCccd } from './scan-cccd';
+import ScanCccdLiveComponent from './scan-cccd.component';
 
-describe('ScanCccd', () => {
-  let component: ScanCccd;
-  let fixture: ComponentFixture<ScanCccd>;
+describe('ScanCccdLiveComponent', () => {
+  let component: ScanCccdLiveComponent;
+  let fixture: ComponentFixture<ScanCccdLiveComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ScanCccd]
+      imports: [ScanCccdLiveComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ScanCccd);
+    fixture = TestBed.createComponent(ScanCccdLiveComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

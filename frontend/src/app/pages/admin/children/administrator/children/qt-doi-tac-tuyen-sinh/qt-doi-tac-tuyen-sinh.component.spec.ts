@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtDoiTacTuyenSinhComponent } from './qt-doi-tac-tuyen-sinh.component';
+import QtDoiTacTuyenSinhComponent from './qt-doi-tac-tuyen-sinh.component';
 
 describe('QtDoiTacTuyenSinhComponent', () => {
   let component: QtDoiTacTuyenSinhComponent;

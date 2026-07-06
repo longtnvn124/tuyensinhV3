@@ -1,4 +1,4 @@
-import { ApplicationRef , Component , computed , inject , OnDestroy , OnInit , Signal , signal , WritableSignal } from '@angular/core';
+import {  Component , computed , inject , OnDestroy , OnInit , Signal , signal , WritableSignal } from '@angular/core';
 import { ActivatedRoute , ParamMap , Router } from '@angular/router';
 import { SIGN_IN_WITH_THIRD_PARTY_VALUES , SignInWithThirdParty } from '@pages/auth/interfaces/sign-in-with-third-party';
 import { AuthenticationService } from '@services/authentication.service';
@@ -8,7 +8,6 @@ import { merge , Observable , Subject , switchMap , takeUntil , timer } from 'rx
 import { getApiRouteLink } from '@env';
 import { Token } from '@models/auth';
 import { APP_REDIRECT_LINKS , PickRole , SysRoleName } from '@models/role';
-import { ProgressBar } from 'primeng/progressbar';
 
 const isRedirectFromSupportedThirdParty : ( value : unknown ) => boolean = ( value : unknown ) : value is SignInWithThirdParty => {
 	return SIGN_IN_WITH_THIRD_PARTY_VALUES.includes( value as SignInWithThirdParty );
@@ -18,7 +17,7 @@ type RedirectUriCallBackState = 'checking' | 'loading' | 'invalid' | 'error' | '
 
 @Component( {
 	selector    : 'app-redirect-uri-call-back' ,
-	imports     : [ ProgressBar ] ,
+	imports     : [ ] ,
 	templateUrl : './redirect-uri-call-back.html' ,
 	styleUrl    : './redirect-uri-call-back.css'
 } )

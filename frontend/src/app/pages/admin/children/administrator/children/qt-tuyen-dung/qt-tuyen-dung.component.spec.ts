@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtTuyenDungComponent } from './qt-tuyen-dung.component';
+import QtTuyenDungComponent from './qt-tuyen-dung.component';
 
 describe('QtTuyenDungComponent', () => {
   let component: QtTuyenDungComponent;

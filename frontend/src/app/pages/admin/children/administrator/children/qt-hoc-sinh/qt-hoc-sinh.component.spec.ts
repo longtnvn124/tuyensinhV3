@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { QtHocSinhComponent } from './qt-hoc-sinh.component';
+import QtHocSinhComponent from './qt-hoc-sinh.component';
 
 describe('QtHocSinhComponent', () => {
   let component: QtHocSinhComponent;
