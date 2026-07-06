@@ -1,0 +1,33 @@
+mat-slider,
+.ictu-criteria-scores-control__input {
+    width: calc((100% - 30px - 60px - 36px) / 2);
+    max-width: calc((100% - 30px - 60px - 36px) / 2);
+    flex: 1 1 auto;
+}
+
+.ictu-criteria-scores-control__input {
+    border: none;
+    padding: 13px;
+    outline: none;
+    box-shadow: none;
+    background: #F8F9FA;
+    border-radius: 4px;
+}
+
+.ictu-criteria-scores-control__btn-remove {
+    min-width: 36px;
+    width: 36px;
+    max-width: 36px;
+    height: 36px;
+}
+
+.ictu-criteria-scores-control__label {
+    min-width: 50px;
+    width: 50px;
+    max-width: 50px;
+}
+
+.ictu-criteria-scores-control {
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+}

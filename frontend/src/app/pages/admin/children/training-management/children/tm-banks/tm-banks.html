@@ -1,0 +1,106 @@
+<section class="admin-section--table position-relative">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	<div class="admin-wrap-table">
+		@if (state() !== 'error') {
+			<div class="admin-wrap-table__head d-flex">
+				<h4 class="admin-wrap-table__heading">
+					<svg>
+						<use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+					</svg>
+					Danh sách ngân hàng
+				</h4>
+				<div class="admin-wrap-table__head-actions">
+					<input [(ngModel)]="searchText" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchData()">
+					@if (permissionControl().canDelete) {
+						<button (click)="deleteSelectedRows()" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+							<i class="ti ti-trash"></i>
+						</button>
+					}
+					@if (permissionControl().canCreate) {
+						<button (click)="addNewItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+							<i class="ti ti-plus"></i>
+						</button>
+					}
+				</div>
+			</div>
+			<div class="admin-wrap-table__body">
+				<table class="tbl admin-table table-hover">
+					<thead>
+						<tr>
+							<th class="col-checkbox">
+								<mat-checkbox [checked]="dataTable.totalChecked()" [indeterminate]="dataTable.partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="disabledCheckbox()"></mat-checkbox>
+							</th>
+							<th class="col-index text-center">#</th>
+							<th class="text-start">Tên ngân hàng</th>
+							<th class="text-start">Mô tả</th>
+							<th class="text-start">Môn học</th>
+							<th class="wid-140 text-center">Khối kiến thức</th>
+							<th class="wid-140 text-center">Trạng thái</th>
+							<th class="wid-90 text-center px-0">Hành động</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for (_bank of dataTable.data(); track _bank.id; let i = $index) {
+							<tr>
+								<td class="col-checkbox">
+									<mat-checkbox [checked]="_bank._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)" [disabled]="!this.permissionControl().canDelete"></mat-checkbox>
+								</td>
+								<td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+								<td class="text-start">{{ _bank.name }}</td>
+								<td class="text-start">{{ _bank.desc }}</td>
+								<td class="text-start"></td>
+								<td class="wid-140 text-center"></td>
+								<td class="wid-140 text-center p-0">
+									<div class="d-flex w-100 h-100 justify-content-center align-items-center">
+										@if (_bank.status === 1) {
+											<span class="ictu-badge ictu-badge--success">Đang hoạt động</span>
+										} @else {
+											<span class="ictu-badge ictu-badge--secondary">Dừng hoạt động</span>
+										}
+									</div>
+								</td>
+								<td class="p-0 wid-90">
+									@if (permissionControl().canDelete || permissionControl().canUpdate) {
+										<div class="admin-table__btn-actions" style="gap : 5px">
+											@if (permissionControl().canDelete) {
+												<button (click)="editRow(_bank)" class="btn ictu-button-info-light" pTooltip="Cập nhật thông tin lớp học" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body" tooltipPosition="left" showDelay="1000">
+													<i class="ti ti-edit"></i>
+												</button>
+											}
+											@if (permissionControl().canUpdate) {
+												<button [disabled]="_bank.status === 1" (click)="deleteRow(_bank)" class="btn ictu-button-danger-light" [tooltipDisabled]="_bank.status === 1" pTooltip="Xóa lớp học" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body" tooltipPosition="left" showDelay="1000">
+													<i class="ti ti-trash"></i>
+												</button>
+											}
+										</div>
+									}
+								</td>
+							</tr>
+						} @empty {
+							<tr>
+								<td colspan="8">Không có ngân hàng.</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<div class="admin-wrap-table__foot">
+				<div class="d-flex justify-content-center align-items-center w-100">
+					<ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+				</div>
+			</div>
+		} @else {
+			<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+	</div>
+</section>
+
+<p-dialog (onHide)="onDrawerHide()" [modal]="false" [(visible)]="visibleDialog" [closable]="false" [draggable]="false" appendTo="body" position="center" styleClass="ictu-dialog-layout ictu-dialog-layout--full-screen">
+	@if (visibleDialog) {
+		<app-bank [bankID]="activeBankID" [enableClose]="true" (onClose)="onBankFormClosed($event)"></app-bank>
+	}
+</p-dialog>

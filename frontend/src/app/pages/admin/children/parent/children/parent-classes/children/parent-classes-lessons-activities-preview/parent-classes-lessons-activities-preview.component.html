@@ -1,0 +1,18 @@
+@if (activity()) {
+    <div class="feedback-section m-0">
+        <div class="feedback-card" [ngClass]="staffRole() === 'TEACHER' ? 'feedback-teacher' : 'feedback-ta'">
+            <div class="feedback-avatar">
+                <div class="avatar-circle overflow-hidden">
+                    <img class="w-100 d-block" style="height: auto;object-fit: cover;" [ngSrc]="activity()?.employee | employeePhoto" width="32" height="32">
+                </div>
+            </div>
+            <div class="feedback-content">
+                <div class="feedback-header">
+                    <span class="feedback-name">{{ staffName() }}</span>
+                    <span class="feedback-role">{{ staffRole() === 'TEACHER' ? 'Giáo viên' : 'Trợ giảng' }}</span>
+                </div>
+                <p class="feedback-text f-roboto f-14 lh-base fw-normal m-0">{{ activity().comment }}</p>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,26 @@
+<div class="library-folder-tree position-relative">
+    <div class="library-folder-tree__list d-flex flex-column justify-content-start align-items-start">
+        @for (item of ( folders() | ilFilterRootFolder ); track item.id) {
+            <div class="library-folder-tree__note d-flex align-items-start">
+                <span class="library-folder-tree__indent"></span>
+                <span class="library-folder-tree__switcher">
+                <span class="library-folder-tree__switcher-leaf-line"></span>
+            </span>
+                <div class="library-folder-tree__node-content-wrapper d-inline-flex flex-fill">
+                    <button class="btn library-folder-tree__btn-title p-0 m-0 f-roboto f-14 fw-normal lh-base">{{ item.title }}</button>
+                </div>
+            </div>
+        }
+        <!--        <div class="library-folder-tree__note d-flex align-items-start">-->
+        <!--            <span class="library-folder-tree__indent">-->
+        <!--                <span class="library-folder-tree__indent__unit"></span>-->
+        <!--            </span>-->
+        <!--            <span class="library-folder-tree__switcher">-->
+        <!--                <span class="library-folder-tree__switcher-leaf-line"></span>-->
+        <!--            </span>-->
+        <!--            <div class="library-folder-tree__node-content-wrapper d-inline-flex flex-fill">-->
+        <!--                <button class="btn library-folder-tree__btn-title p-0 m-0 f-roboto f-14 fw-normal lh-base">Textbooks</button>-->
+        <!--            </div>-->
+        <!--        </div>-->
+    </div>
+</div>

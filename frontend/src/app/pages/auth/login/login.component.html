@@ -1,0 +1,55 @@
+<div class="login-elegant-layout position-relative">
+    <ng-scrollbar orientation="vertical" style="height: var(--device-height)" visibility="hover">
+        <div class="login-elegant__container">
+            <div class="login-elegant__wrapper position-relative">
+                <div class="login-elegant__inner position-relative">
+                    @if (loading()) {
+                        <app-loading-progress heading="Loading..." backdropFilter="blur(1px)"/>
+                    }
+                    <h4 class="text-center login-elegant__heading">Dang nhap</h4>
+                    <form [formGroup]="formGroup" class="login-elegant__form">
+                        <div class="login-elegant__form-control">
+                            <label class="login-elegant__form-control__label" for="username">Tai khoan</label>
+                            <input tabindex="0" (keydown.enter)="enterOnUsernameField($event, passwordInputField)" autocomplete="username" class="login-elegant__form-control__input ictu-form-control__input" formControlName="username" id="username" placeholder="Ma sinh vien hoac email" type="text">
+                        </div>
+                        <div class="login-elegant__form-control">
+                            <label class="login-elegant__form-control__label" for="password">Mat khau</label>
+                            <div class="login-elegant__form-control__group">
+                                <input tabindex="0" #passwordInputField (keydown.enter)="onEnter($event)" [type]="hide ? 'password' : 'text'" autocomplete="password" class="login-elegant__form-control__input ictu-form-control__input" formControlName="password" id="password" placeholder="Nhap mat khau">
+                                <div class="login-elegant__form-control__group__suffix-box">
+                                    <button tabindex="-1" (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide" mat-icon-button matSuffix>
+                                        <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="login-elegant__form-control">
+                            <div class="login-elegant__check-me">
+                                <mat-checkbox checked class="float-start" color="primary" tabIndex="0">Ghi nho dang nhap</mat-checkbox>
+                                <a tabIndex="0" class="f-w-400 f-14 text-primary-500 m-b-0" href="#" routerLink="/auth/forgot-password">Quen mat khau?</a>
+                            </div>
+                        </div>
+                        <div class="login-elegant__form-control">
+                            <button tabindex="0" (click)="submit()" [disabled]="formGroup.invalid" class="login-elegant__form-control__button" color="primary" mat-flat-button style="
+                                --mat-typography-button-font-family:var(--primary-font-family);
+                                --mat-typography-button-font-size : 14px;
+                                --mat-button-filled-label-text-weight : 400;
+                                line-height: 1;
+                                --mat-button-filled-container-height: 48px;
+                                --mat-button-outlined-container-height: var(--mat-button-filled-container-height, 48px);
+                                border-radius: 6px !important;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="height: auto;width: 21px;display: inline-block;margin: 0 5px -5px 0;">
+                                    <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"></path>
+                                    <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 1 0 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"></path>
+                                </svg>
+                                Dang nhap
+                            </button>
+                        </div>
+                    
+                        <span class="login-elegant__form-control__app-version text-secondary">{{ appVersion() }}</span>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </ng-scrollbar>
+</div>

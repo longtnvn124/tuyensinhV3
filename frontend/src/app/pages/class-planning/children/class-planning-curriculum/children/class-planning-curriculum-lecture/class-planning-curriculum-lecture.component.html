@@ -1,0 +1,112 @@
+@for (section of lecture(); track section; let i = $index) {
+    <div class="class-planning-curriculum__lesson-content__section the-content-has-been-rewritten" [attr.data-index]="i" [attr.data-order]="section.order">
+        <div class="class-planning-curriculum__lesson-content__section__head">
+            <b class="class-planning-curriculum__lesson-content__section__title">{{ section.title }}</b>
+            <span class="class-planning-curriculum__author" pTooltip="Nội dung được cập nhật bởi giáo viên" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+                <figure>
+                    <!-- <img [src]="classObject() | classEmployeeAvatar : activeCourseLesson().teacher_id : 'images/user/avatar-placeholder.jpg'" alt="" width="100" height="100"> -->
+                    <img [src]="'images/user/avatar-placeholder.jpg'" alt="" width="100" height="100">
+                </figure>
+            </span>
+        </div>
+        <button class="btn class-planning-curriculum__btn-toggle-eye-check" pTooltip="So sánh với nội dung gốc" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+            <i class="ti ti-exchange"></i>
+        </button>
+        @switch (section.type) {
+            @case ('EXCERPT_FROM_DOCUMENT') {
+                <!-- <app-view-document type_view="EXCERPT_FROM_DOCUMENT" [form_document]="section.page"></app-view-document> -->
+                @if (section.page?.id_file && section.page?.end) {
+                    <div class="class-planning-curriculum-lecture__efd-section d-flex flex-column">
+                        <div class="class-planning-curriculum-lecture__efd-section__head d-flex">
+                            <h4 class="d-block text-center f-14 f-roboto fw-medium lh-base text-decoration-underline p-l-10 p-r-10 p-t-10 p-b-15 m-0 w-100">
+                                <span class="fw-normal text-decoration-none d-inline-block m-r-5">Từ trang</span> {{ section.page?.start ?? 0 }}
+                                <span class="fw-normal text-decoration-none d-inline-block m-r-5 m-l-5">đến trang</span> {{ section.page?.end ?? 0 }}
+                            </h4>
+                        </div>
+                        <div class="class-planning-curriculum-lecture__efd-section__body">
+                            <p-carousel #caourse [value]="section.page|excerptFromDocumentToSlides" [numVisible]="4" [numScroll]="1" [responsiveOptions]="responsiveOptions">
+                                <ng-template let-slide #item>
+                                    <div class="class-planning-curriculum-lecture__efd-section__slide p-10">
+                                        <div class="class-planning-curriculum-lecture__efd-section__slide__inner position-relative overflow-hidden">
+                                            <img [excerptFromDocumentLoader]="slide" class="class-planning-curriculum-lecture__efd-section__slide__img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAMgCAYAAAD/YBzEAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAACY3SURBVHgB7d1bcxzneeDxxvlMUhR1suRIctleb9ZVcdX6wrnYm3yh3dpPsN8tF8mFtzZJeZ1UbIWWKZmiSIIgzmdkngEbasz0HEA+ILtnfj8ViuAAHAx6SMxf7/v22zNfPXx0UQAAkGa2AAAglcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAg2XwBTLWTk9Pi7PyiODw66fx6Vpx33o/bQrx/dn7+6vPO+v5sfOz81ccnyezsbDE3e/3/P+fmZrq3lxbm5zq3zXZv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458dGE/xvcWeXaO2YojI+rvf/JfadVzxWKqX9olNRnvjMR5THJ9RI0Y/qzyOOKZ1l+75w5+eVB5X/aV7qvcTa8TifqqPKY5X9fkatDcX0A4zXz18dFEArVOGQ3WPpwiXcqPR6nYIMaUYIz114nP/oRJRoRwB6o2SX//yr/pGZ0Y9noiN3vv5659+MvCCx1kut2l4eG30KkbG4vFcXt7n+jGKxxOPq07vWq/y+7rcaf36bu8Rh4PUrRmLY917PxGHvRvDAu0isKDFIhLiRbt3r6iqCIcYPRn2Yl0XWVURFP/1pz8auSZonPv52Rcf3Xpcjft4bvKYRm0NEREbAToqisa5n1/94lOjV9ByAgsmQEwvxVqjcsF7vMjHaErvPlijxBqg757tdC8RE2cnxll0cT8RHzcZTSnvpxwpet37ydJ7fEIEzN31pYFTenXie4lpwrifeD+2X3jwanr0Jse57n7iGEXAWncFk0FgAQAks8gdACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkgksAIBkAgsAIJnAAgBIJrAAAJIJLACAZAILACCZwAIASCawAACSCSwAgGQCCwAgmcACAEgmsAAAkv0nUQKXNZsmcv8AAAAASUVORK5CYII=" [alt]="'slide-'+slide.order">
+                                            @switch (slide.state) {
+                                                @case ('loaded') {
+
+                                                }
+                                                @case ('error') {
+                                                    <div class="class-planning-curriculum-lecture__efd-section__slide__overlay class-planning-curriculum-lecture__efd-section__slide__overlay--error position-absolute d-flex w-100 h-100 justify-content-center align-items-center">
+                                                        <button (click)="btnReloadImage(slide)" class="class-planning-curriculum-lecture__efd-section__slide__btn-reload btn ictu-button-danger-light" matTooltip="Reload Image">
+                                                            <i class="ti ti-refresh f-20"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                                @case ('loading') {
+                                                    <div class="class-planning-curriculum-lecture__efd-section__slide__overlay position-absolute d-flex w-100 h-100 justify-content-center align-items-center">
+                                                        <span class="class-planning-curriculum-lecture__efd-section__slide__loading d-block"></span>
+                                                    </div>
+                                                }
+                                                @default {
+
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </p-carousel>
+                        </div>
+                    </div>
+                }
+            }
+            @case ('MEDIA') {
+                <div class="class-planning-curriculum-lecture__media d-flex flex-wrap">
+                    @for (_media of (section.content | courseLessonMediaDecode); track _media; ) {
+                        @switch (_media.mediaType) {
+                            @case ('video') {
+                                <div class="class-planning-curriculum-lecture__media__item d-inline-flex p-0 m-0">
+                                    <class-curriculum-lecture-media-video [media]="_media" class="w-100 h-100"></class-curriculum-lecture-media-video>
+                                </div>
+                            }
+                            @case ('audio') {
+                                <div class="class-planning-curriculum-lecture__media__item d-inline-flex p-0 m-0">
+                                    <app-class-curriculum-lecture-media-audio [media]="_media" class="w-100 h-100"></app-class-curriculum-lecture-media-audio>
+                                </div>
+                            }
+                            @case ('picture') {
+                                <div class="class-planning-curriculum-lecture__media__item d-inline-flex p-0 m-0">
+                                    <app-class-curriculum-lecture-media-picture [media]="_media" class="w-100 h-100"></app-class-curriculum-lecture-media-picture>
+                                </div>
+                            }
+                            @case ('document') {
+                                <div class="class-planning-curriculum-lecture__media__item d-inline-flex p-0 m-0">
+                                    <app-class-curriculum-lecture-media-document [media]="_media" class="w-100 h-100"></app-class-curriculum-lecture-media-document>
+                                </div>
+                            }
+                            @default {
+                                <div class="class-planning-curriculum__lesson-content__section__content" [innerHTML]="section.content | safeHtml"></div>
+                            }
+                        }
+                    }
+                </div>
+            }
+            @case ('VOCABULARY') {
+            }
+            @case ('TEXT') {
+                <div class="class-planning-curriculum__lesson-content__section__content" [innerHTML]="section.content | safeHtml">
+                </div>
+            }
+            @case ('EXAMPLE_SENTENCES') {
+            }
+            @case ('LINK') {
+            }
+            @case ('TEST') {
+            }
+            @default {
+
+            }
+        }
+    </div>
+} @empty {
+    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+        <div class="ictu-alert ictu-alert-primary">Khóa học chưa thiết lập cấu trúc bài giảng.</div>
+    </div>
+}

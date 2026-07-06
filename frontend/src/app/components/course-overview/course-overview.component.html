@@ -1,0 +1,188 @@
+<section class="course-overview-section">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    @if (state() === 'error') {
+        <div class="class-planning-panel">
+            <div class="admin-table__alert-danger text-center">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+        </div>
+    } @else {
+        @if (state() === 'unauthorized') {
+            <div class="class-planning-panel">
+                <div class="d-flex flex-column align-items-center" style="gap:20px;">
+                    <span class="ictu-badge ictu-badge--primary text-center f-15" style="padding: 10px 15px; line-height: 24px; font-size: 14px;">Khóa học không còn tồn tại hoặc bạn không được phân quyền để truy cập nội dung khóa học này!</span>
+                    <button (click)="backRouter()" mat-flat-button class="btn ictu-badge-btn--primary-reverse" style="height: 40px;">
+                        <i class="ti ti-arrow-back-up me-1"></i> Quay lại
+                    </button>
+                </div>
+            </div>
+        } @else {
+            <div class="class-planning-panel__layout">
+                <div class="course-editor-layout__inner w-100">
+                    <div class="course-editor-layout__header">
+                        <div class="course-editor-layout__header__container">
+                            <button (click)="backRouter()" mat-flat-button class="btn ictu-badge-btn--secondary-reverse course-editor-layout__header__btn-back" pTooltip="Trở lại" tooltipPosition="right">
+                                <i class="pi-arrow-left pi"></i>
+                            </button>
+                            <div class="course-editor-layout__header__divider"></div>
+                            @if(class_id() == 0) {
+                                <h1 class="course-editor-layout__heading">Khóa học : {{ course()?.title }}
+                                    @if (course()) {
+                                        <i class="f-14 f-roboto d-block fw-normal m-t-5" style="color: #cbcbcb;">{{ course().status ? 'Đang hoạt động' : 'Dừng hoạt động' }}</i>
+                                    }
+                                </h1>
+                            }@else {
+                                <h1 class="course-editor-layout__heading">Lớp học : {{ class()?.name }}</h1>
+                            }
+                        </div>
+                    </div>
+                    <div class="class-planning-panel__content course-overview-scroll">
+                        <div class="course-overview-content">
+                            <section class="course-overview-card course-overview-card--summary">
+                                <div class="course-overview-card__header">
+                                    <div>
+                                        <h2 class="course-overview-card__title">Thông tin cơ bản</h2>
+                                        <p class="course-overview-card__subtitle">Tóm tắt nhanh các thông tin quan trọng để dễ theo dõi hơn.</p>
+                                    </div>
+                                </div>
+                                <div class="course-overview-summary-grid">
+                                    <div class="course-overview-content__item">
+                                        <div class="course-overview-content__item__label">Giáo trình</div>
+                                        <div class="course-overview-content__item__value">{{ course()?.title || '—' }}</div>
+                                    </div>
+                                    <div class="course-overview-content__item">
+                                        <div class="course-overview-content__item__label">Tác giả</div>
+                                        <div class="course-overview-content__item__value">{{ course()?.creator_name || '—' }}</div>
+                                    </div>
+                                    <div class="course-overview-content__item">
+                                        <div class="course-overview-content__item__label">Lĩnh vực</div>
+                                        <div class="course-overview-content__item__value">{{ course()?.linhvuc || '—' }}</div>
+                                    </div>
+                                    <div class="course-overview-content__item">
+                                        <div class="course-overview-content__item__label">Bậc đào tạo</div>
+                                        <div class="course-overview-content__item__value">{{ course()?.bacdaotao || '—' }}</div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="course-overview-card">
+                                <div class="course-overview-card__header">
+                                    <div>
+                                        <h2 class="course-overview-card__title">Mô tả khóa học</h2>
+                                        <p class="course-overview-card__subtitle">Phần giới thiệu ngắn giúp nắm nhanh nội dung khóa học.</p>
+                                    </div>
+                                </div>
+                                <div class="course-overview-content__item course-overview-content__item--full">
+                                    <div class="course-overview-content__item__label">Mô tả ngắn</div>
+                                    <div class="course-overview-content__item__value">{{ course()?.excerpt || 'Chưa có mô tả khóa học.' }}</div>
+                                </div>
+                            </section>
+
+                            <section class="course-overview-card">
+                                <div class="course-overview-card__header">
+                                    <div>
+                                        <h2 class="course-overview-card__title">Mô tả chi tiết</h2>
+                                        <p class="course-overview-card__subtitle">Nội dung mô tả đầy đủ được nhập trong khóa học.</p>
+                                    </div>
+                                </div>
+                                <div class="course-overview-content__item course-overview-content__item--full">
+                                    <div class="course-overview-content__item__label">Nội dung chi tiết</div>
+                                    <div class="course-overview-content__item__value course-overview-content__item__value--html" [innerHTML]="course()?.desc"></div>
+                                </div>
+                            </section>
+
+                            <section class="course-overview-card course-overview-card--table">
+                                <div class="course-overview-card__header">
+                                    <div>
+                                        <h2 class="course-overview-card__title">Chương trình chi tiết</h2>
+                                        <p class="course-overview-card__subtitle">Giữ nguyên cấu trúc bảng hiện có để thuận tiện theo dõi nội dung giảng dạy.</p>
+                                    </div>
+                                </div>
+                                <div class="course-overview-content__item course-overview-content__item--table">
+                                    <div class="course-overview-content__item__value">
+                                        <div class="admin-wrap-table">
+                                            @if(class_id() == 0) {
+                                                <table class="tbl admin-table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="col-index text-center">#</th>
+                                                            <th class="text-center">Chương</th>
+                                                            <th class="text-center">Bài học</th>
+                                                            <th class="wid-200 text-center">Pages</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @for (row of course()?.course_lesson; track row; let i = $index) {
+                                                            @if(row.unit){
+                                                                <tr>
+                                                                    <td class="col-index text-center">{{ i + 1 }}</td>
+                                                                    <td class="text-left">{{ row.unit }}</td>
+                                                                    <td class="text-left">{{ row.lesson }}</td>
+                                                                    <td class="text-center">{{ row.page }}</td>
+                                                                </tr>
+                                                            }
+                                                        } @empty {
+                                                            <tr>
+                                                                <td colspan="7">Không có bản ghi nào.</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            }@else{
+                                                <table class="tbl admin-table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="col-index text-center">#</th>
+                                                            <th class="wid-150 text-center">Ngày</th>
+                                                            <th class="text-center">Chương</th>
+                                                            <th class="text-center">Bài học</th>
+                                                            <th class="text-center">GV/TA</th>
+                                                            <th class="wid-140 text-center">Trạng thái</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @for (row of classSesion(); track row; let i = $index) {
+                                                            <tr>
+                                                                <td class="col-index text-center">{{ i + 1 }}</td>
+                                                                <td class="text-center">{{ row.time_start | date : 'dd/MM/yyyy hh:mm' }}</td>
+                                                                <td class="text-left">{{ row.topic }}</td>
+                                                                <td class="text-left">{{ row.title }}</td>
+                                                                <td class="text-center">
+                                                                    <small class="block f-14 text-primary">{{ row.teacher?.full_name }}</small>
+                                                                    <span class="block">{{ row.assistants?.full_name }}</span>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    @switch (row.status) {
+                                                                        @case (0){
+                                                                            <span class="ictu-badge ictu-badge--secondary ictu-badge--set-width">Chưa bắt đầu</span>
+                                                                        }
+                                                                        @case (1){
+                                                                            <span class="ictu-badge ictu-badge--primary ictu-badge--set-width">Đang diễn ra</span>
+                                                                        }
+                                                                        @case (2){
+                                                                            <span class="ictu-badge ictu-badge--success ictu-badge--set-width">Đã kết thúc</span>
+                                                                        }
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        } @empty {
+                                                            <tr>
+                                                                <td colspan="7">Không có bản ghi nào.</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</section>

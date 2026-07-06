@@ -1,0 +1,104 @@
+.gm-employees-form {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.gm-employees-form__header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gm-employees-form__body {
+    max-height: calc(var(--device-height) - 60px - 60px);
+    display: flex;
+    height: 100%;
+    overflow: hidden auto;
+    --ictu-dnd-section--bd-color: #b3bac2;
+    --ictu-dnd-section--bg-color: #eef1f7;
+}
+
+.gm-employees-form__tab-list {
+    display: flex;
+    -webkit-box-pack: start;
+    justify-content: flex-start;
+    flex-direction: row;
+    height: 40px;
+    background: #DBE0E9;
+    padding: 4px;
+    border-radius: 4px;
+    width: fit-content;
+    overflow-wrap: break-word;
+    border: none;
+}
+
+.gm-employees-form__tab-list__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 0;
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-duration: 200ms;
+    font-family: var(--primary-font-family), sans-serif;
+    font-weight: 400;
+    font-size: 14px;
+    padding-inline-start: 15px;
+    padding-inline-end: 15px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    color: #4D5E6F;
+    border-radius: 2px;
+    width: 187px;
+    background-color: transparent;
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    user-select: none !important;
+}
+
+.gm-employees-form__tab-list__button:not(:disabled) {
+    cursor: pointer;
+}
+
+.gm-employees-form__tab-list__button--active:not(:disabled) {
+    color: #001931;
+    background-color: #ffffff;
+    cursor: default;
+}
+
+.gm-employees-form__dnd-section {
+    border: 1px dashed var(--ictu-dnd-section--bd-color);
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--ictu-dnd-section--bg-color);
+    padding: 15px;
+    flex-flow: column wrap;
+    gap: 15px;
+    aspect-ratio: 387 / 107;
+    max-width: calc(100% - 20px);
+    max-height: 100%;
+    height: 300px;
+    width: auto;
+}
+
+.gm-employees-form__dnd-section__heading {
+    color: #4d5e6f;
+    font-family: var(--primary-font-family), sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    text-align: center;
+    margin: 0;
+}
+
+.gm-employees-form__guide {
+    font-size: 15px;
+    font-weight: 400;
+    margin: 20px 0 0;
+}
+

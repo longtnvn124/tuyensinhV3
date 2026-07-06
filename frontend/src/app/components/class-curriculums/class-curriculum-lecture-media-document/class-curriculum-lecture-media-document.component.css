@@ -1,0 +1,35 @@
+.class-curriculum-lecture-media-picture__info {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    font-size: 12px;
+    user-select: none;
+    pointer-events: none;
+    display: inline-block;
+    line-height: 1.5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-family: monospace;
+    opacity: 0.8;
+    color: rgba(0, 0, 0, 0.65);
+    z-index: 10;
+    padding: 5px 10px;
+}
+
+.edit-course-lesson-structure-media-element__btn-preview {
+    font-size: 0;
+    line-height: 0;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    cursor: pointer;
+    transition: background-color .35s ease;
+}
+
+.edit-course-lesson-structure-media-element__btn-preview:hover {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+}

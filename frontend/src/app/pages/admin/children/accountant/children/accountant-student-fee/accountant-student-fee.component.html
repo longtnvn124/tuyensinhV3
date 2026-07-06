@@ -1,0 +1,398 @@
+<section class="admin-section--table position-relative">
+  @if (state() === 'loading') {
+    <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+  }
+    @if (state() !== 'error') {
+        @if(modeState() == 'default'){
+            <div class="admin-wrap-table">
+                <div class="admin-wrap-table__head d-flex">
+                    <h4 class="admin-wrap-table__heading">
+                        <svg><use href="fonts/custom-icon.svg#custom-graduation-cap"></use></svg>
+                        Danh sách học sinh
+                    </h4>
+                    <div class="admin-wrap-table__head-actions">
+                        <input [(ngModel)]="hocSinhSearchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm theo tên" type="text" (keyup.enter)="onSearchData()">
+                        <div class="admin-wrap-table__switchers" pTooltip="Lọc theo lớp học" tooltipPosition="left">
+                            <button [matMenuTriggerFor]="menu_class" type="button" class="admin-wrap-table__switchers__btn-label btn f-0 p-0" style="line-height: 1;height: 32px;">
+                                <span class="admin-wrap-table__switchers__btn-label__lbl">
+                                    <i class="fa-utility-fill fa-semibold fa-book"></i><span>{{ activeClass()?.name ?? 'Lọc theo lớp học' }}</span><i class="ti ti-chevron-down" style="background: transparent;"></i>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="admin-wrap-table__switchers" pTooltip="Lọc theo cơ sở đào tạo" tooltipPosition="left">
+                            <button [matMenuTriggerFor]="menu_agent" type="button" class="admin-wrap-table__switchers__btn-label btn f-0 p-0" style="line-height: 1;height: 32px;">
+                                <span class="admin-wrap-table__switchers__btn-label__lbl">
+                                    <i class="ti ti-filter"></i><span>{{ activeAgent()?.ten }}</span><i class="ti ti-chevron-down" style="background: transparent;"></i>
+                                </span>
+                            </button>
+                        </div>
+                        <!-- <button (click)="updateCourseIDAll()">
+
+                        </button> -->
+                        <!-- <div class="admin-wrap-table__switchers" pTooltip="Chế độ hiển thị" tooltipPosition="left">
+                            <button (click)="btnSetViewModeType('default')" type="button" [class.active]="viewModeType()==='default'" class="admin-wrap-table__switchers__btn btn">Mặc định</button>
+                            <button (click)="btnSetViewModeType('class')" type="button" [class.active]="viewModeType()==='class'" class="admin-wrap-table__switchers__btn btn">Lớp</button>
+                            <button (click)="btnSetViewModeType('course')" type="button" [class.active]="viewModeType()==='course'" class="admin-wrap-table__switchers__btn btn">Khóa học</button>
+                        </div> -->
+                       
+                    </div>
+                </div>
+                <div class="admin-wrap-table__body">
+                <table class="tbl admin-table table-hover">
+                    <thead>
+                    <tr>
+                        <th class="wid-100 text-center">Mã HS</th>
+                        <th class="wid-60 text-center">Ảnh</th>
+                        <th class="text-center">Họ và tên</th>
+                        <th class="wid-90 text-center">Năm sinh</th>
+                        <th class="wid-90 text-center">Giới tính</th>
+                        @if(activeClass().id != -1){
+                            <th class="wid-100 text-center">Số buổi</th>
+                            <th class="wid-100 text-center">Số buổi còn lại</th>
+                        }
+                        <th class="wid-100 text-center">Trạng thái học</th>
+                        <th class="wid-100 text-center">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @for (row of dataTable.data(); track row.id; let i = $index) {
+                        <tr>
+                        <td class="wid-100 text-center">{{ row.code }}</td>
+                        <td class="wid-60 text-center" style="line-height: 0;padding: 5px 0;">
+                            <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{student: row}" class="button--un-set-style">
+                            <img class="profile-avatar-circle" [src]="row.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">
+                            </button>
+                        </td>
+                        <td class="text-left">
+                            @if(row.english_name){
+                                <small class="block f-14 text-primary">{{ row.english_name }}</small>
+                            }
+                            <span class="block">{{ row.full_name }}</span>
+                        </td>
+                        <td class="wid-90 text-center">{{ row.dob | date: 'yyyy'}}</td>
+                        <td class="wid-90 text-center">{{ row.gender }}</td>
+
+                        @if(activeClass().id != -1){
+                            <td class="wid-100 text-center">{{ row.student_fee_current?.amount ?? 0 }}</td>
+                            <td class="wid-100 text-center">{{ row.student_fee_current?.amount_left ?? 0 }}</td>
+                        }
+                        <td class="wid-100 text-center p-0">
+                            <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                            @if (row.status === -1) {
+                                <span class="ictu-badge ictu-badge--pink">Nghỉ học</span>
+                            } @else if(row.status === 1) {
+                                <span class="ictu-badge ictu-badge--success">Đang học</span>
+                            } @else {
+                                <span class="ictu-badge ictu-badge--secondary">Chờ xếp lớp</span>
+                            }
+                            </div>
+                        </td>
+                        <td class="p-0 wid-100">
+                            <div class="admin-table__btn-actions">
+                                <button (click)="setMode('student_fee',row)" class="btn ictu-button-info-light" pTooltip="Xem học phí" tooltipPosition="left">
+                                    <i class="fa-duotone fa-thin fa-table-cells-columns"></i>
+                                </button>
+                                <button class="btn ictu-button-success-light" (click)="opendialogPhuHuynh(row)" pTooltip="Thông tin phụ huynh" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                    <i class="ti ti-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="12">Không có bản ghi nào.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                </div>
+                <div class="admin-wrap-table__foot">
+                    <div class="d-flex justify-content-center align-items-center w-100">
+                        <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+                    </div>
+                </div>
+    
+            </div>
+        }
+        @if(modeState() == 'student_fee') {
+            <div class="admin-wrap-table">
+                <div class="admin-wrap-table__head d-flex">
+                <h4 class="admin-wrap-table__heading">
+                    <svg><use href="fonts/custom-icon.svg#custom-sidebar-show"></use></svg>
+                    Danh sách học phí của {{ studentSelect()?.full_name }} {{activeClass() ? ('| ' + activeClass()?.name) : ''}}
+                </h4>
+                <div class="admin-wrap-table__head-actions">
+                    @if(activeClass().id != -1){
+                        <button (click)="addNewItemStudentFee()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                            <i class="ti ti-plus"></i>
+                        </button>
+                    }
+                    <button (click)="setMode('default')" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                        <i class="ti ti-x"></i>
+                    </button>
+                </div>
+                </div>
+                <div class="admin-wrap-table__body">
+                <table class="tbl admin-table table-hover">
+                    <thead>
+                    <tr>
+                        <th class="col-index text-center">#</th>
+                        <th class="wid-100 text-center">Mã hợp đồng</th>
+                        <th class="text-center">Khóa học</th>
+                        <th class="wid-100 text-center">Tổng số buổi</th>
+                        <th class="wid-100 text-center">Số buổi khả dụng</th>
+                        <th class="wid-100 text-center">Số buổi còn lại</th>
+                        <th class="wid-100 text-center">Ngày thanh toán</th>
+                        <th class="wid-100 text-center">Ngày áp dụng</th>
+                        <th class="wid-150 text-center">Giá</th>
+                        <th class="wid-150 text-center">Chiết khấu</th>
+                        <th class="wid-150 text-center">Thành tiền</th>
+                        <th class="wid-100 text-center">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @for (row of dataTableStudentFee.data(); track row.id; let i = $index) {
+                        <tr>
+							<td class="col-index text-center">{{ dataTableStudentFee.paginator.startIndex() + i }}</td>
+                            <td class="text-center">{{ row.code }}</td>
+                            <td class="text-left">{{ row.course_id | ictuDropdownOptionMap : courseDropdownField.options() : ''  }}</td>
+                            <td class="text-center">{{ row.total_amount }}</td>
+                            <td class="text-center">{{ row.amount }}</td>
+                            <td class="text-center">{{ row.amount_left }}</td>
+                            <td class="text-center">{{ row.payment_date | date: 'dd/MM/yyyy' }}</td>
+                            <td class="text-center">{{ row.effective_date| date: 'dd/MM/yyyy' }}</td>
+                            <td class="text-end">{{ row.price | formatVndPipe }}</td>
+                            <td class="text-end">{{ row.discount | formatVndPipe }}</td>
+                            <td class="text-end">{{ row.total_price | formatVndPipe }}</td>
+                            <td class="p-0 wid-100">
+                                <div class="admin-table__btn-actions">
+                                    <button [disabled]="row.has_used == 1" class="btn ictu-button-info-light" (click)="editRowItemStudentFee(row)" pTooltip="Chỉnh sửa" tooltipPosition="left">
+                                        <i class="fa-duotone fa-light fa-edit"></i>
+                                    </button>
+                                    <button [disabled]="true" class="btn ictu-button-danger-light"><i class="ti ti-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                            <td colspan="12">Không có bản ghi nào.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                </div>
+                <div class="admin-wrap-table__foot">
+                    <div class="d-flex justify-content-center align-items-center w-100">
+                        <ictu-paginator [control]="dataTableStudentFee.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    @else {
+        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+            <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+        </div>
+    }
+</section>
+
+<p-drawer #pDrawer (onHide)="onDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+	<div class="ictu-p-drawer__content position-relative">
+		@if (formControl.enableLoading()) {
+			<app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+		}
+		<div class="ictu-p-drawer__content__body position-relative">
+			@switch (formControl.state()) {
+				@case ('READY') {
+					<form [formGroup]="formControl.formGroup">
+                        <div class="ictu-form"> 
+                            <!-- ictu-form--label-on-top -->
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required" for="f_code">Mã hợp đồng</label>
+                                        <input class="ictu-form__input-field"id="f_code" pInputText placeholder="Mã hợp đồng" formControlName="code" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-9">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required">Lớp học</label>
+                                        <p-select [options]="listClass()" appendTo="body" class="ictu-form__input-field" formControlName="class_id" optionLabel="name" optionValue="id" placeholder="Chọn lớp học" (onChange)="onChangeClass($event)"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required" for="f_payment_date">Ngày nộp</label>
+                                        <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" dateFormat="dd/mm/yy" formControlName="payment_date" id="f_payment_date" inputId="buttondisplay"></p-datepicker>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required" for="feffective_date">Ngày áp dụng</label>
+                                        <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" dateFormat="dd/mm/yy" formControlName="effective_date" id="feffective_date" inputId="buttondisplay"></p-datepicker>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required" for="f_total_amount">Tổng số buổi</label>
+                                        <p-inputNumber class="ictu-form__input-field"id="f_total_amount" placeholder="Tổng số buổi" formControlName="total_amount"  inputStyleClass="w-100" (onInput)="onChangeTotalAmount()" [min]="0" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required" for="f_price">Tổng tiền</label>
+                                        <p-inputNumber formControlName="price" mode="currency" currency="VND" locale="vi-VN" class="ictu-form__input-field" inputStyleClass="w-100 text-end" [min]="0" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required" for="f_amount">Số buổi còn lại</label>
+                                        <p-inputNumber class="ictu-form__input-field" id="f_amount" placeholder="Số buổi còn lại" formControlName="amount" inputStyleClass="w-100"  [min]="0" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+                                    </div>
+                                </div>
+                                @if(student_fee_amount_add != 0){
+                                    @if(student_fee_amount_add > 0){
+                                        <small class="text-danger f-roboto f-14 fw-normal d-block" style="line-height: 1.5; margin: 10px 0px 0px 0px;">
+                                            Được cộng dồn {{ student_fee_amount_add }} buổi học từ hóa đơn trước
+                                        </small>
+                                    }@else {
+                                        <small class="text-danger f-roboto f-14 fw-normal d-block" style="line-height: 1.5; margin:10px 0px 0px 0px">
+                                            Bị trừ {{ -student_fee_amount_add }} buổi học từ hóa đơn trước
+                                        </small>
+                                    }
+                                }
+                                <!-- <div class="col-4">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label" for="f_price">Chiết khấu</label>
+                                        <p-inputNumber formControlName="discount" mode="currency" currency="VND" locale="vi-VN" class="ictu-form__input-field" inputStyleClass="w-100 text-end" [min]="0" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label ictu-form__label--required" for="f_price">Tổng tiền</label>
+                                        <p-inputNumber formControlName="total_price" mode="currency" currency="VND" locale="vi-VN" class="ictu-form__input-field" inputStyleClass="text-end" [min]="0" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+                                    </div>
+                                </div> -->
+                            </div>
+                            
+                            <div class="ictu-form__row">
+                                <label class="ictu-form__label" for="f_transcription">Diễn giải</label>
+                                <div class="ngx-editor__wrapper d-flex flex-column" id="f_transcription">
+                                    <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                                    <ngx-editor class="editor-transcription" [editor]="editor" formControlName="desc" placeholder="..."></ngx-editor>
+                                </div>
+                                <small class="text-muted f-roboto f-14 fw-normal d-block" style="line-height: 1.5;margin: 5px 0 0;"><i class="ti ti-info-circle me-1 f-16"></i>Mô tả về khoản thu</small>
+                            </div>
+                        </div>
+					</form>
+				}
+				@case ('PREPARATION_FAILED') {
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+			}
+		</div>
+		<div class="ictu-p-drawer__content__footer">
+			<button (click)="pDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+			<button (click)="submitFormItemStudentFee()" [disabled]="!formControl.formFilledAndValid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+		</div>
+	</div>
+</p-drawer>
+
+
+<mat-menu #menu="matMenu" yPosition="above" >
+  <ng-template matMenuContent let-student="student">
+    <div class="profile-avatar-menu">
+      <img [src]="student.avatar || 'images/user/avatar-1.jpg'" alt="Preview"/>
+    </div>
+  </ng-template>
+</mat-menu>
+
+<mat-menu #menu_phu_huynh="matMenu" yPosition="above" >
+	<ng-template matMenuContent let-data="data" let-defaultAvatar="defaultAvatar">
+		<div class="profile-avatar-menu">
+			<img [src]="data.avatar || defaultAvatar" alt="Preview"/>
+		</div>
+	</ng-template>
+</mat-menu>
+
+<mat-menu #menu_agent="matMenu" class="ictu-switchers-menu">
+    @for (_agent of listAgent(); track _agent.id) {
+        <button (click)="btnChangeAgent(_agent)" mat-menu-item class="ictu-switchers-menu__item" [class.ictu-switchers-menu__item--active]="activeAgent() ? activeAgent().id === _agent.id : false">
+            <b class="text-left d-block f-14" style="font-weight: 500;margin: 0 0 1px;">{{ _agent.ten }}</b>
+            <span class="text-left d-block text-muted" style="font-size: 13px">{{ _agent.address }}</span>
+        </button>
+    } @empty {
+        <div class="tm-calendar-class-list__element--empty" style="border-radius: 0">Không có cơ sở đào tạo</div>
+    }
+</mat-menu>
+<mat-menu #menu_class="matMenu" class="ictu-switchers-menu">
+    @for (_class of listClass(); track _class.id) {
+        <button (click)="btnChangeClass(_class)" mat-menu-item class="ictu-switchers-menu__item" [class.ictu-switchers-menu__item--active]="activeClass() ? activeClass().id === _class.id : false">
+            <b class="text-left d-block f-14" style="font-weight: 500;margin: 0 0 1px;">{{ _class.name }}</b>
+            <span class="text-left d-block text-muted" style="font-size: 13px">{{ _class.code }}</span>
+        </button>
+    } @empty {
+        <div class="tm-calendar-class-list__element--empty" style="border-radius: 0">Không có lớp học</div>
+    }
+</mat-menu>
+
+
+<p-dialog [modal]="true" [(visible)]="visibleDialogPhuHuynh" [closable]="false" [draggable]="true" [style]="{ width: '500px', height: '75vh' }" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+	<div class="ictu-dialog-layout__wrapper">
+		@if (stateDialog() == 'loading') {
+			<app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+		}
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Danh sách phụ huynh của học sinh {{studentSelect()?.full_name}}</h4>
+            <button (click)="visibleDialogPhuHuynh = !visibleDialogPhuHuynh" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        @switch (stateDialog()) {
+            @case ('success') {
+                <div class="ictu-dialog-layout__body">
+                    @for (row of listPhuHuynh; track row.id; let i = $index){
+                        <div class="class-student-parent-dialog-body__profile-card">
+                            <button [matMenuTriggerFor]="menu_phu_huynh" [matMenuTriggerData]="{data: row, defaultAvatar: 'images/user/avatar-placeholder.jpg'}" class="button--un-set-style">
+                                <img class="profile-avatar-circle" style="width: 60px; height: 60px; margin-right: 10px;" [src]="row.avatar || 'images/user/avatar-placeholder.jpg'" alt="" width="50" height="50">
+                            </button>
+                            <div class="class-student-parent-dialog-body__profile-info">
+                                @if(row.vaitro){
+                                    <div class="profile-info-name">{{ row.code }} ({{ row.vaitro }})</div>
+                                }@else {
+                                    <div class="profile-info-name">{{ row.full_name }}</div>
+                                }
+                                <div class="profile-info-dob">Ngày sinh: {{ row.dob | date: 'dd/MM/yyyy' }}</div>
+                                <div class="profile-info-tag">
+                                    <span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai1 }}</span>
+                                    @if(row.dienthoai2){
+                                        <span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai2 }}</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (listPhuHuynh.length == 0) {
+                    <div class="ictu-dialog-layout__body" class="empty-message-wrapper">Không có phụ huynh</div>
+                }
+            }
+            @case ('error') {
+                <div class="ictu-dialog-layout__body">
+                    <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                        <a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="loadPhuHuynh(studentSelect())">tải lại</a>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+</p-dialog>

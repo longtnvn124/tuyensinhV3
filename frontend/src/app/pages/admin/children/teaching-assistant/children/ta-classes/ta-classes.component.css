@@ -1,0 +1,16 @@
+.btn-class-name {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 14px;
+    line-height: 14px;
+    color: inherit;
+    background: transparent !important;
+    cursor: pointer;
+}
+
+.btn-class-name:hover {
+    color: var(--primary-color);
+}

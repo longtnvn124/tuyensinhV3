@@ -1,0 +1,140 @@
+<section class="class-planning-panel course-editor-layout">
+	@switch (state()) {
+		@case ('loading') {
+			<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+		}
+		@case ('unauthorized') {
+			<div class="d-flex justify-content-center align-items-center w-100" style="height:  var(--device-height); padding: 10px;">
+				<span class="f-14 ictu-badge ictu-badge--danger p-10">Bạn không có quyền truy cập nội dung này. Vui lòng kiểm tra lại.</span>
+			</div>
+		}
+		@case ('invalid') {
+			<div class="d-flex justify-content-center align-items-center w-100" style="height:  var(--device-height); padding: 10px;">
+				<span class="f-14 ictu-badge ictu-badge--danger p-10">Bạn không được phân quyền truy cập nội dung của lớp học này.</span>
+			</div>
+		}
+		@case ('notFound') {
+			<div class="d-flex justify-content-center align-items-center w-100" style="height:  var(--device-height); padding: 10px;">
+				<span class="f-14 ictu-badge ictu-badge--danger p-10">Lớp học không tồn tại hoặc bạn không được phân quyền truy cập nội dung của lóp học này. Vui lòng kiểm tra lại.</span>
+			</div>
+		}
+		@case ('error') {
+			<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+		@default {
+			<div class="course-editor-layout__inner w-100">
+				<div class="course-editor-layout__header">
+					<div class="course-editor-layout__header__container">
+						<button (click)="backToClassList()" mat-flat-button class="btn ictu-badge-btn--secondary-reverse course-editor-layout__header__btn-back" pTooltip="Trở lại lịch học" tooltipPosition="right">
+							<i class="pi-arrow-left pi"></i>
+						</button>
+						<div class="course-editor-layout__header__divider"></div>
+						<div class="flex flex-column">
+							<h4 class="course-editor-layout__heading">Lớp : {{ className() }}</h4>
+							<b class="course-editor-layout__heading">{{ sessionStart() | date: 'dd/MM/yyyy HH:mm' }}{{ classSession().parent_class_id != 0 ? ' (Buổi học bổ trợ)' : '' }}</b>
+						</div>
+						<nav class="course-editor-layout__main-nav">
+							<ul class="course-editor-layout__main-nav__list">
+								@for (m of navList(); track m.name) {
+									<li>
+										<button class="course-editor-layout__main-nav__btn btn" [ngClass]="{ 'course-editor-layout__main-nav__btn--active': m.name === activeMenu() }" (click)="selectMenu(m)">{{ m.label }}</button>
+									</li>
+								}
+							</ul>
+						</nav>
+						<div class="course-editor-layout__header__actions">
+							<div style="color: white">{{timePassed()}}</div>
+
+							<button [matMenuTriggerFor]="menu" mat-flat-button class="btn ictu-badge-btn--primary-reverse" [ngStyle]="{'background-color': classSessionStateLabel() === 'Chưa bắt đầu' ? 'var(--p-blue-500)' : classSessionStateLabel() === 'Đã bắt đầu' ? 'var(--p-amber-500)' : classSessionStateLabel() === 'Đã kết thúc' ? 'var(--p-lime-600)' : '',}">
+								<span class="course-editor-layout__btn-label">
+									<span class="course-editor-layout__btn-label__text">{{ classSessionStateLabel() }}</span>
+									<svg class="course-editor-layout__btn-label__svg" width="8" height="5" viewBox="0 0 8 5" xmlns="http://www.w3.org/2000/svg">
+										<path d="M4.351 4.83667C4.356 4.83067 4.358 4.82267 4.363 4.81667L7.85376 0.959934C8.04875 0.742949 8.04875 0.390973 7.85376 0.173988C7.85176 0.171988 7.84976 0.170988 7.84776 0.169988C7.80438 0.117447 7.75005 0.0750133 7.68856 0.0456521C7.62707 0.0162909 7.55992 0.000710645 7.49179 0H0.509265C0.439882 0.00112114 0.371591 0.0174635 0.309217 0.0478731C0.246843 0.0782826 0.191907 0.122018 0.14829 0.175988L0.14629 0.173988C0.0519268 0.283166 0 0.422654 0 0.566961C0 0.711267 0.0519268 0.850756 0.14629 0.959934L3.64505 4.83667C3.68861 4.88772 3.74272 4.92872 3.80366 4.95684C3.8646 4.98495 3.93091 4.99951 3.99802 4.99951C4.06514 4.99951 4.13145 4.98495 4.19239 4.95684C4.25333 4.92872 4.30744 4.88772 4.351 4.83667Z"></path>
+									</svg>
+								</span>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="class-progress-panel__body">
+					<div class="class-progress-panel__content">
+						@switch (activeMenu()) {
+							@case ('session') {
+								@switch (role()) {
+									@case ('teaching_assistant') {
+										<app-class-progress-lesson [class_id]="classID()" [class_session_id]="classSessionID()"></app-class-progress-lesson>
+									}
+									@case ('teacher') {
+										<app-class-planning-additional-lesson [class_id]="classID()" [class_session_id]="classSessionID()"></app-class-planning-additional-lesson>
+									}
+								}
+							}
+							@case ('attendance') {
+								<app-class-progress-attendance [classObject]="classValue" [class_session_params]="classSession()" [canChange]="canChanges()"></app-class-progress-attendance>
+							}
+							@case ('assign') {
+
+								<app-assign-homework-component [class_id]="classID()" [class_session_id]="classSessionID()" [course_lesson_id]="classSession().course_lesson_id" [canChange]="this.classSessionState() && this.classSessionState().value !== 0"></app-assign-homework-component>
+							}
+						}
+					</div>
+				</div>
+			</div>
+		}
+	}
+</section>
+
+<mat-menu #menu="matMenu">
+	<ng-template matMenuContent>
+		@for (item of menuList(); track $index) {
+			<button (click)="updateClassSessionStatus(item.value)" mat-menu-item>{{ item.label }}</button>
+		}
+	</ng-template>
+</mat-menu>
+
+<p-dialog [(visible)]="visibleDialog" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '300px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thông báo</h4>
+			<button (click)="visibleDialog = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: center; font-size: 14px; width: 100%; padding: 10px;">
+			<div>Bài tập chưa được giao!</div>
+			<div>Không thể kết thúc buổi học!</div>
+		</div>
+	</div>
+</p-dialog>
+
+<p-dialog [(visible)]="visibleDialogClassSesssionOn" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '400px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thông báo buổi học chưa được kết thúc</h4>
+			<button (click)="visibleDialogClassSesssionOn = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: start; font-size: 14px; width: 100%; padding: 10px; gap: 10px">
+			@for (m of classSessionOn; track m.id) {
+				<div class="class-progress-class-session-on_item">({{m.title}} - {{m.time_start | date:'dd/MM/yyyy HH:mm'}})</div>
+			}
+		</div>
+	</div>
+</p-dialog>
+
+<p-dialog [(visible)]="visibleDialogSkipStatus" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '400px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thông báo</h4>
+			<button (click)="visibleDialogSkipStatus = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: center; font-size: 14px; width: 100%; padding: 10px; text-align: center; gap: 10px">
+			<div>{{contentDialogSkipStatus}}</div>
+		</div>
+	</div>
+</p-dialog>

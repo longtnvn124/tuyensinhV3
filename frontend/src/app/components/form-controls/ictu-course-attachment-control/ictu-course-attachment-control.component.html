@@ -1,0 +1,42 @@
+<div class="ictu-course-attachment-control">
+    @if (multipleMode()) {
+        <div class="ictu-course-attachment-control__empty p-10 d-flex flex-column gap-10">
+            @if (attachments().length) {
+                <app-ictu-course-attachment-preview cssClasses="gap-10" [multipleMode]="multipleMode()" (onDeleteAttachment)="removeAttachmentFromList($event)" [media]="value()"></app-ictu-course-attachment-preview>
+            }
+            <button mat-flat-button (click)="btnCallFileChooser()" class="btn ictu-button-info-light w-100 hei-40">
+                <span class="d-flex justify-content-center align-items-center" style="gap:5px;">
+                    <i [ngClass]="btnUploadIcons()"></i>
+                    <span class="f-14 fw-normal lh-base">{{ btnUploadLabel() }}</span>
+                </span>
+            </button>
+        </div>
+    } @else {
+        @if (singleAttachment()) {
+            <div class="ictu-attachment-item" [ngClass]="'ictu-attachment-item--type-' + singleAttachment().location">
+                <div class="ictu-attachment-item__container w-100">
+                    <div class="ictu-attachment-item__icon d-inline-flex justify-content-center align-items-center position-relative p-0 m-0" [innerHTML]="singleAttachment().file | fileIcon | safeHtml"></div>
+                    <div class="ictu-attachment-item__info">
+                        <b class="ictu-attachment-item__info__label text-truncate w-100 f-roboto f-14 fw-medium lh-base m-0 p-0">{{ singleAttachment().file?.title ?? '' }}</b>
+                        <p class="ictu-attachment-item__info__info text-truncate w-100 f-roboto f-14 fw-normal lh-base text-muted m-0 p-0">{{ singleAttachment().file?.size ?? 0 | formatBytes }}</p>
+                    </div>
+                    <div class="ictu-attachment-item__controls" style="gap:5px">
+                        <button (click)="removeAttachmentFile()" class="btn ictu-attachment-item__controls__btn ictu-attachment-item__controls__btn--delete" matTooltipPosition="above" [matTooltip]="btnDeleteLabel()" style="border-radius: 999px;">
+                            <i class="fa-classic fa-regular fa-remove f-16"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <app-ictu-course-attachment-preview class="d-block" [multipleMode]="multipleMode()" [media]="value()" (onDeleteAttachment)="removeAttachmentFile()"></app-ictu-course-attachment-preview>
+        } @else {
+            <div class="ictu-course-attachment-control__empty p-10">
+                <button mat-flat-button (click)="btnCallFileChooser()" class="btn ictu-button-info-light w-100 hei-40">
+                    <span class="d-flex justify-content-center align-items-center" style="gap:5px;">
+                        <i [ngClass]="btnUploadIcons()"></i>
+                        <span class="f-14 fw-normal lh-base">{{ btnUploadLabel() }}</span>
+                    </span>
+                </button>
+            </div>
+        }
+    }
+</div>

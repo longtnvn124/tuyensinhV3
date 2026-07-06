@@ -1,0 +1,153 @@
+<div class="cp-lesson-date-assignment position-relative">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	@if (state() === 'error') {
+		<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+			<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+		</div>
+	} @else {
+		<div class="cp-lesson-date-assignment__container">
+			<div class="admin-wrap-table">
+				<div class="admin-wrap-table__head d-flex">
+					<h4 class="admin-wrap-table__heading">
+						<svg>
+							<use href="fonts/custom-icon.svg#custom-calendar"></use>
+						</svg>
+						{{ heading() }}
+					</h4>
+					<div class="admin-wrap-table__head-actions">
+						<div class="admin-wrap-table__switchers admin-wrap-table__switchers--next" pTooltip="{{ viewMode() === 'week' ? 'Tuần' : 'Tháng' }} hiện tại" tooltipPosition="left">
+							<button (click)="btnResetToCurrentDate()" type="button" class="admin-wrap-table__switchers__btn btn f-18">
+								<i class="ti ti-golf"></i>
+							</button>
+						</div>
+						<div class="admin-wrap-table__switchers admin-wrap-table__switchers--next">
+							<button (click)="btnPrevDate()" type="button" class="admin-wrap-table__switchers__btn btn f-18" pTooltip="{{ viewMode() === 'week' ? 'Tuần' : 'Tháng' }} trước" tooltipPosition="left">
+								<i class="ti ti-chevron-left"></i>
+							</button>
+							<button (click)="btnNextDate()" type="button" class="admin-wrap-table__switchers__btn btn f-18" pTooltip="{{ viewMode() === 'week' ? 'Tuần' : 'Tháng' }} sau" tooltipPosition="left">
+								<i class="ti ti-chevron-right"></i>
+							</button>
+						</div>
+						<div class="admin-wrap-table__switchers" pTooltip="Chế độ hiển thị" tooltipPosition="left" showDelay="1000">
+							<button (click)="btnSetViewMode('week')" type="button" [class.active]="viewMode()==='week'" class="admin-wrap-table__switchers__btn btn">Tuần</button>
+							<button (click)="btnSetViewMode('month')" type="button" [class.active]="viewMode()==='month'" class="admin-wrap-table__switchers__btn btn">Tháng</button>
+						</div>
+					</div>
+				</div>
+				<div class="admin-wrap-table__body">
+					@if (viewMode() === 'week') {
+						<table class="tbl admin-table">
+							<thead>
+								<tr>
+									<th class="text-center" [class.--tbl-col-active]="weekDays()[0].isToday">Thứ 2
+										<span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[0].slug }}</span>
+									</th>
+									<th class="text-center" [class.--tbl-col-active]="weekDays()[1].isToday">Thứ 3
+										<span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[1].slug }}</span>
+									</th>
+									<th class="text-center" [class.--tbl-col-active]="weekDays()[2].isToday">Thứ 4
+										<span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[2].slug }}</span>
+									</th>
+									<th class="text-center" [class.--tbl-col-active]="weekDays()[3].isToday">Thứ 5
+										<span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[3].slug }}</span>
+									</th>
+									<th class="text-center" [class.--tbl-col-active]="weekDays()[4].isToday">Thứ 6
+										<span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[4].slug }}</span>
+									</th>
+									<th class="text-center" [class.--tbl-col-active]="weekDays()[5].isToday">Thứ 7
+										<span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[5].slug }}</span>
+									</th>
+									<th class="text-center" [class.--tbl-col-active]="weekDays()[6].isToday">Chủ nhật
+										<span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[6].slug }}</span>
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td [class.--tbl-col-active]="weekDays()[0].isToday">
+										<div class="tm-calendar-component__tbl-col-contain" (cdkDropListDropped)="onDrop($event, weekDays()[0])" cdkDropList [class.calendar-block--empty]="!weekDays()[0].data.length">
+											@for (session of weekDays()[0].data; track session.id) {
+												<div class="tm-calendar-component__session">
+
+												</div>
+											} @empty {
+												<span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch học</span>
+											}
+										</div>
+									</td>
+									<td [class.--tbl-col-active]="weekDays()[1].isToday">
+										<div class="tm-calendar-component__tbl-col-contain" (cdkDropListDropped)="onDrop($event, weekDays()[1])" cdkDropList [class.calendar-block--empty]="!weekDays()[1].data.length">
+											<span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch học</span>
+										</div>
+									</td>
+									<td [class.--tbl-col-active]="weekDays()[2].isToday">
+										<div class="tm-calendar-component__tbl-col-contain" (cdkDropListDropped)="onDrop($event, weekDays()[2])" cdkDropList [class.calendar-block--empty]="!weekDays()[2].data.length">
+											<span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch học</span>
+										</div>
+									</td>
+									<td [class.--tbl-col-active]="weekDays()[3].isToday">
+										<div class="tm-calendar-component__tbl-col-contain" (cdkDropListDropped)="onDrop($event, weekDays()[3])" cdkDropList [class.calendar-block--empty]="!weekDays()[3].data.length">
+											<span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch học</span>
+										</div>
+									</td>
+									<td [class.--tbl-col-active]="weekDays()[4].isToday">
+										<div class="tm-calendar-component__tbl-col-contain" (cdkDropListDropped)="onDrop($event, weekDays()[4])" cdkDropList [class.calendar-block--empty]="!weekDays()[4].data.length">
+											<span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch học</span>
+										</div>
+									</td>
+									<td [class.--tbl-col-active]="weekDays()[5].isToday">
+										<div class="tm-calendar-component__tbl-col-contain" (cdkDropListDropped)="onDrop($event, weekDays()[5])" cdkDropList [class.calendar-block--empty]="!weekDays()[5].data.length">
+											<span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch học</span>
+										</div>
+									</td>
+									<td [class.--tbl-col-active]="weekDays()[6].isToday">
+										<div class="tm-calendar-component__tbl-col-contain" (cdkDropListDropped)="onDrop($event, weekDays()[6])" cdkDropList [class.calendar-block--empty]="!weekDays()[6].data.length">
+											<span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch học</span>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					} @else {
+						<div class="tm-calendar-calendar-grid-wrapper d-block position-relative">
+							<ul class="tm-calendar-calendar-grid tm-calendar-calendar-grid--header">
+								<li class="tm-calendar-calendar-grid__day-cell tm-calendar-calendar-grid__day-cell--heading">
+									<b class="tm-calendar-calendar-grid__day-cell__cell-name">Thứ 2</b>
+								</li>
+								<li class="tm-calendar-calendar-grid__day-cell tm-calendar-calendar-grid__day-cell--heading">
+									<b class="tm-calendar-calendar-grid__day-cell__cell-name">Thứ 3</b>
+								</li>
+								<li class="tm-calendar-calendar-grid__day-cell tm-calendar-calendar-grid__day-cell--heading">
+									<b class="tm-calendar-calendar-grid__day-cell__cell-name">Thứ 4</b>
+								</li>
+								<li class="tm-calendar-calendar-grid__day-cell tm-calendar-calendar-grid__day-cell--heading">
+									<b class="tm-calendar-calendar-grid__day-cell__cell-name">Thứ 5</b>
+								</li>
+								<li class="tm-calendar-calendar-grid__day-cell tm-calendar-calendar-grid__day-cell--heading">
+									<b class="tm-calendar-calendar-grid__day-cell__cell-name">Thứ 6</b>
+								</li>
+								<li class="tm-calendar-calendar-grid__day-cell tm-calendar-calendar-grid__day-cell--heading">
+									<b class="tm-calendar-calendar-grid__day-cell__cell-name">Thứ 7</b>
+								</li>
+								<li class="tm-calendar-calendar-grid__day-cell tm-calendar-calendar-grid__day-cell--heading">
+									<b class="tm-calendar-calendar-grid__day-cell__cell-name">Chủ nhật</b>
+								</li>
+							</ul>
+							<ul class="tm-calendar-calendar-grid">
+								@for (_d of monthDays(); track _d.slug) {
+									<li class="tm-calendar-calendar-grid__day-cell" [ngClass]="{'tm-calendar-calendar-grid__day-cell--today' : _d.isToday,'tm-calendar-calendar-grid__day-cell--hidden' : !_d.visible}">
+										<div class="tm-calendar-calendar-grid__day-cell__container" (cdkDropListDropped)="onDrop($event, _d)" cdkDropList>
+											<span class="tm-calendar-calendar-grid__day-cell__lbl">{{ _d.date | date : 'dd' }}</span>
+										</div>
+									</li>
+								}
+							</ul>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	}
+</div>

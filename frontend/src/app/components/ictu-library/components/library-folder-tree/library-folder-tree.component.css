@@ -1,0 +1,43 @@
+.library-folder-tree {
+    box-sizing: border-box;
+}
+
+.library-folder-tree__note {
+    padding: 0 0 4px 0;
+    outline: none;
+}
+
+.library-folder-tree__indent {
+    align-self: stretch;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.library-folder-tree__switcher {
+    position: relative;
+    flex: none;
+    align-self: stretch;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.library-folder-tree__switcher-leaf-line {
+
+}
+
+.library-folder-tree__btn-title {
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.library-folder-tree__node-content-wrapper {
+    user-select: none;
+    padding: 8px 0 7px;
+}

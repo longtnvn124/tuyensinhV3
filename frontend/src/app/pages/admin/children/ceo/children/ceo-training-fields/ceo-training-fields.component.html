@@ -1,0 +1,117 @@
+<section class="admin-section--table position-relative">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	<div class="admin-wrap-table">
+		@if (state() !== 'error') {
+			<div class="admin-wrap-table__head d-flex">
+				<h4 class="admin-wrap-table__heading">
+					<svg>
+						<use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+					</svg>
+					Danh sách lĩnh vực đào tạo
+				</h4>
+				<div class="admin-wrap-table__head-actions">
+					<input [(ngModel)]="_search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchData()">
+					<button (click)="deleteSelectedRows()" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+						<i class="ti ti-trash"></i>
+					</button>
+					<button (click)="addNewItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+						<i class="ti ti-plus"></i>
+					</button>
+				</div>
+			</div>
+			<div class="admin-wrap-table__body">
+				<table class="tbl admin-table table-hover">
+					<thead>
+						<tr>
+							<th class="col-checkbox">
+								<mat-checkbox [checked]="dataTable.totalChecked()" [indeterminate]="dataTable.partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="!dataTable.data().length"></mat-checkbox>
+							</th>
+							<th class="col-index text-center">#</th>
+							<th>Lĩnh vực đào tạo</th>
+							<th class="wid-120 text-center">Trạng thái</th>
+							<th class="wid-90 text-center px-0">Hành động</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for (row of dataTable.data(); track row.id; let i = $index) {
+							<tr>
+								<td class="col-checkbox">
+									<mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)"></mat-checkbox>
+								</td>
+								<td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+								<td>{{ row.ten }}</td>
+								<td class="wid-120 text-center p-0">
+									<div class="d-flex w-100 h-100 justify-content-center align-items-center">
+										@if (row.trangthai === 1) {
+											<span class="ictu-badge ictu-badge--success">Đã kích hoạt</span>
+										} @else {
+											<span class="ictu-badge ictu-badge--secondary">Chưa kích hoạt</span>
+										}
+									</div>
+								</td>
+								<td class="p-0 wid-90">
+									<div class="admin-table__btn-actions">
+										<button (click)="editRow(row)" class="btn ictu-button-info-light">
+											<i class="ti ti-edit"></i></button>
+										<button (click)="deleteRow(row)" class="btn ictu-button-danger-light">
+											<i class="ti ti-trash"></i></button>
+									</div>
+								</td>
+							</tr>
+						} @empty {
+							<tr>
+								<td colspan="5">Không có bản ghi nào.</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<div class="admin-wrap-table__foot">
+				<div class="d-flex justify-content-center align-items-center w-100">
+					<ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+				</div>
+			</div>
+		} @else {
+			<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+	</div>
+</section>
+
+<p-drawer #pDrawer (onHide)="onDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'400px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+	<div class="ictu-p-drawer__content position-relative">
+		@if (formControl.enableLoading()) {
+			<app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+		}
+		<div class="ictu-p-drawer__content__body position-relative">
+			<form [formGroup]="formControl.formGroup">
+				<div class="ictu-form ictu-form--label-on-top">
+					<div class="ictu-form__row">
+						<label class="ictu-form__label" for="f_name">Tên lĩnh vực</label>
+						<input class="ictu-form__input-field" formControlName="ten" id="f_name" pInputText placeholder="Tên lĩnh vực đào tạo" type="text">
+					</div>
+					<div class="ictu-form__row">
+						<label class="ictu-form__label">Lĩnh vực cha</label>
+						<p-select [options]="parentDropdownField.options()" [placeholder]="parentDropdownField.placeholder()" appendTo="body" class="ictu-form__input-field" formControlName="parent_id"/>
+					</div>
+					<div class="ictu-form__row">
+						<label class="ictu-form__label">Trạng thái</label>
+						<p-select [options]="optionList" appendTo="body" class="ictu-form__input-field" formControlName="trangthai" placeholder="Trạng thái"/>
+					</div>
+				</div>
+			</form>
+			@if (formControl.state() === 'PREPARATION_FAILED') {
+				<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+					<a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+				</div>
+			}
+		</div>
+		<div class="ictu-p-drawer__content__footer">
+			<button (click)="pDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+			<button (click)="submitForm()" [disabled]="!formControl.formFilledAndValid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+		</div>
+	</div>
+</p-drawer>

@@ -1,0 +1,110 @@
+<div class="student-dashboard">
+	<div class="d-flex flex-column">
+		<div class="ictu-statistics--block-shadow d-flex flex-column p-20">
+			<div class="student-layout__user w-100 align-items-center d-flex">
+				<div class="student-layout__avatar d-inline-flex align-items-center justify-content-center flex-shrink-0 rounded-circle overflow-hidden">
+					<img src="https://masterstudy.stylemixthemes.com/lms-plugin/wp-content/themes/ms-lms-starter-theme-child/assets/images/avatars/demo-student.jpg" alt="Demo Student">
+				</div>
+				<div class="student-layout__personal m-l-20">
+					<h4 class="student-layout__name m-0 f-roboto f-24 fw-medium lh-base">Demo Student</h4>
+					<p class="student-layout__member m-0 f-roboto f-14 fw-normal lh-base">Member since October 2018</p>
+				</div>
+				<div class="student-layout__actions ms-auto">
+					<button (click)="btnDetailsToggle()" class="btn ictu-button-info-light wid-120">{{ btnDetailLabel() }}</button>
+				</div>
+			</div>
+			<collapse-panel #collapseMenu>
+				<div class="student-layout__details d-flex w-100 flex-column m-t-15">
+					<div class="student-layout__details__fields d-flex justify-content-center align-items-center">
+						<div class="student-layout__details__fields__icon d-inline-flex justify-content-start align-items-center">
+							<i class="ti ti-calendar-time f-20"></i>
+						</div>
+						<div class="student-layout__details__fields__value d-inline-flex align-items-center">
+							<p class="m-0 f-roboto f-15 lh-base fw-normal">18/10/2001</p>
+						</div>
+					</div>
+					<div class="student-layout__details__fields d-flex justify-content-center align-items-center">
+						<div class="student-layout__details__fields__icon d-inline-flex justify-content-start align-items-center">
+							<i class="ti ti-mail f-20"></i>
+						</div>
+						<div class="student-layout__details__fields__value d-inline-flex align-items-center">
+							<p class="m-0 f-roboto f-15 lh-base fw-normal ">abc&#64;gmail.com</p>
+						</div>
+					</div>
+					<div class="student-layout__details__fields d-flex justify-content-center align-items-center">
+						<div class="student-layout__details__fields__icon d-inline-flex justify-content-start align-items-center">
+							<i class="ti ti-phone f-20"></i>
+						</div>
+						<div class="student-layout__details__fields__value d-inline-flex align-items-center">
+							<p class="m-0 f-roboto f-15 lh-base fw-normal">0987 152 365</p>
+						</div>
+					</div>
+					<div class="student-layout__details__fields d-flex justify-content-center align-items-center border-0">
+						<div class="student-layout__details__fields__icon d-inline-flex justify-content-start align-items-center">
+							<i class="ti ti-home f-20"></i>
+						</div>
+						<div class="student-layout__details__fields__value d-inline-flex align-items-center">
+							<p class="m-0 f-roboto f-15 lh-base fw-normal">0987 152 365</p>
+						</div>
+					</div>
+				</div>
+			</collapse-panel>
+		</div>
+		<div class="d-flex flex-wrap w-100">
+			<div class="row w-100 m-0 p-0">
+				<div class="col-3 col-lg-3 col-md-4 col-sm-6 p-0">
+					<div class="ictu-statistics-block ictu-statistics--block-shadow">
+						<div class="ictu-statistics-block__icon">
+							<i class="ti ti-bookmarks f-20"></i>
+						</div>
+						<div class="ictu-statistics-block__content">
+							<b class="ictu-statistics-block__title fw-medium m-0">Tổng số lớp</b>
+							<div class="ictu-statistics-block__value">
+								<p class="ictu-statistics-block__value__text text-primary">10 lớp</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-3 col-lg-3 col-md-4 col-sm-6 p-0">
+					<div class="ictu-statistics-block ictu-statistics--block-shadow">
+						<div class="ictu-statistics-block__icon">
+							<i class="ti ti-puzzle f-20"></i>
+						</div>
+						<div class="ictu-statistics-block__content">
+							<b class="ictu-statistics-block__title fw-medium m-0">Nhóm học tập</b>
+							<div class="ictu-statistics-block__value">
+								<p class="ictu-statistics-block__value__text text-primary">0 nhóm</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-3 col-lg-3 col-md-4 col-sm-6 p-0">
+					<div class="ictu-statistics-block ictu-statistics--block-shadow">
+						<div class="ictu-statistics-block__icon">
+							<i class="ti ti-clipboard-list f-20"></i>
+						</div>
+						<div class="ictu-statistics-block__content">
+							<b class="ictu-statistics-block__title fw-medium m-0">Tổng số bài tập</b>
+							<div class="ictu-statistics-block__value">
+								<p class="ictu-statistics-block__value__text text-primary">10 bài tập</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-3 col-lg-3 col-md-4 col-sm-6 p-0">
+					<div class="ictu-statistics-block ictu-statistics--block-shadow">
+						<div class="ictu-statistics-block__icon">
+							<i class="ti ti-test-pipe f-20"></i>
+						</div>
+						<div class="ictu-statistics-block__content">
+							<b class="ictu-statistics-block__title fw-medium m-0">Tổng số bài kiểm tra</b>
+							<div class="ictu-statistics-block__value">
+								<p class="ictu-statistics-block__value__text text-primary">10 bài kiểm tra</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

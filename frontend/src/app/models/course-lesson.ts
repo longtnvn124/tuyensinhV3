@@ -1,0 +1,64 @@
+import { IctuBaseModel } from '@models/ictu-base-model';
+import { CourseAttachment } from '@models/course';
+import { IctuDropdownOption } from '@models/ictu-dropdown-option';
+import { IctuBasicFile } from '@models/file';
+import { sortBy } from 'lodash-es';
+import { ClassLesson } from '@models/class';
+import { CourseLessonChapter } from '@pages/class-planning/children/class-planning-curriculum/class-planning-curriculum.component';
+
+export type DeliveryMode = 'ONLINE' | 'OFFLINE' | 'HYBRID';
+
+export const optionDeliveryModeType : IctuDropdownOption<DeliveryMode>[] = [
+    { value : 'ONLINE' , label : 'Trực tuyến' } ,
+    { value : 'OFFLINE' , label : 'Trực tiếp' } ,
+    { value : 'HYBRID' , label : 'Kết hợp' }
+];
+
+export interface ScormResponse {
+    code : string;
+    message : string;
+    data : string;
+}
+
+export type TypeCourseLesson = 'TEXT' | 'VIDEO' | 'AUDIO' | 'QUIZ' | 'ASSIGNMENT' | 'STREAM' | 'SCORM'
+
+export interface CourseLessonParam {
+    fast_forward? : boolean
+}
+
+export interface CourseLesson extends IctuBaseModel {
+    id : number;
+    donvi_id : number;
+    course_id : number;
+    parent_id : number;
+    title : string;
+    slug : string;
+    code : string;
+    type : TypeCourseLesson;
+    params : CourseLessonParam;
+    content : string;
+    desc : string;
+    video : CourseAttachment;
+    audio : CourseAttachment;
+    scorm : IctuBasicFile;
+    preview : number;
+    attachments : CourseAttachment[];
+    ordering : number;
+    teacher : number;
+    status : number;
+    duration : number;
+    courseLessonChild? : CourseLesson[];
+    delivery_mode : DeliveryMode;
+}
+
+export const courseLessons2ClassLessons : any = ( courseLessons : CourseLesson[] ) : ClassLesson[] => {
+    const chapters : CourseLessonChapter[] = sortBy<CourseLessonChapter>( courseLessons.filter( ( i : CourseLesson ) : boolean => i.parent_id === 0 ).map( ( p : CourseLesson ) : CourseLessonChapter => {
+        const children : CourseLesson[] = sortBy<CourseLesson>( courseLessons.filter( ( c : CourseLesson ) : boolean => c.parent_id === p.id ) , 'ordering' );
+        return { ... p , children };
+    } ) , 'ordering' );
+    const lessons : CourseLesson[]         = chapters.reduce( ( _reducer : CourseLesson[] , item : CourseLesson ) : CourseLesson[] => {
+        _reducer.push( ... item[ 'children' ] );
+        return _reducer;
+    } , new Array<CourseLesson>() );
+    return lessons.map( ( { id } : CourseLesson , index : number ) : ClassLesson => ( { course_lesson_id : id , teacher_id : 0 , ordering : 1 + index } ) );
+}

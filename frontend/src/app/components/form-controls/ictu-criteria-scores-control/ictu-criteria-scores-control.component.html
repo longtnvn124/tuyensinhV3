@@ -1,0 +1,18 @@
+<div class="ictu-criteria-scores-control d-flex flex-column gap-10 p-10">
+    @for (score of value(); track score; let i = $index) {
+        <div class="ictu-criteria-scores-control__row d-flex gap-10 justify-content-center align-items-center">
+            <input [(ngModel)]="score.criteria" (ngModelChange)="triggerChanges()" [id]="'criteria-scores-'+i" class="ictu-criteria-scores-control__input f-roboto f-14 fw-medium lh-base" type="text" pInputText placeholder="...">
+            <mat-slider min="0" max="10" step="0.5" showTickMarks discrete [displayWith]="formatLabel">
+                <input matSliderThumb [(ngModel)]="score.score" #slider>
+            </mat-slider>
+            <label class="ictu-criteria-scores-control__label f-roboto f-14 fw-normal lh-base text-end wid-50" [for]="'criteria-scores-'+i">{{ score.score }} / 10</label>
+            <button (click)="btnRemoveItem(i)" class="ictu-criteria-scores-control__btn-remove btn ictu-button-danger-light p-0">
+                <i class="fa-classic fa-solid fa-trash-alt"></i>
+            </button>
+        </div>
+    }
+    <button mat-flat-button (click)="btnAddItem()" class="btn ictu-button-info-light w-100 p-0 m-0 hei-40">
+        <i class="fa-classic fa-solid fa-plus"></i>
+        <span class="f-roboto f-14 lh-base fw-normal m-l-5">Thêm tiêu chí</span>
+    </button>
+</div>

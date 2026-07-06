@@ -1,0 +1,270 @@
+<section class="admin-section--table position-relative">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	<div class="admin-wrap-table">
+		@if (state() !== 'error') {
+			<div class="admin-wrap-table__head d-flex">
+				<h4 class="admin-wrap-table__heading">
+					<svg>
+						<use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+					</svg>
+					Danh sách cơ sở đào tạo
+				</h4>
+				<div class="admin-wrap-table__head-actions">
+					<input [(ngModel)]="_search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchData()">
+					@if (permissionControl().canDelete) {
+						<button (click)="deleteSelectedRows()" [disabled]="!branchesTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+							<i class="ti ti-trash"></i>
+						</button>
+					}
+					@if (permissionControl().canCreate) {
+						<button (click)="addNewItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+							<i class="ti ti-plus"></i>
+						</button>
+					}
+				</div>
+			</div>
+			<div class="admin-wrap-table__body">
+				<table class="tbl admin-table table-hover">
+					<thead>
+						<tr>
+							<th class="col-checkbox">
+								<mat-checkbox [checked]="branchesTable.totalChecked()" [indeterminate]="branchesTable.partiallyChecked()" (change)="branchesTable.selectRow($event.checked)" [disabled]="!branchesTable.data().length || !permissionControl().canDelete"></mat-checkbox>
+							</th>
+							<th class="col-index text-center">#</th>
+							<th class="wid-100 text-center">Ký hiệu</th>
+							<th class="text-center">Tên cơ sở đào tạo</th>
+							<th class="text-center">Người phụ trách</th>
+							<th class="wid-120 text-center">Trạng thái</th>
+							<th class="wid-90 text-center px-0">Hành động</th>
+						</tr>
+					</thead>
+					<tbody>
+						@for (row of branchesTable.data(); track row.id; let i = $index) {
+							<tr>
+								<td class="col-checkbox">
+									<mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="branchesTable.selectRow($event.checked, i)" [disabled]="!permissionControl().canDelete"></mat-checkbox>
+								</td>
+								<td class="col-index text-center">{{ branchesTable.paginator.startIndex() + i }}</td>
+								<td class="wid-100 text-center">{{ row.kyhieu }}</td>
+								<td class="text-left">{{ row.ten }}</td>
+								<td class="text-left">{{ row._managerInfo.full_name }}</td>
+								<td class="wid-120 text-center p-0">
+									<div class="d-flex w-100 h-100 justify-content-center align-items-center">
+										@if (row.status === 1) {
+											<span class="ictu-badge ictu-badge--success">Đã kích hoạt</span>
+										} @else {
+											<span class="ictu-badge ictu-badge--secondary">Chưa kích hoạt</span>
+										}
+									</div>
+								</td>
+								<td class="p-0 wid-90">
+									<div class="admin-table__btn-actions">
+										@if (permissionControl().canUpdate) {
+											<button (click)="editRow(row)" class="btn ictu-button-info-light">
+												<i class="ti ti-edit"></i>
+											</button>
+										}
+										@if (permissionControl().canDelete) {
+											<button (click)="deleteRow(row)" class="btn ictu-button-danger-light">
+												<i class="ti ti-trash"></i>
+											</button>
+										}
+									</div>
+								</td>
+							</tr>
+						} @empty {
+							<tr>
+								<td colspan="7">Không có bản ghi nào.</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<div class="admin-wrap-table__foot">
+				<div class="d-flex justify-content-center align-items-center w-100">
+					<ictu-paginator [control]="branchesTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+				</div>
+			</div>
+		} @else {
+			<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+	</div>
+</section>
+<p-drawer #pDrawer (onHide)="onDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'500px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+	<div class="ictu-p-drawer__content position-relative">
+		@if (formControl.enableLoading()) {
+			<app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+		}
+		<div class="ictu-p-drawer__content__body position-relative">
+			@switch (formControl.state()) {
+				@case ('READY') {
+					<form [formGroup]="formControl.formGroup">
+						<div class="ictu-form ictu-form--label-on-top">
+							<div class="ictu-form__row">
+								<div class="d-flex justify-content-center align-items-center">
+									<div class="csdt-logo-input">
+										<div class="csdt-logo-input__logo ictu-media-wrapper">
+											<img class="csdt-logo-input__logo__img" [ICTUMediaLoader]="f.get('logo')?.value" src="images/organization-logo-default.png" placeholder="images/organization-logo-default.png" alt="">
+											<button (click)="btnUpdateOrganizationLogo()" class="btn csdt-logo-input__btn-upload">
+												<i class="ti ti-camera-plus"></i>
+											</button>
+										</div>
+										<h4 class="csdt-logo-input__heading">Logo</h4>
+										<p class="csdt-logo-input__desc">(Size 200x200)</p>
+									</div>
+								</div>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label--required" for="f_name">Tên cơ sở đào tạo</label>
+								<input class="ictu-form__input-field" formControlName="ten" id="f_name" pInputText placeholder="Tên cơ sở đào tạo" type="text">
+							</div>
+							<div class="ictu-form__row">
+								<div class="row">
+									<div class="col-4">
+										<div class="ictu-form__row">
+											<label class="ictu-form__label ictu-form__label--required" for="f_alias">Ký hiệu</label>
+											<input class="ictu-form__input-field" formControlName="kyhieu" id="f_alias" pInputText placeholder="Ký hiệu cơ sở đào tạo" type="text" style="text-transform: uppercase;">
+										</div>
+									</div>
+									<div class="col-8">
+										<div class="ictu-form__row">
+											<label class="ictu-form__label ictu-form__label--required" for="f_hotline">Hotline</label>
+											<input class="ictu-form__input-field" formControlName="hotline" id="f_hotline" pInputText placeholder="Đường dây nóng cơ sở đào tạo" type="text"/>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label--required" for="f_address">Địa chỉ</label>
+								<input class="ictu-form__input-field" formControlName="address" id="f_address" pTextarea placeholder="Địa chỉ của cơ sở đào tạo" type="text"/>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label" for="f_desc">Mô tả</label>
+								<textarea class="ictu-form__input-field" formControlName="mota" id="f_desc" pTextarea placeholder="Thêm mô tả cho cơ sở đào tạo"></textarea>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label">Người phụ trách</label>
+								<div class="ceo-class-time-slots p-0">
+									<employee-control [formControlObject]="formControl.formGroup.get('userid_manager')" [donvi_id]="donviId()" placeholder="-- Chọn người phụ trách --" layout="dropdown"/>
+								</div>
+								<!-- <p-select class="ictu-form__input-field p-select&#45;&#45;hide-angle" [options]="employeeDropdownField.options()" formControlName="userid_manager" [placeholder]="employeeDropdownField.placeholder()">
+									<ng-template #selectedItem let-selectedOption>
+										@if (selectedOption) {
+											@if (selectedOption.value) {
+												<div class="employee-show">
+													<div class="employee-show__avatar">
+														<img src="images/user/avatar-1.jpg" alt="">
+													</div>
+													<div class="employee-show__info">
+														<h4 class="employee-show__info__name">{{ selectedOption.info.hoten }}</h4>
+														<p class="employee-show__info__email">{{ selectedOption.info.email }}</p>
+													</div>
+												</div>
+											} @else {
+												<span style="color: var(&#45;&#45;accent-600);">{{ selectedOption.label }}</span>
+											}
+										}
+									</ng-template>
+									<ng-template let-employee #item>
+										@if (employee.value) {
+											<div class="employee-show">
+												<div class="employee-show__avatar">
+													<img src="images/user/avatar-1.jpg" alt="">
+												</div>
+												<div class="employee-show__info">
+													<h4 class="employee-show__info__name">{{ employee.info.hoten }}</h4>
+													<p class="employee-show__info__email">{{ employee.info.email }}</p>
+												</div>
+											</div>
+										} @else {
+											{{ employee.label }}
+										}
+									</ng-template>
+								</p-select> -->
+								<!-- <employee-picker [formControlObject]="formControl.formGroup.get('userid_manager')" [donvi_id]="donviId()"></employee-picker> -->
+							</div>
+							<div class="ictu-form__row">
+								<label for="set_up_class-time-slot" class="ictu-form__label">Các khung giờ học</label>
+								<div id="set_up_class-time-slot" class="ceo-class-time-slots" formArrayName="time_slots">
+									<div class="ceo-class-time-slots__body">
+										@for (_control of branchTimeSlots.controls; track _control; let i = $index) {
+											<div class="d-flex align-items-center ceo-class-time-slots__element" [formGroupName]="i">
+												<div class="ceo-class-time-slots__node" (keydown.enter)="preventKeyDown($event)">
+													<span class="ceo-class-time-slots__node__order">#{{ 1 + i }}</span>
+													<label class="ceo-class-time-slots__node__lbl ceo-class-time-slots__node__lbl--name" [for]="'fg_class_time_name'+i" style="max-width: 130px;"><input [id]="'fg_class_time_name'+i" class="ceo-class-time-slots__node__input" pInputText formControlName="name" placeholder="name"></label>
+													<label class="ceo-class-time-slots__node__lbl ceo-class-time-slots__node__lbl--start" [for]="'fg_class_time_start'+i"><input [id]="'fg_class_time_start'+i" class="ceo-class-time-slots__node__input text-center" pInputText formControlName="start" placeholder="00:00"></label>
+													<span class="ceo-class-time-slots__node__separator">-</span>
+													<label class="ceo-class-time-slots__node__lbl ceo-class-time-slots__node__lbl--end" [for]="'fg_class_time_end'+i"><input [id]="'fg_class_time_end'+i" class="ceo-class-time-slots__node__input text-center" pInputText formControlName="end" placeholder="00:00"></label>
+												</div>
+												<button (click)="btnRemoveNewClassTimeSlot(i)" class="btn ictu-button-danger-light ceo-class-time-slots__btn--delete">
+													<i class="ti ti-trash"></i>
+												</button>
+											</div>
+										}
+									</div>
+									<button class="btn ictu-button-info-light ceo-class-time-slots__btn-add" (click)="btnAddNewClassTimeSlot()">
+										<svg>
+											<use href="fonts/custom-icon.svg#custom-add-circle"></use>
+										</svg>
+										Thêm mới khung giờ học
+									</button>
+								</div>
+							</div>
+
+							<div class="ictu-form__row">
+								<label for="co_so_dao_thong_tin_lien_he" class="ictu-form__label">Thông tin liên hệ</label>
+								<div id="co_so_dao_thong_tin_lien_he" class="ceo-class-time-slots">
+									<div class="ceo-class-time-slots__body">
+										<div class="d-flex align-items-center co-so-dao-tao-info" formGroupName="params">
+											<div class="co-so-dao-tao-info__node" (keydown.enter)="preventKeyDown($event)">
+												<label for="co_so_dao_phone" class="co-so-dao-tao-info__label">Phone</label>
+												<input id="co_so_dao_phone" class="co-so-dao-tao-info__input" pInputText placeholder="0123456789" formControlName="phone">
+											</div>
+											<div class="co-so-dao-tao-info__node" (keydown.enter)="preventKeyDown($event)">
+												<label for="co_so_dao_email" class="co-so-dao-tao-info__label">Email</label>
+												<input id="co_so_dao_email" class="co-so-dao-tao-info__input" pInputText placeholder="email@abc.com" formControlName="email">
+											</div>
+											<div class="co-so-dao-tao-info__node" (keydown.enter)="preventKeyDown($event)">
+												<label for="co_so_dao_website" class="co-so-dao-tao-info__label">Website</label>
+												<input id="co_so_dao_website" class="co-so-dao-tao-info__input" pInputText placeholder="www.abc.com" formControlName="website">
+											</div>
+											<div class="co-so-dao-tao-info__node" (keydown.enter)="preventKeyDown($event)">
+												<label for="co_so_dao_facebook" class="co-so-dao-tao-info__label">Facebook</label>
+												<input id="co_so_dao_facebook" class="co-so-dao-tao-info__input" pInputText placeholder="https://www.facebook.com" formControlName="facebook">
+											</div>
+											<div class="co-so-dao-tao-info__node" (keydown.enter)="preventKeyDown($event)">
+												<label for="co_so_dao_youtube" class="co-so-dao-tao-info__label">Youtube</label>
+												<input id="co_so_dao_youtube" class="co-so-dao-tao-info__input" pInputText placeholder="https://www.youtube.com" formControlName="youtube">
+											</div>
+											<div class="co-so-dao-tao-info__node" (keydown.enter)="preventKeyDown($event)">
+												<label for="co_so_dao_tiktok" class="co-so-dao-tao-info__label">Tiktok</label>
+												<input id="co_so_dao_tiktok" class="co-so-dao-tao-info__input" pInputText placeholder="https://www.tiktok.com" formControlName="tiktok">
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label">Trạng thái</label>
+								<p-select [options]="optionList" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Trạng thái"/>
+							</div>
+						</div>
+					</form><!-- <div class="ictu-form ictu-form&#45;&#45;label-on-top" style="padding-top: 5px;"> --><!-- <div class="ictu-form__row"> --><!-- <label for="set_up_class-time-slot" class="ictu-form__label">Các khung giờ học</label> --><!-- <div id="set_up_class-time-slot" class="ceo-class-time-slots"> --><!-- <div class="ceo-class-time-slots__body"> --><!-- 									@if (classTimeSlots.length) { --><!-- 										@for (_control of classTimeSlots.controls; track _control;){ --><!-- 											<div class="ceo-class-time-slots__node"> --><!-- 												{{ _control.name }} --><!-- 											</div> --><!-- 										} --><!-- 									} @else { --><!-- 										<div class="ceo-class-time-slots__node&#45;&#45;empty"> --><!-- 											Cơ sở chưa được thiết lập khung giờ học --><!-- 										</div> --><!-- 									} --><!-- 								</div> --><!-- 								<button class="btn ictu-button-info-light ceo-class-time-slots__btn-add" (click)="btnAddNewClassTimeSlot()"> --><!-- 									<svg> --><!-- 										<use href="fonts/custom-icon.svg#custom-add-circle"></use> --><!-- 									</svg> --><!-- 									Thêm mới khung giờ học --><!-- 								</button> --><!-- 							</div> --><!-- 						</div> --><!-- 					</div> -->
+				}
+				@case ('PREPARATION_FAILED') {
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+			}
+		</div>
+		<div class="ictu-p-drawer__content__footer">
+			<button (click)="pDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+			<button (click)="submitForm()" [disabled]="!formControl.formFilledAndValid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+		</div>
+	</div>
+</p-drawer>

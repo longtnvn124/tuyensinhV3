@@ -1,0 +1,270 @@
+.admin-wrap-table__switchers--next .admin-wrap-table__switchers__btn {
+    min-width: 36px;
+    width: 36px;
+}
+
+.admin-wrap-table__switchers {
+    gap: 1px;
+}
+
+.admin-table {
+    --parent-schedule-active-color-rgb: 70 128 255;
+}
+
+.admin-table {
+    table-layout: fixed;
+}
+
+.admin-table th,
+.admin-table td {
+    width: calc(100% / 7);
+}
+
+.admin-table th.--tbl-col-active,
+.admin-table td.tbl-col-calendar-block--active,
+.admin-table td.--tbl-col-active {
+    background-color: rgb(var(--parent-schedule-active-color-rgb)/10%);
+}
+
+.admin-wrap-table__body {
+    max-height: calc(var(--device-height) - 55px);
+    overflow-y: auto;
+    display: block;
+    position: relative;
+    border-top: 1px solid var(--admin-table-border-color);
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+}
+
+thead th {
+    position: relative;
+    border: none;
+    border-left: 1px solid var(--admin-table-border-color);
+}
+
+thead th:last-child {
+    border-right: 1px solid var(--admin-table-border-color);
+}
+
+thead::after {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 1px;
+    top: calc(100% - 1px);
+    left: 0;
+    width: 100%;
+    border-top: 1px solid var(--admin-table-border-color);
+    z-index: 99;
+}
+
+.admin-table th.--tbl-col-active {
+    color: rgb(var(--parent-schedule-active-color-rgb)/100%);
+}
+
+.admin-table tbody td.tbl-col-calendar-block--empty {
+    vertical-align: middle;
+    background: repeating-linear-gradient(-45deg, transparent, transparent 10px, #dbe0e5 10px, #dbe0e5 12px);
+}
+
+.admin-table tbody td.tbl-col-calendar-block--empty.tbl-col-calendar-block--active {
+    background: repeating-linear-gradient(-45deg, transparent, transparent 10px, #9dbcff 10px, #9dbcff 12px);
+}
+
+.week-date-sections {
+    min-height: calc(var(--device-height) - 55px - 62px);
+    background-color: transparent;
+}
+
+.week-date-sections__session {
+    --wds-session-text-color: #5B6B79;
+    --wds-session-background: #f9f9ff;
+    --wds-session-border-color: #d3d3f3;
+    background: var(--wds-session-background);
+    border: 1px solid var(--wds-session-border-color);
+    border-radius: 4px;
+    padding: 10px;
+    margin: 0;
+    font-size: 13px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.week-date-sections__session--completed {
+    --wds-session-text-color: #444444;
+    --wds-session-background: #dcfce7;
+    --wds-session-border-color: #22c55e;
+}
+
+.parent-schedule-children {
+    gap: 7px;
+}
+
+.parent-schedule-children__info {
+    --psc-student-avatar-size: 22px;
+    --psc-gap: 7px;
+    gap: var(--psc-gap);
+}
+
+.parent-schedule-children__info__avatar {
+    width: var(--psc-student-avatar-size);
+    height: var(--psc-student-avatar-size);
+    margin: 0;
+    font-size: 0;
+    line-height: 0;
+    border: 1px solid #d3d3f3;
+    /*padding: 1px;*/
+    border-radius: 999px;
+}
+
+.parent-schedule-children__info__avatar img {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.parent-schedule-children__info__name {
+    display: inline-block;
+    max-width: calc(100% - var(--psc-gap) - var(--psc-student-avatar-size));
+    line-height: 1.4;
+    color: var(--wds-session-text-color);
+}
+
+/****************************************************
+* admin-table-month
+*****************************************************/
+.admin-table-month {
+}
+
+.admin-table-month thead::after {
+    top: 100%;
+}
+
+.month-grid__cell {
+    height: max(163px, calc(var(--device-height) - 65px - 40px) / 5);
+    padding: 6px;
+    transition: background 0.15s;
+}
+
+.month-grid__cell:nth-child(7n) {
+    border-right: none;
+}
+
+.month-grid__cell:hover {
+    background: #fafbfc;
+}
+
+.month-grid__cell.other-month {
+    background: #f8fafc;
+}
+
+.month-grid__cell.other-month .cell-date {
+    color: #94a3b8;
+}
+
+.month-grid__cell.is-today {
+    background: #eff6ff;
+}
+
+.month-grid__cell.is-today .cell-date {
+    background: #2563eb;
+    color: #fff;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell-date {
+    display: inline-block;
+    color: #1e293b;
+    margin-bottom: 4px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+}
+
+/* Session items inside month cells */
+.cell-sessions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cell-session-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 5px;
+    border-radius: 4px;
+    cursor: default;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.cell-session-item.status-completed {
+    background: #dcfce7;
+    color: #15803d;
+    border-left: 3px solid #22c55e;
+}
+
+.cell-session-item.status-scheduled {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-left: 3px solid #3b82f6;
+}
+
+.cell-session-item.status-cancelled {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-left: 3px solid #ef4444;
+    text-decoration: line-through;
+}
+
+.cell-session__time {
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.cell-session__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cell-more__label {
+    font-size: 11px;
+    color: #64748b;
+    display: inline-block;
+    padding: 5px 0 0 0;
+}
+
+.cell-more__details-button {
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0 0 0 auto;
+    display: inline-block;
+    background-color: transparent;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.cell-more__details-button:hover {
+    color: #2563eb;
+}

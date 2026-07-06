@@ -1,0 +1,121 @@
+
+.admin-wrap-table__switchers {
+    --admin-switcher-active-color-rgb: 70 128 255;
+    --admin-switcher-border-radius: 2px;
+    display: flex;
+    padding: 1px;
+    gap: 0;
+    align-items: center;
+    justify-content: center;
+    /*border: 1px solid #aac4ff;*/
+    border: 1px solid rgb(var(--admin-switcher-active-color-rgb)/20%);
+    background-color: transparent;
+    border-radius: calc(var(--admin-switcher-border-radius) + 1px);
+}
+
+.admin-wrap-table__switchers__btn-label,
+.admin-wrap-table__switchers__btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    border-radius: 0;
+    line-height: 1.5;
+    padding: 5px;
+    min-width: 60px;
+    cursor: pointer;
+    background-color: rgb(var(--admin-switcher-active-color-rgb)/10%);
+    color: rgb(var(--admin-switcher-active-color-rgb));
+    height: 36px;
+    user-select: none;
+}
+
+.admin-wrap-table__switchers__btn:first-child {
+    border-radius: var(--admin-switcher-border-radius) 0 0 var(--admin-switcher-border-radius);
+}
+
+.admin-wrap-table__switchers__btn:last-child {
+    border-radius: 0 var(--admin-switcher-border-radius) var(--admin-switcher-border-radius) 0;
+}
+
+.admin-wrap-table__switchers--next > .btn:hover,
+.admin-wrap-table__switchers__btn.active {
+    background-color: rgb(var(--admin-switcher-active-color-rgb)/100%);
+    color: #ffffff;
+}
+
+.admin-wrap-table__switchers--next {
+    gap: 1px
+}
+
+.admin-wrap-table__switchers--next > .btn {
+    min-width: 36px;
+}
+
+.admin-wrap-table__switchers__btn-label__lbl i {
+    font-size: 18px;
+    line-height: 1;
+    height: 100%;
+    display: inline-flex;
+    width: 36px;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(218 230 255);
+}
+
+.admin-wrap-table__switchers__btn-label__lbl span {
+    line-height: 1.5;
+    font-weight: 500;
+    margin: 0 0 -4px 0;
+    width: 150px;
+    text-align: left;
+    font-family: var(--primary-font-family), sans-serif;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    padding: 0 0 0 10px;
+}
+
+/*.admin-table {*/
+/*    width: 100%;*/
+/*    !*table-layout: fixed;*!*/
+/*}*/
+
+/*.admin-table .x-col-day-in-week {*/
+/*    width: calc((100% - 450px) / 7);*/
+/*}*/
+
+/*.admin-table .x-col-avatar {*/
+/*    width: 25%;*/
+/*}*/
+
+/*.admin-table th,*/
+/*.admin-table td {*/
+/*    box-sizing: border-box;*/
+/*}*/
+
+.x-col-day-in-week {
+    vertical-align: top;
+}
+
+.teaching-statistic__sessions {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.teaching-statistic__sessions__elm:not(:first-child)::before {
+    content: "";
+    display: block;
+    width: 100%;
+    border-top: 1px dashed #aaaaaa;
+    margin: 10px 0 10px;
+}

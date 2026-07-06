@@ -1,0 +1,78 @@
+.parent-summary {
+    padding: 1px;
+}
+
+.tone-primary {
+    color: #1d4ed8;
+}
+
+.tone-success {
+    color: #15803d;
+}
+
+.tone-warning {
+    color: #b45309;
+}
+
+.tone-danger {
+    color: #b91c1c;
+}
+
+.parent-island {
+    /*min-height: calc(var(--device-height) - 56px - 73px - 32px);*/
+    border-radius: 10px;
+    min-height: 130px;
+}
+
+.parent-island--progress {
+    width: calc(70% - 7.5px);
+}
+
+.parent-island--notifications {
+    width: calc(30% - 7.5px);
+}
+
+.admin-wrap-table__head {
+    box-shadow: 0 0 1px 1px var(--admin-table-border-color);
+    z-index: 5;
+    position: relative;
+}
+
+.parent-island__heading {
+    color: #333333;
+}
+
+.parent-reminder-item {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #dbe0e9;
+    background: #fff;
+}
+
+.parent-reminder-item__desc {
+    color: #4d5e6f;
+}
+
+.priority-high {
+    border-left: 4px solid #dc2626;
+}
+
+.priority-medium {
+    border-left: 4px solid #d97706;
+}
+
+.priority-low {
+    border-left: 4px solid #2563eb;
+}
+
+.empty-text {
+    user-select: none;
+    border-radius: 4px;
+    color: #383d41;
+    background-color: #e2e3e5;
+    border-color: #d6d8db;
+}
+
+.progress-bar-loader {
+
+}

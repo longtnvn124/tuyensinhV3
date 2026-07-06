@@ -1,0 +1,135 @@
+<div class="bank-question-editor">
+    <form class="ictu-form p-0" [formGroup]="formGroup">
+        <div class="ictu-form__row">
+            <div class="row">
+                <div class="col-sm-8 col-12">
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label" for="q_type" [class.ictu-form__label--required]="getControl('type').hasValidator(Validators.required)">Dạng câu hỏi</label>
+                        <p-select id="q_type" [options]="questionTypeOptions()" appendTo="body" class="ictu-form__input-field" formControlName="type" placeholder="Chọn loại câu hỏi">
+                            <ng-template #selectedItem let-selectedOption>
+                                <div class="ictu-question-label-group d-flex align-items-center">
+                                    <span class="ictu-question-label-group__type f-roboto f-12 fw-normal lh-base">{{ selectedOption.value | questionTypeToLabel }}</span>
+                                    <span class="ictu-question-label-group__name f-roboto f-14 fw-normal lh-base">{{ selectedOption.value | questionTypeToName }}</span>
+                                </div>
+                            </ng-template>
+                            <ng-template let-option #item>
+                                <div class="ictu-question-label-group d-flex align-items-center">
+                                    <span class="ictu-question-label-group__type f-roboto f-12 fw-normal lh-base">{{ option.value | questionTypeToLabel }}</span>
+                                    <span class="ictu-question-label-group__name f-roboto f-14 fw-normal lh-base">{{ option.value | questionTypeToName }}</span>
+                                </div>
+                            </ng-template>
+                            <ng-template #dropdownicon>
+                                <i class="pi pi-question-circle"></i>
+                            </ng-template>
+                        </p-select>
+                    </div>
+                </div>
+                <div class="col-sm-4 col-12">
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label" for="q_difficulty_level" [class.ictu-form__label--required]="getControl('difficulty').hasValidator(Validators.required)">Mức độ khó</label>
+                        <p-select id="q_difficulty_level" [options]="difficultyLevelOptions()" appendTo="body" class="ictu-form__input-field" formControlName="difficulty" placeholder="Chọn mức độ khó của câu hỏi">
+                            <ng-template #selectedItem let-selectedOption>
+                                <div class="ictu-question-label-group d-flex align-items-center">
+                                    <span class="ictu-question-label-group__difficulty-type f-roboto f-12 fw-normal lh-base" [ngClass]="'ictu-question-label-group__difficulty-type--'+selectedOption.value">{{ selectedOption.value }}</span>
+                                    <span class="ictu-question-label-group__difficulty-name f-roboto f-14 fw-normal lh-base">{{ selectedOption.label }}</span>
+                                </div>
+                            </ng-template>
+                            <ng-template let-option #item>
+                                <div class="ictu-question-label-group d-flex align-items-center">
+                                    <span class="ictu-question-label-group__difficulty-type f-roboto f-12 fw-normal lh-base" [ngClass]="'ictu-question-label-group__difficulty-type--'+option.value">{{ option.value }}</span>
+                                    <span class="ictu-question-label-group__difficulty-name f-roboto f-14 fw-normal lh-base">{{ option.label }}</span>
+                                </div>
+                            </ng-template>
+                        </p-select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-block ictu-bank-questions__form__contents">
+            <div class="ictu-bank-questions__form__contents__head p-20">
+                <div class="ictu-form__row">
+                    <div class="d-flex justify-content-start align-items-center p-b-10">
+                        <b class="f-roboto m-0 p-0 f-15 fw-medium lh-base">Nội dung câu hỏi</b>
+                        <div class="d-inline-flex ms-auto align-items-center p-0" style="gap:15px;">
+                            <button (click)="changeBankQuestionDialogState('OPEN_HINT_EDITOR')" mat-flat-button class="btn ictu-badge-btn--warning-reverse ictu-bank-questions__btn-toggle-guide-explain p-0 m-0 lh-1" [class.ictu-bank-questions__btn-toggle-guide-explain--empty]="!getControl('hint')?.value" [matTooltip]="!getControl('hint')?.value ? 'Thêm gợi ý' : 'Hiển thị gợi ý'" matTooltipPosition="above">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 12.7 12.7" width="48">
+                                    <g>
+                                        <path d="m1.3993994.44960641c-.135181-.0018-.271057.04776-.375687.149345-.21359597.207433-.21402797.55004899-.001.75809299l.798401.797885c.208044.212989.550658.212553.758093-.001.203144-.20926.198827-.543433-.0098-.747241l-.798401-.79788399c-.101906-.104342-.236373-.157384-.371554-.159164zm9.9012046 0c-.135181.0018-.269648.05482-.371554.159164l-.798401.79788399c-.2086446.203808-.2129626.537981-.0098.747241.207435.213587.550049.214023.758093.001l.798401-.797885c.212994-.208044.212562-.55065999-.001-.75809299-.10463-.101589-.240507-.151124-.375687-.149345zm-4.9433676 1.21594699c-1.632241 0-2.964677 1.337626-2.964677 2.972428 0 .846965.399143 1.577705.968933 2.119251v1.299145c0 .55386.462667 1.017509 1.017509 1.017509h1.949235c.554843 0 1.015442-.463649 1.015442-1.017509v-1.289327c.576503-.542145.978752-1.276433.978752-2.129069 0-.817497-.331417-1.563679-.867131-2.101164-.535712-.537484-1.281845-.871264-2.098063-.871264zm0 1.058333c.529095 0 1.001811.213635 1.347722.560689.345911.347056.558622.821141.558622 1.353406 0 .631132-.301351 1.183199-.767395 1.53324a.52921955.52921955 0 0 0 -.21084.424263v1.419552h-1.865519v-1.42782a.52921955.52921955 0 0 0 -.208773-.42168c-.461827-.350403-.759644-.899802-.759644-1.527555 0-1.064721.847443-1.914095 1.905827-1.914095zm-5.2927 1.6738c-.29169897-.0035-.53106797.229776-.53536797.521415-.0044.297712.237649.540418.53536797.536918h1.128613c.297716.0035.539668-.239211.535368-.536918-.0043-.291613-.243719-.524835-.535368-.521415zm9.4423176 0c-.291699-.0035-.5310676.229776-.5353676.521415-.0044.297712.2376486.540418.5353676.536918h1.128613c.297716.0035.539668-.239211.535368-.536918-.0043-.291613-.243719-.524835-.535368-.521415zm-8.3064696 3.15898c-.13762-.0002-.275283.05267-.379305.159163l-.798401.798401c-.21299397.208044-.21256197.550661.001.758094.20926.203178.54343.198895.747241-.0098l.798401-.797884c.208645-.20381.212962-.537983.0098-.747241-.103717-.106794-.241168-.160514-.378788-.160714zm8.3069866 0c-.135181-.0018-.270541.04776-.375171.149345-.2135956.207433-.2145436.550566-.0016.75861l.798401.797884c.208044.21299.550658.212553.758093-.001.203144-.209259.198827-.543432-.0098-.747241l-.797884-.797884c-.101906-.104357-.23689-.157897-.37207-.15968zm-5.2782306 2.04742c-.291649-.0034-.531068.229777-.535368.5214146-.0044.297706.23765.540418.535368.536919h2.257226c.297718.0035.53972-.239213.535368-.536919-.0043-.2916376-.243719-.5248346-.535368-.5214146zm.564306 1.5880166c-.291699-.0035-.531067.229776-.535367.521415-.0044.297712.237648.540418.535367.536918h1.128614c.297716.0035.539667-.23921.535367-.536918-.0043-.291613-.243718-.524815-.535367-.521415z"/>
+                                    </g>
+                                </svg>
+                            </button>
+                            <button (click)="changeBankQuestionDialogState('OPEN_EXPLAIN_EDITOR')" mat-flat-button class="btn ictu-badge-btn--success-reverse ictu-bank-questions__btn-toggle-guide-explain p-0 m-0 lh-1" [class.ictu-bank-questions__btn-toggle-guide-explain--empty]="!getControl('explanation')?.value" [matTooltip]="!getControl('explanation')?.value ? 'Thêm bài giải' : 'Hiển thị bài giải'" matTooltipPosition="above">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="512" viewBox="0 0 24 24" width="512">
+                                    <g>
+                                        <path d="m21 22h-18c-.6 0-1-.4-1-1s.4-1 1-1h18c.6 0 1 .4 1 1s-.4 1-1 1z"/>
+                                        <path d="m8.7 18h-3.7c-.6 0-1-.4-1-1v-3.6c0-.3.1-.5.3-.7l10.3-10.4c.4-.4 1-.4 1.4 0l3.7 3.7c.4.4.4 1 0 1.4l-10.3 10.3c-.2.2-.5.3-.7.3zm-2.7-2h2.2l9.3-9.3-2.2-2.2-9.3 9.3z"/>
+                                    </g>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <ictu-editor class="d-block" formControlName="content" [config]="{ height : 300 }"></ictu-editor>
+                </div>
+            </div>
+            <hr>
+            <div class="ictu-bank-questions__form__contents__body p-20">
+                <div class="d-flex justify-content-start align-items-center">
+                    <b class="f-roboto m-0 p-0 f-15 fw-medium lh-base">Phương án trả lời</b>
+                    <div class="d-inline-flex ms-auto align-items-center" style="gap:15px;">
+                        <div class="d-inline-flex align-items-center">
+                            <div class="ictu-form__row">
+                                <div class="d-flex align-items-center" style="--p-select-padding-y: 5px;">
+                                    <label class="d-inline-block f-14 lh-base fw-medium" style="margin:0 10px -2px 0; white-space: nowrap;" for="q_columns">Chế độ hiển thị</label>
+                                    <p-select id="q_columns" [options]="answersDisplayOptions()" appendTo="body" class="ictu-form__input-field" formControlName="columns" placeholder="Chế độ hiển thị"/>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="ictu-bank-questions__form__contents__separator-vertical" style="height: 30px;"></span>
+                        <div class="d-inline-flex align-items-center">
+                            <p-checkbox formControlName="shuffle" [binary]="true" inputId="q_shuffle" [trueValue]="1" [falseValue]="0"/>
+                            <label class="d-inline-block f-14 lh-base" style="margin: 0 0 -2px 10px;" for="q_shuffle">Đảo vị trí các phương án trả lời</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex ictu-bank-questions__form__answers">
+                    @switch (getControl('type').value) {
+                        @case ('radio') {
+                            <input-bank-question-type-radio [formObject]="formGroup" class="w-100 d-flex"/>
+                        }
+                    }
+                </div>
+            </div>
+            <hr>
+            <div class="ictu-bank-questions__form__contents__footer p-20">
+                <div class="d-flex align-items-center justify-content-center" style="gap: 20px">
+                    <button (click)="btnFormAction('CANCEL')" mat-flat-button class="btn ictu-badge-btn--secondary me-auto">
+                        <span class="d-flex align-items-center justify-content-center"><i class="ti ti-arrow-back-up f-18 m-r-5 lh-1" style="margin-top: -3px;"></i>Quay lại danh sách câu hỏi</span>
+                    </button>
+                    <button (click)="btnFormAction('PREVIEW')" [disabled]="formGroup.invalid" mat-flat-button class="btn ictu-badge-btn--primary-reverse">
+                        <span class="d-flex align-items-center justify-content-center"><i class="ti ti-eye-check f-18 m-r-5 lh-1" style="margin-top: -3px;"></i>Xem trước</span>
+                    </button>
+                    <button (click)="btnFormAction('SUBMIT')" [disabled]="formGroup.invalid || formGroup.untouched" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                        <span class="d-flex align-items-center justify-content-center"><i class="ti ti-device-floppy f-18 m-r-5 lh-1" style="margin-top: -3px;"></i>Lưu lại</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<p-dialog [modal]="true" [(visible)]="visibleDialog" [closable]="false" [draggable]="false" appendTo="body" position="center" styleClass="ictu-dialog-layout ictu-dialog-layout--full-screen">
+    <div class="ictu-bank-question-dialog">
+        <div class="ictu-bank-question-dialog__head d-flex justify-content-start align-items-center p-l-15 p-r-15 p-t-15">
+            <b class="f-roboto m-0 p-0 f-16 fw-bold lh-base">{{ dialogHeading() }}</b>
+            <button (click)="changeBankQuestionDialogState('CLOSED')" mat-flat-button class="btn ictu-badge-btn--danger-reverse ictu-bank-question-dialog__head__btn-close ms-auto">
+                <i class="ti ti-x f-18"></i>
+            </button>
+        </div>
+        <div class="ictu-form">
+            <div class="ictu-form__row">
+                @if (visibleDialog) {
+                    <ictu-editor [content]="dialogControl.value" (onEditorBlur)="dialogControl.markAsTouched()" (contentChange)="dialogControl.setValue($event)"></ictu-editor>
+                }
+            </div>
+        </div>
+    </div>
+</p-dialog>

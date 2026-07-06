@@ -1,0 +1,45 @@
+<div class="ictu-bank d-flex justify-content-center align-items-center overflow-hidden flex-column">
+	<div class="ictu-bank__head position-relative">
+		@if (enableClose()) {
+			<div class="ictu-bank__head__wrap-btn-close d-flex justify-content-center align-items-center position-absolute">
+				<button (click)="closeForm()" mat-flat-button class="btn ictu-badge-btn--danger-reverse ictu-bank__head__btn-close">
+					<i class="ti ti-x f-18"></i>
+				</button>
+			</div>
+		}
+		@if (state() === 'success') {
+			<ul class="ictu-bank__head__navigations d-flex justify-content-center m-auto">
+				<li class="ictu-bank__head__navigations__elm">
+					<button (click)="btnChangeTabActive('info')" class="ictu-bank__head__navigations__btn d-flex justify-content-center align-items-center f-14 f-roboto fw-normal lh-base" [class.--btn-active]="tabActive() ==='info'">Thông tin ngân hàng</button>
+				</li>
+				<li class="ictu-bank__head__navigations__elm">
+					<button [disabled]="!bank()" (click)="btnChangeTabActive('questions')" class="ictu-bank__head__navigations__btn d-flex justify-content-center align-items-center f-14 f-roboto fw-normal lh-base" [class.--btn-active]="tabActive() ==='questions'">Danh sách câu hỏi</button>
+				</li>
+			</ul>
+		}
+	</div>
+	<div class="ictu-bank__body position-relative w-100">
+		@switch (state()) {
+			@case ('error') {
+				<div class="admin-table__alert-danger text-center m-auto">Tải dữ liệu thất bại. Vui lòng chọn
+					<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+				</div>
+			}
+			@case ('success') {
+				@switch (tabActive()) {
+					@case ('info') {
+						<bank-form [(bank)]="bank" [courseOptions]="courseOptions()" [(dirty)]="dirty"></bank-form>
+					}
+					@case ('questions') {
+						<bank-questions [(bank)]="bank" [(dirty)]="dirty"></bank-questions>
+					}
+					@default {
+					}
+				}
+			}
+			@default {
+				<app-loading-progress heading="Tải xuống dữ liệu..."></app-loading-progress>
+			}
+		}
+	</div>
+</div>

@@ -1,0 +1,65 @@
+<div class="cpd-reschedule-class-session-form w-100 flex-column d-flex flex-column position-relative p-15 m-0">
+    @switch (state()) {
+        @case ('init') {
+            @if (totalElements() > 0) {
+                <div class="cpd-reschedule-class-session-form__head">
+                    <h4 class="d-block text-center f-roboto f-18 fw-medium m-0 p-t-10 pb-0 lh-base">Chọn ngày bắt đầu xếp lại lịch</h4>
+                </div>
+                <div class="cpd-reschedule-class-session-form__body p-t-20 p-b-15">
+                    <div class="ictu-form ictu-form--label-on-top wid-250 m-auto p-0">
+                        <div class="ictu-form__row">
+                            <!-- <label for="reschedule_session_input" class="ictu-form__label lh-1">Ngày bắt đầu</label> -->
+                            <p-datepicker [(ngModel)]="date" class="ictu-form__input-field" dateFormat="dd/mm/yy" [minDate]="minDate()" [autofocus]="false" [focusTrap]="false" [showIcon]="true" [inline]="false" appendTo="body" [showWeek]="false" placeholder="Chọn ngày" selectionMode="single" [readonlyInput]="true" inputId="reschedule_session_input"></p-datepicker>
+                        </div>
+                    </div>
+                </div>
+                <div class="cpd-reschedule-class-session-form__foot d-flex justify-content-center align-items-center p-t-15 p-b-15" style="gap: 15px;">
+                    <button (click)="btnClose()" class="btn ictu-badge-btn--secondary" mat-flat-button style="min-width: 100px">Hủy</button>
+                    <button [disabled]="!date()" class="btn ictu-badge-btn--primary-reverse" mat-flat-button style="min-width: 100px">Bắt đầu</button>
+                </div>
+            } @else {
+                <h4 class="d-block text-center f-roboto f-14 fw-normal m-auto p-0 lh-base">Đang xử lý thông tin...</h4>
+            }
+
+            @if (confirmation() && date()) {
+                <div class="cpd-reschedule-class-session-form__overlay d-flex flex-column justify-content-center align-items-center position-absolute">
+                    <p class="d-block text-center f-roboto f-16 fw-medium m-0 p-0 lh-base text-danger">Bạn có chắc chắn muốn xếp lại lịch của <span class="text-primary">{{ totalElements() }}</span> buổi học bắt đầu từ <span class="text-muted">{{ date() | date : 'dd/MM/yyyy' }}</span> không?</p>
+                    <div class="d-flex justify-content-center align-items-center p-t-30 p-b-15" style="gap: 15px;">
+                        <button (click)="btnConfirm('cancelled')" class="btn ictu-badge-btn--dark-reverse" mat-flat-button>[Không] - Tôi chưa sẵn sàng</button>
+                        <button (click)="btnConfirm('confirmed')" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>[Có] - Tôi xác nhận</button>
+                    </div>
+                </div>
+            }
+        }
+        @case ('sending') {
+            <div class="d-flex justify-content-center align-items-center flex-column m-auto" style="z-index: 50;border-radius: 0;width: 290px;gap: 10px;color: #333333;">
+                <p class="f-15 fw-normal f-roboto lh-base m-0">Đang cập nhật lịch...</p>
+                <div class="ictu-progress-bar ictu-progress-bar--animated">
+                    <div [style.width.%]="syncProgress()" class="ictu-progress-bar__pipe" style="background-color: #28a745;"></div>
+                </div>
+                <p class="f-18 fw-bold f-roboto lh-base">{{ syncProgress() }}%</p>
+            </div>
+        }
+        @case ('error') {
+            <div class="d-flex justify-content-center align-items-center flex-column m-auto" style="width: min(calc(100% - 30px) , 520px);gap: 30px;color: #333333;">
+                <p class="ictu-alert ictu-alert-danger m-0 text-center">Quá trình sắp xếp lịch học bị gián đoạn!. </p>
+                <button (click)="btnReupload()" mat-flat-button class="btn ictu-badge-btn--primary-reverse">
+                    <i class="ti ti-refresh"></i> Bắt đầu lại
+                </button>
+            </div>
+        }
+        @case ('success') {
+            <div class="d-block text-center m-auto">
+                <h4 class=" f-roboto f-18 fw-medium m-0 p-0 lh-base text-success">Đã xếp lại lịch thành công {{ totalElements() }} buổi học.</h4>
+                <div class="d-block text-center m-t-20">
+                    <button (click)="btnClose()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                        <i class="pi pi-check f-12 m-r-5"></i>Kết thúc
+                    </button>
+                </div>
+            </div>
+        }
+        @default {
+
+        }
+    }
+</div>

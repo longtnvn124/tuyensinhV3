@@ -1,0 +1,9 @@
+@if (words()?.length) {
+    <div class="parent-class-lesson-preview-vocabulary d-flex flex-wrap gap-15 p-0">
+        @for (word of words(); track word) {
+            <app-flashcard class="d-block wid-200" [word]="word"></app-flashcard>
+        }
+    </div>
+}  @else {
+    <span class="ictu-badge ictu-badge--warning f-roboto fw-normal lh-base p-y-10 p-x-15 f-14" style="color: #444444;background-color: #e9ecef;">Không có từ vựng.</span>
+}

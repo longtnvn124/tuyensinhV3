@@ -1,0 +1,100 @@
+<div class="gm-employees-form position-relative">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	<div class="gm-employees-form__header">
+		<div class="gm-employees-form__tab-list">
+			<button (click)="btnChangeMode('form')" [ngClass]="{ 'gm-employees-form__tab-list__button--active' : panel() === 'form'}" class="gm-employees-form__tab-list__button btn">Form</button>
+			<button (click)="btnChangeMode('import')" [disabled]="formEvent().name === 'edit'" [ngClass]="{ 'gm-employees-form__tab-list__button--active' : panel() === 'import'}" class="gm-employees-form__tab-list__button btn">Import Từ File</button>
+		</div>
+	</div>
+	<div class="gm-employees-form__body">
+		@if (enableUploading()) {
+			<div class="d-flex position-absolute top-0 start-0 w-100 h-100 justify-content-center align-items-center flex-column" style="background-color: rgb(255 255 255 / 71%);z-index: 50;border-radius: 0;backdrop-filter: blur(10px);gap: 10px;color: #333333;">
+				<p class="f-15 fw-normal f-roboto lh-base m-0">Hệ thống đang cập nhật dữ liệu...</p>
+				<div class="ictu-progress-bar ictu-progress-bar--animated">
+					<div [style.width.%]="progress()" class="ictu-progress-bar__pipe" style="background-color: #28a745;"></div>
+				</div>
+				<p class="f-18 fw-bold f-roboto lh-base">{{ progress() }}%</p>
+			</div>
+		}
+		@if (panel() === 'import') {
+			<div class="d-flex flex-column justify-content-center align-items-center w-100 h-100">
+				@if (importPanelLayout() === 'input') {
+					<div class="gm-employees-form__dnd-section" dragAndDrop (fileDropped)="onFileDropped($event)">
+						<h3 class="gm-employees-form__dnd-section__heading">Kéo thả file vào đây hoặc duyệt file từ máy tính của bạn.</h3>
+						<button mat-flat-button class="btn ictu-badge-btn--primary-reverse wid-100">Duyệt file</button>
+					</div>
+					<small class="gm-employees-form__guide">Hệ thông chỉ chấp nhận file có định dạng<span class="ictu-badge ictu-badge--success" style="padding: 2px 5px;">.xlsx</span> và có dung lượng không quá<span class="ictu-badge ictu-badge--danger" style="padding: 2px 5px;">10Mb</span></small>
+				} @else {
+					<div class="gm-employees-form__upload-preview">
+						<div class="ictu-analytics-short-report">
+							<ul class="ictu-analytics-short-report__list">
+								<li class="ictu-analytics-short-report__list__elm">
+									<div class="ictu-analytics-short-report__block" style="--ictu-analytics-short-report-icon-bg: rgba(155,81,224, 0.1);--ictu-analytics-short-report-icon-color: rgba(155,81,224, 1)">
+										<!-- <div class="ictu-analytics-short-report__block__loader">
+											<img src="images/analytics-short-report-loader.svg" class="ictu-analytics-short-report__block__loader__image" alt="">
+										</div> -->
+										<div class="ictu-analytics-short-report__block__icon">
+											<i class="ti ti-file-zip"></i>
+										</div>
+										<div class="ictu-analytics-short-report__block__content">
+											<p class="ictu-analytics-short-report__block__content__title">Tổng số</p>
+											<b class="ictu-analytics-short-report__block__content__value">50</b>
+										</div>
+									</div>
+								</li>
+								<li class="ictu-analytics-short-report__list__elm">
+									<div class="ictu-analytics-short-report__block" style="--ictu-analytics-short-report-icon-bg: rgba(40,116,252, 0.1);--ictu-analytics-short-report-icon-color: rgba(40,116,252, 1)">
+										<div class="ictu-analytics-short-report__block__icon">
+											<i class="ti ti-file-check"></i>
+										</div>
+										<div class="ictu-analytics-short-report__block__content">
+											<p class="ictu-analytics-short-report__block__content__title">Hợp lệ</p>
+											<b class="ictu-analytics-short-report__block__content__value">45</b>
+										</div>
+									</div>
+								</li>
+								<li class="ictu-analytics-short-report__list__elm">
+									<div class="ictu-analytics-short-report__block" style="--ictu-analytics-short-report-icon-bg: rgba(252, 185, 0, 0.1);--ictu-analytics-short-report-icon-color: rgba(252, 185, 0, 1)">
+										<div class="ictu-analytics-short-report__block__icon">
+											<i class="ti ti-file-alert"></i>
+										</div>
+										<div class="ictu-analytics-short-report__block__content">
+											<p class="ictu-analytics-short-report__block__content__title">Không hợp lệ</p>
+											<b class="ictu-analytics-short-report__block__content__value">15</b>
+										</div>
+									</div>
+								</li>
+								<li class="ictu-analytics-short-report__list__elm">
+									<div class="ictu-analytics-short-report__block" style="--ictu-analytics-short-report-icon-bg: rgba(97,204,47, 0.1);--ictu-analytics-short-report-icon-color: rgba(97,204,47, 1)">
+										<div class="ictu-analytics-short-report__block__icon">
+											<i class="ti ti-check"></i>
+										</div>
+										<div class="ictu-analytics-short-report__block__content">
+											<p class="ictu-analytics-short-report__block__content__title">Cập nhật thành công</p>
+											<b class="ictu-analytics-short-report__block__content__value">40</b>
+										</div>
+									</div>
+								</li>
+								<li class="ictu-analytics-short-report__list__elm">
+									<div class="ictu-analytics-short-report__block" style="--ictu-analytics-short-report-icon-bg: rgba(254,45,45, 0.1);--ictu-analytics-short-report-icon-color: rgba(254,45,45, 1)">
+										<div class="ictu-analytics-short-report__block__icon">
+											<i class="ti ti-x"></i>
+										</div>
+										<div class="ictu-analytics-short-report__block__content">
+											<p class="ictu-analytics-short-report__block__content__title">Cập nhật lỗi</p>
+											<b class="ictu-analytics-short-report__block__content__value">5</b>
+										</div>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				}
+			</div>
+		} @else {
+
+		}
+	</div>
+</div>

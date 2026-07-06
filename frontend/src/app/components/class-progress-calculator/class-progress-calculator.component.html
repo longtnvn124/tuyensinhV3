@@ -1,0 +1,6 @@
+<div class="class-progress-calculator d-flex flex-row align-items-center p-10 w-100" style="gap:5px;">
+    <div class="flex-fill cpc-progress overflow-hidden d-inline-flex justify-content-start">
+        <span class="cpc-progress__pipe d-inline-block" [style.width.%]="progress()"></span>
+    </div>
+    <span class="cpc-percent">{{ progress() }}%</span>
+</div>

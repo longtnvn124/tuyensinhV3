@@ -1,0 +1,86 @@
+.input-bank-question-type-radio-check-box__btn-add-more {
+    border-radius: 4px;
+    padding: 0;
+    height: 44px;
+}
+
+.input-bank-question-type-radio-check-box__answers {
+    gap: 15px;
+}
+
+.input-bank-question-type-radio-check-box__answers__block {
+    --question-type-radio-tag-size: 40px;
+    --question-type-radio-gap: 20px;
+    gap: var(--question-type-radio-gap);
+}
+
+.input-bank-question-type-radio-check-box__answers__block > ictu-editor {
+    min-width: calc(100% - (2 * var(--question-type-radio-tag-size)) - (2 * var(--question-type-radio-gap)));
+    width: calc(100% - (2 * var(--question-type-radio-tag-size)) - (2 * var(--question-type-radio-gap)));
+    max-width: calc(100% - (2 * var(--question-type-radio-tag-size)) - (2 * var(--question-type-radio-gap)));
+}
+
+.input-bank-question-type-radio-check-box__answers__block__tag {
+    min-width: var(--question-type-radio-tag-size);
+    width: var(--question-type-radio-tag-size);
+    height: var(--question-type-radio-tag-size);
+    border-radius: 4px;
+    padding: 0;
+    z-index: 5;
+}
+
+.input-bank-question-type-radio-check-box__btn-toggle-correct-answer {
+    inset: 0;
+    border-radius: 4px;
+    z-index: 5;
+    background: transparent;
+    font-size: 0;
+    min-width: auto;
+}
+
+.input-bank-question-type-radio-check-box__answers__block__btn--delete {
+    max-width: var(--question-type-radio-tag-size);
+    min-width: var(--question-type-radio-tag-size);
+    width: var(--question-type-radio-tag-size);
+    height: var(--question-type-radio-tag-size);
+    border-radius: 4px;
+    padding: 0;
+    line-height: 0;
+}
+
+.input-bank-question-type-radio-check-box__answers__block__btn--delete svg {
+    fill: currentColor;
+    width: 16px;
+    height: auto;
+    aspect-ratio: 1;
+}
+
+.input-bank-question-type-radio-check-box__answers__block__btn--delete:hover {
+    background-color: #e12c1f;
+    color: #ffffff;
+}
+
+.mark-correct-answer {
+    position: relative;
+}
+
+.mark-correct-answer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: var(--question-type-radio-tag-size);
+    height: var(--question-type-radio-tag-size);
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    transform: scale(1.3);
+    top: 50%;
+    left: 50%;
+    margin: calc(-1 * (var(--question-type-radio-tag-size) / 2)) 0 0 calc(-1 * (var(--question-type-radio-tag-size) / 2));
+    background: transparent;
+    z-index: 3;
+}
+
+.mark-correct-answer .input-bank-question-type-radio-check-box__answers__block__tag {
+    background-color: #28a745;
+    color: #ffffff;
+}

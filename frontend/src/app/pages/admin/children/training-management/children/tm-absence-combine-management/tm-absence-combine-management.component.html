@@ -1,0 +1,227 @@
+<section class="admin-section--table position-relative">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    <div class="admin-wrap-table">
+        @if (state() !== 'error') {
+            <div class="admin-wrap-table__head d-flex">
+                <h4 class="admin-wrap-table__heading">
+                    <svg>
+                        <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+                    </svg>
+                    Danh sách yêu cầu học ghép lịch
+                </h4>
+                <div class="admin-wrap-table__head-actions">
+                    <div class="ictu-form ictu-topbar-filter-menu p-0 d-inline-flex">
+                        <div class="ictu-form__row ictu-topbar-filter-menu__container d-flex" pTooltip="Lọc theo trạng thái" tooltipPosition="bottom">
+                            <i class="ti ti-filter d-inline-flex justify-content-center align-items-center f-18 lh-1"></i>
+                            <ictu-custom-mat-menu class="d-inline-flex m-0" [options]="checkInStatusOptions" placeholder="Chọn trạng thái" [(ngModel)]="filterProgress"></ictu-custom-mat-menu>
+                        </div>
+                    </div>
+                    <div class="ictu-form ictu-form-on-head-filter p-0 ictu-topbar-filter-menu" style="--p-inputtext-padding-y:6px;--p-datepicker-input-width: 190px;">
+                        <div class="ictu-form__row" pTooltip="Lọc từ ngày - đến ngày" tooltipPosition="bottom">
+                            <p-datepicker [(ngModel)]="rangeDates" style="--ictu-form-group-after-input-width:40px" class="w-100 ictu-p-calendar" dateFormat="dd/mm/yy" [autofocus]="false" [focusTrap]="false" [showIcon]="true" [inline]="false" [showWeek]="false" placeholder="Từ ngày - đến ngày" inputId="f_time_start" selectionMode="range" [readonlyInput]="true"></p-datepicker>
+                        </div>
+                    </div>
+                   <div class="admin-wrap-table__switchers" pTooltip="Lọc theo cơ sở đào tạo" tooltipPosition="left">
+                        <button [matMenuTriggerFor]="menu" type="button" class="admin-wrap-table__switchers__btn-label btn f-0 p-0" style="line-height: 1;height: 32px;">
+                            <span class="admin-wrap-table__switchers__btn-label__lbl">
+                                <i class="ti ti-filter"></i><span>{{ activeAgentName() }}</span><i class="ti ti-chevron-down" style="background: transparent;"></i>
+                            </span>
+                        </button>
+                    </div>
+                    @if(this.filterProgress() == 0){
+                        <button (click)="openDialogAll()" mat-flat-button [disabled]="!dataTable.someItemsChecked()" class="btn ictu-badge-btn--primary-reverse">
+                            <i class="ti ti-clipboard-list"></i>
+                        </button>
+                    }
+                    <!-- <button  class="btn ictu-badge-btn--primary-reverse lh-1" mat-flat-button pTooltip="Phân công giáo viên" tooltipPosition="left">
+                        <i class="ti ti-user"></i>
+                    </button> -->
+                </div>
+            </div>
+            <ng-scrollbar orientation="vertical" style="height: calc(var(--device-height) - 56px); width: 100%;--_scrollbar-hover-thickness-px:10px" visibility="hover">
+                <div class="admin-wrap-table__body">
+                    <table class="tbl admin-table table-hover admin-table--sticky-head">
+                        <thead>
+                            <tr>
+                                @if(this.filterProgress() == 0){
+                                    <th class="col-checkbox">
+                                        <mat-checkbox [checked]="dataTable.totalChecked()" [indeterminate]="dataTable.partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="!dataTable.data().length"></mat-checkbox>
+                                    </th>
+                                }
+                                <th class="col-index text-center">#</th>
+                                <th class="x-col-avatar-name wid-240" colspan="2">Học sinh</th>
+                                <th class="x-col-class wid-150">{{this.filterProgress() == 0 ? 'Lớp' : 'Lớp học ghép'}}</th>
+                                <th class="x-col-course">Khóa học</th>
+                                <th class="x-col-lesson">{{this.filterProgress() == 0 ? 'Bài học' : 'Bài học ghép'}}</th>
+                                <th class="wid-85 text-center px-0">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (row of dataTable.data(); track row.id; let i = $index) {
+                                <tr>
+                                    @if(this.filterProgress() == 0){
+                                        <td class="col-checkbox">
+                                            <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)"></mat-checkbox>
+                                        </td>
+                                    }
+                                    <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+                                    <td class="x-col-avatar wid-60 p-0">
+                                        <div class="d-flex justify-content-center align-items-center w-100 h-100" style="font-size: 0;line-height: 0;max-width: 60px; min-width: 60px">
+                                            <img class="border-0 rounded-5" [src]="row.hocsinh.avatar || 'images/user/avatar-1.jpg'" [alt]="row.hocsinh?.full_name" width="40" height="40" style="height: 40px;min-width: 40px;object-fit: contain;">
+                                        </div>
+                                    </td>
+                                    <td class="x-col-name wid-180 p-10">
+                                        <small class="block f-14 text-primary">{{ row.hocsinh?.english_name }}</small>
+                                        <span class="block">{{ row.hocsinh?.full_name }}</span>
+                                    </td>
+                                    <td class="x-col-class wid-150 text-break p-10">
+                                        <div class="d-block m-0 f-14 f-roboto lh-base fw-medium text-primary">
+                                            {{this.filterProgress() == 0 ? row.class?.name : row.class_assigned?.name}}
+                                        </div>
+                                    </td>
+                                    <td class="x-col-course text-start text-break p-10">{{ row.course?.title }}</td>
+                                    @if(this.filterProgress() == 0){
+                                        <td class="x-col-lesson text-start text-break p-10">
+                                            @if (row.class_session?.topic) {
+                                                <small class="f-13 text-muted fw-medium d-block">{{ row.class_session?.topic }}</small>
+                                            }
+                                            @if (row.class_session?.title) {
+                                                <span class="d-block">{{ row.class_session?.title }}</span>
+                                            }
+                                            <div class="d-block m-0 f-14 f-roboto lh-base fw-medium">Ngày: {{ row?.class_session?.time_start | date: 'dd/MM/yyyy HH:mm' }}</div>
+                                        </td>
+                                    }@else{
+                                        <td class="x-col-lesson text-start text-break p-10">
+                                            @if (row.class_session_assigned?.topic) {
+                                                <small class="f-13 text-muted fw-medium d-block">{{ row.class_session?.topic }}</small>
+                                            }
+                                            @if (row.class_session_assigned?.title) {
+                                                <span class="d-block">{{ row.class_session?.title }}</span>
+                                            }
+                                            <div class="d-block m-0 f-14 f-roboto lh-base fw-medium">Ngày: {{ row?.class_session_assigned?.time_start | date: 'dd/MM/yyyy HH:mm' }}</div>
+                                        </td>
+                                    }
+                                    <td class="p-0 wid-85">
+                                        <div class="admin-table__btn-actions">
+                                            <button [disabled]="row.class_session_assigned?.status == 2" (click)="openDialog(row)" class="btn ictu-button-info-light" pTooltip="Ghép buổi học" tooltipPosition="left">
+                                                <i class="ti ti-clipboard-list"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr>
+                                    <td colspan="12">Không có bản ghi nào.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="admin-wrap-table__foot admin-wrap-table__foot--sticky-head">
+                    <div class="d-flex justify-content-center align-items-center w-100">
+                        <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+                    </div>
+                </div>
+            </ng-scrollbar>
+        }
+    </div>
+</section>
+
+<mat-menu #menu="matMenu" class="ictu-switchers-menu">
+    @for (_agent of listAgent(); track _agent.id) {
+        <button (click)="btnChangeAgent(_agent)" mat-menu-item class="ictu-switchers-menu__item" [class.ictu-switchers-menu__item--active]="activeAgent() ? activeAgent().id === _agent.id : false">
+            <b class="text-left d-block f-14" style="font-weight: 500;margin: 0 0 1px;">{{ _agent.ten }}</b>
+            <span class="text-left d-block text-muted" style="font-size: 13px">{{ _agent.address }}</span>
+        </button>
+    } @empty {
+        <div class="tm-calendar-class-list__element--empty" style="border-radius: 0">Không có cơ sở đào tạo</div>
+    }
+</mat-menu>
+
+
+<p-dialog [(visible)]="visibleDialog" [closable]="false" [resizable]="false" [draggable]="false" [modal]="true" [style]="{ width: '520px', height: 'calc(70vh + 46px)' }" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer  ictu-dialog-layout--hide-overflow">
+    <div class="ictu-dialog-layout__wrapper">
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start fw-bold">Phân buổi</h4>
+            <div class="flex-item--center" style="margin-right: 50px; flex: 1;">
+                <div class="admin-wrap-table__switchers">
+                    <button (click)="setTypeViewClassSession('all')" [class.active]="typeViewClassSession()==='all'" type="button" class="admin-wrap-table__switchers__btn btn f-14" style="height: 30px;">
+                        Tất cả buổi học
+                    </button>
+                    <button (click)="setTypeViewClassSession('fit')" [class.active]="typeViewClassSession()==='fit'" type="button" class="admin-wrap-table__switchers__btn btn f-14" style="height: 30px;">
+                        Buổi học phù hợp
+                    </button>
+                </div>
+            </div>
+            <button (click)="closeDialog()" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div class="ictu-dialog-layout__body" style="padding: 10px 0px 0px 0px; max-height: none; height: calc(70vh); overflow-y: hidden;">
+            @if(state_dialog() == 'loading'){
+                <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+            }
+            @if(state_dialog() == 'assigned'){
+                <app-loading-progress heading="Đang cập nhật..." backdropFilter="none"></app-loading-progress>
+            }
+            @if(state_dialog() != 'error'){
+                <div class="tm-absence-combine-management_layout">
+                    <div class="tm-absence-combine-management_layout__header">
+                        <div class="admin-wrap-table__switchers admin-wrap-table__switchers--next" style="height: 30px;">
+                            <button (click)="nextOrPreviousClassSession(false)" type="button" class="admin-wrap-table__switchers__btn btn f-18" style="height: 30px;">
+                                <i class="ti ti-chevron-left"></i>
+                            </button>
+                        </div>
+                        <div class="tm-absence-combine-management_layout__header-date" style="height: 30px;">
+                            <div>Từ ngày: {{ startDateClassSession() | date: 'dd/MM/yyyy' }} - Đến ngày: {{ endDateClassSession() | date: 'dd/MM/yyyy' }}</div>
+                        </div>
+                        <div (click)="nextOrPreviousClassSession(true)" class="admin-wrap-table__switchers admin-wrap-table__switchers--next">
+                            <button type="button" class="admin-wrap-table__switchers__btn btn f-18" style="height: 30px;">
+                                <i class="ti ti-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tm-absence-combine-management_layout__content">
+                            @for (row of typeViewClassSession() == 'fit'? dataTable_class_session_fit() : dataTable_class_session_all(); track row.id; let i = $index) {
+                                <button class="button--un-set-style" (click)="submitDiemDanhCombined(row)">
+                                    <div style="border: 1px solid #4680ff1a; border-radius: 4px;">
+                                        <div class="tm-absence-combine-management_layout__content-item-parent" [class.active]="activeDiemDanhCombined()?.assigned_class_session_id == row.id">
+                                            <div class="tm-absence-combine-management_layout__content-item">
+                                                <div class="flex-row-gap-6">
+                                                    <i class="ti ti-calendar-minus f-16"></i>
+                                                    <div class="d-block m-0 f-14 f-roboto lh-base fw-medium text-primary">{{ row?.time_start | date: 'dd/MM/yyyy HH:mm' }}</div>
+                                                </div>
+                                                <!-- @if (row?.topic) {
+                                                    <small class="f-14 text-muted fw-medium d-block">{{ row?.topic }}</small>
+                                                } -->
+                                                <div class="flex-row-gap-6">
+                                                    <i class="ti ti-school f-16"></i>
+                                                    <small class="f-14 text-muted fw-medium d-block">{{ row?.class.name }}</small>
+                                                </div>
+                                                @if (row?.title) {
+                                                    <div class="flex-row-gap-6">
+                                                        <i class="ti ti-book f-16"></i>
+                                                        <small class="f-14 text-muted fw-normal d-block">{{ row?.title }}</small>
+                                                    </div>
+                                                }
+                                            </div>
+                                            @if(activeDiemDanhCombined()?.assigned_class_session_id == row.id){
+                                                <i class="pi pi-check-circle text-success"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                </button>
+                            }
+                            @empty {
+                                <div class="flex-item--center" style="height: calc(70vh - 50px); width: 100%; background: white;">
+                                    <span class="ictu-badge ictu-badge--danger">Không có buổi học</span>
+                                </div>
+                            }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</p-dialog>

@@ -1,0 +1,6 @@
+.bank-editor-layout-checking {
+    width: var(--device-width, 100vw);
+    height: var(--device-height, 100vh);
+    overflow: hidden auto;
+    background: rgba(0, 0, 0, 0) url('/images/confetti.svg') repeat scroll center center;
+}

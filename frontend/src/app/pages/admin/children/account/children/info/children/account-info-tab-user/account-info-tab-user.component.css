@@ -1,0 +1,49 @@
+.admin-standard-layout__body {
+    --p-inputtext-disabled-background: #f0f0f0;
+    --p-inputtext-disabled-color: #444444;
+    --p-form-field-border-color: #dee1de;
+    --p-inputtext-border-color: #dee1de;
+}
+
+.user-upload {
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    aspect-ratio: 1;
+}
+
+.user-upload .img-fluid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+}
+
+.user-upload .img-avtar-upload {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4) !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    opacity: 0;
+    transition: all 0.2s ease-in-out;
+    z-index: 5;
+}
+
+.user-upload:hover .img-avtar-upload {
+    opacity: 1;
+}

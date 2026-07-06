@@ -1,0 +1,8 @@
+.admin-wrap-class-report-editor {
+    width: 100%;
+}
+
+.report-editor-wraper {
+    display: flex;
+    flex-direction: column;
+}

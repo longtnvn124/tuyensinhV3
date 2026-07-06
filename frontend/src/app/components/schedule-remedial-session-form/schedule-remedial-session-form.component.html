@@ -1,0 +1,293 @@
+<div class="schedule-remedial-session-form position-relative">
+    @switch (state()) {
+        @case ('checkingFail') {
+            <div class="d-flex justify-content-center align-items-center w-100 hei-150">
+                <div class="admin-table__alert-danger text-center">Tải dữ liệu thất bại. Vui lòng chọn
+                    <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                </div>
+            </div>
+        }
+        @case ('submitting') {
+            @if (enableProgress()) {
+                <div class="tm-absence-makeup-management__overlay d-flex justify-content-center align-items-center position-absolute inset-1 zdx-5">
+                    <div class="d-flex justify-content-center align-items-center flex-column m-auto" style="z-index: 50;border-radius: 0;width: 290px;gap: 10px;color: #333333;">
+                        <p class="f-15 fw-normal f-roboto lh-base m-0">Đang cập nhật thông tin...</p>
+                        <div class="ictu-progress-bar ictu-progress-bar--animated">
+                            <div [style.width.%]="syncProgress()" class="ictu-progress-bar__pipe" style="background-color: #28a745;"></div>
+                        </div>
+                        <p class="f-18 fw-bold f-roboto lh-base">{{ syncProgress() }}%</p>
+                    </div>
+                </div>
+            } @else {
+                <div class="schedule-remedial-session-form__backdrop position-absolute inset-1 zdx-5">
+                    <app-loading-progress heading="Đang cập nhật thông tin..." backdropFilter="none"></app-loading-progress>
+                </div>
+            }
+        }
+        @case ('checking') {
+            <div class="schedule-remedial-session-form__backdrop position-absolute inset-1 zdx-5">
+                <app-loading-progress heading="Kiểm tra thông tin..." backdropFilter="none"></app-loading-progress>
+            </div>
+        }
+        @case ('emptyOfficialSession') {
+            <div class="schedule-remedial-session-form__backdrop position-absolute inset-1 zdx-5">
+                <div class="d-flex justify-content-center align-items-center w-100 h-100">
+                    <div class="ictu-alert ictu-alert-danger m-0 text-center">
+                        Buổi học chính thức đã bị xóa. @if (scheduleRemedialSession()) {
+                        <span class="text-muted">#{{ scheduleRemedialSession()[0].class_session_id }}</span>
+                    }
+                    </div>
+                </div>
+            </div>
+        }
+        @case ('loading') {
+            <div class="schedule-remedial-session-form__backdrop position-absolute inset-1 zdx-5">
+                <app-loading-progress heading="Tải thông tin..." backdropFilter="none"></app-loading-progress>
+            </div>
+        }
+        @default {
+
+        }
+    }
+    @if (! [ 'emptyOfficialSession', 'checkingFail' ].includes(state())) {
+        <form [formGroup]="formGroup" class="tm-registration-form w-100 flex-column d-flex position-relative p-15" style="--trf-form-gap: 15px;">
+            <!-- Lớp -->
+            <div class="tm-registration-form__row">
+                <div class="d-inline-flex tm-registration-form__col-left">
+                    <i class="ti ti-briefcase"></i><span class="tm-registration-form__label">Lớp</span>
+                </div>
+                <div class="d-inline-flex tm-registration-form__col-right">
+                    <p class="tm-registration-form__text fw-medium">{{ scheduleRemedialSession()[0].class?.name }}</p>
+                </div>
+            </div>
+
+            <!-- Khóa học -->
+            <div class="tm-registration-form__row">
+                <div class="d-inline-flex tm-registration-form__col-left">
+                    <i class="ti ti-bookmarks"></i><span class="tm-registration-form__label">Khóa học</span>
+                </div>
+                <div class="d-inline-flex tm-registration-form__col-right">
+                    <p class="tm-registration-form__text fw-medium">
+                        @if (course()) {
+                            <span class="d-inline text-muted">[{{ course().code }}]</span> - {{ course().title }}
+                        }
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bài học -->
+            <div class="tm-registration-form__row">
+                <div class="d-inline-flex tm-registration-form__col-left">
+                    <i class="ti ti-book"></i><span class="tm-registration-form__label">Bài học</span>
+                </div>
+                <div class="d-inline-flex tm-registration-form__col-right">
+                    <p class="tm-registration-form__text fw-medium">
+                        <b class="d-block m-0 f-13 text-secondary">{{ getControl('topic').value }}</b>
+                        <span class="d-block m-0 f-14 fw-normal">{{ getControl('title').value }}</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Hoc sinh -->
+            <div class="tm-registration-form__row">
+                <div class="d-inline-flex tm-registration-form__col-left">
+                    <i class="ti ti-user"></i><span class="tm-registration-form__label">Học sinh</span>
+                </div>
+                <div class="d-inline-flex tm-registration-form__col-right flex-column" style="gap:10px">
+                    <!--                     <div class="tm-registration-form__buttons-menu tm-registration-form__buttons-menu&#45;&#45;icon-after btn tm-registration-form__text fw-medium text-start text-muted p-5 d-flex align-items-center" style="cursor: auto;line-height: 0;background-color: #f8fafc;border: 1px solid #cbd5e1;"> -->
+                    <!--                         <figure class="d-inline-flex m-0 f-0 p-0 border-0" style="font-size: 0;line-height: 0;max-width: 40px; min-width: 40px"> -->
+                    <!--                             <img class="border-0 rounded-5" [src]="scheduleRemedialSession().studentAvatar | safeUrl" [alt]="scheduleRemedialSession().hocsinh?.full_name" width="40" height="40" style="height: 40px;min-width: 40px;object-fit: contain;"> -->
+                    <!--                         </figure> -->
+                    <!--                         <div class="d-inline-flex flex-fill flex-column p-l-10 lh-sm"> -->
+                    <!--                             <small class="block f-14 text-primary ictu-text-truncate" style="&#45;&#45;ictu-text-truncate-line-clamp:1;">{{ scheduleRemedialSession().hocsinh?.english_name }}</small> -->
+                    <!--                             <span class="block ictu-text-truncate" style="&#45;&#45;ictu-text-truncate-line-clamp:1;">{{ scheduleRemedialSession().hocsinh?.full_name }}</span> -->
+                    <!--                         </div> -->
+                    <!--                     </div> -->
+                    @if (students()) {
+                        @for (student of students(); track student.id) {
+                            <div class="tm-registration-form__buttons-menu tm-registration-form__buttons-menu--icon-after btn tm-registration-form__text fw-medium text-start text-muted p-5" style="cursor: auto;line-height: 0;background-color: #f8fafc;border: 1px solid #cbd5e1;">
+                                <div class="d-flex w-100 fw-normal align-items-center">
+                                    <div class="wid-40 p-0 d-inline-flex justify-content-start" style="max-width: 42px; min-width: 42px;font-size: 0;line-height: 0;">
+                                        <figure style="font-size: 0;line-height: 0;overflow: hidden;margin: 0;padding: 2px;border: 1px solid #e2e8f0;width: 42px;border-radius: 999px;">
+                                            <img class="border-0 rounded-5" [src]="student | studentAvatar" [alt]="student.full_name" width="36" height="36" style="height: 36px;width: 36px;object-fit: contain;">
+                                        </figure>
+                                    </div>
+                                    <div class="flex-fill lh-1 p-l-5" style="max-width: calc(100% - 44px);">
+                                        @if (student.english_name) {
+                                            <small class="block f-roboto f-14 m-0 w-100 text-truncate text-muted" style="margin-bottom: 3px;">{{ student.english_name }}</small>
+                                        }
+                                        <span class="block f-roboto f-14 m-0 p-0 lh-base lh-base fw-medium" style="color: #333;">{{ student.full_name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- separator -->
+            <div class="tm-registration-form__row">
+                <div class="tm-registration-form__separator m-t-5 m-b-5"></div>
+            </div>
+
+            <!-- date -->
+            <div class="tm-registration-form__row">
+                <div class="d-inline-flex tm-registration-form__col-left">
+                    <i class="ti ti-calendar-event"></i><span class="tm-registration-form__label">Ngày</span>
+                </div>
+                <div class="d-inline-flex tm-registration-form__col-right position-relative">
+                    <button #calendarMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="calendarMenu" class="tm-registration-form__buttons-menu tm-registration-form__buttons-menu--icon-after btn tm-registration-form__text fw-medium text-start text-muted" type="button">
+                        <!-- {{ getControl('time_start').value | date : 'dd/MM/yyyy' : 'UTC+7' }} -->{{ getControl('time_start').value | date : 'fullDate' : 'UTC+7' }}
+                        <i class="ti ti-calendar-time tm-registration-form__icon-after"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- time -->
+            <div class="tm-registration-form__row">
+                <div class="d-inline-flex tm-registration-form__col-left">
+                    <i class="ti ti-clock"></i><span class="tm-registration-form__label">Ca</span>
+                </div>
+                <div class="d-inline-flex tm-registration-form__col-right position-relative">
+                    <button [matMenuTriggerFor]="timeSlotMenu" class="tm-registration-form__buttons-menu tm-registration-form__buttons-menu--icon-after btn tm-registration-form__text fw-medium text-start text-muted" type="button">
+                        @if (getControl('time_slot_order').value) {
+                            {{ getControl('time_slot_order').value ? ((timeSlotOptions() | findInArray : 'value' : getControl('time_slot_order').value)?.raw | branchTimeSlotInfo) : '' }}
+                        }
+                        <i class="ti ti-history tm-registration-form__icon-after"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Địa điểm -->
+            <div class="tm-registration-form__row">
+                <div class="d-inline-flex tm-registration-form__col-left">
+                    <i class="ti ti-map-pin"></i><span class="tm-registration-form__label">Địa điểm</span>
+                </div>
+                <div class="d-inline-flex tm-registration-form__col-right position-relative" [ngClass]="{'trm-control--error': (getControl('room_id').touched && getControl('room_id').invalid) || formGroup.hasError('ROOM_NOT_AVAILABLE') }">
+                    <button [class.text-muted]="!getControl('room_id').invalid" [matMenuTriggerFor]="menuRooms" class="tm-registration-form__buttons-menu tm-registration-form__buttons-menu--icon-after btn tm-registration-form__text fw-medium text-start text-muted" type="button">
+                        <div class="d-flex">
+                            @if (getControl('room_id').value) {
+                                <span class="text-secondary">[{{ (classrooms() | findInArray : 'id' : getControl('room_id').value)?.code }}]</span> - {{ (classrooms() | findInArray : 'id' : getControl('room_id').value)?.name }}
+                                <!-- <span class="fw-normal f-14 ms-auto"> (sức chứa {{ (classrooms() | findInArray : 'id' : getControl('room_id').value)?.capacity }} người)</span> -->
+                                <button class="btn tm-registration-form__col-right__btn-times">
+                                    <i class="pi pi-times"></i>
+                                </button>
+                            }
+                        </div>
+                        <i class="ti ti-live-view tm-registration-form__icon-after"></i>
+                    </button>
+                    @if (getControl('room_id').value) {
+                        <button class="btn tm-registration-form__col-right__btn-times" (click)="resetControl('room_id',0)">
+                            <i class="pi pi-times"></i>
+                        </button>
+                    }
+                    @if (formGroup.hasError('ROOM_NOT_AVAILABLE')) {
+                        <small class="f-12 f-roboto fw-normal lh-base m-0 p-0 text-danger position-absolute" style="top:100%; left: 0; z-index: 5;">Địa điểm bị trùng với lớp khác</small>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end align-items-center" style="gap: var(--trf-form-gap, 15px);">
+                <button (click)="btnCloseDialog()" class="btn ictu-badge-btn--secondary" mat-flat-button style="min-width: 100px">Hủy</button>
+                <button (click)="btnSaveForm()" [disabled]="formGroup.invalid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button style="min-width: 100px">Lưu lại</button>
+            </div>
+        </form>
+    }
+</div>
+
+<mat-menu #menuRooms="matMenu" class="ictu-switchers-menu ictu-switchers-menu-fixed-size">
+    <div class="tm-registration-curriculum-info">
+        <div (click)="avoidCloseMenuByClicking($event)" class="tm-registration-curriculum-info__head">
+            <svg style="height: auto;width: 20px;aspect-ratio: 1;">
+                <use href="fonts/custom-icon.svg#custom-folder-open"></use>
+            </svg>
+            <h4 class="tm-registration-curriculum-info__textbook-name">Danh mục phòng học</h4>
+        </div>
+        <div class="tm-registration-curriculum-info__body">
+            @if (getControl('time_start').valid && getControl('time_slot_order').valid) {
+                @switch (classroomMenuState()) {
+                    @case ('success') {
+                        @for (_classRoom of availableClassrooms(); track _classRoom.id) {
+                            <button (click)="registerClassroom(_classRoom.id)" [class.ictu-switchers-menu__item--active]="getControl('room_id').value === _classRoom.id" class="ictu-switchers-menu__item" mat-menu-item>
+                                <b class="text-left d-block f-14" style="font-weight: 500;margin: 0;padding: 5px 0;word-break: break-word;" [ngStyle]="{ 'max-width' : 'calc(100% - 160px)'}">[{{ _classRoom.code }}] - {{ _classRoom.name }}</b>
+                                <span style="width: 160px" class="text-end text-muted">Sức chứa {{ _classRoom.capacity }} người</span>
+                            </button>
+                        } @empty {
+                            <div class="tm-registration-curriculum-info__empty" (click)="avoidCloseMenuByClicking($event)">
+                                <p class="tm-registration-curriculum-info__empty__text" style="border-radius: 0">Không có phòng học khả dụng</p>
+                            </div>
+                        }
+                    }
+                    @case ('error') {
+                        <div class="d-flex justify-content-center align-items-center w-100 h-100" (click)="avoidCloseMenuByClicking($event)">
+                            <p class="ictu-alert ictu-alert-danger m-0 text-center">
+                                Quá trình tìm kiếm phòng học khả dụng bị gián đoạn.
+                                <a href="#" (click)="regetAvailableClassRooms($event)">Thực hiện lại</a>
+                            </p>
+                        </div>
+                    }
+                    @default {
+                        <div class="position-absolute inset-1 zdx-5" (click)="avoidCloseMenuByClicking($event)">
+                            <app-loading-progress heading="Tìm kiếm phòng học khả dụng..." backdropFilter="none"></app-loading-progress>
+                        </div>
+                    }
+                }
+            } @else {
+                <div class="tm-registration-curriculum-info__empty" (click)="avoidCloseMenuByClicking($event)">
+                    <p class="ictu-alert-warning ictu-alert-warning m-auto p-10" style="border-radius: 0">Vui lòng chọn ca học trước.</p>
+                </div>
+            }
+        </div>
+    </div>
+</mat-menu>
+
+<mat-menu #timeSlotMenu="matMenu" class="ictu-switchers-menu ictu-switchers-menu-fixed-size">
+    <div class="tm-registration-curriculum-info">
+        <div (click)="avoidCloseMenuByClicking($event)" class="tm-registration-curriculum-info__head">
+            <svg style="height: auto;width: 20px;aspect-ratio: 1;">
+                <use href="fonts/custom-icon.svg#custom-folder-open"></use>
+            </svg>
+            <h4 class="tm-registration-curriculum-info__textbook-name">Khung giờ học</h4>
+        </div>
+        <div class="tm-registration-curriculum-info__body">
+            @switch (timeSlotMenuState()) {
+                @case ('success') {
+                    @if (getControl('time_start').valid) {
+                        @for (option of timeSlotOptions(); track option.value) {
+                            <button [disabled]="option.disabled" (click)="registerTimeSlot(option)" [class.ictu-switchers-menu__item--active]="getControl('time_slot_order').value === option.value" class="ictu-switchers-menu__item" mat-menu-item>
+                                <b class="text-left d-block f-14" style="font-weight: 500;margin: 0;padding: 5px 0;word-break: break-word;">{{ option.raw | branchTimeSlotInfo }}</b>
+                            </button>
+                        } @empty {
+                            <div class="tm-registration-curriculum-info__empty" (click)="avoidCloseMenuByClicking($event)">
+                                <p class="tm-registration-curriculum-info__empty__text" style="border-radius: 0">Cơ sở đào tạo chưa định nghĩa các khung giờ học.</p>
+                            </div>
+                        }
+                    } @else {
+                        <div class="tm-registration-curriculum-info__empty" (click)="avoidCloseMenuByClicking($event)">
+                            <p class="ictu-alert-warning ictu-alert-warning m-auto p-10" style="border-radius: 0">Vui lòng chọn ngày học trước.</p>
+                        </div>
+                    }
+                }
+                @case ('error') {
+                    <div class="d-flex justify-content-center align-items-center w-100 h-100" (click)="avoidCloseMenuByClicking($event)">
+                        <p class="ictu-alert ictu-alert-danger m-0 text-center">
+                            Quá trình tìm kiếm khung giờ học khả dụng bị gián đoạn.
+                            <a href="#" (click)="btnRecheckAvailableTeacherTimeSlot($event)">Thực hiện lại</a>
+                        </p>
+                    </div>
+                }
+                @default {
+                    <div class="position-absolute inset-1 zdx-5" (click)="avoidCloseMenuByClicking($event)">
+                        <app-loading-progress heading="Tìm kiếm phòng học khả dụng..." backdropFilter="none"></app-loading-progress>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</mat-menu>
+
+<mat-menu #calendarMenu="matMenu" class="ictu-switchers-menu ictu-switchers-menu-fixed-size">
+    <div class="d-block" (click)="avoidCloseMenuByClicking($event)">
+        <p-datepicker class="w-100 ictu-p-calendar" [inline]="true" [showWeek]="false" [defaultDate]="getControl('time_start').value | str2date" (onSelect)="registerDate($event)" [ngModel]="selectedDate"></p-datepicker>
+    </div>
+</mat-menu>

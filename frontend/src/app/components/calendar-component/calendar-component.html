@@ -1,0 +1,308 @@
+<div class="cp-lesson-date-assignment position-relative">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    @if (state() === 'error') {
+        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+            <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+        </div>
+    } @else {
+        <div class="cp-lesson-date-assignment__container">
+            <div class="admin-wrap-table">
+                <div class="admin-wrap-table__head d-flex">
+                    <h4 class="admin-wrap-table__heading">
+                        <svg>
+                            <use href="fonts/custom-icon.svg#custom-calendar"></use>
+                        </svg>
+                        {{ heading() }}
+                    </h4>
+                    <div class="admin-wrap-table__head-actions">
+                        <p-select [options]="branches()" [(ngModel)]="selectedBranch" appendTo="body" optionLabel="ten" [showClear]="false" class="ictu-form__input-field wid-175" placeholder="Lọc theo CSDT" (onChange)="onSelectBranch()"/>
+                        <div class="admin-wrap-table__switchers admin-wrap-table__switchers--next" pTooltip="{{ viewMode() === 'week' ? 'Tuần' : 'Tháng' }} hiện tại" tooltipPosition="left">
+                            <button (click)="btnResetToCurrentDate()" type="button" class="admin-wrap-table__switchers__btn btn f-18">
+                                <i class="ti ti-golf"></i>
+                            </button>
+                        </div>
+                        @if (viewMode() === 'week') {
+                            <div class="admin-wrap-table__switchers" pTooltip="Chế độ hiển thị" tooltipPosition="left" showDelay="1000">
+                                <button (click)="btnSetViewModeType('default')" type="button" [class.active]="viewModeType()==='default'" class="admin-wrap-table__switchers__btn btn">Mặc định</button>
+                                <button (click)="btnSetViewModeType('session')" type="button" [class.active]="viewModeType()==='session'" class="admin-wrap-table__switchers__btn btn">Ca</button>
+                            </div>
+                        }
+                        <div class="admin-wrap-table__switchers admin-wrap-table__switchers--next">
+                            <button (click)="btnPrevDate()" type="button" class="admin-wrap-table__switchers__btn btn f-18" pTooltip="{{ viewMode() === 'week' ? 'Tuần' : 'Tháng' }} trước" tooltipPosition="left">
+                                <i class="ti ti-chevron-left"></i>
+                            </button>
+                            <button (click)="btnNextDate()" type="button" class="admin-wrap-table__switchers__btn btn f-18" pTooltip="{{ viewMode() === 'week' ? 'Tuần' : 'Tháng' }} sau" tooltipPosition="left">
+                                <i class="ti ti-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="admin-wrap-table__switchers" pTooltip="Chế độ hiển thị" tooltipPosition="left" showDelay="1000">
+                            <button (click)="btnSetViewMode('week')" type="button" [class.active]="viewMode()==='week'" class="admin-wrap-table__switchers__btn btn">Tuần</button>
+                            <button (click)="btnSetViewMode('month')" type="button" [class.active]="viewMode()==='month'" class="admin-wrap-table__switchers__btn btn">Tháng</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-wrap-table__body">
+                    @if (viewMode() === 'week') {
+                        @if (viewModeType() === 'default') {
+                            <table class="tbl admin-table" style="table-layout: fixed">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[0].isToday">Thứ 2
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[0].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[1].isToday">Thứ 3
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[1].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[2].isToday">Thứ 4
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[2].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[3].isToday">Thứ 5
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[3].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[4].isToday">Thứ 6
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[4].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[5].isToday">Thứ 7
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[5].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[6].isToday">Chủ nhật
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[6].slug }}</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        @for (day of weekDays(); track day.order; let i = $index) {
+                                            <td [class.--tbl-col-active]="weekDays()[i].isToday">
+                                                <div class="calendar-component__tbl-col-contain p-10" [class.calendar-block--empty]="!weekDays()[i].data.length">
+                                                    @for (session of weekDays()[i].data; track session.id) {
+                                                        <ng-container [ngTemplateOutlet]="defaultTemplate" [ngTemplateOutletContext]="{ $implicit: session }"></ng-container>
+                                                    } @empty {
+                                                        <span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch dạy</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                </tbody>
+                            </table>
+                        } @else {
+                            <table class="tbl admin-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">Ca</th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[0].isToday">Thứ 2
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[0].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[1].isToday">Thứ 3
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[1].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[2].isToday">Thứ 4
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[2].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[3].isToday">Thứ 5
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[3].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[4].isToday">Thứ 6
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[4].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[5].isToday">Thứ 7
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[5].slug }}</span>
+                                        </th>
+                                        <th class="text-center" [class.--tbl-col-active]="weekDays()[6].isToday">Chủ nhật
+                                            <span class="d-block w-100 text-center" style="font-weight: 400;">{{ weekDays()[6].slug }}</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (slot of selectedBranch().time_slots; track slot.order) {
+                                        <tr>
+                                            <td style="width: 50px;">
+                                                <b class="slot-vertical">{{ slot.name }} : {{ slot.start }} - {{ slot.end }}</b>
+                                            </td>
+                                            @for (day of weekDays(); track day.order; let i = $index) {
+                                                <td [class.--tbl-col-active]="weekDays()[i].isToday">
+                                                    <div class="calendar-component__tbl-col-contain w-100 p-10" [class.calendar-block--empty]="!getCalendarSession(weekDays()[i], slot.order).length">
+                                                        @for (session of getCalendarSession(weekDays()[i], slot.order); track session.id) {
+                                                            <ng-container [ngTemplateOutlet]="defaultTemplate" [ngTemplateOutletContext]="{ $implicit: session }"></ng-container>
+                                                        } @empty {
+                                                            <span class="cdk-drop-list--hide-on-dragging d-block m-auto text-center" style="padding: 10px;background-color: rgba(255,255,255,.5);border-radius: 4px;">Không có lịch dạy</span>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    } @else {
+                        <div class="calendar-calendar-grid-wrapper d-block position-relative">
+                            <ul class="calendar-calendar-grid calendar-calendar-grid--header">
+                                <li class="calendar-calendar-grid__day-cell calendar-calendar-grid__day-cell--heading">
+                                    <b class="calendar-calendar-grid__day-cell__cell-name">Thứ 2</b>
+                                </li>
+                                <li class="calendar-calendar-grid__day-cell calendar-calendar-grid__day-cell--heading">
+                                    <b class="calendar-calendar-grid__day-cell__cell-name">Thứ 3</b>
+                                </li>
+                                <li class="calendar-calendar-grid__day-cell calendar-calendar-grid__day-cell--heading">
+                                    <b class="calendar-calendar-grid__day-cell__cell-name">Thứ 4</b>
+                                </li>
+                                <li class="calendar-calendar-grid__day-cell calendar-calendar-grid__day-cell--heading">
+                                    <b class="calendar-calendar-grid__day-cell__cell-name">Thứ 5</b>
+                                </li>
+                                <li class="calendar-calendar-grid__day-cell calendar-calendar-grid__day-cell--heading">
+                                    <b class="calendar-calendar-grid__day-cell__cell-name">Thứ 6</b>
+                                </li>
+                                <li class="calendar-calendar-grid__day-cell calendar-calendar-grid__day-cell--heading">
+                                    <b class="calendar-calendar-grid__day-cell__cell-name">Thứ 7</b>
+                                </li>
+                                <li class="calendar-calendar-grid__day-cell calendar-calendar-grid__day-cell--heading">
+                                    <b class="calendar-calendar-grid__day-cell__cell-name">Chủ nhật</b>
+                                </li>
+                            </ul>
+                            <ul class="calendar-calendar-grid">
+                                @for (_d of monthDays(); track _d.slug) {
+                                    <li class="calendar-calendar-grid__day-cell" [ngClass]="{'calendar-calendar-grid__day-in-month--selected' : _d.isToday,'calendar-calendar-grid__day-cell--hidden' : !_d.visible}" style="cursor: auto;">
+                                        <div class="calendar-calendar-grid__day-cell__container p-0">
+                                            <span class="calendar-calendar-grid__day-cell__lbl p-l-10 p-t-10 p-b-10">{{ _d.date | date : 'dd' }}</span>
+                                            @if (_d.data?.length) {
+                                                <div class="d-inline-flex w-100" style="height: calc(100% - 37px)">
+                                                    <ng-scrollbar class="w-100" orientation="vertical" style="height:100%;" visibility="hover">
+                                                        <div class="d-flex flex-column p-b-0 w-100 p-l-10 p-r-10" style="gap:10px">
+                                                            @for (session of _d.data; track session.id) {
+                                                                <!-- <ng-container [ngTemplateOutlet]="defaultTemplate" [ngTemplateOutletContext]="{ $implicit: session }"></ng-container> -->
+                                                                <div class="calendar-calendar-grid__day-cell-in-month__session-info">
+                                                                    <h4 class="calendar-calendar-grid__day-cell-in-month__session-info__class-name f-roboto f-14 fw-bold m-0 w-100 text-truncate">{{ session.class?.name ?? session.parent_class?.name }}</h4>
+                                                                    <p class="calendar-calendar-grid__day-cell-in-month__session-info__class-info f-roboto f-14 fw-normal m-0 w-100 text-truncate">{{ session | classTimeSlotInfo : selectedBranch().time_slots }}</p>
+                                                                    <p class="calendar-calendar-grid__day-cell-in-month__session-info__class-info f-roboto f-14 fw-normal m-0 w-100 text-truncate">{{ session.room?.name ?? '' }}</p>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </ng-scrollbar>
+                                                </div>
+                                            }
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<ng-template #defaultTemplate let-session>
+    <button class="button--un-set-style w-100" (click)="getToClassProgress(session)">
+        <div class="item-calendar-session">
+            <b class="f-roboto f-15 fw-medium m-0 w-100 text-truncate text-primary">
+                <i class="ti ti-briefcase f-17 m-r-5 wid-20 d-inline-block"></i>{{ session.class?.name ?? session.parent_class?.name }}
+            </b>
+            <p class="f-roboto f-14 fw-normal m-0 w-100 text-truncate fw-medium" style="color: #5B6B79;">
+                <i class="ti ti-puzzle f-16 m-r-5 wid-20 d-inline-block"></i>{{ session.topic }}
+            </p>
+            <p class="f-roboto f-14 fw-normal m-0 w-100 text-truncate" style="color: #5B6B79;">
+                <i class="ti ti-book f-16 m-r-5 wid-20 d-inline-block"></i>{{ session.title }}
+            </p>
+            <p class="f-roboto f-14 fw-normal m-0 w-100 text-truncate" style="color: #5B6B79;">
+                <i class="ti ti-clock  f-16 m-r-5 wid-20 d-inline-block"></i>{{ session | classTimeSlotInfo : selectedBranch().time_slots }}
+            </p>
+            <p class="f-roboto f-14 fw-normal m-0 w-100 text-truncate" style="color: #5B6B79;">
+                <i class="ti ti-map-pin  f-16 m-r-5 wid-20 d-inline-block"></i>{{ session.room?.name ?? '' }}
+            </p>
+            <p class="f-roboto f-14 fw-normal m-0 w-100 text-truncate" style="color: #FF5722;">
+                <svg class="d-inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" height="24" viewBox="0 0 24 24" width="24" style="width: 20px;height: auto;display: inline-block;margin: 0 5px -4px 0;">
+                    <g clip-rule="evenodd" fill="currentColor" fill-rule="evenodd">
+                        <path d="m13.2678 14.2994c.387.1478.5808.5813.433.9682-.6388 1.6727-1.6108 2.5948-2.7909 3.056-1.09233.4268-2.3023.4266-3.34468.4264-.02175 0-.04342 0-.06502 0-1.12022 0-2.05959.0093-2.86374.3236-.73922.2888-1.42865.8667-1.93562 2.194-.1478.387-.58129.5808-.96824.433s-.58083-.5813-.43303-.9682c.63886-1.6726 1.61088-2.5948 2.79094-3.056 1.09233-.4268 2.3023-.4266 3.34468-.4264h.06501c1.12022 0 2.05959-.0093 2.8637-.3236.7393-.2888 1.4287-.8666 1.9357-2.194.1478-.387.5813-.5808.9682-.433z"/>
+                        <path d="m12.9478 2.25h4.1074c1.1328-.00002 2.0586-.00004 2.7894.09822.764.10271 1.4263.32499 1.955.85368.5287.5287.751 1.19103.8537 1.95499.0982.73086.0982 1.65659.0982 2.78942v2.10739c0 1.1328 0 2.0586-.0982 2.7894-.1027.764-.325 1.4263-.8537 1.955s-1.191.751-1.955.8537c-.7308.0982-1.6566.0982-2.7894.0982h-1.555c-.4142 0-.75-.3358-.75-.75s.3358-.75.75-.75h1.5013c1.1997 0 2.0241-.0016 2.6432-.0848.5977-.0804.8907-.2242 1.0942-.4278.2036-.2035.3474-.4965.4278-1.0942.0832-.6191.0848-1.4435.0848-2.6432v-2c0-1.19971-.0016-2.02405-.0848-2.64324-.0804-.59762-.2242-.89066-.4278-1.0942-.2035-.20354-.4965-.34737-1.0942-.42772-.6191-.08325-1.4435-.08484-2.6432-.08484h-4c-1.1997 0-2.024.00159-2.6432.08484-.59766.08035-.8907.22418-1.09424.42772-.17427.17428-.30236.41163-.38635.84042-.0881.44974-.11637 1.04751-.12363 1.90338-.00351.4142-.34213.74713-.75633.74361-.4142-.00351-.74713-.34213-.74361-.75633.00721-.85069.03354-1.57659.15154-2.179.1221-.62334.35159-1.1666.79772-1.61274.5287-.52869 1.19103-.75097 1.955-.85368.7308-.09826 1.6566-.09824 2.7894-.09822z"/>
+                        <path d="m7.5002 10.75c-.9665 0-1.75.7835-1.75 1.75s.7835 1.75 1.75 1.75 1.75-.7835 1.75-1.75-.7835-1.75-1.75-1.75zm-3.25 1.75c0-1.7949 1.45508-3.25 3.25-3.25 1.79493 0 3.25 1.4551 3.25 3.25s-1.45507 3.25-3.25 3.25c-1.79492 0-3.25-1.4551-3.25-3.25z"/>
+                        <path d="m11.2502 7c0-.41421.3358-.75.75-.75h6c.4142 0 .75.33579.75.75 0 .41422-.3358.75-.75.75h-6c-.4142 0-.75-.33578-.75-.75zm3 4c0-.4142.3358-.75.75-.75h3c.4142 0 .75.3358.75.75s-.3358.75-.75.75h-3c-.4142 0-.75-.3358-.75-.75z"/>
+                    </g>
+                </svg>
+                <span class="d-inline">{{ session.teacher?.full_name ?? '....... ....... ....... ....... .......' }}</span>
+            </p>
+            <p class="f-roboto f-14 fw-normal m-0 w-100 text-truncate" style="color: #5B6B79;">
+                <svg class="d-inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" height="512" viewBox="0 0 24 24" width="512" style="width: 16px;height: auto;margin: 0 9px -2px 0;">
+                    <g fill="currentColor">
+                        <path d="m12 12.75c-3.17 0-5.75-2.58-5.75-5.75s2.58-5.75 5.75-5.75 5.75 2.58 5.75 5.75-2.58 5.75-5.75 5.75zm0-10c-2.34 0-4.25 1.91-4.25 4.25s1.91 4.25 4.25 4.25 4.25-1.91 4.25-4.25-1.91-4.25-4.25-4.25z"/>
+                        <path d="m15.8196 22.7499c-.38 0-.74-.14-1-.4-.31-.31-.45-.76-.38-1.23l.19-1.35c.05-.35.26-.76.51-1.02l3.54-3.54c1.42-1.42 2.67-.61 3.28 0 .52.52.79 1.08.79 1.64 0 .57-.26 1.1-.79 1.63l-3.5401 3.54c-.25.25-.6699.46-1.0199.51l-1.3501.1899c-.08.02-.1499.0301-.2299.0301zm4.49-6.83c-.18 0-.34.12-.57.35l-3.54 3.54c-.03.03-.08.13-.08.17l-.18 1.25 1.25-.18c.04-.01.1399-.06.1699-.09l3.5401-3.54c.16-.16.35-.39.35-.57 0-.15-.12-.36-.35-.58-.24-.24-.42-.35-.59-.35z"/>
+                        <path d="m20.9206 19.2198c-.07 0-.14-.0099-.2-.0299-1.32-.37-2.37-1.42-2.74-2.74-.11-.4.12-.81.52-.92s.81.12.92.52c.23.82.88 1.47 1.7 1.7.4.11.63.53.52.92-.09.33-.39.5499-.72.5499z"/>
+                        <path d="m3.41016 22.75c-.41 0-.75-.34-.75-.75 0-4.27 4.19002-7.75 9.34004-7.75 1.09 0 2.17.16 3.18.46.4.12.62.54.5.93-.12.4-.54.62-.93.5-.88-.26-1.8-.4-2.75-.4-4.32002 0-7.84004 2.8-7.84004 6.25 0 .42-.34.76-.75.76z"/>
+                    </g>
+                </svg>
+                <span class="d-inline">{{ session.assistants?.full_name ?? '....... ....... ....... ....... .......' }}</span>
+            </p>
+            @if (session.parent_id && session.hocsinh.length) {
+                <div class="avatar-list-stacked">
+                    @for (_std of session.hocsinh; track _std.id) {
+                        <button class="btn avatar-list-stacked__btn" (click)="avoidCloseMenuByClicking($event)" [matMenuTriggerFor]="studentInfo" [matMenuTriggerData]="{student: _std}" [matTooltip]="_std.full_name" matTooltipPosition="above" matTooltipShowDelay="200">
+                            <figure class="avatar-list-stacked__avatar-rounded">
+                                <img [src]="_std | studentAvatar" [alt]="_std.full_name">
+                            </figure>
+                        </button>
+                    }
+                </div>
+            }
+            @switch (session.status) {
+                @case (-1) {
+                    <p class="f-roboto f-14 fw-normal m-t-5 m-b-0 p-t-10 w-100 text-truncate text-danger d-flex align-items-center" style="border-top: 1px dashed #979797;">
+                        <i class="ti ti-x f-18 lh-1 d-inline-block" style="margin: -3px 5px 0 0;"></i>
+                        <span class="d-inline">Đã hủy</span>
+                    </p>
+                }
+                @case (0) {
+                    <p class="f-roboto f-14 fw-normal m-t-5 m-b-0 p-t-10 w-100 text-truncate d-flex align-items-center" style="border-top: 1px dashed #979797;color: #5B6B79;">
+                        <i class="ti ti-history f-18 lh-1 d-inline-block" style="margin: -3px 5px 0 0;"></i>
+                        <span class="d-inline">Chưa bắt đầu</span>
+                    </p>
+                }
+                @case (1) {
+                    <div class="d-flex align-items-center m-t-5 m-b-0 p-t-10 w-100" style="border-top: 1px dashed #979797;">
+                        <p class="f-roboto f-14 fw-normal text-truncate d-flex align-items-center flex-fill flex-grow-1 m-0" style="color:#0d6efd">
+                            <i class="ti ti-access-point f-18 lh-1 d-inline-block" style="margin: -3px 5px 0 0;"></i>
+                            <span class="d-inline">Đang diễn ra</span>
+                        </p>
+                        <span class="ictu-circle-waving-animation" style="--icwa-size:8px"></span>
+                    </div>
+                }
+                @case (2) {
+                    <p class="f-roboto f-14 fw-normal m-t-5 m-b-0 p-t-10 w-100 text-truncate d-flex align-items-center" style="border-top: 1px dashed #979797; color: #46a35e">
+                        <i class="ti ti-check f-18 lh-1 d-inline-block" style="margin: -3px 5px 0 0;"></i>
+                        <span class="d-inline">Đã kết thúc</span>
+                    </p>
+                }
+                @default {
+                }
+            }
+        </div>
+    </button>
+</ng-template>
+
+<mat-menu #studentInfo="matMenu" class="ictu-switchers-menu" xPosition="after" yPosition="below">
+    <ng-template matMenuContent let-student="student">
+        <div class="employee-popup-details d-flex flex-column justify-content-center align-items-center" (click)="avoidCloseMenuByClicking($event)">
+            <div class="employee-popup-details__avatar">
+                <img class="employee-popup-details__avatar__img wid-60 hei-60" [src]="student | studentAvatar" alt=" student.full_name" width="100" height="100">
+            </div>
+            <b class="f-roboto f-14 fw-medium lh-base text-truncate m-t-15 m-b-10" style="max-width: 100%">{{ student.full_name }}</b>
+            <div class="employee-popup-details__contact-field d-flex flex-column justify-content-center align-items-start w-100">
+                <div class="employee-popup-details__contact-field__info d-flex justify-content-start align-items-center">
+                    <i class="pi-megaphone pi text-secondary m-r-10"></i>
+                    <p class="employee-popup-details__contact-field__info__text f-14 lh-base fw-normal text-secondary m-0 text-truncate">{{ student.english_name }}</p>
+                </div>
+                <div class="employee-popup-details__contact-field__info d-flex justify-content-start align-items-center">
+                    <i class="pi-calendar-clock pi text-secondary m-r-10"></i>
+                    <p class="employee-popup-details__contact-field__info__text f-14 lh-base fw-normal text-secondary m-0 text-truncate">{{ student.dob ? (student.dob | date : 'dd/MM/yyyy' : 'UTC+7') : '--/--/----' }}</p>
+                </div>
+                <div class="employee-popup-details__contact-field__info d-flex justify-content-start align-items-center">
+                    <i class="pi-id-card pi text-secondary m-r-10"></i>
+                    <p class="employee-popup-details__contact-field__info__text f-14 lh-base fw-normal text-secondary m-0 text-truncate">{{ student.code ?? '' }}</p>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</mat-menu>

@@ -1,0 +1,41 @@
+<section class="admin-wrap-table">
+        <div class="admin-wrap-table__head d-flex">
+        </div>
+        <div class="admin-wrap-table__body">
+            @for (row of reportPartContent(); track row.id; let i = $index) {
+                @switch (row.type) {
+                    @case('text'){
+                        <div class="ngx-editor__wrapper d-flex flex-column" style="margin: 10px;">
+                            <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                            <ngx-editor [editor]="editor" [(ngModel)]="row.content" placeholder="..."></ngx-editor>
+                        </div> 
+                    }
+                    @case('media'){
+                        <div class="class-activities-album-media-format class-activities-album-media-format--border-none">
+        <div class="class-activities-album-media-session d-flex flex-wrap">
+                @for (item of row.files; track item.id; let index = $index) {
+                        <!-- @if (deletingFormItemIndex() === index) {
+                            <mat-progress-bar class="class-activities-album-media__item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+                        } -->
+                        <div class="class-activities-album-media__item-session">
+                                <div class="class-activities-album-media__item_media-session">
+                                    @switch(checkTypeFile(item)){
+                                        @case('image'){
+                                            <app-class-curriculum-lecture-media-picture [media]="setMediaContentClassMedia(item, 'picture')" class="w-100 h-100"></app-class-curriculum-lecture-media-picture>
+                                        }
+                                        @case('video'){
+                                            <!-- <class-curriculum-lecture-media-video [hidden]="visibleDialogClassStudent" [media]="setMediaContentClassMedia(item.media.file, 'video')" class="w-100 h-100"></class-curriculum-lecture-media-video> -->
+                                            <app-view-document type_view="VIDEO" [link]="setSrcMedia(item)"></app-view-document>
+                                        }
+                                        @case('undefine'){}
+                                    }
+                                </div>
+                        </div>
+                }
+        </div>
+    </div>
+                    }
+                }
+            }
+        </div>
+</section>

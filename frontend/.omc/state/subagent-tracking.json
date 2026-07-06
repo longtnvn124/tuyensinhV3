@@ -1,0 +1,17 @@
+{
+  "agents": [
+    {
+      "agent_id": "ab8c96ce6b9311bf9",
+      "agent_type": "oh-my-claudecode:code-reviewer",
+      "started_at": "2026-07-05T02:22:48.399Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-07-05T02:25:24.056Z",
+      "duration_ms": 155657
+    }
+  ],
+  "total_spawned": 1,
+  "total_completed": 1,
+  "total_failed": 0,
+  "last_updated": "2026-07-05T02:25:24.171Z"
+}

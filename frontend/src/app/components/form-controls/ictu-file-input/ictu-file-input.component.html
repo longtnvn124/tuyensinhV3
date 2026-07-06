@@ -1,0 +1,58 @@
+<div class="file-control ictu-file-input">
+    <div class="ictu-file-input__files d-flex flex-column gap-10">
+        @for (file of files(); track file) {
+            <div class="ictu-attachment-item" [ngClass]="'ictu-attachment-item--type-'+file.location">
+                <div class="ictu-attachment-item__container w-100 position-relative">
+                    @if (selectedFileID() === file.id) {
+                        <mat-progress-bar class="ictu-file-input-uploaded-item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+                        <div class="ictu-file-input-uploaded-item__overlay"></div>
+                    }
+                    <div class="ictu-attachment-item__icon d-inline-flex justify-content-center align-items-center position-relative p-0 m-0" [innerHTML]="file | fileIcon | safeHtml"></div>
+                    <div class="ictu-attachment-item__info">
+                        <b class="ictu-attachment-item__info__label text-truncate w-100 f-roboto f-14 fw-medium lh-base m-0 p-0">{{ file.title }}</b>
+                        <p class="ictu-attachment-item__info__info text-truncate w-100 f-roboto f-14 fw-normal lh-base text-muted m-0 p-0">{{ file.size | formatBytes }}</p>
+                    </div>
+                    @if (btnControls().length) {
+                        <div class="ictu-attachment-item__controls">
+                            @if (enableButtonDownload()) {
+                                <button (click)="btnButtonEvent( 'download',file)" class="btn ictu-attachment-item__controls__btn ictu-attachment-item__controls__btn--download" pTooltip="Tải xuống" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+                                    <i class="ti ti-download"></i>
+                                </button>
+                            }
+                            @if (enableButtonPreview()) {
+                                <button (click)="btnButtonEvent( 'preview',file)" class="btn ictu-attachment-item__controls__btn ictu-attachment-item__controls__btn--preview" pTooltip="Xem trước" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+                                    <i class="ti ti-eye"></i>
+                                </button>
+                            }
+                            @if (enableButtonRemove()) {
+                                <button (click)="btnButtonEvent( 'remove',file)" class="btn ictu-attachment-item__controls__btn ictu-attachment-item__controls__btn--delete" pTooltip="Xóa file" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        } @empty {
+            @if (disabled()) {
+                <p class="ictu-file-input__files__empty-text f-roboto f-14 lh-base fw-normal m-0 text-center p-10">{{ emptyMessage() }}</p>
+            }
+        }
+        @if (!disabled()) {
+            <button mat-flat-button (click)="btnCallFileChooser()" class="btn ictu-button-info-light w-100 p-0 m-0 hei-40 edit-course-layout__lecture-format__btn-add-item">
+                <i [class]="addButtonIconCssClass()"></i>
+                <span class="f-roboto f-14 lh-base fw-normal m-l-5">{{ addButtonLabel() }}</span>
+            </button>
+        }
+    </div>
+    @if (enableUploading()) {
+        <div class="ictu-file-input__overlay position-absolute inset-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center" style="z-index: 50;border-radius: 0;gap: 10px;color: #333333;">
+            <p class="f-14 fw-normal f-roboto lh-base m-0">Uploading file...
+                <b class="f-14 f-roboto m-0">{{ uploadProgress() }}%</b>
+            </p>
+            <div class="ictu-progress-bar ictu-progress-bar--animated">
+                <div [style.width.%]="uploadProgress()" class="ictu-progress-bar__pipe" style="background-color: #28a745;"></div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,87 @@
+.ictu-bank {
+    --ictu-bank-head-height: 60px;
+    --ictu-bank-body-height: calc(var(--device-height) - var(--ictu-bank-head-height));
+    --ictu-bank-border-color: #e2e8f0;
+    --ictu-bank-colors-main-background: #EEF1F7;
+    --ictu-bank-colors-header-bg: #1C252E;
+    --ictu-bank-colors-selected-tab: rgba(255, 255, 255, 0.1);
+    width: var(--device-width);
+    background-color: var(--ictu-bank-colors-main-background);
+}
+
+.ictu-bank__head {
+    width: 100%;
+    display: flex;
+    min-height: var(--ictu-bank-head-height);
+    height: var(--ictu-bank-head-height);
+    max-height: var(--ictu-bank-head-height);
+    background-color: var(--ictu-bank-colors-header-bg);
+    border: none;
+}
+
+.ictu-bank__head__wrap-btn-close {
+    min-width: var(--ictu-bank-head-height);
+    width: var(--ictu-bank-head-height);
+    max-width: var(--ictu-bank-head-height);
+    min-height: var(--ictu-bank-head-height);
+    height: var(--ictu-bank-head-height);
+    max-height: var(--ictu-bank-head-height);
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+}
+
+.ictu-bank__head__wrap-btn-close .btn {
+    max-width: 40px;
+    width: 40px;
+    max-height: 40px;
+    height: 40px;
+    border-radius: 4px;
+    padding: 0;
+    margin: 0;
+}
+
+.ictu-bank__head__navigations {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.ictu-bank__head__wrap-btn-close + .ictu-bank__head__navigations {
+    max-width: calc(100% - (2 * var(--ictu-bank-head-height)));
+}
+
+.ictu-bank__head__navigations__btn {
+    min-width: 120px;
+    min-height: var(--ictu-bank-head-height);
+    height: var(--ictu-bank-head-height);
+    max-height: var(--ictu-bank-head-height);
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    border: none;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    color: #b3bac2;
+    background-color: transparent;
+    padding: 0 15px;
+}
+
+.ictu-bank__head__navigations__btn:not(:disabled):hover {
+    color: #fff;
+    cursor: pointer;
+}
+
+.ictu-bank__head__navigations__btn.--btn-active {
+    background-color: hsla(0, 0%, 100%, .1);
+    border-bottom-color: #227aff;
+    color: #fff;
+}
+
+.ictu-bank__body {
+    min-height: var(--ictu-bank-body-height);
+    height: var(--ictu-bank-body-height);
+    max-height: var(--ictu-bank-body-height);
+}

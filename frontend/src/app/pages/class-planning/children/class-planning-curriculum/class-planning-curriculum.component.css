@@ -1,0 +1,634 @@
+.class-planning-curriculum__list {
+    display: flex;
+    padding: 0 0 10px;
+    margin: 0;
+    list-style: none;
+    flex-flow: column nowrap;
+    gap: 10px;
+    overflow: hidden;
+    --cpl-border-color: #e2e8f0;
+    user-select: none;
+}
+
+.class-planning-curriculum__elm {
+    border-radius: 4px;
+    border: 1px solid var(--cpl-border-color);
+    display: flex;
+    width: 100%;
+    padding: 10px;
+    background-color: #ffffff;
+    box-sizing: border-box;
+}
+
+.class-planning-curriculum__elm__pending-load{
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.class-planning-curriculum__elm--active {
+    --cpl-border-color: #0d6efd;
+}
+
+.class-planning-curriculum__item {
+    width: 100%;
+    gap: 10px;
+}
+
+.class-planning-curriculum__item__icon {
+    width: 43px;
+    /*height: 43px;*/
+    border-radius: 4px;
+    --cpl-icon-color-rgb: 13 110 253;
+    background-color: rgb(var(--cpl-icon-color-rgb) / 10%);
+    font-family: var(--primary-font-family), sans-serif;
+    color: rgb(var(--cpl-icon-color-rgb) / 100%);
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 600;
+}
+
+.class-planning-curriculum__item__icon:not(.item--move-disabled) {
+    cursor: grab;
+}
+
+.cdk-drag-preview .class-planning-curriculum__item,
+.class-planning-curriculum__item__icon:not(.item--move-disabled):active:hover {
+    cursor: grabbing;
+    pointer-events: auto !important;
+}
+
+.class-planning-curriculum__item__info {
+    width: calc(100% - 43px - 26px - 20px);
+    max-width: calc(100% - 43px - 26px - 20px);
+}
+
+.class-planning-curriculum__item__tick {
+    display: inline-flex;
+    width: 26px;
+    justify-content: center;
+    align-items: center;
+    color: transparent;
+}
+
+.class-planning-curriculum__item__tick i {
+    font-size: 20px;
+    color: currentColor;
+}
+
+.class-planning-curriculum__btn-select {
+    --drag-handle-size: 63px;
+    font-size: 0;
+    border: none !important;
+    border-radius: 0;
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    position: absolute;
+    inset: 0;
+    width: calc(100% - var(--drag-handle-size));
+    left: var(--drag-handle-size);
+    height: 100%;
+    z-index: 10;
+    cursor: pointer;
+    padding: 0;
+}
+
+.class-planning-curriculum__verified-label,
+.class-planning-curriculum__btn-swap-teacher,
+.class-planning-curriculum__btn-remove {
+    position: absolute;
+    z-index: 15;
+    top: calc(50% - 16px);
+    right: 10px;
+    cursor: pointer;
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0;
+    line-height: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 99px;
+}
+
+.class-planning-curriculum__verified-label,
+.class-planning-curriculum__btn-remove {
+    top: calc(50% - 15px);
+    right: calc(10px + 10px + 30px);
+    width: 30px;
+    height: 30px;
+    transition: all .35s ease;
+    opacity: 0;
+    visibility: hidden;
+    font-size: 17px;
+}
+
+.class-planning-curriculum__btn-swap-teacher {
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff;
+    padding: 1px;
+    font-size: 0;
+    line-height: 0;
+}
+
+.class-planning-curriculum__btn-swap-teacher figure {
+    aspect-ratio: 1;
+    max-width: 30px;
+    width: 100%;
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 99px;
+}
+
+.class-planning-curriculum__btn-swap-teacher img {
+    aspect-ratio: 1;
+    object-fit: cover;
+    height: auto;
+    width: 100%;
+    max-width: 100%;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.class-planning-curriculum__btn-swap-teacher:disabled {
+    cursor: auto;
+}
+
+.class-planning-curriculum__verified-label,
+.class-planning-curriculum__elm:hover .class-planning-curriculum__btn-remove {
+    opacity: 1;
+    visibility: visible;
+}
+
+.class-planning-curriculum__verified-label {
+    --p-icon-size: 18px;
+    color: #52be4f;
+    cursor: default;
+    top: calc(50% - (0.5 * var(--p-icon-size)));
+    right: calc(var(--p-icon-size) + 30px);
+    width: var(--p-icon-size);
+    height: var(--p-icon-size);
+    background-color: #ffffff;
+}
+
+.course-editor-layout-grid__footer-btn-add {
+    padding: 0;
+    line-height: 1;
+    width: 100%;
+    margin: 0;
+    border-radius: 4px;
+    font-size: 14px;
+    height: 44px;
+}
+
+.class-planning-curriculum-empty {
+    position: absolute;
+    top: var(--course-editor-layout-header-height, 60px);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    width: 100%;
+    height: calc(var(--device-height) - var(--course-editor-layout-header-height, 60px));
+    background-color: #ffffff;
+    gap: 15px;
+    padding: 15px;
+}
+
+:is(.course-editor-layout-grid__body, .course-editor-layout-grid__header) .course-editor-layout-grid__container {
+    padding: 0 10px;
+}
+
+.class-planning-curriculum__toggle-sidebar {
+    --btn-toggle-size-bar-width: 16px;
+    --toggle-size-bar-border-inline-width: calc(var(--btn-toggle-size-bar-width) / 2);
+    --toggle-size-bar-border-block-width: calc(var(--btn-toggle-size-bar-width) / 2);
+    --toggle-size-bar-background-color: #cce5ff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+    width: 1px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: all .5s ease-in-out;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.class-planning-curriculum__toggle-sidebar__button {
+    color: #004085;
+    background-color: var(--toggle-size-bar-background-color) !important;
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    width: var(--btn-toggle-size-bar-width);
+    height: 40px;
+    position: relative;
+}
+
+.class-planning-curriculum__toggle-sidebar__button:hover {
+    --toggle-size-bar-background-color: #0162e8;
+    color: #ffffff;
+}
+
+.class-planning-curriculum__toggle-sidebar__button:active {
+    --toggle-size-bar-background-color: #0155c9;
+    color: #ffffff;
+}
+
+.class-planning-curriculum__toggle-sidebar__button i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.class-planning-curriculum__toggle-sidebar__button::after,
+.class-planning-curriculum__toggle-sidebar__button::before {
+    content: '';
+    display: inline-block;
+    border: 1px solid var(--toggle-size-bar-background-color);
+    border-inline-width: var(--toggle-size-bar-border-inline-width);
+    border-block-width: var(--toggle-size-bar-border-block-width);
+    border-block-start-color: transparent;
+    border-inline-end-color: transparent;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    z-index: 3;
+}
+
+.class-planning-curriculum__toggle-sidebar__button::after {
+    border-block-start-color: var(--toggle-size-bar-background-color);
+    border-block-end-color: transparent;
+    bottom: auto;
+    top: 100%;
+}
+
+/*****************************************************
+* class-planning-curriculum__lesson-content
+******************************************************/
+.class-planning-curriculum__lesson-content {
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    /*width: calc(100% - 30px);*/
+    /*height: calc(100% - 30px);*/
+    /*border-radius: 4px;*/
+    /*overflow: hidden;*/
+    /*margin: 15px;*/
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+}
+
+.class-planning-curriculum__lesson-content__head {
+    max-height: 60px;
+    height: 60px;
+    min-height: 60px;
+    padding: 0 15px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.class-planning-curriculum__lesson-content__lesson-title i {
+    font-size: 28px;
+    margin: 0 10px 0 0;
+}
+
+.class-planning-curriculum__lesson-content__instructors {
+    gap: 15px;
+}
+
+.class-planning-curriculum__lesson-content__btn-books {
+    border: none !important;
+    padding: 0;
+    margin: 0;
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+    line-height: 1;
+    border-radius: 999px;
+}
+
+.class-planning-curriculum__lesson-content__man {
+    border: none !important;
+    padding: 0;
+    margin: 0;
+    width: 36px;
+    height: 36px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 99px;
+    background-color: #ffffff;
+    box-sizing: border-box;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.class-planning-curriculum__lesson-content__man img {
+    display: block;
+    font-size: 0;
+    line-height: 0;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+}
+
+.class-planning-curriculum__lesson-content__circle-man {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 2px solid rgb(1, 85, 201);
+}
+
+.class-planning-curriculum__lesson-content__circle-man::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    background-color: rgb(1, 85, 201);
+    z-index: 10;
+    border-radius: 999px;
+    border: 2px solid #ffffff;
+}
+
+.class-planning-curriculum__lesson-content__body {
+    height: calc(100% - 60px);
+    max-height: calc(100% - 60px);
+    /*padding: 15px;*/
+    /*overflow: hidden auto;*/
+}
+
+.class-planning-curriculum__lesson-content__tab {
+    height: 100%;
+    --cpc-tab-height: 50px;
+}
+
+.class-planning-curriculum__lesson-content__tab__head {
+    min-height: var(--cpc-tab-height);
+}
+
+.class-planning-curriculum__lesson-content__tab-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0;
+    line-height: 0;
+    position: relative;
+    background-color: rgb(244 244 244);
+}
+
+.class-planning-curriculum__lesson-content__tab-list::before {
+    content: '';
+    display: block;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 1px;
+    border-bottom: 1px solid rgb(223 223 223);
+    z-index: 1;
+    position: absolute;
+}
+
+.class-planning-curriculum__lesson-content__tab-list__elm {
+    position: relative;
+    z-index: 5;
+    border-left: 1px solid rgb(223 223 223);
+}
+
+.class-planning-curriculum__lesson-content__tab-list__elm:last-child {
+    border-right: 1px solid rgb(223 223 223);
+}
+
+.class-planning-curriculum__lesson-content__tab-list__btn {
+    box-sizing: border-box;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    /*color: #74777b;*/
+    color: #333333;
+    border: none;
+    border-bottom: 1px solid rgb(223 223 223);
+    margin: 0;
+    padding: 0;
+    height: var(--cpc-tab-height);
+    max-height: var(--cpc-tab-height);
+    min-width: 150px;
+}
+
+.class-planning-curriculum__lesson-content__tab-list__btn i {
+    font-size: 20px;
+    margin: -4px 5px 0 0;
+    line-height: 1;
+}
+
+.class-planning-curriculum__lesson-content__tab__body {
+    height: calc(100% - var(--cpc-tab-height));
+    max-height: calc(100% - var(--cpc-tab-height));
+    overflow: hidden auto;
+}
+
+.cpc-lesson-tab--active .class-planning-curriculum__lesson-content__tab-list__btn {
+    background-color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+.class-planning-curriculum__lesson-content__tab-content {
+    padding: 15px;
+}
+
+.class-planning-curriculum__lesson-content__section {
+    display: block;
+    position: relative;
+    border: 1px solid #DBE0E9;
+    background-color: #ffffff;
+    border-radius: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 400;
+    font-family: var(--primary-font-family), sans-serif;
+    color: #333333;
+    padding: 15px;
+    min-height: 80px;
+    word-break: break-word;
+}
+
+.class-planning-curriculum__lesson-content__section:first-child {
+    margin-top: 15px;
+}
+
+.class-planning-curriculum__lesson-content__section + .class-planning-curriculum__lesson-content__section {
+    margin-top: 30px;
+}
+
+.class-planning-curriculum__btn-toggle-eye-check,
+.class-planning-curriculum__lesson-content__section__head {
+    padding: 0 5px;
+    display: inline-block;
+    background-color: #ffffff;
+    z-index: 1;
+    position: absolute;
+    top: -11px;
+    left: 10px;
+}
+
+.class-planning-curriculum__lesson-content__section__title {
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: 500;
+    font-family: var(--primary-font-family), sans-serif;
+    color: #222222;
+    display: inline-block;
+}
+
+.class-planning-curriculum__btn-toggle-eye-check {
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    color: #333333;
+    border: none !important;
+    padding: 0 5px;
+    margin: 0;
+    display: inline-block;
+    font-size: 0;
+    line-height: 0;
+    left: auto;
+    right: 10px;
+}
+
+.class-planning-curriculum__btn-toggle-eye-check i {
+    line-height: 1;
+    font-size: 18px;
+}
+
+.class-planning-curriculum-empty__teaching-assignments {
+    display: flex;
+    width: 100%;
+    height: calc(var(--device-height) - var(--course-editor-layout-header-height, 60px) - 30px);
+    align-items: center;
+    overflow: hidden auto;
+}
+
+.cpc-empty__teaching-assignments__heading {
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    line-height: 1.4;
+    font-weight: 700;
+    font-family: var(--primary-font-family), sans-serif;
+    color: #222222;
+    text-transform: uppercase;
+    margin: 0 0 15px;
+}
+
+.cpc-empty__teaching-assignments__table {
+    border-collapse: collapse;
+    caption-side: bottom;
+    border-color: rgb(226, 232, 240);
+    color: rgb(51, 65, 85);
+    width: min(430px, calc(var(--device-width) - 30px));
+}
+
+.cpc-empty__teaching-assignments__table td,
+.cpc-empty__teaching-assignments__table th,
+.cpc-empty__teaching-assignments__table tr {
+    border-width: 1px;
+    border-style: solid;
+    border-color: inherit;
+}
+
+.cpc-empty__teaching-assignments__btn,
+.cpc-empty__teaching-assignments__table td,
+.cpc-empty__teaching-assignments__table th {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 500;
+    font-family: var(--primary-font-family), sans-serif;
+    padding: 10px;
+    background-color: #ffffff;
+}
+
+.cpc-empty__teaching-assignments__table td {
+    font-weight: 400;
+}
+
+.cpc-empty__teaching-assignments__table th {
+    width: 130px;
+    min-width: 130px;
+}
+
+.cpc-empty__teaching-assignments__btn {
+    cursor: pointer;
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    height: 42px;
+    width: 100%;
+    padding: 0 10px;
+    font-weight: 400;
+    color: inherit;
+}
+
+.class-planning-curriculum__author {
+    position: absolute;
+    left: calc(100% + 5px);
+    bottom: 0;
+    z-index: 5;
+    background-color: #fff;
+    padding: 0 5px;
+}
+
+.class-planning-curriculum__author figure {
+    width: 22px;
+    aspect-ratio: 1;
+    position: relative;
+    border-radius: 999px;
+    font-size: 0;
+    line-height: 0;
+    border: 1px solid rgb(1, 85, 201);
+}
+
+.class-planning-curriculum__author figure:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    background-color: rgb(1, 85, 201);
+    z-index: 10;
+    border-radius: 999px;
+    border: 2px solid #ffffff;
+}
+
+.class-planning-curriculum__author figure img {
+    position: absolute;
+    inset: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    object-fit: cover;
+    z-index: 5;
+    overflow: hidden;
+    border-radius: 999px;
+}

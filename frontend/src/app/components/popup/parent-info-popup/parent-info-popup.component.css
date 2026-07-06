@@ -1,0 +1,169 @@
+.parent-popup__section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4d5e6f;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.parent-popup__section-title i {
+    color: #4680ff;
+    font-size: 18px;
+}
+
+/* ── Empty state ── */
+.parent-popup__empty {
+    text-align: center;
+    padding: 32px 20px;
+    color: #8996a4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.parent-popup__empty i {
+    font-size: 40px;
+    color: #cbd5e1;
+}
+
+.parent-popup__empty p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ── Relative cards ── */
+.parent-popup__relatives {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.relative-card {
+    border: 1px solid #e8ecf1;
+    border-radius: 12px;
+    padding: 16px;
+    background: #fafbfc;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+}
+
+.relative-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-color: #dbe0e9;
+}
+
+.relative-card__badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 99px;
+    line-height: 1.5;
+    color: var(--card-color, #4680ff);
+    background: color-mix(in srgb, var(--card-color, #4680ff) 10%, transparent);
+    margin-bottom: 15px;
+    min-width: 80px;
+}
+
+
+.relative-card__fields {
+    display: flex;
+    gap: 15px;
+    flex-flow: row wrap;
+}
+
+.relative-field {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0;
+    width: calc(50% - (15px / 2));
+    border: 1px dashed rgb(215 215 215);
+    border-radius: 8px;
+    padding: 10px;
+    flex: 1 1 auto;
+}
+
+.relative-field__label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #8996a4;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+}
+
+.relative-field__value {
+    color: #1e293b;
+}
+
+/* ── Tags ── */
+.relative-card__tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.relative-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.relative-tag i {
+    font-size: 13px;
+}
+
+.relative-tag--primary {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.relative-tag--pickup {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* ── Footer ── */
+.parent-popup__footer {
+    padding: 16px 24px;
+    border-top: 1px solid #f0f2f5;
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    background: #fafbfc;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .parent-popup__header {
+        padding: 16px 18px;
+    }
+
+    .parent-popup__body {
+        padding: 15px 18px;
+    }
+
+    .parent-popup__footer {
+        padding: 12px 18px;
+    }
+
+    .parent-popup__avatar {
+        width: 44px;
+        height: 44px;
+    }
+
+    .parent-popup__student-name {
+        font-size: 16px;
+    }
+}

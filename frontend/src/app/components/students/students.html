@@ -1,0 +1,610 @@
+<section class="admin-section--table position-relative">
+  @if (state() === 'loading') {
+    <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+  }
+  @if(modeState() == 'DF'){
+    <div class="admin-wrap-table">
+      @if (state() !== 'error') {
+        <div class="admin-wrap-table__head d-flex">
+          <h4 class="admin-wrap-table__heading">
+            <svg><use href="fonts/custom-icon.svg#custom-graduation-cap"></use></svg>
+            Danh sách học sinh
+          </h4>
+          <div class="admin-wrap-table__head-actions">
+            <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchData()">
+            <!-- <p-select [(ngModel)]="searchInfo.parent_id" [loading]="state() === 'loading'" [options]="parentDropdownField.options()" appendTo="body" [showClear]="true" class="wid-175" placeholder="Lọc theo CSDT" (onChange)="onSearchData()"/> -->
+            <!-- @if (permissionControl().canCreate) {
+            <button (click)="openImportingFromFile()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+              <i class="ti ti-file-import"></i>
+            </button>
+            } -->
+            @if (permissionControl().canDelete) {
+              <button (click)="deleteSelectedRows()" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+                <i class="ti ti-trash"></i>
+              </button>
+            }
+            @if (permissionControl().canCreate) {
+              <button (click)="addNewItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                <i class="ti ti-plus"></i>
+              </button>
+            }
+          </div>
+        </div>
+        <div class="admin-wrap-table__body">
+          <table class="tbl admin-table table-hover">
+            <thead>
+              <tr>
+                <th class="col-checkbox">
+                  <mat-checkbox [checked]="dataTable.totalChecked()" [indeterminate]="dataTable.partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="!dataTable.data().length || !permissionControl().canDelete"></mat-checkbox>
+                </th>
+                <!-- <th class="col-index text-center">#</th> -->
+                <th class="wid-100 text-center">Mã HS</th>
+                <th class="wid-60 text-center">Ảnh</th>
+                <th class="text-center">Họ và tên</th>
+                <!-- <th class="wid-100 text-center">Cơ sở đào tạo</th> -->
+                <!-- <th class="wid-85 text-center">Email</th> -->
+                <th class="wid-90 text-center">Năm sinh</th>
+                <th class="wid-90 text-center">Giới tính</th>
+                <!-- <th class="wid-120 text-center">SĐT phụ huynh</th> -->
+                <!-- <th class="wid-120 text-center">Tỉnh</th>
+                <th class="wid-120 text-center">Huyện</th>
+                <th class="wid-120 text-center">Xã</th> -->
+                <!-- <th class="text-center">Địa chỉ</th> -->
+                <!-- <th class="wid-120 text-center">Cách tiếp cận</th> -->
+                <th class="wid-100 text-center">Trạng thái học</th>
+                <th class="wid-120 text-center">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of dataTable.data(); track row.id; let i = $index) {
+                <tr>
+                  <td class="col-checkbox">
+                    <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)" [disabled]="!permissionControl().canDelete"></mat-checkbox>
+                  </td>
+                  <!-- <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td> -->
+                  <td class="wid-100 text-center">{{ row.code }}</td>
+                  <td class="wid-60 text-center" style="line-height: 0;padding: 5px 0;">
+                    <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{student: row}" class="button--un-set-style">
+                      <img class="profile-avatar-circle" [src]="row.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">
+                    </button>
+                  </td>
+                  <td class="text-left">
+                    @if(row.english_name){
+                        <small class="block f-14 text-primary">{{ row.english_name }}</small>
+                    }
+                    <span class="block">{{ row.full_name }}</span>
+                  </td>
+                  <!-- <td class="wid-100 text-center">{{ row.csdt_ids | ictuDropdownOptionMap : cosodaotaoDropdownField.options() : '' }}</td> -->
+                  <!-- <td class="wid-85 text-center">{{ shortenEmailEnd(row.email)}}</td> -->
+                  <td class="wid-90 text-center">{{ row.dob | date: 'yyyy'}}</td>
+                  <td class="wid-90 text-center">{{ row.gender }}</td>
+                  <!-- <td class="wid-120 text-center">{{ row.phone}}</td> -->
+                  <!-- <td class="wid-120 text-center">{{ row.tinh | ictuDropdownOptionMap : tinhDropdownField.options() : '' }}</td>
+                  <td class="wid-120 text-center">{{ row.huyen | ictuDropdownOptionMap : optionHuyenLoad : '' }}</td>
+                  <td class="wid-120 text-center">{{ row.xa | ictuDropdownOptionMap : optionXaLoad : '' }}</td> -->
+                  <!-- <td class="text-center">{{ joinDiachi(row.tinh,row.huyen,row.xa,row.diachi)}}</td> -->
+                  <!-- <td class="wid-120 text-center">{{ row.nguonden | ictuDropdownOptionMap : optionGT : '' }}</td> -->
+
+                  <td class="wid-100 text-center p-0">
+                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                      @if (row.status === -1) {
+                        <span class="ictu-badge ictu-badge--pink">Nghỉ học</span>
+                      } @else if(row.status === 1) {
+                        <span class="ictu-badge ictu-badge--success">Đang học</span>
+                      } @else {
+                        <span class="ictu-badge ictu-badge--secondary">Chờ xếp lớp</span>
+                      }
+                    </div>
+                  </td>
+                  <td class="p-0 wid-90">
+                    <div class="admin-table__btn-actions">
+                      <button (click)="setMode('phuhuynh',row)" class="btn ictu-button-success-light" matTooltip="Thông tin phụ huynh" matTooltipPosition="above">
+                        <i class="ti ti-eye"></i>
+                      </button>
+                      @if (permissionControl().canUpdate) {
+                        <button (click)="editRow(row)" class="btn ictu-button-info-light">
+                          <i class="ti ti-edit"></i>
+                        </button>
+                      }
+                      @if (permissionControl().canDelete) {
+                        <button (click)="deleteRow(row)" class="btn ictu-button-danger-light">
+                          <i class="ti ti-trash"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+                } @empty {
+                <tr>
+                  <td colspan="12">Không có bản ghi nào.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-wrap-table__foot">
+          <div class="d-flex justify-content-center align-items-center w-100">
+            <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+          </div>
+        </div>
+      } @else {
+        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+          <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+        </div>
+      }
+    </div>
+  }
+  @if(modeState() == 'import'){
+    <div class="admin-wrap-table">
+      @if (state() !== 'error') {
+        <div class="admin-wrap-table__head d-flex">
+          <h4 class="admin-wrap-table__heading">
+            <svg>
+              <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+            </svg>
+            Danh sách học sinh Import
+          </h4>
+          <div class="admin-wrap-table__head-actions">
+            <p-select [disabled]="checkUploadedHocSinh()" [(ngModel)]="class_idSelected" optionLabel="name" optionValue="id" [loading]="state() === 'loading'" [options]="optionsLopHoc" appendTo="body" [showClear]="true" class="wid-175" placeholder="Chọn lớp học"/>
+            <button (click)="openListImportDuplicate()"  mat-flat-button class="btn p-0 ictu-badge-btn--warning-reverse" [matTooltip]="isListImportDuplicate ? 'DS thí sinh lỗi' : 'DS thí sinh'">
+              <i class="ti ti-zoom-question"></i>
+            </button>
+            <button (click)="submitImport()" [disabled]="!checkErrorHocSinh() || isUploadHSLH" mat-flat-button class="btn p-0 ictu-badge-btn--success-reverse" matTooltip="Xác nhận import">
+              <i class="ti ti-checkbox"></i>
+            </button>
+            <button (click)="addHocSinhLopHoc()" [disabled]="checkUploadedHocSinh()" mat-flat-button class="btn p-0 ictu-badge-btn--success-reverse" matTooltip="Xác nhận thêm vào lớp">
+              <i class="ti ti-check"></i>
+            </button>
+            <button (click)="deleteSelectedHocSinhImport()" [disabled]="!someItemsChecked()" class="btn p-0 ictu-button-danger-gradient" mat-flat-button>
+              <i class="ti ti-trash"></i>
+            </button>
+            <button (click)="setMode('DF')" class="btn p-0 ictu-badge-btn--danger-reverse" mat-flat-button>
+              <i class="ti ti-x"></i>
+            </button>
+          </div>
+        </div>
+        <div class="admin-wrap-table__body">
+          <table class="tbl admin-table table-hover">
+            <thead>
+              <tr>
+                <th class="col-checkbox">
+                  <mat-checkbox [checked]="totalChecked()" [indeterminate]="partiallyChecked()" (change)="checkAll($event.checked)" [disabled]="!importFiltered().length"></mat-checkbox>
+                </th>
+                <!-- <th class="col-index text-center">#</th> -->
+                <th class="wid-100 text-center p-0">Trạng thái</th>
+                <th class="text-center p-0">Thông tin lỗi</th>
+                <th class="wid-100 text-center">Mã HS</th>
+                <th class="wid-200 text-center">Tên học sinh</th>
+                <th class="wid-90 text-center">Năm sinh học sinh</th>
+                <th class="wid-90 text-center">Giới tính</th>
+                <!-- <th class="wid-100 text-center">Cơ sở đào tạo</th> -->
+                <th class="wid-120 text-center">Tên phụ huynh</th>
+                <th class="wid-85 text-center">Email phụ huynh</th>
+                <th class="wid-85 text-center">Email học sinh</th>
+                <th class="wid-120 text-center">SĐT phụ huynh</th>
+                <!-- <th class="wid-120 text-center">Tỉnh</th>
+                <th class="wid-120 text-center">Huyện</th>
+                <th class="wid-120 text-center">Xã</th> -->
+                <!-- <th class="text-center">Địa chỉ</th> -->
+                <!-- <th class="wid-120 text-center">Cách tiếp cận</th> -->
+                <!-- <th class="wid-120 text-center">Trạng thái</th> -->
+                <!-- <th class="wid-100 text-center">Trạng thái học</th> -->
+                <th class="wid-60 text-center">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of importFiltered(); track row.id; let i = $index) {
+                <tr [style.background-color]="row.state === 'invalid' ? '#fef2f2' : ''">
+                  <td class="col-checkbox">
+                    <mat-checkbox [checked]="row.checked" (change)="selectRow(row)"></mat-checkbox>
+                  </td>
+                  <!-- <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td> -->
+                  <td class="wid-190 text-center p-0">
+                    <ng-container>
+                      @switch(row.state){
+                        @case('invalid'){
+                          <span class="ictu-badge ictu-badge--danger">Lỗi</span>
+                        }
+                        @case('prepare'){
+                          <span class="ictu-badge ictu-badge--success">Sẵn sàng</span>
+                        }
+                        @case('uploaded'){
+                          <span class="ictu-badge ictu-badge--success">Thành công</span>
+                        }
+                        @case('uploadedHSLH'){
+                          <span  class="ictu-badge ictu-badge--success">Thêm vào lớp thành công</span>
+                        }
+                        @case('uploadingFail'){
+                          <span  class="ictu-badge ictu-badge--danger">Lỗi upload</span>
+                        }
+                        @case('uploadingFailHSLH'){
+                          <span  class="ictu-badge ictu-badge--danger">Lỗi upload</span>
+                        }
+                      }
+                    </ng-container>
+                  </td>
+                  <td class="text-center p-0">
+                    @if (row.state != 'uploaded' && row.state != 'prepare' && row.state != 'uploadedHSLH') {
+                      <span class="ictu-badge ictu-badge--danger">{{row.errorMessage}}</span>
+                    }
+                  </td>
+                  <td class="wid-100 text-center">{{ row.code }}</td>
+                  <td class="wid-200 text-left">{{ row.full_name }}</td>
+                  <td class="wid-90 text-center">{{ row.dob | date: 'yyyy'}}</td>
+                  <td class="wid-90 text-center">{{ row.gender }}</td>
+                  <!-- <td class="wid-100 text-center">{{ row.csdt_ids | ictuDropdownOptionMap : cosodaotaoDropdownField.options() : '' }}</td> -->
+                  <td class="wid-120 text-center">{{ row.tenphuhuynh}}</td>
+                  <td class="wid-85 text-center">{{ shortenEmailEnd(row.emailphuhuynh)}}</td>
+                  <td class="wid-85 text-center">{{ shortenEmailEnd(row.email)}}</td>
+                  <td class="wid-120 text-center">{{ row.dienthoai1}}</td>
+                  <!-- <td class="wid-120 text-center">{{ row.tinh | ictuDropdownOptionMap : tinhDropdownField.options() : '' }}</td>
+                  <td class="wid-120 text-center">{{ row.huyen | ictuDropdownOptionMap : optionHuyenLoad : '' }}</td>
+                  <td class="wid-120 text-center">{{ row.xa | ictuDropdownOptionMap : optionXaLoad : '' }}</td> -->
+                  <!-- <td class="text-center">{{ joinDiachi(row.tinh,row.huyen,row.xa,row.diachi)}}</td> -->
+                  <!-- <td class="wid-120 text-center">{{ row.nguonden | ictuDropdownOptionMap : optionGT : '' }}</td> -->
+
+                  <!-- <td class="wid-100 text-center p-0">
+                  <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                    @if (row.status === -1) {
+                      <span class="ictu-badge ictu-badge--pink">Nghỉ học</span>
+                    } @else if(row.status === 1) {
+                      <span class="ictu-badge ictu-badge--success">Đang học</span>
+                    } @else {
+                      <span class="ictu-badge ictu-badge--secondary">Chờ xếp lớp</span>
+                    }
+                  </div>
+                </td> -->
+                <td class="p-0 wid-60">
+                  <div class="admin-table__btn-actions">
+                    @if (permissionControl().canDelete) {
+                      <button class="btn ictu-button-danger-light" (click)="deleteHocSinhImport(row)">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+              } @empty {
+              <tr>
+                <td colspan="12">Không có bản ghi nào.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="admin-wrap-table__foot">
+        <div class="d-flex justify-content-center align-items-center w-100">
+          <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+        </div>
+      </div>
+    } @else {
+      <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+        <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+      </div>
+    }
+  </div>
+}
+@if(modeState() == 'phuhuynh'){
+  <app-parent-component (modeChange)="onModeChange($event)" [studentObject]="dataHocSinh()"></app-parent-component>
+}
+</section>
+<p-drawer #pDrawer (onHide)="onDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+  <div class="ictu-p-drawer__content position-relative">
+    @if (formControl.enableLoading()) {
+      <app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+    }
+    <div class="ictu-p-drawer__content__body position-relative">
+      @switch (formControl.state()) {
+        @case ('READY') {
+          <form [formGroup]="formControl.formGroup">
+            <div class="ictu-form">
+              <div class="ictu-form__row">
+                <b class="ictu-form__row__heading-on-group"><span>Thông tin phụ huynhh</span>
+                <small>(Thông tin cơ bản của phụ huynh liên hệ trực tiếp)</small></b>
+              </div>
+              <div class="ictu-form__row">
+                <div class="row">
+                  <div class="col-4">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required" for="f_code">Mã phụ huynh</label>
+                      <input class="ictu-form__input-field" formControlName="masoPhuhuynh" id="f_code" pInputText placeholder="Mã định danh phụ huynh" type="text">
+                    </div>
+                  </div>
+                  <div class="col-8">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required" for="f_full_name">Họ và tên phụ huynh</label>
+                      <input class="ictu-form__input-field" formControlName="hotenPhuhuynh" id="f_full_name" pInputText placeholder="Tên phụ huynh" type="text">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ictu-form__row">
+                <div class="row">
+                  <div class="col-4">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required">Giới tính</label>
+                      <div class="gender-group">
+                        <label class="gender-option">
+                          <input type="radio" value="Nam" formControlName="gioitinhPhuhuynh">
+                          <span>Nam</span>
+                        </label>
+
+                        <label class="gender-option">
+                          <input type="radio" value="Nữ" formControlName="gioitinhPhuhuynh">
+                          <span>Nữ</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required" for="f_dob">Ngày sinh</label>
+                      <p-datepicker formControlName="ngaysinhPhuhuynh" class="ictu-form__input-field" id="f_dob" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"  />
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required" for="f_vaitro">Vai trò</label>
+                      <input class="ictu-form__input-field" formControlName="vaitroPhuhuynh" id="f_vaitro" pInputText placeholder="Bố , Mẹ, Anh,..." type="text">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ictu-form__row">
+                <div class="row">
+                  <div class="col-6">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required">Email</label>
+                      <input class="ictu-form__input-field" formControlName="emailPhuhuynh" pInputText placeholder="Email" type="text">
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required">Số điện thoại</label>
+                      <input class="ictu-form__input-field" formControlName="dienthoai1Phuhuynh" pInputText placeholder="Số điện thoại liên hệ" type="text">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ictu-form__row">
+                <label class="ictu-form__label ictu-form__label--required" for="f_address">Địa chỉ</label>
+                <textarea class="ictu-form__input-field" formControlName="diachiPhuhuynh" id="f_address" pTextarea placeholder="Địa chỉ đầy đủ "></textarea>
+              </div>
+              <!-- //////////////////////////////////////// -->
+              <div class="ictu-form__row">
+                <b class="ictu-form__row__heading-on-group"><span>Thông tin học sinh</span></b>
+              </div>
+              <div class="ictu-form__row" style="display: flex; flex-direction: column ;justify-content: center; align-items: center;">
+                <label class="ictu-form__label"  style="width: 100%; float:left">Ảnh đại diện</label>
+                <div class="ictu-upload-image-form-control w-50" style="margin-top: 5px; height: 200px;">
+                  @if (getControl('avatar').value) {
+                    <img class="ictu-upload-image-form-control__img" [src]="getControl('avatar').value | safeUrl" alt="">
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" height="512" viewBox="0 0 48 48" width="512" style="width: 90px;aspect-ratio: 1;max-height: 100%;">
+                      <g>
+                        <path d="m42 9v30h-36v-30z" fill="#fafafa"/>
+                        <path d="m31 18a3 3 0 1 1 3 3 3 3 0 0 1 -3-3zm-3 6-3 5-5-8-11 18h30z" fill="#e0e0e0"/>
+                        <path d="m42 8h-36a1 1 0 0 0 -1 1v30a1 1 0 0 0 1 1h36a1 1 0 0 0 1-1v-30a1 1 0 0 0 -1-1zm-10.4389 30-5.4471-8.9134 1.9695-3.2819 8.9429 12.1953zm-2.3444 0h-18.4334l9.2167-15.082zm11.7833 0h-1.493l-10.7-14.5913a1 1 0 0 0 -1.6641.0767l-2.2054 3.6754-4.0836-6.6823a1.04 1.04 0 0 0 -1.707 0l-10.708 17.5215h-1.4389v-28h34zm-7-16a4 4 0 1 0 -4-4 4.0046 4.0046 0 0 0 4 4zm0-6a2 2 0 1 1 -2 2 2.002 2.002 0 0 1 2-2z" fill="#9e9e9e"/>
+                      </g>
+                    </svg>
+                  }
+                  <button (click)="callFileChooser('photo')" class="btn ictu-upload-image-form-control__btn-upload">
+                    <i class="ti ti-camera-plus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="ictu-form__row">
+                <div class="row">
+                  <div class="col-3">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required" for="f_code">Mã học sinh</label>
+                      <input class="ictu-form__input-field" formControlName="code" id="f_code" pInputText placeholder="Mã số học sinh" type="text">
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label ictu-form__label--required" for="f_full_name">Họ và tên</label>
+                      <input class="ictu-form__input-field" formControlName="full_name" id="f_full_name" pInputText placeholder="Tên học sinh" type="text">
+                    </div>
+                  </div>
+                  <div class="col-3">
+                    <div class="ictu-form__row">
+                      <label class="ictu-form__label" for="f_english_name">Tên tiếng Anh</label>
+                      <input class="ictu-form__input-field" formControlName="english_name" id="f_english_name" pInputText placeholder="Tên tiếng Anh(Nếu có)" type="text">
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <!-- <div class="ictu-form__row">
+              <label class="ictu-form__label ictu-form__label" for="f_email">Email</label>
+              <input class="ictu-form__input-field" formControlName="email" id="f_email" pInputText placeholder="Nhập Email" type="text">
+            </div> -->
+            <!-- <div class="ictu-form__row">
+            <div class="row">
+              <div class="col-6" >
+                <div class="ictu-form__row" style="padding-top: 6px;">
+                  <label class="ictu-form__label ictu-form__label--required" for="f_dob"  style="margin-bottom: 10px;">Ngày sinh</label>
+                  <p-datepicker formControlName="dob" class="ictu-form__input-field" id="f_dob" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"  />
+
+                </div>
+              </div>
+
+              <div class="col-6" >
+                <div class="ictu-form__row" >
+                  <label class="ictu-form__label ictu-form__label--required" for="f_phone" >SĐT phụ huynh</label>
+                  <input class="ictu-form__input-field" formControlName="phone" id="f_phone" pInputText placeholder="SĐT" type="text">
+
+                </div>
+              </div>
+            </div>
+          </div> -->
+          <div class="ictu-form__row">
+            <div class="row">
+              <div class="col-4">
+                <div class="ictu-form__row">
+                  <label class="ictu-form__label" for="f_phone">Số điện thoại</label>
+                  <input class="ictu-form__input-field" formControlName="phone" id="f_phone" pInputText placeholder="Số điện thoại" type="text">
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="ictu-form__row">
+                  <label class="ictu-form__label ictu-form__label--required" for="f_dob">Ngày sinh</label>
+                  <p-datepicker formControlName="dob" class="ictu-form__input-field" id="f_dob" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"  />
+                </div>
+              </div>
+              <div class="col-4">
+                <div class="ictu-form__row">
+                  <label class="ictu-form__label ictu-form__label--required">Giới tính</label>
+                  <div class="gender-group">
+                    <label class="gender-option">
+                      <input type="radio" value="Nam" formControlName="gender">
+                      <span>Nam</span>
+                    </label>
+                    <label class="gender-option">
+                      <input type="radio" value="Nữ" formControlName="gender">
+                      <span>Nữ</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ictu-form__row">
+            <label class="ictu-form__label ictu-form__label--required">Email</label>
+            <input class="ictu-form__input-field" formControlName="email" pInputText placeholder="Email" type="text">
+          </div>
+          <!-- <div class="ictu-form__row">
+          <div class="row">
+            <div class="col-6">
+              <div class="ictu-form__row">
+                <label class="ictu-form__label ictu-form__label" for="f_huyen">Huyện</label>
+                <p-select id="f_huyen" [options]="optionHuyen"  appendTo="body" class="ictu-form__input-field" formControlName="huyen" placeholder="Chọn huyện" (onChange)="loadXa(false)"/>
+              </div>
+            </div>
+
+            <div class="col-6">
+              <div class="ictu-form__row">
+                <label class="ictu-form__label ictu-form__label" for="f_xa">Xã</label>
+                <p-select id="f_xa" [options]="optionXa" appendTo="body" class="ictu-form__input-field" formControlName="xa" placeholder="Chọn xã"/>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="ictu-form__row">
+            <label class="ictu-form__label ictu-form__label--required" for="f_city">Tỉnh</label>
+            <p-select [filter]="true"  [options]="tinhDropdownField.options()" appendTo="body" class="ictu-form__input-field" id="f_city" formControlName="tinh" [placeholder]="tinhDropdownField.placeholder()" (onChange)="loadHuyen(false)"/>
+          </div>
+        </div> -->
+        <div class="ictu-form__row">
+          <label class="ictu-form__label ictu-form__label" for="">Trường học hiện tại</label>
+          <textarea class="ictu-form__input-field" formControlName="regular_school" id="f_regular_school" pTextarea placeholder="Trường học chính quy của học sinh"></textarea>
+        </div>
+        <div class="ictu-form__row">
+          <label class="ictu-form__label ictu-form__label" for="f_regular_class">Lớp học trên trường</label>
+          <textarea class="ictu-form__input-field" formControlName="regular_class" id="f_regular_class" pTextarea placeholder="Lớp học trên trường chính quy"></textarea>
+        </div>
+        <div class="ictu-form__row">
+          <label class="ictu-form__label ictu-form__label" for="f_diachi">Địa chỉ</label>
+          <textarea class="ictu-form__input-field" formControlName="address" id="f_diachi" pTextarea placeholder="Số nhà, đường phố, xóm, tổ"></textarea>
+        </div>
+        <div class="ictu-form__row">
+          <div class="row">
+            <div class="col-6" >
+              <!-- <div class="ictu-form__row">
+              <label class="ictu-form__label ictu-form__label--required" for="f_csdt">Cơ sở đào tạo</label>
+              <p-select [filter]="true" [options]="cosodaotaoDropdownField.options()" appendTo="body" class="ictu-form__input-field" formControlName="csdt_ids" [placeholder]="cosodaotaoDropdownField.placeholder()"/>
+            </div> -->
+            <div class="ictu-form__row">
+              <label class="ictu-form__label ictu-form__label--required" for="f_GT">Cách tiếp cận</label>
+              <p-select [options]="optionGT" appendTo="body" class="ictu-form__input-field" formControlName="nguonden" placeholder="Chọn cách tiếp cận"/>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="ictu-form__row">
+              <label class="ictu-form__label ictu-form__label--required" for="f_status">Trạng thái học</label>
+              <p-select [options]="optionListTrangThaiHoc" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Chọn trạng thái học"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+}
+@case ('PREPARATION_FAILED') {
+  <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+    <a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+  </div>
+}
+}
+
+</div>
+<div class="ictu-p-drawer__content__footer">
+  <button (click)="pDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+  <button (click)="submitForm()" [disabled]="!formControl.formFilledAndValid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+</div>
+</div>
+</p-drawer>
+<ng-template #importTemplate>
+  <div class="ictu-dashboard-dialog">
+    <div class="ictu-dashboard-dialog__head">
+      <div class="ictu-dashboard-dialog__head__inner d-flex w-100 h-100">
+        <h4 class="ictu-dashboard-dialog__head__title me-auto">Nhập thông tin học sinh từ file Excel</h4>
+        <button (click)="downloadFileImportSample()" class="btn ictu-badge-btn--success-reverse ictu-dashboard-dialog__head__btn-close" mat-flat-button matTooltip="Tải xuống file mẫu import" matTooltipPosition="below">
+          <i class="ti ti-arrow-bar-to-down"></i>
+        </button>
+        <button (click)="closeImportingFromFile(importDialogDirty())" class="btn ictu-badge-btn--danger-reverse ictu-dashboard-dialog__head__btn-close" mat-flat-button matTooltip="Đóng panel import" matTooltipPosition="below">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+    </div>
+    <div class="ictu-dashboard-dialog__body flex-fill position-relative">
+      @if (importPanel.isLoading()) {
+        <app-loading-progress [heading]="importPanel.loadingTitle()" backdropFilter="none"></app-loading-progress>
+      }
+      @switch (importPanel.step()) {
+        @case ('SELECT_FILE') {
+          <div class="d-flex justify-content-center align-items-center w-100 h-100 ictu-dashboard-dialog__dnd-area">
+
+
+            <div class="d-block" dragAndDrop (fileDropped)="onInputFile($event)">
+              <button (click)="openFileSelector()" class="ictu-dashboard-dialog__dnd-area__btn" mat-flat-button>
+                <span class="ictu-dashboard-dialog__dnd-area__btn__content d-flex flex-column">
+                  <i class="ictu-dashboard-dialog__dnd-area__btn__icon ti ti-download"></i>
+                  <b class="ictu-dashboard-dialog__dnd-area__btn__text">Kéo và thả file</b>
+                  <b class="ictu-dashboard-dialog__dnd-area__btn__text">hoặc</b>
+                  <b class="ictu-dashboard-dialog__dnd-area__btn__text">click vào đây để duyệt file</b>
+                </span>
+              </button>
+            </div>
+          </div>
+        }
+        @case ('PROCESS') {
+          <div class="ictu-dashboard-dialog__main-content"></div>
+        }
+        @default {
+
+        }
+      }
+    </div>
+  </div>
+</ng-template>
+<p-dialog [modal]="true" [(visible)]="visibleDialog" class="warning-dialog" [closable]="true" [draggable]="false" appendTo="body">
+  <div class="dialog-content">
+    <h1>Cảnh báo</h1>
+    <i class="ti ti-alert-triangle icon"></i>
+    <div class="message">Có học sinh bị lỗi dữ liệu</div>
+    <button mat-flat-button class="btn ictu-badge-btn--info-reverse" (click)="updateStateDialog()">Đóng</button>
+  </div>
+</p-dialog>
+
+<mat-menu #menu="matMenu" yPosition="above" >
+  <ng-template matMenuContent let-student="student">
+    <div class="profile-avatar-menu">
+      <img [src]="student.avatar || 'images/user/avatar-1.jpg'" alt="Preview"/>
+    </div>
+  </ng-template>
+</mat-menu>

@@ -1,0 +1,59 @@
+<div class="ictu-bank-form d-flex h-100 w-100 position-relative">
+	@switch (state()) {
+		@case ('error') {
+			<div class="admin-table__alert-danger text-center m-auto">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+		@case ('loading') {
+			<app-loading-progress heading="Tải xuống dữ liệu..."></app-loading-progress>
+		}
+		@default {
+			<div class="ictu-bank-form__panel d-flex h-100 w-100 position-relative align-items-start">
+				<div class="container">
+					<div class="ictu-bank-form__form d-flex flex-column position-relative">
+						<h4 class="ictu-bank-form__form__heading f-roboto f-18 fw-bold lh-base m-0">Form ngân hàng câu hỏi</h4>
+						<hr>
+						<form class="ictu-form" [formGroup]="formGroup">
+							<div class="ictu-form__row">
+								<div class="row">
+									<div class="col-12 col-sm-6">
+										<div class="ictu-form__row">
+											<label class="ictu-form__label" for="f_name" [class.ictu-form__label--required]="getControl('name').hasValidator(Validators.required)">Tên ngân hàng</label>
+											<input class="ictu-form__input-field" formControlName="name" id="f_name" pInputText placeholder="Tên ngân hàng câu hỏi" type="text">
+										</div>
+									</div>
+									<div class="col-12 col-sm-6">
+										<div class="ictu-form__row">
+											<label class="ictu-form__label" for="f_code" [class.ictu-form__label--required]="getControl('code').hasValidator(Validators.required)">Mã ngân hàng</label>
+											<input class="ictu-form__input-field" formControlName="code" id="f_code" pInputText placeholder="Mã ngân hàng" type="text">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label" [class.ictu-form__label--required]="getControl('course_id').hasValidator(Validators.required)">Khóa học</label>
+								<p-select [options]="courseOptions()" appendTo="body" class="ictu-form__input-field" formControlName="course_id" placeholder="Chọn khóa học"/>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label" for="f_desc" [class.ictu-form__label--required]="getControl('desc').hasValidator(Validators.required)">Mô tả</label>
+								<textarea class="ictu-form__input-field w-100" rows="3" formControlName="desc" id="f_desc" pTextarea placeholder=""></textarea>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label" [class.ictu-form__label--required]="getControl('status').hasValidator(Validators.required)">Trạng thái</label>
+								<p-select [options]="statusOptions()" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Trạng thái"/>
+							</div>
+						</form>
+						<hr>
+						<div class="ictu-bank-form__form__footer d-flex justify-content-end align-items-center">
+							<button (click)="btnSubmitForm()" [disabled]="!formGroup.touched || formGroup.invalid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+						</div>
+						@if (isSubmitting()) {
+							<app-loading-progress heading="Đang cập nhật dữ liệu..." backdropFilter="blur(2px);"></app-loading-progress>
+						}
+					</div>
+				</div>
+			</div>
+		}
+	}
+</div>

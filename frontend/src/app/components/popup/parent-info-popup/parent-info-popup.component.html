@@ -1,0 +1,110 @@
+<div class="ams-student-popup">
+    <div class="ams-student-popup__header">
+        <div class="ams-student-popup__student-info">
+            <div class="ams-student-popup__avatar">
+                <img [ngSrc]="data.avatar || ('images/user/circle-avatar-placeholder.png' | publicAsset)" [alt]="data.full_name" width="52" height="52"/>
+            </div>
+            <div class="ams-student-popup__student-meta">
+                <h3 class="ams-student-popup__student-name m-0 f-roboto f-18 fw-bold">{{ data.full_name }}</h3>
+                <span class="ams-student-popup__student-level m-0 f-roboto f-14 fw-medium">{{ data._studentLevel || data.code }}</span>
+            </div>
+        </div>
+        <button class="btn ams-student-popup__close" (click)="close()" title="Close">
+            <i class="ti ti-x"></i>
+        </button>
+    </div>
+    <div class="ams-student-popup__body position-relative">
+        @switch (state()) {
+            @case ('success') {
+                @if (relatives().length) {
+                    <div class="parent-popup__section-title">
+                        <i class="ti ti-users-group"></i>
+                        <span>Thông tin phụ huynh / người thân</span>
+                    </div>
+                    <div class="parent-popup__relatives">
+                        @for (relative of relatives(); track relative; let idx = $index) {
+                            <div class="relative-card" [style.--card-color]="relative.cardColor">
+                                <div class="relative-card__badge">
+                                    <i class="f-20" [class]="relative.relationshipIcon"></i>
+                                    <span class="f-roboro f-14 fw-medium lh-base">{{ relative.vaitro || '.........' }}</span>
+                                </div>
+                                <div class="relative-card__fields">
+                                    <div class="relative-field">
+                                        <div class="relative-field__label">
+                                            <i class="ti ti-user f-16" style="margin-top: -5px;display: inline-block;"></i>
+                                            <span class="f-roboto lh-base fw-medium" style="font-size:11px;">Họ và tên</span>
+                                        </div>
+                                        <b class="relative-field__value f-roboto f-14 fw-medium lh-base m-0 p-l-20">{{ relative.full_name }}</b>
+                                    </div>
+                                    @if (relative.dob) {
+                                        <div class="relative-field">
+                                            <div class="relative-field__label">
+                                                <i class="ti ti-calendar-time f-16" style="margin-top: -5px;display: inline-block;"></i>
+                                                <span class="f-roboto lh-base fw-medium" style="font-size:11px;">Ngày sinh</span>
+                                            </div>
+                                            <b class="relative-field__value f-roboto f-14 fw-medium lh-base m-0 p-l-20">{{ relative.dob | date: 'dd/MM/yyyy' }}</b>
+                                        </div>
+                                    }
+                                    <div class="relative-field">
+                                        <div class="relative-field__label">
+                                            <i class="ti ti-phone f-16" style="margin-top: -5px;display: inline-block;"></i>
+                                            <span class="f-roboto lh-base fw-medium" style="font-size:11px;">Số điện thoại</span>
+                                        </div>
+                                        <b class="relative-field__value f-roboto f-14 fw-medium lh-base m-0 p-l-20">{{ relative.dienthoai1 }}</b>
+                                    </div>
+                                    @if (relative.dienthoai2) {
+                                        <div class="relative-field">
+                                            <div class="relative-field__label">
+                                                <i class="ti ti-phone f-16" style="margin-top: -5px;display: inline-block;"></i>
+                                                <span class="f-roboto lh-base fw-medium" style="font-size:11px;">Số điện thoại 2</span>
+                                            </div>
+                                            <b class="relative-field__value f-roboto f-14 fw-medium lh-base m-0 p-l-20">{{ relative.dienthoai1 }}</b>
+                                        </div>
+                                    }
+                                    <div class="relative-field">
+                                        <div class="relative-field__label">
+                                            <i class="ti ti-mail f-16" style="margin-top: -5px;display: inline-block;"></i>
+                                            <span class="f-roboto lh-base fw-medium" style="font-size:11px;">Email</span>
+                                        </div>
+                                        <b class="relative-field__value f-roboto f-14 fw-medium lh-base m-0 p-l-20 ictu-text-truncate">{{ relative.email }}</b>
+                                    </div>
+                                    <!--                                    @if (relative.note) {-->
+                                    <!--                                        <div class="relative-field">-->
+                                    <!--                                            <div class="relative-field__label">-->
+                                    <!--                                                <i class="ti ti-notes"></i>-->
+                                    <!--                                                <span>Ghi chú</span>-->
+                                    <!--                                            </div>-->
+                                    <!--                                            <div class="relative-field__value">{{ relative.note }}</div>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    }-->
+                                </div>
+
+                                <div class="relative-card__tags">
+                                    <span class="relative-tag relative-tag--primary f-roboto fw-medium">
+                                        <i class="ti ti-star f-14" style="display: inline-block;margin: -2px 0 0;"></i> Liên hệ chính
+                                    </span>
+                                    <span class="relative-tag relative-tag--pickup f-roboto fw-medium">
+                                        <i class="ti ti-car f-14" style="display: inline-block;margin: -2px 0 0;"></i> Người đưa đón
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <div class="parent-popup__empty">
+                        <i class="ti ti-user-off"></i>
+                        <p>Chưa có thông tin phụ huynh / người thân</p>
+                    </div>
+                }
+            }
+            @case ('error') {
+                <div class="admin-table__alert-danger text-center w-100 m-auto user-select-none">Tải dữ liệu thất bại. Vui lòng chọn
+                    <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                </div>
+            }
+            @default {
+                <app-loading-progress heading="Tải thông tin người thân..."></app-loading-progress>
+            }
+        }
+    </div>
+</div>

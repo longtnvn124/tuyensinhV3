@@ -1,0 +1,268 @@
+<section class="admin-section--table position-relative tm-absence-makeup-management">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	@if (enableProgress()) {
+		<div class="tm-absence-makeup-management__overlay d-flex justify-content-center align-items-center position-absolute inset-1 zdx-10">
+			<div class="d-flex justify-content-center align-items-center flex-column m-auto" style="z-index: 50;border-radius: 0;width: 290px;gap: 10px;color: #333333;">
+				<p class="f-15 fw-normal f-roboto lh-base m-0">Đang xử lý dữ liệu...</p>
+				<div class="ictu-progress-bar ictu-progress-bar--animated">
+					<div [style.width.%]="syncProgress()" class="ictu-progress-bar__pipe" style="background-color: #28a745;"></div>
+				</div>
+				<p class="f-18 fw-bold f-roboto lh-base">{{ syncProgress() }}%</p>
+			</div>
+		</div>
+	}
+	<div class="admin-wrap-table">
+		@if (state() !== 'error') {
+			<div class="admin-wrap-table__head d-flex">
+				<h4 class="admin-wrap-table__heading">
+					<svg>
+						<use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+					</svg>
+					Danh sách yêu cầu học bổ trợ
+				</h4>
+				<div class="admin-wrap-table__head-actions">
+					<!-- <div class="ictu-form ictu-topbar-filter-menu p-0 d-inline-flex wid-250 justify-content-center align-items-center " style="padding: 0 0 0 5px !important;height: 36px; border: 1px solid var(&#45;&#45;ictu-topbar-filter-border-color, #cbd5e1) !important;border-radius: 4px;"> -->
+					<!-- <staff-control class="topbar-filter-layout w-100" [(employees)]="employees" [(ngModel)]="filterByStaffID" [filter]="true" [showClear]="true" placeholder="Lọc theo giáo viên..." layout="simple"></staff-control> -->
+					<!-- </div> -->
+					<div class="ictu-form ictu-topbar-filter-menu p-0 d-inline-flex wid-250">
+						<div class="ictu-form__row ictu-topbar-filter-menu__container d-flex">
+							<i class="ti ti-user d-inline-flex justify-content-center align-items-center f-18 lh-1"></i>
+							<staff-control class="topbar-filter-layout w-100" [(employees)]="employees" [(ngModel)]="filterByStaffID" [filter]="true" [showClear]="true" placeholder="Lọc theo giáo viên..." layout="simple"></staff-control>
+						</div>
+					</div>
+					<div class="ictu-form ictu-topbar-filter-menu p-0 d-inline-flex">
+						<div class="ictu-form__row ictu-topbar-filter-menu__container d-flex" pTooltip="Lọc theo trạng thái" tooltipPosition="bottom">
+							<i class="ti ti-filter d-inline-flex justify-content-center align-items-center f-18 lh-1"></i>
+							<ictu-custom-mat-menu class="d-inline-flex m-0" [options]="checkInStatusOptions" placeholder="Chọn trạng thái" [(ngModel)]="filterProgress"></ictu-custom-mat-menu>
+						</div>
+					</div>
+					<div class="ictu-form ictu-form-on-head-filter p-0 ictu-topbar-filter-menu" style="--p-inputtext-padding-y:6px;--p-datepicker-input-width: 190px;">
+						<div class="ictu-form__row" pTooltip="Lọc từ ngày - đến ngày" tooltipPosition="bottom">
+							<p-datepicker [(ngModel)]="rangeDates" style="--ictu-form-group-after-input-width:40px" class="w-100 ictu-p-calendar" dateFormat="dd/mm/yy" [autofocus]="false" [focusTrap]="false" [showIcon]="true" [inline]="false" [showWeek]="false" placeholder="Từ ngày - đến ngày" inputId="f_time_start" selectionMode="range" [readonlyInput]="true"></p-datepicker>
+						</div>
+					</div>
+					<div class="admin-wrap-table__switchers" pTooltip="Lọc theo cơ sở đào tạo" tooltipPosition="bottom">
+						<button [matMenuTriggerFor]="branchList" type="button" class="admin-wrap-table__switchers__btn-label btn f-0 p-0" style="line-height: 1;height: 32px;">
+                            <span class="admin-wrap-table__switchers__btn-label__lbl d-flex justify-content-center align-items-center h-100">
+                                <i class="pi pi-building"></i><span>{{ branchActive()?.ten ?? 'Chọn cơ sở đào tạo' }}</span><i class="ti ti-chevron-down" style="background: transparent;"></i>
+                            </span>
+						</button>
+					</div>
+					<button (click)="btnAddCommand('SCHEDULE', dataTable.getSelectedData())" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-badge-btn--primary-reverse lh-1" mat-flat-button pTooltip="Phân công giáo viên" tooltipPosition="left">
+						<i class="ti ti-user"></i>
+					</button>
+					<button (click)="btnAddCommand('REJECT',dataTable.getSelectedData())" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-badge-btn--danger-reverse lh-1" mat-flat-button pTooltip="Hủy yêu cầu" tooltipPosition="left">
+						<i class="ti ti-x"></i>
+					</button>
+					<button (click)="btnAddNewRequest()" class="btn ictu-badge-btn--success-reverse lh-1" mat-flat-button pTooltip="Thêm yêu cầu học bổ trợ" tooltipPosition="left">
+						<i class="ti ti-plus"></i>
+					</button>
+				</div>
+			</div>
+			<div class="admin-wrap-table__body">
+				<ng-scrollbar class="w-100" style="height: calc(var(--device-height) - 51px - 51px - 8px);--_viewport-padding-right:0;" visibility="hover" orientation="vertical">
+					<!-- <div class="d-block" style="overflow: auto hidden;"> -->
+					<!-- </div> -->
+					<table class="tbl admin-table table-hover admin-table--sticky-head">
+						<thead>
+							<tr>
+								<th class="col-checkbox">
+									<mat-checkbox [checked]="dataTable.totalChecked()" [indeterminate]="dataTable.partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="!dataTable.data().length"></mat-checkbox>
+								</th>
+								<th class="col-index text-center">#</th>
+								<th class="x-col-avatar-name wid-240" colspan="2">Học sinh</th>
+								<th class="x-col-class wid-200">Lớp</th>
+								<!-- <th class="x-col-course">Khóa học</th> -->
+								<th class="x-col-lesson">Bài học</th>
+								<!-- <th class="x-col-date px-0 text-center wid-130">Ngày yêu cầu</th> -->
+								<th class="x-col-avatar-name wid-240" colspan="2">Giáo viên</th>
+								<th class="x-col-date px-0 text-center wid-130">Thời hạn</th>
+								<th class="x-col-status wid-150 text-center">Trạng thái</th>
+								<th class="wid-85 text-center px-0">Thao tác</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (row of dataTable.data(); track row.id; let i = $index) {
+								<tr [class.item--highlight]="highlightItemID() === row.id">
+									<td class="col-checkbox">
+										<mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)"></mat-checkbox>
+									</td>
+									<td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+									<td class="x-col-avatar wid-60 p-0">
+										<div class="d-flex justify-content-center align-items-center w-100 h-100" style="font-size: 0;line-height: 0;max-width: 60px; min-width: 60px">
+											<img class="border-0 rounded-5" [src]="row.avatar | safeUrl" [alt]="row.student?.full_name" width="40" height="40" style="height: 40px;min-width: 40px;object-fit: contain;">
+										</div>
+									</td>
+									<td class="x-col-name wid-180 p-10">
+										<small class="block f-14 text-primary">{{ row.student?.english_name }}</small>
+										<span class="block f-14 f-roboto fw-medium">{{ row.student?.full_name }}</span>
+									</td>
+									<td class="x-col-class wid-200 text-break p-10">
+										@if (row._class?.name) {
+											<span class="block f-14 f-roboto fw-medium">{{ row._class?.name }}</span>
+										}
+										@if (row.course?.title) {
+											<i class="block">{{ row.course?.title }}</i>
+										}
+									</td>
+									<!-- <td class="x-col-course text-start text-break p-10">{{ row.course?.title }}</td> -->
+									<td class="x-col-lesson text-start text-break p-10">
+										@if (row.class_session?.topic) {
+											<small class="f-13 text-muted fw-medium d-block">{{ row.class_session?.topic }}</small>
+										}
+										@if (row.class_session?.title) {
+											<span class="d-block">{{ row.class_session?.title }}</span>
+										}
+									</td>
+									<!-- <td class="x-col-date p-t-10 p-b-10 px-0 text-center wid-130">{{ row.created_at | date : 'dd/MM/yyyy' }}</td> -->
+									@if (row.teacher) {
+										<td class="x-col-avatar wid-60 p-0">
+											<div class="d-flex justify-content-center align-items-center w-100 h-100" style="font-size: 0;line-height: 0;max-width: 60px; min-width: 60px">
+												<img class="border-0 rounded-5" [src]="row.teacher | employeePhoto" [alt]="row.teacher.full_name" width="40" height="40" style="height: 40px;min-width: 40px;object-fit: contain;">
+											</div>
+										</td>
+										<td class="x-col-name wid-180 p-10">
+											<small class="block f-14 text-primary">{{ row.teacher.full_name }}</small>
+											<span class="block">{{ row.teacher.email }}</span>
+										</td>
+									} @else {
+										<td class="x-col-avatar-name wid-240" colspan="2"></td>
+									}
+									<td class="x-col-date p-t-10 p-b-10 px-0 text-center wid-130">{{ row.lblDeadline }}</td>
+									<td class="x-col-status p-10 text-start">
+										<span class="ictu-badge" [ngClass]="(checkInStatusCssClassOptions | findInArray : 'value' : row.progress)?.label ?? 'ictu-badge--purple'">{{ (checkInStatusOptions | findInArray : 'value' : row.progress)?.label ?? 'Không xác định' }}</span>
+									</td>
+									<td class="p-0 wid-85">
+										<div class="admin-table__btn-actions">
+											<button [disabled]="row.progress > 1" (click)="btnAddCommand('SCHEDULE',[row])" class="btn ictu-button-info-light" matTooltip="Phân công giáo viên" matTooltipPosition="above">
+												<i class="ti ti-user"></i>
+											</button>
+											<button (click)="btnAddCommand('REJECT',[row])" class="btn ictu-button-danger-light" [disabled]="![0,1].includes(row.progress)" [matTooltipDisabled]="![0,1].includes(row.progress)" matTooltip="Hủy yêu cầu" matTooltipPosition="above">
+												<i class="ti ti-x"></i>
+											</button>
+										</div>
+									</td>
+								</tr>
+							} @empty {
+								<tr>
+									<td colspan="11">Không có bản ghi nào.</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</ng-scrollbar>
+			</div>
+			<div class="admin-wrap-table__foot admin-wrap-table__foot--sticky-head">
+				<div class="d-flex justify-content-center align-items-center w-100">
+					<ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+				</div>
+			</div>
+		} @else {
+			<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+	</div>
+</section>
+<mat-menu #branchList="matMenu" class="ictu-switchers-menu">
+	@for (_branch of branchOptions(); track _branch.id) {
+		<button (click)="btnChangeBranch(_branch)" mat-menu-item class="ictu-switchers-menu__item" [class.ictu-switchers-menu__item--active]="branchActive()?.id === _branch.id">
+			<b class="text-left d-block f-14" style="font-weight: 500;margin: 0 0 1px;">{{ _branch.ten }}</b>
+			<span class="text-left d-block text-muted" style="font-size: 13px">{{ _branch.address }}</span>
+		</button>
+	} @empty {
+		<p class="w-100 d-flex justify-content-center align-items-center p-10 f-roboto f-14 m-0 fw-normal lh-base" style="border-radius: 0">Không có cơ sở đào tạo</p>
+	}
+</mat-menu>
+
+<p-dialog [(visible)]="visibleDialog" [closable]="false" [resizable]="false" [draggable]="false" [modal]="true" [style]="{ width: '520px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Phân công giáo viên dạy bổ trợ</h4>
+			<button (click)="btnCloseDialog(false)" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body p-0">
+			<form [formGroup]="formGroup" class="tm-registration-form w-100 flex-column d-flex position-relative p-15" style="--trf-form-gap: 15px;">
+
+				<!-- Học sinh -->
+				@if (command()) {
+					<div class="tm-registration-form__row">
+						<div class="d-inline-flex tm-registration-form__col-left">
+							<i class="ti ti-school"></i><span class="tm-registration-form__label">Học sinh</span>
+						</div>
+						<div class="d-inline-flex tm-registration-form__col-right position-relative flex-column" style="gap:10px">
+							@for (_std of command().items; track _std.student.id) {
+								<div class="tm-registration-form__buttons-menu tm-registration-form__buttons-menu--icon-after btn tm-registration-form__text fw-medium text-start text-muted p-5" style="cursor: auto;line-height: 0;background-color: #f8fafc;border: 1px solid #cbd5e1;">
+									<div class="d-flex w-100 fw-normal align-items-center">
+										<div class="wid-40 p-0 d-inline-flex justify-content-start" style="max-width: 42px; min-width: 42px;font-size: 0;line-height: 0;">
+											<figure style="font-size: 0;line-height: 0;overflow: hidden;margin: 0;padding: 2px;border: 1px solid #e2e8f0;width: 42px;border-radius: 999px;">
+												<img class="border-0 rounded-5" [src]="_std.student | studentAvatar" [alt]="_std.student.full_name" width="36" height="36" style="height: 36px;width: 36px;object-fit: contain;">
+											</figure>
+										</div>
+										<div class="flex-fill lh-1 p-l-5" style="max-width: calc(100% - 44px);">
+											@if (_std.student.english_name) {
+												<small class="block f-roboto f-14 m-0 w-100 text-truncate text-muted" style="margin-bottom: 3px;">{{ _std.student.english_name }}</small>
+											}
+											<span class="block f-roboto f-14 m-0 p-0 lh-base lh-base fw-medium" style="color: #333;">{{ _std.student.full_name }}</span>
+										</div>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+				}
+
+				<div class="tm-registration-form__row">
+					<div class="tm-registration-form__separator m-t-5 m-b-5"></div>
+				</div>
+
+				<!-- Giáo viên -->
+				<div class="tm-registration-form__row">
+					<div class="d-inline-flex tm-registration-form__col-left">
+						<i class="ti ti-user"></i><span class="tm-registration-form__label">Giáo viên</span>
+					</div>
+					<div class="d-inline-flex tm-registration-form__col-right">
+						<staff-control formControlName="assigned_teacher" class="d-flex w-100" [showClear]="true" [filter]="true" [(employees)]="employees" keyValue="user_id" placeholder="-- Chọn giáo viên --"></staff-control>
+					</div>
+				</div>
+
+				<!-- Thơi hạn -->
+				<div class="tm-registration-form__row">
+					<div class="d-inline-flex tm-registration-form__col-left">
+						<i class="ti ti-calendar-time"></i><span class="tm-registration-form__label">Thời hạn</span>
+					</div>
+					<div class="d-inline-flex tm-registration-form__col-right position-relative">
+						<button #calendarMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="calendarMenu" class="tm-registration-form__buttons-menu tm-registration-form__buttons-menu--icon-after btn tm-registration-form__text fw-medium text-start text-muted" type="button">
+							@if (getControl('deadline').value) {
+								{{ getControl('deadline').value | date : 'dd/MM/yyyy' : 'UTC+7' }}
+							} @else {
+								<span class="fw-normal" style="color: #64748b;">-- Chọn thời hạn hoàn thành --</span>
+							}
+							<i class="ti ti-calendar-time tm-registration-form__icon-after"></i>
+						</button>
+						<small class="f-14 f-roboto fw-normal lh-base p-0 position-absolute" style="top: 100%;left: 0;z-index: 5;color: #737578;margin: 3px 0 0;font-style: italic;">Thời hạn giao cho giáo viên phải hoàn thành.</small>
+					</div>
+				</div>
+
+				<div class="tm-registration-form__row">
+					<div class="d-flex m-0 m-t-10"></div>
+				</div>
+
+				<div class="d-flex justify-content-end align-items-center" style="gap: var(--trf-form-gap, 15px);">
+					<button (click)="btnCloseDialog(false)" class="btn ictu-badge-btn--secondary" mat-flat-button style="min-width: 100px">Hủy</button>
+					<button (click)="btnSaveForm()" [disabled]="formGroup.invalid || formGroup.untouched" class="btn ictu-badge-btn--primary-reverse" mat-flat-button style="min-width: 100px">Lưu lại</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</p-dialog>
+
+<mat-menu #calendarMenu="matMenu" class="ictu-switchers-menu ictu-switchers-menu-fixed-size">
+	<div class="d-block" (click)="avoidCloseMenuByClicking($event)">
+		<p-datepicker class="w-100 ictu-p-calendar" [inline]="true" [showWeek]="false" [defaultDate]="getControl('deadline').value | str2date" (onSelect)="registerExpiredDate($event)" [ngModel]="expiredDate"></p-datepicker>
+	</div>
+</mat-menu>

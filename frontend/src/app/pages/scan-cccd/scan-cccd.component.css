@@ -1,0 +1,26 @@
+.scan-container {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.live-scan ngx-scanner-qrcode {
+  width: 200px;
+  height: 200px;
+  margin: 10px auto;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+}
+
+.controls {
+  margin: 10px 0;
+}
+
+.controls button {
+  margin: 5px;
+}
+
+.captured-results {
+  margin-top: 20px;
+  text-align: left;
+}

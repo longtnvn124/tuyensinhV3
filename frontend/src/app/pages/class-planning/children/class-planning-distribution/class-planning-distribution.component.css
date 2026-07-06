@@ -1,0 +1,836 @@
+.class-planning-distribution--full-size {
+    height: calc(var(--device-height) - var(--course-editor-layout-header-height, 60px));
+    width: 100%;
+    /*background: linear-gradient(180deg, #f4efed, #f4f6f6 45%, #cfeaf5);*/
+}
+
+.class-planning-distribution {
+    min-height: calc(var(--device-height) - var(--course-editor-layout-header-height, 60px));
+    /*background: linear-gradient(180deg, #f4efed, #f4f6f6 45%, #cfeaf5);*/
+}
+
+.class-planning-distribution__tabs {
+    display: flex;
+    flex-direction: column;
+    --class-planning-distribution-tabs-head-height: 50px;
+    --class-planning-distribution-tabs-body-height: calc(var(--device-height) - var(--course-editor-layout-header-height, 60px) - var(--class-planning-distribution-tabs-head-height));
+}
+
+.class-planning-distribution__tabs__head {
+
+}
+
+.class-planning-distribution__tabs__body {
+    height: var(--class-planning-distribution-tabs-body-height);
+    max-height: var(--class-planning-distribution-tabs-body-height);
+    overflow: hidden auto;
+    background-color: #FBFBFD;
+}
+
+.class-planning-distribution__tabs__list {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    background-color: #FBFBFD;
+    gap: 50px;
+}
+
+.class-planning-distribution__tabs__list::before {
+    content: '';
+    display: block;
+    position: absolute;
+    border-bottom: 1px solid #dee2e6;
+    height: 1px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.class-planning-distribution__tabs__button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: var(--class-planning-distribution-tabs-head-height);
+    border: none;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 2px;
+    background-color: transparent;
+    color: #444444;
+}
+
+.tab-active {
+    position: relative;
+    display: block;
+}
+
+.tab-active::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    border-top: 1px solid #227aff;
+    z-index: 15;
+}
+
+.tab-active .class-planning-distribution__tabs__button {
+    color: #227aff;
+}
+
+.class-planning-distribution__tabs__class-sections-content {
+    --class-planning-distribution-tab-inline-padding: 20px;
+    --class-planning-distribution-tab-gutter: 20px;
+    --class-planning-distribution-col-number: 4;
+    padding: 20px;
+    display: flex;
+    flex-flow: row wrap;
+    gap: var(--class-planning-distribution-tab-gutter);
+}
+
+.class-planning-distribution__class-lot {
+    --class-planning-distribution-slot-width: 240px;
+    border: 1px solid #E9EDF4;
+    border-radius: 4px;
+    flex-basis: var(--class-planning-distribution-slot-width);
+    max-width: var(--class-planning-distribution-slot-width);
+    min-width: var(--class-planning-distribution-slot-width);
+    padding: 13px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px -1px rgba(222, 222, 222, 0.3607843137);
+    user-select: none;
+}
+
+.class-planning-distribution__class-lot {
+    background-color: #E7F1FC;
+}
+
+.class-planning-distribution__class-lot__room-no {
+    font-size: 14px;
+    padding: 3px 8px 0;
+    border: none;
+    border-radius: 2px;
+    line-height: 1;
+    display: inline-flex;
+    height: 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+.class-planning-distribution__class-lot__head {
+    display: flex;
+    /*border-bottom: 1px solid #E9EDF4;*/
+    border-bottom: 1px solid rgb(0 0 0 / 10%);
+    padding-bottom: 10px;
+}
+
+.class-planning-distribution__class-lot__body {
+    padding-top: 10px;
+    display: flex;
+    flex-flow: column wrap;
+    gap: 5px;
+}
+
+.class-planning-distribution__tabs__content__btn {
+    cursor: pointer;
+    padding: 10px;
+    display: inline-block;
+}
+
+.class-planning-distribution__class-ordering {
+    padding: 6px 5px;
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 500;
+    min-width: 25px;
+    justify-content: center;
+    align-items: center;
+    margin: 0 0 0 auto;
+}
+
+.class-planning-distribution__class-lot__foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    font-size: 0;
+    border-top: 1px solid rgb(0 0 0 / 10%);
+    padding: 10px 0 0;
+    margin: 10px 0 0;
+}
+
+.class-planning-distribution__teachers {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex: 1 1 auto;
+    gap: 15px;
+}
+
+.class-planning-distribution__teachers__avatar {
+    width: 30px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    position: relative;
+    border-radius: 50%;
+    padding: 0;
+    margin: 0;
+}
+
+.class-planning-distribution__teachers__avatar__img {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.class-planning-distribution__status {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 23px;
+    color: rgb(95 109 136);
+}
+
+.class-planning-distribution__status.ti-clipboard-check {
+    color: rgb(var(--c2-success));
+}
+
+.class-planning-distribution__time-table {
+    max-height: var(--class-planning-distribution-tabs-body-height);
+    background-color: #ffffff;
+    overflow: hidden auto;
+}
+
+.class-planning-distribution__time-table__list {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.class-planning-distribution__time-table__list > li {
+    flex: 1 1 auto;
+    width: calc(calc(100% - 50px) / 7);
+    min-width: calc(calc(100% - 50px) / 7);
+    max-width: calc(calc(100% - 50px) / 7);
+    padding: 10px;
+    user-select: none;
+}
+
+.class-planning-distribution__time-table__list > li:first-child {
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
+}
+
+.class-planning-distribution__time-table__list--body + .class-planning-distribution__time-table__list--body {
+    border-top: 1px solid #dee2e6;
+}
+
+.class-planning-distribution__time-table__list--body:nth-child(even) {
+    background-color: rgb(51 59 67 / 6%);
+}
+
+.class-planning-distribution__time-table__list > li:not(:first-child) {
+    border-left: 1px solid #dee2e6;
+}
+
+.class-planning-distribution__time-table__head {
+    background-color: rgb(247, 247, 247);
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+}
+
+.class-planning-distribution__time-table__head li {
+    height: 42px;
+    display: inline-flex;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.class-planning-distribution__time-table__body {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.class-planning-distribution__time-table__list--body > li:first-child {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    line-height: 2;
+    /*font-weight: 700;*/
+}
+
+.class-planning-distribution__rooms {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.class-planning-distribution__rooms__block {
+    --cpdr-border-color: #dee2e6;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--cpdr-border-color);
+    background-color: #ffffff;
+    border-radius: 0;
+    position: relative;
+    z-index: 5;
+    box-shadow: 0 4px 12px -1px rgba(222, 222, 222, 0.3607843137);
+    color: #333333;
+}
+
+.class-planning-distribution__rooms__block--active .class-planning-distribution__rooms__block__head span,
+.class-planning-distribution__rooms__block:hover .class-planning-distribution__rooms__block__head span,
+.class-planning-distribution__rooms__block--active,
+.class-planning-distribution__rooms__block:hover {
+    border-color: #227aff;
+    color: #227aff;
+}
+
+.class-planning-distribution__rooms__block__head,
+.class-planning-distribution__rooms__block__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+    background-color: #f7f7f7;
+    height: 33px;
+}
+
+.class-planning-distribution__rooms__block__head span,
+.class-planning-distribution__rooms__block__foot span,
+.class-planning-distribution__rooms__block__head b {
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.class-planning-distribution__rooms__block__head b {
+    font-weight: 500;
+}
+
+.class-planning-distribution__rooms__block__head span {
+    color: #666666;
+}
+
+.class-planning-distribution__rooms__block__body {
+    padding: 10px;
+    min-height: 45px;
+    border-top: 1px solid var(--cpdr-border-color);
+    border-bottom: 1px solid var(--cpdr-border-color);
+}
+
+.class-planning-distribution__rooms__block__foot span {
+    padding: 0;
+    background-color: transparent;
+}
+
+.class-planning-distribution__rooms__class-name {
+    margin: 0;
+    padding: 0;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #03A9F4;
+    font-family: var(--primary-font-family), sans-serif;
+}
+
+.class-planning-distribution__rooms__block__button {
+    font-size: 0;
+    line-height: 0;
+    display: block;
+    position: absolute;
+    z-index: 10;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.class-planning-distribution__rooms__block__loader {
+    position: absolute;
+    display: block;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 2;
+    --mat-progress-bar-active-indicator-height: 2px;
+    --mat-progress-bar-track-height: 2px;
+}
+
+.tm-registration-form {
+    --trf-form-gap: 20px;
+    --trf-form-left-collumn-size: 130px;
+    --trf-form-right-collumn-size: calc(100% - var(--trf-form-left-collumn-size) - var(--trf-form-gap));
+    gap: var(--trf-form-gap, 20px);
+    padding: 5px;
+}
+
+.tm-registration-form__row {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: var(--trf-form-gap, 20px);
+}
+
+.tm-registration-form__col-left {
+    width: var(--trf-form-left-collumn-size);
+    max-width: var(--trf-form-left-collumn-size);
+    min-width: var(--trf-form-left-collumn-size);
+    min-height: 43px;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.tm-registration-form__col-left i {
+    font-size: 22px;
+    line-height: 1;
+    margin: -5px 0 0 0;
+    color: #666666;
+}
+
+.tm-registration-form__label {
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #666666;
+    font-weight: 500;
+}
+
+.tm-registration-form__col-right {
+    width: var(--trf-form-right-collumn-size);
+    max-width: var(--trf-form-right-collumn-size);
+    min-width: var(--trf-form-right-collumn-size);
+    min-height: 43px;
+}
+
+.tm-registration-form__text,
+.tm-registration-form__textarea,
+.tm-registration-form__input {
+    font-size: 14px;
+    line-height: 1.5;
+    display: block;
+    width: 100%;
+    border-radius: 4px;
+    font-family: var(--primary-font-family), sans-serif;
+    color: #333333;
+    padding: 10px;
+}
+
+.tm-registration-form__textarea {
+    resize: vertical;
+}
+
+.tm-registration-form__text {
+    margin: 0;
+    background: var(--p-inputtext-background);
+    border: 1px solid var(--p-inputtext-border-color, #cbd5e1);
+}
+
+.tm-registration-form__text:not(button) {
+    background-color: #f1f1f1;
+    border: none;
+    user-select: none;
+}
+
+.tm-registration-form__buttons-menu {
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.tm-registration-form__buttons-menu--icon-after {
+    padding-right: 20px;
+    position: relative;
+}
+
+.tm-registration-form__icon-after {
+    position: absolute;
+    right: 5PX;
+    font-size: 15px;
+    line-height: 1;
+    top: calc(50% - 7.5px);
+    color: #888888;
+}
+
+.tm-registration-form__buttons {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 15px;
+}
+
+.tm-registration-form__btn-select {
+    --trf-active-color-rgb: 70 128 255;
+    border-radius: 4px;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    display: inline-flex;
+    padding: 0 15px;
+    height: 43px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: #eff0f3;
+    color: #333333;
+}
+
+.tm-registration-form__btn-select__icon {
+    font-size: 18px;
+    color: inherit;
+}
+
+.tm-registration-form__btn-select__label {
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: inherit;
+}
+
+.tm-registration-form__btn-select:not(.trf-button--selected):hover {
+    background-color: rgb(var(--trf-active-color-rgb)/10%);
+    color: rgb(var(--trf-active-color-rgb)/100%);
+}
+
+.trf-button--selected {
+    background-color: rgb(var(--trf-active-color-rgb)/100%);
+    color: #ffffff;
+}
+
+.tm-registration-form__separator {
+    display: block;
+    width: 100%;
+    height: 1px;
+    border-top: 1px solid var(--p-inputtext-border-color, #cbd5e1);
+}
+
+.tm-registration-form__error {
+    position: absolute;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+}
+
+/********************************************************
+* class-planning-distribution-analytics-wrapper
+*********************************************************/
+.class-planning-distribution-analytics {
+    display: flex;
+    background: #fff;
+    outline: #dbe0e9 solid 1px;
+    position: relative;
+    min-width: 220px;
+    align-items: flex-start;
+}
+
+.class-planning-distribution-analytics__loader {
+    display: flex;
+    width: calc(100% - 10px);
+    height: calc(100% - 10px);
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    padding: 15px;
+    z-index: 11;
+    background: #fff;
+}
+
+.class-planning-distribution-analytics__loader__image {
+    display: flex;
+    width: 100%;
+    -o-object-fit: contain;
+    object-fit: contain;
+    max-width: 100%;
+    height: auto;
+    vertical-align: top;
+}
+
+/********************************************************
+* class-planning-distribution__calendar
+*********************************************************/
+.class-planning-distribution__calendar {
+    /*--class-planning-distribution-tab-gutter: 20px;*/
+    /*--class-planning-distribution-col-number: 4;*/
+    /*--class-planning-distribution-tab-inline-padding : 20px*/
+    border: 1px solid #dbe0e9;
+    display: flex;
+    align-items: flex-start;
+    border-radius: 4px;
+    background-color: #ebecf0;
+    gap: 15px;
+    padding: 15px;
+    min-width: 340px;
+    width: calc((100% / var(--class-planning-distribution-col-number)) - ((var(--class-planning-distribution-tab-gutter) * (var(--class-planning-distribution-col-number) - 1)) / var(--class-planning-distribution-col-number)));
+    max-width: calc((100% / var(--class-planning-distribution-col-number)) - ((var(--class-planning-distribution-tab-gutter) * (var(--class-planning-distribution-col-number) - 1)) / var(--class-planning-distribution-col-number)));
+}
+
+.class-planning-distribution__calendar__left {
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    --class-planning-distribution-calendar-border-radius: 4px;
+}
+
+.class-planning-distribution__calendar__left__head {
+    display: block;
+    position: relative;
+    width: 100%;
+    background-color: #0068ff;
+    border-radius: var(--class-planning-distribution-calendar-border-radius) var(--class-planning-distribution-calendar-border-radius) 0 0;
+    overflow: hidden;
+    --calendar-dot-size: 4px;
+    --calendar-dot-ofset-x: 4px;
+    --calendar-dot-ofset-y: 4px;
+}
+
+.class-planning-distribution__calendar__left__head::before,
+.class-planning-distribution__calendar__left__head::after {
+    content: "";
+    position: absolute;
+    top: var(--calendar-dot-ofset-y, 4px);
+    left: var(--calendar-dot-ofset-x, 4px);
+    z-index: 10;
+    display: inline-block;
+    width: var(--calendar-dot-size, 4px);
+    background-color: #ffffff;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.class-planning-distribution__calendar__left__head::after {
+    left: auto;
+    right: var(--calendar-dot-ofset-x, 4px);
+}
+
+.class-planning-distribution__calendar__year,
+.class-planning-distribution__calendar__month,
+.class-planning-distribution__calendar__day-in-month,
+.class-planning-distribution__calendar__weekday {
+    margin: 0;
+    font-family: var(--primary-font-family), sans-serif;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0;
+    line-height: 1.5;
+    font-size: 12px;
+    font-weight: 400;
+    color: #333333;
+}
+
+.class-planning-distribution__calendar__weekday {
+    padding: 7px 0 3px;
+    color: #ffffff;
+}
+
+.class-planning-distribution__calendar__left__body {
+    display: flex;
+    background-color: #ffffff;
+    border-radius: 0 0 var(--class-planning-distribution-calendar-border-radius) var(--class-planning-distribution-calendar-border-radius);
+    overflow: hidden;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.class-planning-distribution__calendar__day-in-month {
+    font-size: 26px;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0 5px;
+    line-height: 1;
+}
+
+.class-planning-distribution__calendar__month {
+    padding: 0 0 5px;
+    font-weight: 500;
+}
+
+
+.class-planning-distribution__calendar__year {
+    width: 100%;
+    background-color: #dee2e6;
+    color: #0d59cf;
+    line-height: 24px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.class-planning-distribution__calendar__right {
+    max-width: calc(100% - 85px - 15px);
+    width: 100%;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.class-planning-distribution__calendar__right__separator {
+    display: block;
+    margin: 5px 0;
+    line-height: 0;
+    font-size: 0;
+    border-top: 1px solid #d5d5d5;
+}
+
+.class-planning-distribution__calendar__left__foot {
+    --p-icon-size: 18px;
+    color: #52be4f;
+}
+
+.class-planning-distribution__calendar__buttons {
+    top: 0;
+    right: 0;
+    z-index: 5;
+    gap: 10px;
+    padding: 10px;
+    transition: all .35s ease;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.class-planning-distribution__calendar__buttons .btn {
+    --p-icon-size: 15px;
+    line-height: 0;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    border-radius: 4px;
+    /*transition: transform .35s ease;*/
+    /*transform: scale(0);*/
+}
+
+.class-planning-distribution__calendar:hover > .class-planning-distribution__calendar__buttons {
+    opacity: 1;
+    visibility: visible;
+}
+
+/*.class-planning-distribution__calendar:hover > .class-planning-distribution__calendar__buttons > .btn {*/
+/*    transform: scale(1);*/
+/*}*/
+
+.online-indicator-wrapper {
+    display: block;
+    font-size: 0;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.online-indicator {
+    display: block;
+    background-color: #ff1800;
+    outline: 0;
+    padding: 0;
+    border-radius: 999px;
+    position: relative;
+    touch-action: manipulation;
+    width: 12px;
+    height: 12px;
+    z-index: 5;
+}
+
+.online-indicator-wrapper::after,
+.online-indicator-wrapper::before {
+    content: '';
+    border-radius: 999px;
+    position: absolute;
+    margin: auto;
+    top: -8px;
+    right: -8px;
+    width: calc(100% + 16px);
+    height: calc(100% + 16px);
+    background: #ff1800;
+    opacity: .2;
+    animation: zoom-out-x 2s ease-out infinite;
+    z-index: 1;
+}
+
+.online-indicator-wrapper::after {
+    animation: zoom-out-x 1s ease-in .05s infinite;
+}
+
+@keyframes zoom-out-x {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.75);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.class-planning-distribution__calendar__loading {
+    z-index: 15;
+    inset: 0;
+    background-color: rgba(255, 255, 255, .15);
+    backdrop-filter: blur(1px);
+    user-select: none;
+}
+
+.class-planning-distribution__calendar__loading ~ .class-planning-distribution__calendar__buttons {
+    display: none !important;
+}
+
+.class-planning-distribution__calendar__right__line {
+    color: #000000;
+}
+
+.class-planning-distribution__calendar__right__line span {
+    color: #444444;
+    width: 70px;
+    display: inline-block;
+    position: relative;
+}
+
+.class-planning-distribution__calendar__right__line span::after {
+    content: ':';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    right: 5px;
+    z-index: 1;
+}

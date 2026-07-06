@@ -1,0 +1,89 @@
+@switch (classMediaType()) {
+    @case ('ACTIVITY') {
+        <div class="media-gallery m-0">
+            <div class="media-item">
+                @switch (type()) {
+                    @case ('image') {
+                        <img [src]="imgSrc() | safeUrl" class="media-image" [alt]="caption()" loading="lazy">
+                    }
+                    @default {
+                        @if (sources().length) {
+                            <div class="media-video">
+                                <plyr [plyrSources]="sources()" [plyrType]="mediaType()"></plyr>
+                            </div>
+                        }
+                    }
+                }
+                @if (caption()) {
+                    <div class="media-caption text-center">{{ caption() }}</div>
+                }
+            </div>
+        </div>
+    }
+    @default {
+        @if (speakingTestVideos().length) {
+            <div class="media-gallery m-0">
+                @for (_media of speakingTestVideos(); track _media.id) {
+                    <div class="media-item">
+                        @switch (_media.type | str2MediaFileType) {
+                            @case ('audio') {
+                                <div class="media-video">
+                                    <plyr [plyrSources]="_media | ictuBasicFile2ictuCloudFile | ictuCloudFile2PlyrSources" plyrType="audio"></plyr>
+                                </div>
+                            }
+                            @case ('video') {
+                                <div class="media-video">
+                                    <plyr [plyrSources]="_media | ictuBasicFile2ictuCloudFile | ictuCloudFile2PlyrSources" plyrType="video"></plyr>
+                                </div>
+                            }
+                            @case ('image') {
+                                <img [src]="_media | ictuBasicFile2ictuCloudFile | ictuCloudFile2StreamLink | safeUrl" class="media-image" [alt]="caption()" loading="lazy">
+                            }
+                            @default {
+                            }
+                        }
+                        <div class="media-caption text-center">{{ _media.title || '....' }}</div>
+                    </div>
+                }
+            </div>
+        }
+    }
+}
+
+@if (isSpeakingTest()) {
+    <div class="feedback-section mb-0 m-t-15">
+        <div class="feedback-card" [ngClass]="staffRole() === 'TEACHER' ? 'feedback-teacher' : 'feedback-ta'">
+            <div class="feedback-avatar">
+                @if (media()?.employee?.photo) {
+                    <figure class="feedback-avatar__figure m-0 p-0 overflow-hidden">
+                        <img class="feedback-avatar__figure__img d-block inset-0 w-100 h-100" [alt]="media()?.employee.full_name" [ngSrc]="media()?.employee | employeePhoto" width="36" height="36">
+                    </figure>
+                } @else {
+                    <div class="avatar-circle" [ngClass]="staffRole() === 'TEACHER' ? 'avatar-teacher' : 'avatar-ta'">
+                        <i class="fas" [ngClass]="staffRole() === 'TEACHER' ? 'fa-chalkboard-user' : 'fa-user-graduate'"></i>
+                    </div>
+                }
+            </div>
+            <div class="feedback-content">
+                <div class="feedback-header">
+                    <span class="feedback-name">{{ staffName() }}</span>
+                    <span class="feedback-role">{{ staffRole() === 'TEACHER' ? 'Giáo viên' : 'Trợ giảng' }}</span>
+                </div>
+                <p class="feedback-text f-roboto f-14 lh-base fw-normal m-0">{{ media()[ 'content' ] }}</p>
+                @if (criteriaScores().length > 0) {
+                    <div class="criteria-scores">
+                        @for (score of criteriaScores(); track score.criteria) {
+                            <div class="criteria-item">
+                                <span class="criteria-label">{{ score.criteria }}</span>
+                                <div class="criteria-bar">
+                                    <div class="criteria-fill" [style.width.%]="(score.score / 10) * 100" [style.background]="score.score | contentReviewerCriteriaScoreColor"></div>
+                                </div>
+                                <span class="criteria-score">{{ score.score }}/10</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

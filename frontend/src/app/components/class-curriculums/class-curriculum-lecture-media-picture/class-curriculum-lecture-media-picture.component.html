@@ -1,0 +1,26 @@
+<div class="class-curriculum-lecture-media-picture d-flex m-0 p-0 w-100 h-100 position-relative overflow-hidden">
+    @if (src()) {
+        <figure class="class-curriculum-lecture-media-picture__figure d-flex w-100 h-100 position-relative">
+            <img class="class-curriculum-lecture-media-picture__img" [ngSrc]="src() | safeUrl" [alt]="fileInfo()?.title" fill>
+        </figure>
+        @if (fileInfo()) {
+            <p class="class-curriculum-lecture-media-picture__info m-0 position-absolute">{{ fileInfo().title }} | {{ fileSize() }}</p>
+        }
+        @if (previewFile()) {
+            <button class="class-curriculum-lecture-media-picture__btn btn position-absolute w-100 h-100" (click)="btnOpenPreview()"></button>
+        }
+    } @else {
+        <div class="d-flex justify-content-center align-items-center w-100 h-100">
+            <svg class="h-auto wid-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#549bff">
+                <rect height="17.5" rx="2.75" width="17.5" x="3.25" y="3.25" opacity="0.4"/>
+                <g fill="#549bff">
+                    <path d="m20.75 16.92v1.08c0 1.52-1.23 2.75-2.75 2.75h-12c-1.52 0-2.75-1.23-2.75-2.75v-1.31l3.81-3.81c1.07-1.07 2.81-1.07 3.88 0l2.16 2.16 1.25-.84c1.02-.68 2.33-.62 3.27.16z"/>
+                    <circle cx="14" cy="9" r="2.75"/>
+                </g>
+            </svg>
+        </div>
+    }
+</div>
+@if (enablePreview() && previewFile()) {
+    <div [ngxFilePreview]="previewFile()" [canDownload]="false" [openImmediately]="true" class="d-none" lang="en" themeMode="light" trigger="click" (onClosePreview)="onClosePreview()" (previewVisible)="previewVisible($event)"></div>
+}

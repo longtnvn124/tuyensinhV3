@@ -1,0 +1,335 @@
+<section class="admin-section--table">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Tải xuống dữ liệu..." style="max-width: calc(100% - 1px)"></app-loading-progress>
+    }
+    @if (state() === 'update') {
+        <app-loading-progress heading="Đang cập nhật..." style="max-width: calc(100% - 1px)"></app-loading-progress>
+    }
+    @if(state() !== 'error'){
+        @switch (modeState()) {
+            @case ('default') {
+                <div class="admin-wrap-table">
+                    <div class="admin-wrap-table__head d-flex">
+                        <h4 class="admin-wrap-table__heading">
+                            <svg>
+                                <use href="fonts/custom-icon.svg#custom-calendar"></use>
+                            </svg>
+                            Danh sách nghỉ học
+                        </h4>
+                    </div>
+                    <div class="admin-wrap-table__body">
+                        <table class="tbl admin-table table-hover">
+                                <thead>
+                                    <tr>
+                                        <!-- <th class="col-index text-left">#</th> -->
+                                        <th class="wid-60 text-center">Ảnh</th>
+                                        <th class="text-left">Họ và tên</th>
+                                        <th class="wid-100 text-center">Ngày sinh</th>
+                                        <th class="text-left">Khóa học / Bài học</th>
+                                        <th class="wid-120 text-center">Bắt đầu</th>
+                                        <th class="wid-175 text-center">Trạng thái điểm danh</th>
+                                        <th class="text-center">Lý do nghỉ</th>
+                                        <th class="wid-160 text-center p-0">Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (row of dataTable.data(); track row.id; let index = $index) {
+                                        <tr class="select-item" >
+                                            <!-- (click)="btnGetToSingle(row)" -->
+                                            <!-- <td class="col-index text-left">{{ dataTable.paginator.startIndex() + i }}</td> -->
+                                            <td class="wid-60 text-center" style="line-height: 0;padding: 5px 0;">
+                                                <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{student: row}" class="button--un-set-style">
+                                                    <img class="profile-avatar-circle" [src]="row.hocsinh.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">	
+                                                </button>	
+                                            </td>
+                                            <td class="x-col-name wid-180 p-10">
+                                                <small class="block f-14 text-primary">{{ row.hocsinh?.english_name }}</small>
+                                                <span class="block">{{ row.hocsinh?.full_name }}</span>
+                                            </td>
+                                            <td class="wid-100 text-center">{{ row.hocsinh.dob | date: 'dd/MM/yyyy'}}</td>
+
+                                            <td class="text-left">
+                                                <small class="block f-14 text-primary">{{row.class_session?.topic}}</small>
+                                                <span class="block">{{row.class_session?.title}}</span>
+                                            </td>
+                                            <td class="wid-120 text-center">{{row.class_session.started_at | date: 'dd/MM/yyyy hh:mm'}}</td>
+                                            <td class="wid-175 text-center">
+                                                <div class="flex" style="justify-content: center; gap: 6px">
+                                                    @switch (row.status) {
+                                                        @case ('PRESENT') {
+                                                            <span class="ictu-badge ictu-badge--success attendance-absent-badge-center">Đi học</span>
+                                                        }
+                                                        @case ('UNEXCUSED') {
+                                                            <span class="ictu-badge ictu-badge--danger attendance-absent-badge-center">Nghỉ không phép</span>
+                                                        }
+                                                        @case ('EXCUSED') {
+                                                            <span class="ictu-badge ictu-badge--purple attendance-absent-badge-center">Nghỉ có phép</span>
+                                                        }
+                                                        @case ('LATE') {
+                                                            <span class="ictu-badge ictu-badge--info attendance-absent-badge-center">Đi muộn</span>
+                                                        }
+                                                        @case ('WAITING') {
+                                                            <span class="ictu-badge ictu-badge--secondary attendance-absent-badge-center">Chưa điểm danh</span>
+                                                        }
+                                                    }
+                                                    <button class="button--un-set-style" [matMenuTriggerFor]="menu_status" [matMenuTriggerData]="{data: index}">
+                                                        <i class="ti ti-dots-vertical"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <textarea rows="1" style="width: 100%; box-sizing: border-box;background: white; resize: vertical;" [(ngModel)]="row.reason" variant="filled" pTextarea (input)="updateStatusDiemDanh(row.status, index)"></textarea>
+                                            </td>
+                                            <td class="wid-160 text-center p-0">
+                                                <div class="admin-table__btn-actions">
+                                                    <button mat-flat-button class="btn ictu-button-danger-light" (click)="selectAttendance(row)" [ngClass]="{ 'warning-btn': row.attendance_socet }" [disabled]="!row.attendance_socet" pTooltip="Trạng thái điểm danh đã được cập nhật" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-alert-circle"></i>
+                                                    </button>
+                                                    <button mat-flat-button class="btn ictu-button-info-light" (click)="opendialogteacherTA(row)" pTooltip="Thông tin người giảng dạy" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-alert-circle"></i>
+                                                    </button>
+                                                    <button mat-flat-button class="btn ictu-button-secondary-light" (click)="setMode('session', row)" pTooltip="Xem chi tiết học tập" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-table-export"></i>
+                                                    </button>
+                                                    <button class="btn ictu-button-success-light" (click)="opendialogPhuHuynh(row)" pTooltip="Thông tin phụ huynh" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="12">Không có bản ghi nào.</td>
+                                        </tr> 
+                                    }
+                                </tbody>
+                            </table>
+                    </div>
+                </div>
+            }
+            @case ('session') {
+                <div class="admin-wrap-table">
+                    <div class="admin-wrap-table__head d-flex">
+                        <h4 class="admin-wrap-table__heading">
+                            <svg>
+                                <use href="fonts/custom-icon.svg#custom-calendar"></use>
+                            </svg>
+                            Danh sách buổi học của {{attendance_selected().hocsinh?.full_name}}
+                        </h4>
+                        <div class="admin-wrap-table__head-actions">
+                            <button (click)="setMode('default')" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                                <i class="ti ti-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="admin-wrap-table__body">
+                        <table class="tbl admin-table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="col-index text-left">#</th>
+                                        <th class="text-left">Khóa học / Bài học</th>
+                                        <th class="wid-175 text-center">Trạng thái điểm danh</th>
+                                        <th class="text-center">Lý do nghỉ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (row of dataTableAttendanceStudent.data(); track row.id; let index = $index) {
+                                        <tr class="select-item" >
+                                            <!-- (click)="btnGetToSingle(row)" -->
+                                            <td class="col-index text-center">{{ dataTable.paginator.startIndex() + index }}</td>
+                                            <td class="text-left">
+                                                <small class="block f-14 text-primary">{{row['class_session']?.topic}}</small>
+                                                <span class="block">{{row['class_session']?.title}}</span>
+                                            </td>
+                                            <td class="wid-175 text-center">
+                                                @switch (row.status) {
+                                                    @case ('PRESENT') {
+                                                        <span class="ictu-badge ictu-badge--success attendance-absent-badge-center">Đi học</span>
+                                                    }
+                                                    @case ('UNEXCUSED') {
+                                                        <span class="ictu-badge ictu-badge--danger attendance-absent-badge-center">Nghỉ không phép</span>
+                                                    }
+                                                    @case ('EXCUSED') {
+                                                        <span class="ictu-badge ictu-badge--purple attendance-absent-badge-center">Nghỉ có phép</span>
+                                                    }
+                                                    @case ('LATE') {
+                                                        <span class="ictu-badge ictu-badge--info attendance-absent-badge-center">Đi muộn</span>
+                                                    }
+                                                    @case ('WAITING') {
+                                                        <span class="ictu-badge ictu-badge--secondary attendance-absent-badge-center">Chưa điểm danh</span>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                <textarea [disabled]="true" rows="1" style="width: 100%; box-sizing: border-box;background: white; resize: vertical;" [(ngModel)]="row.reason" variant="filled" pTextarea (input)="updateStatusDiemDanh(row.status, index)"></textarea>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="12">Không có bản ghi nào.</td>
+                                        </tr> 
+                                    }
+                                </tbody>
+                            </table>
+                    </div>
+                    <div class="admin-wrap-table__foot">
+                        <div class="d-flex justify-content-center align-items-center w-100">
+                            <ictu-paginator [control]="dataTableAttendanceStudent.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    } @else {
+        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+            <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+        </div>
+    }
+</section>
+
+<mat-menu #menu="matMenu" yPosition="above" >
+	<ng-template matMenuContent let-student="student">
+		<div class="profile-avatar-menu">
+			<img [src]="student.avatar || 'images/user/avatar-1.jpg'" alt="Preview"/>
+		</div>
+	</ng-template>
+</mat-menu>
+
+<mat-menu #menu_status="matMenu" yPosition="above" >
+    <ng-template matMenuContent let-data="data">
+        <div style="display: flex; flex-direction: column; gap: 5px; align-items: center; padding: 10px;">
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('PRESENT', data)">
+                <span class="ictu-badge ictu-badge--success" style="display: flex; width: 120px; justify-content: center;">Đi học</span>
+            </button>
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('UNEXCUSED', data)">
+                <span class="ictu-badge ictu-badge--danger" style="display: flex; width: 120px; justify-content: center;">Nghỉ không phép</span>
+            </button>
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('EXCUSED', data)">
+                <span class="ictu-badge ictu-badge--purple" style="display: flex; width: 120px; justify-content: center;">Nghỉ có phép</span>
+            </button>
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('LATE', data)">
+                <span class="ictu-badge ictu-badge--info" style="display: flex; width: 120px; justify-content: center;">Đi muộn</span>
+            </button>
+        </div>
+    </ng-template>
+</mat-menu>
+
+
+<mat-menu #menuPhuHuynh="matMenu" yPosition="above" >
+	<ng-template matMenuContent let-data="data" let-defaultAvatar="defaultAvatar">
+		<div class="profile-avatar-menu">
+			<img [src]="data.avatar || defaultAvatar" alt="Preview"/>
+		</div>
+	</ng-template>
+</mat-menu>
+
+<mat-menu #menu_status="matMenu" yPosition="above" >
+    <ng-template matMenuContent let-data="data">
+        <div style="display: flex; flex-direction: column; gap: 5px; align-items: center; padding: 10px;">
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('PRESENT', data)">
+                <span class="ictu-badge ictu-badge--success" style="display: flex; width: 120px; justify-content: center;">Đi học</span>
+            </button>
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('UNEXCUSED', data)">
+                <span class="ictu-badge ictu-badge--danger" style="display: flex; width: 120px; justify-content: center;">Nghỉ không phép</span>
+            </button>
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('EXCUSED', data)">
+                <span class="ictu-badge ictu-badge--purple" style="display: flex; width: 120px; justify-content: center;">Nghỉ có phép</span>
+            </button>
+            <button class="button--un-set-style" (click)="updateStatusDiemDanh('LATE', data)">
+                <span class="ictu-badge ictu-badge--info" style="display: flex; width: 120px; justify-content: center;">Đi muộn</span>
+            </button>
+        </div>
+    </ng-template>
+</mat-menu>
+
+
+<p-dialog [(visible)]="visibleDialogAttendanceSocet" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '300px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thông tin thay đổi điểm danh</h4>
+			<button (click)="visibleDialogAttendanceSocet = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: center; font-size: 14px; width: 100%; padding: 10px;">
+			<div>Người cập nhật: {{attendance_selected()?.attendance_socet?.creator}}</div>
+			<div>Thời gian: {{attendance_selected()?.attendance_socet?.created_at}}</div>
+		</div>
+	</div>
+</p-dialog>
+
+
+<p-dialog [(visible)]="visibleDialogteacherTA" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '500px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thông tin GV/TG</h4>
+			<button (click)="visibleDialogteacherTA = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div style="display: flex; flex-direction: column; align-items: center; font-size: 14px; width: 100%; padding: 10px;">
+			<div>Giáo viên: {{diemdanhSelect?.class_session?.teacher?.full_name}}{{ diemdanhSelect?.class_session?.teacher?.phone ? ' | ' + diemdanhSelect?.class_session?.teacher?.phone : '' }}</div>
+			<div>Trợ giảng: {{diemdanhSelect?.class_session?.assistants?.full_name}}{{ diemdanhSelect?.class_session?.assistants?.phone ? ' | ' + diemdanhSelect?.class_session?.assistants?.phone : '' }}</div>
+		</div>
+	</div>
+</p-dialog>
+
+<p-dialog class="p-dialog--no-header" [modal]="true" [(visible)]="visibleDialogPhuHuynh" [closable]="false" [draggable]="true" [style]="{ width: '500px', height: '75vh' }">
+	<div class="class-student-parent-dialog">
+		@if (statePagePhuHuynh() == 'loading') {
+			<app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+		}
+		
+		<div>
+			<div class="class-student-parent-dialog-header">
+				<div class="d-flex justify-content-center align-items-center">
+					<div>Danh sách phụ huynh của học sinh {{diemdanhSelect?.hocsinh?.full_name}}</div>
+				</div>
+				<div class="d-flex justify-content-center align-items-center">
+					<button class="class-student-parent-dialog-btnclose" (click)="visibleDialogPhuHuynh = !visibleDialogPhuHuynh">
+						<i class="ti ti-x"></i>
+					</button>
+				</div>
+			</div>
+			@switch (statePagePhuHuynh()) {
+				@case ('success') {
+					<div class="class-student-parent-dialog-body">
+						@for (row of listPhuHuynh; track row.id; let i = $index){
+							<div class="class-student-parent-dialog-body__profile-card">
+								<button [matMenuTriggerFor]="menuPhuHuynh" [matMenuTriggerData]="{data: row, defaultAvatar: 'images/user/avatar-placeholder.jpg'}" class="button--un-set-style">
+									<img class="profile-avatar-circle" style="width: 60px; height: 60px; margin-right: 10px;" [src]="row.avatar || 'images/user/avatar-placeholder.jpg'" alt="" width="50" height="50">	
+								</button>
+								<div class="class-student-parent-dialog-body__profile-info">
+									@if(row.vaitro){
+										<div class="profile-info-name">{{ row.full_name }} ({{ row.vaitro }})</div>
+									}@else {
+										<div class="profile-info-name">{{ row.full_name }}</div>
+									}
+									<div class="profile-info-dob">Ngày sinh: {{ row.dob | date: 'dd/MM/yyyy' }}</div>
+									<div  class="profile-info-tag">
+										<span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai1 }}</span>
+										@if(row.dienthoai2){
+											<span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai2 }}</span>
+										}
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+						
+					@if (listPhuHuynh.length == 0) {
+						<div class="class-student-parent-dialog-body" class="empty-message-wrapper" style="text-align: center;">Không có phụ huynh</div>
+					}
+				}
+				@case ('error') {
+					<div class="class-student-parent-dialog-body class-student-parent-dialog-body--center">
+						<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+							<a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="loadPhuHuynh(diemdanhSelect)">tải lại</a>
+						</div>
+					</div>
+				}
+			}
+
+		</div>
+	</div>
+</p-dialog>

@@ -1,0 +1,620 @@
+<section class="admin-wrap-table-students">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	<div class="admin-wrap-table">
+		@if (state() === 'success') {
+			@switch (modeState()) {
+				@case ('DF') {
+					<div class="admin-wrap-table__head d-flex">
+					<h4 class="admin-wrap-table__heading">
+						<svg><use href="fonts/custom-icon.svg#custom-user-tie"></use></svg>
+						Tổng số: {{recordsFiltered}}
+					</h4>
+					
+						<div style="display: flex; flex-direction: row; align-items: center; gap: 10px">
+							@if(viewMode()==='group'){
+								<button (click)="openOrCloseAllPanels()" style="width: 40px; height: 38px;" mat-flat-button class="btn ictu-button-purple-light">
+									@if(!viewAllPlanesMode){
+										<i class="ti ti-chevrons-down" pTooltip="Mở tất cả" tooltipPosition="left"></i>
+									}@else{
+										<i class="ti ti-chevrons-up" pTooltip="Đóng tất cả" tooltipPosition="left"></i>
+									} 
+								</button>
+								<button mat-flat-button class="btn ictu-badge-btn--purple" style="height: 38.5px" (click)="visibleDialogClassGroup = true;"><i class="ti ti-users"></i> Tạo nhóm</button>
+							}
+							<div class="admin-wrap-table__head-actions">
+								@if(viewMode()==='DF'){
+									<input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchData()">
+									@if (role() == 'training_management') {
+										<button (click)="openDialogAddHS()" class="btn ictu-badge-btn--success-reverse" mat-flat-button  matTooltip="Thêm học sinh từ danh sách">
+											<i class="ti ti-plus"></i>
+										</button>
+									}
+									@if (permissionControl().canCreate) {
+										<button (click)="openImportingFromFile()" mat-flat-button class="btn ictu-badge-btn--success-reverse" matTooltip="Import học sinh">
+											<i class="ti ti-file-import"></i>
+										</button>
+									}
+								}
+								@if(role() == 'training_management' && classObject().course.type != 'ON_SITE'){
+									<div class="admin-wrap-table__switchers" pTooltip="Chế độ hiển thị" tooltipPosition="left">
+										<button (click)="btnSetViewMode('DF')" type="button" [class.active]="viewMode()==='DF'" class="admin-wrap-table__switchers__btn btn">Danh sách</button>
+										<button (click)="btnSetViewMode('group')" type="button" [class.active]="viewMode()==='group'" class="admin-wrap-table__switchers__btn btn">Nhóm</button>
+									</div>
+								}
+								<!-- @if (role() == 'manager') {
+									<button (click)="addSelectedRows()" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+										<i class="ti ti-trash"></i>
+									</button>
+								} -->
+							</div>
+						</div>
+			</div>
+			@if(viewMode()==='DF'){
+				<div class="admin-wrap-table__body">
+					<table class="tbl admin-table table-hover">
+						<thead>
+							<tr>
+								<!-- <th *ngIf="role() == 'manager'" class="col-checkbox">
+									<mat-checkbox [checked]="dataTable.totalChecked()" [indeterminate]="dataTable.partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="!dataTable.data().length"></mat-checkbox>
+								</th> -->
+								<!-- <th class="col-index text-center">#</th> -->
+								<th class="wid-100 text-center">Mã HS</th>
+								<th class="wid-60 text-center">Ảnh</th>
+								<th class="text-left">Họ và tên</th>
+								<th class="wid-100 text-center">Ngày sinh</th>
+								<th class="wid-50 text-center">Giới tính</th>
+								<th class="wid-150 text-center">Trạng thái</th>
+								@if(role() == 'training_management' || 'teacher'){
+									<th class="wid-60 text-center">Hành động</th>
+								}
+							</tr>
+						</thead>
+						<tbody>
+							@for (row of dataTable.data(); track row.id; let i = $index) {
+								<tr>
+									<!-- <td class="col-checkbox">
+										<mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)" [disabled]="false"></mat-checkbox>
+									</td> -->
+									<!-- <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td> -->
+									<td class="wid-100 text-center">{{ row.hocsinh?.code ?? '' }}</td>
+									<td class="wid-60 text-center" style="line-height: 0;padding: 5px 0;">
+										<button [matMenuTriggerFor]="menuAvatar" [matMenuTriggerData]="{data: row.hocsinh, defaultAvatar: 'images/user/avatar-1.jpg'}" class="button--un-set-style">
+											<img class="profile-avatar-circle" [src]="row.hocsinh.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">	
+										</button>	
+									</td>
+									<td class="text-left" style="font-weight: 500;">{{ row.hocsinh.full_name }}{{ row.hocsinh.english_name ? ' (' + row.hocsinh.english_name + ')' : '' }}</td>
+									<td class="wid-100 text-center">{{ row.hocsinh?.dob ?? '' | date: 'dd/MM/yyyy'}}</td>
+									<td class="wid-50 text-center">{{ row.hocsinh?.gender ?? ''}}</td>
+									<td class="wid-150 text-center p-0">
+										<div class="d-flex w-100 h-100 justify-content-center align-items-center">
+											@if(role() == 'training_management'){
+												<p-select  (onChange)="saveStatusStudent($event, row.id)" [options]="optionListTrangThai" [style]="{ width: '134px' }" [(ngModel)]="row.status" appendTo="body" class="ictu-form__input-field only-icon-dropdown"/>
+											}@else{
+												@if (row.status === 1) {
+													<span class="ictu-badge ictu-badge--success">Đang học</span>
+												} @else {
+													<span class="ictu-badge ictu-badge--secondary">Đã nghỉ</span>
+												}
+											}
+											
+										</div>
+									</td>
+									<td class="wid-60 text-center p-0">
+										<div class="admin-table__btn-actions">
+											<button class="btn ictu-button-success-light" (click)="opendialogPhuHuynh(row)" matTooltip="Thông tin phụ huynh" matTooltipPosition="above">
+												<i class="ti ti-eye"></i>
+											</button>
+											<!-- <button *ngIf="role() == 'manager'" (click)="deleteRow(row)" class="btn ictu-button-danger-light">
+												<i class="ti ti-trash"></i>
+											</button> -->
+										</div>
+									</td>
+								</tr>
+							} @empty {
+								<tr>
+									<td colspan="12">Không có bản ghi nào.</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+				<!-- <div class="admin-wrap-table__foot">
+					<div class="d-flex justify-content-center align-items-center w-100">
+						<ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+					</div>
+				</div> -->
+			}@else {
+				<div class="admin-wrap-table__body_group">
+					@for (itemGroup of classGroup; track itemGroup.id; let i = $index) {
+						<div class="flex-col" style="border: 1px solid #dbe0e5;">
+							<div class="header_group">
+								<div style="font-weight: 500; font-size: 16px;">{{itemGroup.name}}</div>
+								<div class="header_group_right">
+									@if(itemGroup.id != 0){
+										<button (click)="openDialogClassGroupTA(itemGroup,i)" pTooltip="Thêm trợ giảng" tooltipPosition="left" mat-flat-button class="btn ictu-badge-btn--info-reverse"><i class="ti ti-users"></i></button>
+									}
+									@if(itemGroup.listStudent.length != 0){
+										<button [disabled]="!hasAnyChecked(i)" (click)="clickclassGroupAddStudent(i)" pTooltip="Chuyển nhóm" tooltipPosition="left" mat-flat-button class="btn ictu-badge-btn--teal-reverse"><i class="ti ti-arrows-right-down"></i></button>
+									}
+									<svg style="cursor: pointer;" (click)="collapseMenu.panel?.toggle();" [ngClass]="isPanelOpen($index) ? 'css-en-1hqlyo5' : 'css-en-9zucdi'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#EEF1F7"></circle><path d="M12.351 14.8367C12.356 14.8307 12.358 14.8227 12.363 14.8167L15.8538 10.9599C16.0487 10.7429 16.0487 10.391 15.8538 10.174C15.8518 10.172 15.8498 10.171 15.8478 10.17C15.8044 10.1174 15.75 10.075 15.6886 10.0457C15.6271 10.0163 15.5599 10.0007 15.4918 10H8.50927C8.43988 10.0011 8.37159 10.0175 8.30922 10.0479C8.24684 10.0783 8.19191 10.122 8.14829 10.176L8.14629 10.174C8.05193 10.2832 8 10.4227 8 10.567C8 10.7113 8.05193 10.8508 8.14629 10.9599L11.645 14.8367C11.6886 14.8877 11.7427 14.9287 11.8037 14.9568C11.8646 14.985 11.9309 14.9995 11.998 14.9995C12.0651 14.9995 12.1315 14.985 12.1924 14.9568C12.2533 14.9287 12.3074 14.8877 12.351 14.8367Z" fill="#808C98"></path></svg>
+								</div>
+							</div>
+							<collapse-panel #collapseMenu>
+								<div style="background: rgb(247, 247, 247); padding: 0px 6px;">
+									<table class="tbl admin-table table-hover">
+									<thead>
+										<tr>
+											<th class="col-checkbox">
+												<mat-checkbox [checked]="isAllChecked(i)" [indeterminate]="partiallyCheckedStudent(i)" (change)="clickCheckedAll(i, $event.checked)" [disabled]="itemGroup.listStudent.length == 0"></mat-checkbox>
+											</th>
+											<th class="wid-60 text-center">Ảnh</th>
+											<th class="wid-100 text-center">Mã HS</th>
+											<th class="text-left">Họ và tên</th>
+											<th class="wid-100 text-center">Ngày sinh</th>
+											<th class="wid-50 text-center">Giới tính</th>
+										</tr>
+									</thead>
+									<tbody>
+										@for (row of itemGroup.listStudent; track row.id; let j = $index) {
+											<tr>
+												<td class="col-checkbox">
+													<mat-checkbox [checked]="row.isChecked" (change)="clickCheckedOne(i, j, $event.checked)" [disabled]="false"></mat-checkbox>
+												</td>
+												<td class="wid-60 text-center" style="line-height: 0;padding: 5px 0;">
+													<button [matMenuTriggerFor]="menuAvatar" [matMenuTriggerData]="{data: row.hocsinh, defaultAvatar: 'images/user/avatar-1.jpg'}" class="button--un-set-style">
+														<img class="profile-avatar-circle" [src]="row.hocsinh?.avatar ? row.hocsinh.avatar : 'images/user/avatar-1.jpg'" alt="" width="50" height="50">	
+													</button>
+												</td>
+												<td class="wid-100 text-center">{{ row.hocsinh?.code ?? '' }}</td>
+												@if(row.hocsinh.english_name){
+													<td class="text-left" style="font-weight: 500;">{{ row.hocsinh?.full_name ?? ''}} ({{row.hocsinh?.english_name  ?? ''}})</td>
+												}@else {
+													<td class="text-left" style="font-weight: 500;">{{ row.hocsinh?.full_name  ?? ''}}</td>
+												}
+												<td class="wid-100 text-center">{{ row.hocsinh?.dob  ?? '' | date: 'dd/MM/yyyy'}}</td>
+												<td class="wid-50 text-center">{{ row.hocsinh?.gender  ?? ''}}</td>
+											</tr>
+										} @empty {
+											<tr>
+												<td colspan="12">Không có học sinh nào.</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+								</div>
+								<!-- <div style="height: 6px"></div> -->
+							</collapse-panel>
+						</div>
+					}
+				</div>
+			}
+
+		}
+		@case ('import') {
+			<div class="admin-wrap-table">
+				@if (state() !== 'error') {
+					<div class="admin-wrap-table__head d-flex">
+						<h4 class="admin-wrap-table__heading">
+							<svg>
+								<use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+							</svg>
+							Danh sách học sinh Import
+						</h4>
+						<div class="admin-wrap-table__head-actions">
+							<button (click)="openListImportDuplicate()"  mat-flat-button class="btn p-0 ictu-badge-btn--warning-reverse" [matTooltip]="isListImportDuplicate ? 'DS thí sinh lỗi' : 'DS thí sinh'">
+								<i class="ti ti-zoom-question"></i>
+							</button>
+							<button (click)="submitImport()" [disabled]="!checkErrorHocSinh() || isUploadHSLH" mat-flat-button class="btn p-0 ictu-badge-btn--success-reverse" matTooltip="Xác nhận import">
+								<i class="ti ti-checkbox"></i>
+							</button>
+							<button (click)="addHocSinhLopHoc()" [disabled]="checkUploadedHocSinh()" mat-flat-button class="btn p-0 ictu-badge-btn--success-reverse" matTooltip="Xác nhận thêm vào lớp">
+								<i class="ti ti-check"></i>
+							</button>
+							<button (click)="deleteSelectedHocSinhImport()" [disabled]="!someItemsChecked()" class="btn p-0 ictu-button-danger-gradient" mat-flat-button>
+								<i class="ti ti-trash"></i>
+							</button>
+							<button (click)="setMode('DF')" class="btn p-0 ictu-badge-btn--danger-reverse" mat-flat-button>
+								<i class="ti ti-x"></i>
+							</button>
+						</div>
+					</div>
+					<div class="admin-wrap-table__body">
+						<table class="tbl admin-table table-hover">
+							<thead>
+								<tr>
+									<th class="col-checkbox">
+										<mat-checkbox [checked]="totalChecked()" [indeterminate]="partiallyChecked()" (change)="checkAll($event.checked)" [disabled]="!importFiltered().length"></mat-checkbox>
+									</th>
+									<th class="wid-100 text-center p-0">Trạng thái</th>
+									<th class="text-center p-0">Thông tin lỗi</th>
+									<th class="wid-100 text-center">Mã HS</th>
+									<th class="wid-85 text-center">Email học sinh</th>
+									<th class="wid-200 text-center">Tên học sinh</th>
+									<th class="wid-90 text-center">Năm sinh học sinh</th>
+									<th class="wid-90 text-center">Giới tính</th>
+									<th class="wid-120 text-center">Tên phụ huynh</th>
+									<th class="wid-85 text-center">Email phụ huynh</th>
+									<th class="wid-120 text-center">SĐT phụ huynh</th>
+									<th class="wid-60 text-center">Hành động</th>
+								</tr>
+							</thead>
+							<tbody>
+								@for (row of importFiltered(); track row.id; let i = $index) {
+									<tr [style.background-color]="row.state === 'invalid' ? '#fef2f2' : ''">
+										<td class="col-checkbox">
+											<mat-checkbox [checked]="row.checked" (change)="selectRow(row)"></mat-checkbox>
+										</td>
+										<td class="wid-190 text-center p-0">
+											<ng-container>
+												@switch(row.state){
+													@case('invalid'){
+														<span class="ictu-badge ictu-badge--danger">Lỗi</span>
+													}
+													@case('prepare'){
+														<span class="ictu-badge ictu-badge--success">Sẵn sàng</span>
+													}
+													@case('uploaded'){
+														<span class="ictu-badge ictu-badge--success">Thành công</span>
+													}
+													@case('uploadedHSLH'){
+														<span class="ictu-badge ictu-badge--success">Thêm vào lớp thành công</span>
+													}
+													@case('uploadingFail'){
+														<span class="ictu-badge ictu-badge--danger">Lỗi upload</span>
+													}
+													@case('uploadingFailHSLH'){
+														<span class="ictu-badge ictu-badge--danger">Lỗi upload</span>
+													}
+												}
+											</ng-container>
+										</td>
+										<td class="text-center p-0">
+											@if(row.state != 'uploaded' && row.state != 'prepare' && row.state != 'uploadedHSLH'){
+												<span class="ictu-badge ictu-badge--danger">{{row.errorMessage}}</span>
+											}
+										</td>
+										<td class="wid-100 text-center">{{ row.masohocsinh }}</td>
+										<td class="wid-85 text-center">{{ shortenEmailEnd(row.emailhocsinh)}}</td>
+										<td class="wid-200 text-left">{{ row.hotenhocsinh }}</td>
+										<td class="wid-90 text-center">{{ row.ngaysinhhocsinh | date: 'yyyy'}}</td>
+										<td class="wid-90 text-center">{{ row.gioitinhhocsinh }}</td>
+										<td class="wid-120 text-center">{{ row.tenphuhuynh}}</td>
+										<td class="wid-85 text-center">{{ shortenEmailEnd(row.emailphuhuynh)}}</td>
+										<td class="wid-120 text-center">{{ row.dienthoaiphuhuynh}}</td>
+										<td class="p-0 wid-60">
+											<div class="admin-table__btn-actions">
+												@if (permissionControl().canDelete) {
+													<button class="btn ictu-button-danger-light" (click)="deleteHocSinhImport(row)">
+														<i class="ti ti-trash"></i>
+													</button>
+												}
+											</div>
+										</td>
+									</tr>
+								} @empty {
+									<tr>
+										<td colspan="12">Không có bản ghi nào.</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+					<div class="admin-wrap-table__foot">
+						<div class="d-flex justify-content-center align-items-center w-100">
+							<ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+						</div>
+					</div>
+				} @else {
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+			</div>
+			}
+		}
+			
+		} @else if(state() === 'unset_class_group') {
+				<div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+					<span class="ictu-badge ictu-badge--danger">Bạn chưa được phân vào nhóm</span>
+				</div>
+			} @else if(state() === 'error') {
+				<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+					<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+				</div>
+			}
+	</div>
+</section>
+
+<p-dialog class="p-dialog--no-header" [(visible)]="visibleDialog" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '600px', height: 'calc(70vh + 46px)'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer  ictu-dialog-layout--hide-overflow">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thêm học sinh vào lớp</h4>
+			<input style="margin-right: 10px;" [(ngModel)]="searchInfoAddHS.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchAddHS()">
+			<button style="margin-right: 40px;" [disabled]="listHSselectedcheckbox.length == 0" class="btn ictu-button-primary-light" (click)="addHS()">
+				<i class="ti ti-checks" pTooltip="Xác nhận" tooltipPosition="top" placeholder="Top"></i>
+			</button>
+			<button (click)="this.visibleDialog = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body" style="max-height: none; height: 70vh">
+			<div class="custom-dialog">
+				@if (statePage == 'load') {
+					<app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+				}
+				<div>
+					@switch (statePage) {
+						@case ('success') {
+							<div>
+								<div class="custom-dialog-body">
+									@for (row of dataTableAddHS.data(); track row.id; let j = $index){
+										<div class="row_no_space_between">
+											<p-checkbox [inputId]="row.code" name="group" [value]="row" [(ngModel)]="listHSselectedcheckbox" />
+												<div class="employee-show" style="margin-left: 10px;">
+													<button [matMenuTriggerFor]="menuAvatar" [matMenuTriggerData]="{data: row, defaultAvatar: 'images/user/avatar-1.jpg'}" class="button--un-set-style">
+														<img class="profile-avatar-circle" [src]="row.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">	
+													</button>
+													<div class="employee-show__info">
+														<h4 class="employee-show__info__name">{{ row.full_name }}</h4>
+														<p class="employee-show__info__email">{{ row.code }}</p>
+													</div>
+												</div>
+										</div>
+									}@empty {
+										<div class="empty-message-wrapper">Không có học sinh</div>
+									}
+								</div>
+								<div class="custom-dialog-foot">
+									<div class="d-flex justify-content-center align-items-center w-100">
+										<ictu-paginator [control]="dataTableAddHS.paginator" (onChangePage)="onChangePageAddHS($event)"></ictu-paginator>
+									</div>
+								</div>
+							</div>
+							
+						}
+						@case ('error') {
+							<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+								<a (click)="reloadAddHS($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+							</div>
+						}
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</p-dialog>
+<p-dialog [modal]="true" [(visible)]="visibleDialogPhuHuynh" [closable]="false" [draggable]="true" [style]="{ width: '500px', height: '75vh' }" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+	<div class="ictu-dialog-layout__wrapper">
+		@if (stateDialogPhuHuynh() == 'load') {
+			<app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+		}
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Danh sách phụ huynh của học sinh {{hocsinhSelected?.hocsinh?.full_name}}</h4>
+            <button (click)="visibleDialogPhuHuynh = !visibleDialogPhuHuynh" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        @switch (stateDialogPhuHuynh()) {
+            @case ('success') {
+                <div class="ictu-dialog-layout__body">
+                    @for (row of listPhuHuynh; track row.id; let i = $index){
+                        <div class="class-student-parent-dialog-body__profile-card">
+                            <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{data: row, defaultAvatar: 'images/user/avatar-placeholder.jpg'}" class="button--un-set-style">
+                                <img class="profile-avatar-circle" style="width: 60px; height: 60px; margin-right: 10px;" [src]="row.avatar || 'images/user/avatar-placeholder.jpg'" alt="" width="50" height="50">
+                            </button>
+                            <div class="class-student-parent-dialog-body__profile-info">
+                                @if(row.vaitro){
+                                    <div class="profile-info-name">{{ row.code }} ({{ row.vaitro }})</div>
+                                }@else {
+                                    <div class="profile-info-name">{{ row.full_name }}</div>
+                                }
+                                <div class="profile-info-dob">Ngày sinh: {{ row.dob | date: 'dd/MM/yyyy' }}</div>
+                                <div class="profile-info-tag">
+                                    <span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai1 }}</span>
+                                    @if(row.dienthoai2){
+                                        <span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai2 }}</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (listPhuHuynh.length == 0) {
+                    <div class="ictu-dialog-layout__body" class="empty-message-wrapper">Không có phụ huynh</div>
+                }
+            }
+            @case ('error') {
+                <div class="ictu-dialog-layout__body">
+                    <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                        <a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="loadPhuHuynh(hocsinhSelected)">tải lại</a>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+	
+</p-dialog>
+
+<ng-template #importTemplate>
+	<div class="ictu-dashboard-dialog">
+		<div class="ictu-dashboard-dialog__head">
+			<div class="ictu-dashboard-dialog__head__inner d-flex w-100 h-100">
+				<h4 class="ictu-dashboard-dialog__head__title me-auto">Nhập thông tin học sinh từ file Excel</h4>
+				<button (click)="downloadFileImportSample()" class="btn ictu-badge-btn--success-reverse ictu-dashboard-dialog__head__btn-close" mat-flat-button matTooltip="Tải xuống file mẫu import" matTooltipPosition="below">
+					<i class="ti ti-arrow-bar-to-down"></i>
+				</button>
+				<button (click)="closeImportingFromFile(importDialogDirty())" class="btn ictu-badge-btn--danger-reverse ictu-dashboard-dialog__head__btn-close" mat-flat-button matTooltip="Đóng panel import" matTooltipPosition="below">
+					<i class="ti ti-x"></i>
+				</button>
+			</div>
+		</div>
+		<div class="ictu-dashboard-dialog__body flex-fill position-relative">
+			@if (importPanel.isLoading()) {
+				<app-loading-progress [heading]="importPanel.loadingTitle()" backdropFilter="none"></app-loading-progress>
+			}
+			@switch (importPanel.step()) {
+				@case ('SELECT_FILE') {
+					<div class="d-flex justify-content-center align-items-center w-100 h-100 ictu-dashboard-dialog__dnd-area">
+						<div class="d-block" dragAndDrop (fileDropped)="onInputFile($event)">
+							<button (click)="openFileSelector()" class="ictu-dashboard-dialog__dnd-area__btn" mat-flat-button>
+								<span class="ictu-dashboard-dialog__dnd-area__btn__content d-flex flex-column">
+									<i class="ictu-dashboard-dialog__dnd-area__btn__icon ti ti-download"></i>
+									<b class="ictu-dashboard-dialog__dnd-area__btn__text">Kéo và thả file</b>
+									<b class="ictu-dashboard-dialog__dnd-area__btn__text">hoặc</b>
+									<b class="ictu-dashboard-dialog__dnd-area__btn__text">click vào đây để duyệt file</b>
+								</span>
+							</button>
+						</div>
+					</div>
+				}
+				@case ('PROCESS') {
+					<div class="ictu-dashboard-dialog__main-content"></div>
+				}
+				@default {
+
+				}
+			}
+		</div>
+	</div>
+</ng-template>
+
+<p-dialog [(visible)]="visibleDialogClassGroup" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '300px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Tạo nhóm</h4>
+			<button (click)="this.visibleDialogClassGroup = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body">
+			<div class="ictu-form ictu-form--label-on-top">
+				<div class="ictu-form__row">
+					<label class="ictu-form__label ictu-form__label--required" for="f_name">Số lượng nhóm</label>
+					<input class="ictu-form__input-field" [(ngModel)]="SLGroup" id="f_name" pInputText placeholder="Số lượng nhóm cần tạo" type="text">
+				</div>	
+				<button (click)="createClassGroup()" [disabled]="SLGroup == 0" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+			</div>
+		</div>
+		
+		
+		
+	</div>
+	
+</p-dialog>
+
+<p-dialog [(visible)]="visibleDialogClassGroupAddStudent" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '300px',}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Chọn nhóm cần thêm</h4>
+			<button (click)="this.visibleDialogClassGroupAddStudent = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body">
+			<div class="ictu-form ictu-form--label-on-top">
+				<div class="ictu-form__row">
+					<p-select class="ictu-form__input-field" appendTo="body" [options]="classGroupOptions()" optionLabel="name" optionValue="id" [(ngModel)]="classGroupAddStudent.classGroup_id" placeholder="Chọn nhóm lớp"> </p-select>
+				</div>	
+				<button (click)="updateClassGroupAddStudent()" [disabled]="classGroupAddStudent.classGroup_id == 0" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+			</div>
+		</div>
+	</div>
+</p-dialog>
+
+
+<p-dialog [(visible)]="visibleDialogClassGroupTA" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '50vh',minHeight: '400px',maxHeight: '75vh'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thông tin trợ giảng ({{classGroupAddStudent.classGroup?.name}})</h4>
+			<button (click)="this.visibleDialogClassGroupTA = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body">
+			@switch (statePage) {
+				@case ('success') {
+					<div class="custom-dialog">
+						@if(classGroupAddStudent.classGroup?.assistants.length != 0){
+							<div class="custom-dialog-body1" style="gap: 6px;">
+								@for(itemTA of classGroupAddStudent.classGroup?.assistants; track itemTA.id; let i = $index){
+									<div style="width: 100%;">
+										<ng-container *ngTemplateOutlet="employeeTplDel; context: { $implicit: itemTA }"></ng-container>
+									</div>
+								}
+							</div>
+						}@else {
+							
+							<div class="empty-message-wrapper">Không có trợ giảng</div>
+						}
+						<div class="custom-dialog-foot">
+							<button class="btn ictu-button-info-light" [matMenuTriggerFor]="menu" #trigger="matMenuTrigger"><i class="ti ti-circle-plus"></i> Thêm trợ giảng</button>
+						</div>
+					</div>
+				}
+				@case ('load') {
+					<app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+				}
+				@case ('error') {
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="reloadAddHS($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+			}
+		</div>
+	</div>
+</p-dialog>
+
+<ng-template #employeeTpl let-employee>
+	<div class="employee-control-multiple__staff d-flex w-100">
+		<div class="employee-control-multiple__staff__avatar d-inline-flex position-relative">
+			<img [alt]="employee.full_name" [ngSrc]=" employee.photo ?? 'images/user/avatar-2.jpg'" class="position-absolute d-block m-auto p-0" height="100" width="100">
+		</div>
+		<div class="employee-control-multiple__staff__info d-inline-flex flex-column">
+			<h4 class="f-roboto f-14 fw-medium m-0 p-0 lh-base text-truncate">{{ employee.full_name }}</h4>
+			<p class="f-roboto f-14 fw-normal m-0 p-0 lh-base text-muted text-truncate">{{ employee.email }}</p>
+		</div>
+	</div>
+</ng-template>
+
+<ng-template #employeeTplDel let-employee>
+	<div class="employee-control-multiple__staff d-flex w-100 position-relative">
+	<div class="employee-control-multiple__staff__avatar d-inline-flex position-relative">
+		<img [alt]="employee.full_name" [ngSrc]=" employee.photo ?? 'images/user/avatar-2.jpg'" class="position-absolute d-block m-auto p-0" height="100" width="100">
+	</div>
+	<div class="employee-control-multiple__staff__info d-inline-flex flex-column">
+		<h4 class="f-roboto f-14 fw-medium m-0 p-0 lh-base text-truncate">{{ employee.full_name }}</h4>
+		<p class="f-roboto f-14 fw-normal m-0 p-0 lh-base text-muted text-truncate">{{ employee.email }}</p>
+	</div>
+	<button (click)="addClassGroupTA(employee, true)"class="btn ictu-button-danger-light btn-delete">
+		<i class="ti ti-trash"></i>
+	</button>
+</div>
+</ng-template>
+
+
+<mat-menu #menu="matMenu" yPosition="above">
+  <div style="padding: 10px; max-height: 300px; min-height: 60px; overflow-y: auto">
+		@if(classGroupAddStudent.listTA.length != 0){
+			@for(itemTA of classGroupAddStudent.listTA; track itemTA.id; let i = $index){
+				<div style="padding-bottom: 6px;" (click)="addClassGroupTA(itemTA, false)">
+					<ng-container *ngTemplateOutlet="employeeTpl; context: { $implicit: itemTA }"></ng-container>
+				</div>
+			}
+		}@else {
+			<div>Tất cả trợ giảng đã được phân công</div>
+		}
+  </div>
+</mat-menu>
+
+
+<mat-menu #menuAvatar="matMenu" yPosition="above" >
+	<ng-template matMenuContent let-data="data" let-defaultAvatar="defaultAvatar">
+		<div class="profile-avatar-menu">
+			<img [src]="data.avatar || defaultAvatar" alt="Preview"/>
+		</div>
+	</ng-template>
+</mat-menu>

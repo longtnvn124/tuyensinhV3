@@ -1,0 +1,212 @@
+.throw-error-template {
+    width: var(--device-width);
+    max-height: var(--device-height);
+    overflow: hidden;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    display: block;
+    user-select: none;
+}
+
+.throw-error-template__inner {
+    min-height: var(--device-height);
+    width: var(--device-width);
+}
+
+.throw-error-template-bg-gradient {
+    background: linear-gradient(47deg, #1652f0 0%, #0a46e4 100%);
+}
+
+.error-code {
+    font-size: 120px;
+    font-weight: 900;
+    color: #dc3545;
+    text-shadow: 7px 7px 0 rgba(0, 0, 0, 0.1);
+    user-select: none;
+    letter-spacing: 2px;
+}
+
+.glitch {
+    animation: glitch 1s linear infinite;
+}
+
+.error-title {
+    text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.1);
+    font-size: 60px;
+}
+
+.error-page {
+    background-color: #FFFFFF;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: 10px 10px 0 0 rgba(0, 0, 0, 0.1);
+    padding: 40px;
+}
+
+@keyframes glitch {
+    2%,
+    64% {
+        transform: translate(2px, 0) skew(0deg);
+    }
+
+    4%,
+    60% {
+        transform: translate(-2px, 0) skew(0deg);
+    }
+
+    62% {
+        transform: translate(0, 0) skew(5deg);
+    }
+}
+
+.et_pb_button_0 {
+    color: #FFFFFF;
+    border-width: 1px;
+    border-color: #29c1ac;
+    border-radius: 10px;
+    background-color: #29c1ac;
+    padding: 12px 20px;
+    transition: all .35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.et_pb_button_0 {
+    box-shadow: 10px 10px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.et_pb_button_0:hover {
+    box-shadow: 5px 5px 0 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(5px);
+}
+
+.et_pb_button_0:active {
+    box-shadow: 0 0 0 0 transparent;
+    transform: translateY(10px);
+}
+
+.bubble {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.bubble div {
+    height: 60px;
+    width: 60px;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50px;
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    animation: 4s linear infinite;
+}
+
+.bubble .dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.5);
+    position: absolute;
+    top: 20%;
+    right: 20%;
+}
+
+.bubble div:nth-child(1) {
+    top: 20%;
+    left: 20%;
+    animation: animate 8s linear infinite;
+}
+
+.bubble div:nth-child(2) {
+    top: 60%;
+    left: 80%;
+    animation: animate 10s linear infinite;
+}
+
+.bubble div:nth-child(3) {
+    top: 40%;
+    left: 40%;
+    animation: animate 3s linear infinite;
+}
+
+.bubble div:nth-child(4) {
+    top: 66%;
+    left: 30%;
+    animation: animate 7s linear infinite;
+}
+
+.bubble div:nth-child(5) {
+    top: 90%;
+    left: 10%;
+    animation: animate 9s linear infinite;
+}
+
+.bubble div:nth-child(6) {
+    top: 30%;
+    left: 60%;
+    animation: animate 5s linear infinite;
+}
+
+.bubble div:nth-child(7) {
+    top: 70%;
+    left: 20%;
+    animation: animate 8s linear infinite;
+}
+
+.bubble div:nth-child(8) {
+    top: 75%;
+    left: 60%;
+    animation: animate 10s linear infinite;
+}
+
+.bubble div:nth-child(9) {
+    top: 50%;
+    left: 50%;
+    animation: animate 6s linear infinite;
+}
+
+.bubble div:nth-child(10) {
+    top: 45%;
+    left: 20%;
+    animation: animate 10s linear infinite;
+}
+
+.bubble div:nth-child(11) {
+    top: 10%;
+    left: 90%;
+    animation: animate 9s linear infinite;
+}
+
+.bubble div:nth-child(12) {
+    top: 20%;
+    left: 70%;
+    animation: animate 7s linear infinite;
+}
+
+.bubble div:nth-child(13) {
+    top: 20%;
+    left: 20%;
+    animation: animate 8s linear infinite;
+}
+
+.bubble div:nth-child(14) {
+    top: 60%;
+    left: 5%;
+    animation: animate 6s linear infinite;
+}
+
+.bubble div:nth-child(15) {
+    top: 90%;
+    left: 80%;
+    animation: animate 9s linear infinite;
+}
+
+@keyframes animate {
+    0% {
+        transform: scale(0) translateY(0) rotate(70deg);
+    }
+
+    100% {
+        transform: scale(1.3) translateY(-100px) rotate(360deg);
+    }
+}

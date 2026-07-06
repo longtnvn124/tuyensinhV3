@@ -1,0 +1,16 @@
+.ictu-attachment-item {
+    border-radius: 4px 4px 0 0;
+    border: 1px solid #dbe0e9;
+    border-bottom: 0;
+}
+
+.ictu-attachment-item + app-ictu-course-attachment-preview {
+    border: 1px solid #dbe0e9;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
+
+.ictu-course-attachment-control__empty {
+    border: 1px dashed #dbe0e9;
+    border-radius: 4px;
+}

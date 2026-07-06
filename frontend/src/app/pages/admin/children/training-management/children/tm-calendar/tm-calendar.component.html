@@ -1,0 +1,241 @@
+<!--
+<section class="admin-section&#45;&#45;table position-relative">
+	@if (state() === 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}
+	<div>
+		@if (state() !== 'error') {
+			@switch (mode()) {
+				@case ('thang') {
+					<div class="calendar-container">
+						<div class="header" style="height:55px;">
+							<div class="calendar-header-left">
+								<p-button icon="ti ti-chevron-left" [rounded]="true" [text]="true" severity="secondary" size="large" (click)="prevMonth()"/>
+								<p-button icon="ti ti-chevron-right" [rounded]="true" [text]="true" severity="secondary" size="large" (click)="nextMonth()"/>
+								<h1 class="p-0 m-0">{{ monthNames[currentMonth] }} - Năm {{ currentYear }}</h1>
+							</div>
+							<div class="calendar-header-right">
+								<div class="dropdown">
+									<div (click)="toggleDropdown()" class="calendar-wrapper" matTooltip="Yêu cầu đổi lịch" matTooltipPosition="above">
+										<i class="ti ti-calendar-stats"></i>
+										<span *ngIf="listlichYeuCau.length" class="dot"></span>
+									</div>
+									<div *ngIf="showDropdown" class="dropdown-menu">
+										<h1>Danh sách lịch yêu cầu đổi</h1>
+										@for (item of listlichYeuCau; track item.id; let i = $index) {
+											<div (click)="editRow(item); $event.stopPropagation()" class="note">
+												📝 {{ item.time_start | date: 'HH:mm' }} -                                                {{ shortenText(getLopHocText(item)) }}
+											</div>
+										}
+									</div>
+								</div>
+								<p-select [(ngModel)]="selectOption" [loading]="state() === 'loading'" [options]="optionList" optionLabel="value" appendTo="body" class="wid-175" placeholder="" (onChange)="setMode(selectOption.id)"/>
+							</div>
+						</div>
+
+						<div class="calendar-grid">
+							<div class="day-name" *ngFor="let d of dayNames">{{ d }}</div>
+							<div *ngFor="let date of calendarDays" class="day-cell" [class.today]="isToday(date)" (click)="addNewItem(date)">
+								<div class="day-number">{{ date?.getDate() }}</div>
+								<div *ngIf="checkCoLich(date)">
+									<div class="note" *ngFor="let item of getlich1ngay(date).slice(0, 2)">
+										<div (click)="editRow(item); $event.stopPropagation()">
+											📝 {{ item.time_start | date: 'HH:mm' }} - {{ shortenText(getLopHocText(item)) }}
+										</div>
+									</div>
+									<div *ngIf="getlich1ngay(date).length > 2" class="note" (click)="setMode('tuan',date)">
+										+ {{ getlich1ngay(date).length - 2 }} lịch khác...
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+				@case ('tuan') {
+					<div class="calendar-container">
+						<div class="header" style="height:55px;">
+							<div class="calendar-header">
+								<p-button icon="ti ti-chevron-left" [rounded]="true" [text]="true" severity="secondary" size="large" (click)="prevWeek()"/>
+								<p-button icon="ti ti-chevron-right" [rounded]="true" [text]="true" severity="secondary" size="large" (click)="nextWeek()"/>
+								<h1 class="p-0 m-0">Tuần: {{ weekDays[0] | date: 'dd/MM/yyyy' }} - {{ weekDays[6] | date: 'dd/MM/yyyy' }}</h1>
+							</div>
+							<p-select [(ngModel)]="selectOption" [loading]="state() === 'loading'" [options]="optionList" optionLabel="value" appendTo="body" class="wid-175" placeholder="" (onChange)="setMode(selectOption.id)"/>
+						</div>
+						<div class="calendar-grid week-view">
+							<div class="day-cell-week" *ngFor="let day of weekDays" [class.today]="isToday(day)" (click)="addNewItem(day)">
+								<div class="day-name">
+									{{ dayNamesWeek[day.getDay()] }} - {{ day | date: 'dd/MM' }}
+								</div>
+								<div></div>
+								<div class="note" *ngFor="let item of getlich1ngay(day)">
+									<div (click)="editRow(item); $event.stopPropagation()">
+										📝 {{ item.time_start | date: 'HH:mm' }} -                                    {{ getLopHoc(item.class_id).name }}                                    ({{ getPhonghoc(item.phonghoc_id).code }})
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			}
+		} @else {
+			<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+	</div>
+</section>
+
+
+&lt;!&ndash; <p-drawer #pDrawer (onHide)="onDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+	<div class="ictu-p-drawer__content position-relative">
+		@if (formControl.enableLoading()) {
+			<app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+
+		}
+		<div class="ictu-p-drawer__content__body position-relative">
+			@switch (formControl.state()) {
+				@case ('READY') {
+					<form [formGroup]="formControl.formGroup">
+						<div class="ictu-form ictu-form&#45;&#45;label-on-top">
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_phonghoc">Phòng học</label>
+								<p-select [options]="optionPhongHoc" appendTo="body" class="ictu-form__input-field" formControlName="phonghoc_id" placeholder="Chọn phòng học" optionLabel="name" optionValue="id"/>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_diadiem">Địa điểm</label>
+								<textarea class="ictu-form__input-field" formControlName="diadiem_phonghoc" id="f_diadiem" pTextarea placeholder="Địa điểm"></textarea>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_desc">Mô tả</label>
+								<textarea class="ictu-form__input-field" formControlName="content" id="f_desc" pTextarea placeholder="Thêm mô tả cho khóa học"></textarea>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_capacity">Hình thức</label>
+								<p-select [options]="optiontype" appendTo="body" class="ictu-form__input-field" formControlName="type" placeholder="Trạng thái"/>
+							</div>
+							<div class="ictu-form__row">
+								<div class="row">
+									<div class="col-6">
+										<div class="ictu-form__row" style="padding-top: 6px;">
+                                            <label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_timestart"  style="margin-bottom: 10px;">Thời gian giảng dạy</label>
+                                            <p-datepicker formControlName="time_start" class="ictu-form__input-field" id="f_timestart" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false" placeholder="Chọn thời gian"/>
+                                        </div>
+									</div>
+									<div class="col-6">
+										<div class="ictu-form__row">
+											<label class="ictu-form__label ictu-form__label&#45;&#45;required">Trạng thái</label>
+											<p-select [options]="optionList" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Trạng thái"/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				}
+				@case ('PREPARATION_FAILED') {
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+			}
+
+		</div>
+		<div class="ictu-p-drawer__content__footer">
+			<button (click)="pDrawer.close($event)" class="btn ictu-badge-btn&#45;&#45;secondary" mat-flat-button>Hủy</button>
+			<button (click)="submitForm()" [disabled]="!formControl.formFilledAndValid" class="btn ictu-badge-btn&#45;&#45;primary-reverse" mat-flat-button>Lưu lại</button>
+		</div>
+	</div>
+</p-drawer> &ndash;&gt;
+<p-dialog [(visible)]="visibleDialog" [closable]="false" [draggable]="true" [modal]="false" [style]="{ width: '700px'}">
+	<div>
+		@if (formControl.enableLoading()) {
+			<app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+
+		}
+
+		<div class="form-dialog">
+			<div class="custom-dialog-header">
+				<span class="title">{{ formControl.heading() }} ngày: {{ selectDate | date: 'dd/MM/yyyy' }}</span>
+				<div>
+					<button (click)="deleteRow(lichHocSelect)" *ngIf="formControl.isFormEdit" class="btn ictu-button-danger-light">
+						<i class="ti ti-trash"></i>
+					</button>
+					<button (click)="openAndCloseDialog()" class="close-btn">✕</button>
+				</div>
+			</div>
+			@switch (formControl.state()) {
+				@case ('READY') {
+					<form [formGroup]="formControl.formGroup">
+
+						<div class="ictu-form ictu-form&#45;&#45;label-on-top">
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_phonghoc">Phòng học</label>
+								<p-select [options]="optionPhongHoc" appendTo="body" class="ictu-form__input-field" formControlName="phonghoc_id" placeholder="Chọn phòng học" optionLabel="name" optionValue="id"/>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_diadiem">Địa điểm</label>
+								<textarea class="ictu-form__input-field" formControlName="diadiem_phonghoc" id="f_diadiem" pTextarea placeholder="Địa điểm"></textarea>
+							</div>
+							&lt;!&ndash; <div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_desc">Mô tả</label>
+								<textarea class="ictu-form__input-field" formControlName="content" id="f_desc" pTextarea placeholder="Thêm mô tả"></textarea>
+							</div> &ndash;&gt;
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_class">Lớp học</label>
+								<p-select [options]="dataTableLopHoc.data()" optionLabel="name" optionValue="id" appendTo="body" class="ictu-form__input-field" formControlName="class_id" id="f_class" placeholder="Chọn lớp"/>
+							</div>
+							<div class="ictu-form__row">
+								<div class="row">
+									<div class="col-6">
+										<div class="ictu-form__row" style="padding-top: 6px;">
+											<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_timestart" style="margin-bottom: 10px;">Thời gian giảng dạy</label>
+											<p-datepicker timeOnly="true" hourFormat="24" [stepMinute]="5" formControlName="time_start" class="ictu-form__input-field" id="f_timestart" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false" placeholder="Chọn thời gian" [readonlyInput]="true"/>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="ictu-form__row">
+											<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_capacity">Thời gian giảng dạy yêu cầu đổi</label>
+											<input class="ictu-form__input-field" formControlName="time_start_update" id="f_capacity" pInputText placeholder="Thời gian yêu cầu" type="text">
+										</div>
+									</div>
+								</div>
+							</div>
+							<div *ngIf="formField('status_reason').value == 1">
+								<div>Lý do:</div>
+								<div *ngFor="let item of formField('reason').value">
+									<div>{{ item.name }} : {{ item.reason }}</div>
+								</div>
+							</div>
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required" for="f_capacity">Hình thức</label>
+								<p-select [options]="optiontype" appendTo="body" class="ictu-form__input-field" formControlName="type" placeholder="Trạng thái"/>
+							</div>
+
+							<div class="ictu-form__row">
+								<label class="ictu-form__label ictu-form__label&#45;&#45;required">Trạng thái</label>
+								<p-select [options]="optionStatus" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Trạng thái"/>
+							</div>
+							<div *ngIf="formControl.isFormAdd">
+								<p-checkbox formControlName="apdungAll" [binary]="true" size="large"></p-checkbox>
+								<label style="padding-left: 10px" for="myCheckbox" class="ml-2">Áp dụng cho các tuần trong tháng</label>
+							</div>
+						</div>
+
+					</form>
+				}
+				@case ('PREPARATION_FAILED') {
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+			}
+			<div class="ictu-p-drawer__content__footer">
+				<button (click)="openAndCloseDialog()" class="btn ictu-badge-btn&#45;&#45;secondary" mat-flat-button>Đóng</button>
+				<button (click)="updateLichHocYeucaudoi(2)" *ngIf="formField('status_reason').value == 1" class="btn ictu-badge-btn&#45;&#45;danger-reverse" mat-flat-button>Không duyệt</button>
+				<button (click)="updateLichHocYeucaudoi(3)" *ngIf="formField('status_reason').value == 1" class="btn ictu-badge-btn&#45;&#45;primary-reverse" mat-flat-button>Duyệt</button>
+				<button (click)="submitForm()" [disabled]="!formControl.formFilledAndValid" class="btn ictu-badge-btn&#45;&#45;primary-reverse" mat-flat-button>Lưu lại</button>
+			</div>
+		</div>
+	</div>
+</p-dialog>
+-->

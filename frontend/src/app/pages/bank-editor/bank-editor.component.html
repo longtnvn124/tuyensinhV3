@@ -1,0 +1,26 @@
+@if (state() === 'success') {
+	<app-bank [bankID]="bankID()" [enableClose]="true" (onClose)="onBankFormClosed($event)"></app-bank>
+} @else {
+	<div class="bank-editor-layout-checking">
+		<div class="bank-editor-layout-checking__inner position-relative d-flex justify-content-center align-items-center w-100 h-100">
+			@switch (state()) {
+				@case ('error') {
+					<div class="admin-table__alert-danger text-center p-15">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+				@case ('unauthorized') {
+					<div class="d-flex flex-column align-items-center" style="gap:20px;">
+						<span class="ictu-badge ictu-badge--primary text-center f-15" style="padding: 10px 15px; line-height: 24px; font-size: 14px;">Ngân hàng không còn tồn tại hoặc bạn không được phân quyền để truy cập nội dung ngân hàng này!</span>
+						<button (click)="backToBankList()" mat-flat-button class="btn ictu-badge-btn--primary-reverse" style="height: 40px;">
+							<i class="ti ti-arrow-back-up me-1"></i> Quay lại
+						</button>
+					</div>
+				}
+				@default {
+					<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+				}
+			}
+		</div>
+	</div>
+}

@@ -1,0 +1,86 @@
+<div class="ams-student-popup">
+    <div class="ams-student-popup__header">
+        <div class="ams-student-popup__student-info">
+            <div class="ams-student-popup__avatar">
+                <img [ngSrc]="data.student.avatar || ('images/user/circle-avatar-placeholder.png' | publicAsset)" [alt]="data.student.full_name" width="52" height="52"/>
+            </div>
+            <div class="ams-student-popup__student-meta">
+                <h3 class="ams-student-popup__student-name m-0 f-roboto f-18 fw-bold">{{ data.student.full_name }}</h3>
+                <span class="ams-student-popup__student-level m-0 f-roboto f-14 fw-medium">{{ data.student._studentLevel || data.student.code }}</span>
+            </div>
+        </div>
+        <button class="btn ams-student-popup__close" (click)="close()" title="Close">
+            <i class="ti ti-x"></i>
+        </button>
+    </div>
+    <div class="ams-student-popup__body position-relative">
+        @switch (state()) {
+            @case ('success') {
+                @if (isSubmitting()) {
+                    <app-loading-progress heading="Submitting..."></app-loading-progress>
+                }
+                @if (data.readonly) {
+                    @if (feedback()) {
+                        <div class="feedback-card" [ngClass]="author()._role === 'teacher' ? 'feedback-teacher' : 'feedback-ta'">
+                            <div class="feedback-avatar">
+                                <div class="avatar-circle" [ngClass]="author()._role === 'teacher' ? 'avatar-teacher' : 'avatar-ta'">
+                                    <i class="fas" [ngClass]="author()._role === 'teacher' ? 'fa-chalkboard-user' : 'fa-user-graduate'"></i>
+                                </div>
+                            </div>
+                            <div class="feedback-content">
+                                @if (author()) {
+                                    <div class="feedback-header">
+                                        <span class="feedback-name">{{ author().full_name }}</span>
+                                        <span class="feedback-role">{{ author()._role === 'teacher' ? 'Giáo viên' : author()._role === 'assistant' ? 'Trợ giảng' : '.........' }}</span>
+                                    </div>
+                                }
+                                <p class="feedback-text f-roboto f-14 lh-base fw-normal m-0">{{ feedback().comment }}</p>
+                            </div>
+                        </div>
+                    } @else {
+                        <div class="feedback__empty text-center d-flex flex-column justify-content-center align-items-center gap-10 p-x-20 p-y-30">
+                            <p class="m-0 f-14 f-roboto fw-normal lh-base">Không có nhận xét.</p>
+                        </div>
+                    }
+                } @else {
+                    <form class="d-block" [formGroup]="formGroup">
+                        <label class="d-block w-100 f-0 lh-0 m-0 p-0" for="text_feedback" style="font-size: 0;line-height: 0;">
+                            <textarea id="text_feedback" pTextarea formControlName="comment" placeholder="Nhận xét..." rows="6" cols="50" class="f-roboto f-14 lh-base fw-normal w-100"></textarea>
+                        </label>
+                    </form>
+                }
+            }
+            @case ('error') {
+                <div class="admin-table__alert-danger text-center w-100 m-auto user-select-none">Tải dữ liệu thất bại. Vui lòng chọn
+                    <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                </div>
+            }
+            @default {
+                <app-loading-progress heading="Tải thông tin..."></app-loading-progress>
+            }
+        }
+    </div>
+    @if (!data.readonly) {
+        <div class="ams-student-popup__footer">
+            @if (author()) {
+                <div class="d-flex me-auto">
+                    <div class="feedback-avatar m-r-5">
+                        <div class="avatar-circle" [ngClass]="author()._role === 'teacher' ? 'avatar-teacher' : 'avatar-ta'">
+                            <i class="fas" [ngClass]="author()._role === 'teacher' ? 'fa-chalkboard-user' : 'fa-user-graduate'"></i>
+                        </div>
+                    </div>
+                    <div class="feedback-header flex-column justify-content-start align-items-start m-0" style="gap:0">
+                        <span class="feedback-name">{{ author().full_name }}</span>
+                        <span class="feedback-role fw-normal">{{ author()._role === 'teacher' ? 'Giáo viên' : author()._role === 'assistant' ? 'Trợ giảng' : '.........' }}</span>
+                    </div>
+                </div>
+            }
+            <button (click)="submitData()" [disabled]="formGroup.untouched || formGroup.invalid || isSubmitting() " mat-flat-button class="btn ictu-badge-btn--primary-reverse">
+                <span class="d-flex justify-content-center align-items-center">
+                    <i class="fa-classic fa-solid fa-save m-r-5"></i>
+                    <p class="m-0 p-0 f-14 fw-normal lh-base f-roboto">Lưu nhận xét</p>
+                </span>
+            </button>
+        </div>
+    }
+</div>

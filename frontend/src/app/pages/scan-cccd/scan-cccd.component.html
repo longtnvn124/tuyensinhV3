@@ -1,0 +1,23 @@
+<div class="scan-container">
+  <h2>Quét QR Code CCCD</h2>
+
+  <video #video width="300" height="300" style="border: 2px solid #ccc; border-radius: 8px;"></video>
+
+  <div class="controls">
+    <button (click)="captureAndRead()" class="btn btn-primary">Chụp & Đọc QR</button>
+    <button (click)="toggleCamera()" class="btn btn-secondary">
+      {{ videoRef?.nativeElement?.srcObject ? 'Tắt Camera' : 'Bật Camera' }}
+    </button>
+  </div>
+
+  <div class="result-live">
+    <p><strong>Kết quả hiện tại:</strong> {{ output }}</p>
+  </div>
+
+  <div class="captured-results">
+    <h4>Lịch sử kết quả đã chụp</h4>
+    <ul>
+      <li *ngFor="let item of capturedResults">{{ item }}</li>
+    </ul>
+  </div>
+</div>

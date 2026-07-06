@@ -1,0 +1,8 @@
+.attendance-absent-badge-center {
+  width: 100%;
+  height: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

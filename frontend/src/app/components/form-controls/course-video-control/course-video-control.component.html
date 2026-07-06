@@ -1,0 +1,79 @@
+<div class="course-video-control ictu-form__group-control--before position-relative" style="--ictu-form-group-after-input-width: 100px;">
+	@switch (location()) {
+		@case ('online') {
+			<input [(ngModel)]="youtubeUrl" (keyup)="updateYoutubeSrc()" [placeholder]="location() | courseVideoLabel : 'placeholder' :'...'" class="ictu-form__input-field" pInputText type="text">
+			@if (youtubeUrl && youtubeUrl.trim()) {
+				<div class="ictu-form__input-field__buttons-control">
+					<button (click)="btnPreviewVideo()" mat-flat-button class="btn ictu-badge-btn--primary" pTooltip="Xem trước" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+						<i class="ti ti-brand-youtube"></i>
+					</button>
+				</div>
+			}
+		}
+		@default {
+			<span class="ictu-form__input-field text-muted" style="--p-inputtext-disabled-background: #f8fafc;--p-inputtext-border-color: #cbd5e1;user-select: none;">{{ file() ? file().title : location() | courseVideoLabel : 'placeholder' :'Vui lòng upload file.' }}</span>
+			@if (file()) {
+				<div class="ictu-form__input-field__buttons-control">
+					<button (click)="btnPreviewVideo()" mat-flat-button class="btn ictu-badge-btn--primary" pTooltip="Xem video" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+						<i class="ti ti-player-play"></i>
+					</button>
+					<button (click)="btnUnselectedFile()" mat-flat-button class="btn ictu-badge-btn--danger" pTooltip="Xóa lựa chọn" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+						<i class="ti ti-x"></i>
+					</button>
+				</div>
+			} @else {
+				@switch (inputFileState()) {
+					@case ('OPEN_FILE_CHOOSER') {
+						<div class="course-video-control__input-file-animation animation-typing-dots">
+							<span class="animation-typing-dots__element"></span>
+							<span class="animation-typing-dots__element"></span>
+							<span class="animation-typing-dots__element"></span>
+						</div>
+					}
+					@case ('UPLOADING') {
+						<div class="course-video-control__upload-file-animation d-flex flex-column justify-content-center align-items-center">
+							<h5 class="m-0 f-roboto f-14 fw-medium text-center">Đang upload file... {{ uploadFileProgress() }}%</h5>
+							<mat-progress-bar [mode]="progressBarMode()" [value]="uploadFileProgress()"></mat-progress-bar>
+						</div>
+					}
+					@default {
+
+					}
+				}
+				<div class="ictu-form__input-field__buttons-control buttons-control--showed">
+					<button (click)="btnOpenFileChooser()" mat-flat-button class="btn ictu-badge-btn--primary" pTooltip="Upload file" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+						<i class="ti ti-file-plus"></i>
+					</button>
+				</div>
+			}
+		}
+	}
+	<span (click)="popover.toggle($event)" class="ictu-form__after-input-field" style="cursor: pointer">
+		<span class="f-roboto f-14 fw-medium m-auto lh-1">{{ location() | courseVideoLabel : 'label' :'Youtube' }}</span>
+		<svg height="451.847px" style="width: 10px;height: auto;fill: currentColor;margin: 0 10px 0 0;" viewBox="0 0 451.847 451.847" width="451.847px" x="0px" xmlns="http://www.w3.org/2000/svg" y="0px"><g><path d="M225.923,354.706c-8.098,0-16.195-3.092-22.369-9.263L9.27,151.157c-12.359-12.359-12.359-32.397,0-44.751   c12.354-12.354,32.388-12.354,44.748,0l171.905,171.915l171.906-171.909c12.359-12.354,32.391-12.354,44.744,0   c12.365,12.354,12.365,32.392,0,44.751L248.292,345.449C242.115,351.621,234.018,354.706,225.923,354.706z"/></g></svg>
+	</span>
+</div>
+<p-popover #popover appendTo="body" styleClass="ictu-popover-no-padding">
+	<div class="popover-buttons d-block">
+		<ul class="popover-buttons__list d-flex flex-column">
+			<li class="popover-buttons__list__elm">
+				<button (click)="btnSetVideoIntroLocation('online',popover)" class="btn popover-buttons__btn" mat-flat-button>Youtube</button>
+			</li>
+			<li class="popover-buttons__list__elm">
+				<button (click)="btnSetVideoIntroLocation('local',popover)" class="btn popover-buttons__btn" mat-flat-button>File</button>
+			</li>
+		</ul>
+	</div>
+</p-popover>
+
+<p-dialog [(visible)]="enableErrorDialog" [closable]="true" [draggable]="false" [modal]="true" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+	<div class="ictu-dialog-layout__wrapper" style="width: min(calc(var(--device-width) - 20px), 400px)">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold text-danger">{{ errorHeading() }}</h4>
+			<button (click)="btnCloseDialog()" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div [innerHTML]="errorMessage() | safeHtml" class="ictu-dialog-layout__body"></div>
+	</div>
+</p-dialog>

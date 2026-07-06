@@ -1,0 +1,41 @@
+.ictu-bank-form {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.ictu-bank-form__panel {
+    overflow: hidden auto;
+    min-height: calc(var(--device-height) - 60px);
+    max-height: calc(var(--device-height) - 60px);
+}
+
+.ictu-bank-form__form {
+    background-color: #ffffff;
+    height: fit-content;
+    border-radius: 4px;
+    border-color: #e2e8f0;
+    margin: 30px 0;
+}
+
+.ictu-bank-form__form hr {
+    opacity: 1;
+    border-width: 0 0 1px;
+    border-image: initial;
+    border-color: inherit;
+    border-style: solid;
+    width: 100%;
+    margin: 0;
+}
+
+.container {
+    padding: 0;
+    width: 100%;
+    max-width: min(100%, 1024px);
+    margin: 0 auto;
+}
+
+.ictu-bank-form__form__footer,
+.ictu-bank-form__form__heading {
+    padding: 10px 15px;
+}

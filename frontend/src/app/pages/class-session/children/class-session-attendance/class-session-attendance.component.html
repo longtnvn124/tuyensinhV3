@@ -1,0 +1,164 @@
+<div class="class-session-attendance d-flex flex-column overflow-hidden position-relative">
+    <div class="class-session-attendance__head hei-60 p-x-10 d-flex justify-content-center align-items-center">
+        <div class="class-session-attendance__head__left flex-fill">
+            <ng-scrollbar orientation="horizontal" style="height:60px; width: calc(var(--device-width) - 30px - 200px);--_scrollbar-hover-thickness-px:10px" visibility="hover">
+                <div class="class-attendance-stats">
+                    @for (item of reports(); track item.key) {
+                        <div class="stats-card d-flex align-items-center gap-10 m-0 p-0">
+                            <div class="stats-card__chart">
+                                <svg class="stats-card__svg" viewBox="0 0 100 100">
+                                    <circle class="stats-card__bg-circle" cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle class="stats-card__progress-circle" cx="50" cy="50" r="45" fill="none" [attr.stroke]="item.color" stroke-width="8" stroke-linecap="round" [attr.stroke-dasharray]="circumference()" [attr.stroke-dashoffset]="item | classAttendanceStatDashoffset" transform="rotate(-90 50 50)"/>
+                                </svg>
+                                <div class="stats-card__icon" [style.background-color]="item.color + '15'">
+                                    <i [class]="item.icon" [style.color]="item.color"></i>
+                                </div>
+                            </div>
+                            <div class="stats-card__info">
+                                <span class="stats-card__label f-roboto f-14 lh-base fw-medium m-0">{{ item.label }}</span>
+                                <b class="stats-card__value f-roboto f-16 fw-bold lh-1" style="margin: 3px 0 0;" [style.color]="item.color">{{ item.value }}</b>
+                            </div>
+                        </div>
+                    }
+                    @for (item of counter(); track item.key) {
+                        <div class="stats-card d-flex align-items-center gap-10 m-0 p-0">
+                            <div class="stats-card__chart">
+                                <svg class="stats-card__svg" viewBox="0 0 100 100">
+                                    <circle class="stats-card__bg-circle" cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle class="stats-card__progress-circle" cx="50" cy="50" r="45" fill="none" [attr.stroke]="item.color" stroke-width="8" stroke-linecap="round" [attr.stroke-dasharray]="circumference()" [attr.stroke-dashoffset]="item | classAttendanceStatDashoffset" transform="rotate(-90 50 50)"/>
+                                </svg>
+                                <div class="stats-card__icon" [style.background-color]="item.color + '15'">
+                                    <i [class]="item.icon" [style.color]="item.color"></i>
+                                </div>
+                            </div>
+                            <div class="stats-card__info">
+                                <span class="stats-card__label f-roboto f-14 lh-base fw-medium m-0">{{ item.label }}</span>
+                                <b class="stats-card__value f-roboto f-16 fw-bold lh-1" style="margin: 3px 0 0;" [style.color]="item.color">{{ item.value }}</b>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </ng-scrollbar>
+        </div>
+        <div class="class-session-attendance__head__right d-inline-flex justify-content-center align-items-center gap-10 ms-auto">
+            <button mat-flat-button class="btn ictu-badge-btn--pink">
+                <span class="d-flex justify-content-center align-items-center" style="gap:7px">
+                    <i class="fa-classic fa-regular fa-photo-video f-18"></i>
+                    <span class="f-14 f-roboto lh-base fw-medium">Media</span>
+                </span>
+            </button>
+            <button (click)="btnSubmitData()" [disabled]="!dirty()" mat-flat-button class="btn ictu-badge-btn--primary-reverse">
+                <span class="d-flex justify-content-center align-items-center" style="gap:7px">
+                    <i class="fa-classic fa-regular fa-save f-18"></i>
+                    <span class="f-14 f-roboto lh-base fw-medium">Save</span>
+                </span>
+            </button>
+        </div>
+    </div>
+    <div class="class-session-attendance__body">
+        <ng-scrollbar orientation="vertical" style="height:calc(var(--device-height) - 60px - 60px); width: 100%;--_scrollbar-hover-thickness-px:10px" visibility="hover">
+            <table class="tbl admin-table table-hover class-session-attendance__tbl admin-table--sticky-head">
+                <thead>
+                <tr>
+                    <th class="text-center cell-index p-x-0 wid-60">STT</th>
+                    <th class="text-center">Học sinh</th>
+                    <th class="text-center p-x-0 wid-100">Ngày sinh</th>
+                    <th class="text-center cel-check-control" matTooltipPosition="above" matTooltip="Có mặt">C</th>
+                    <th class="text-center cel-check-control" matTooltipPosition="above" matTooltip="Vắng có phép">P</th>
+                    <th class="text-center cel-check-control" matTooltipPosition="above" matTooltip="Vắng không phép">K</th>
+                    <th class="text-center cel-check-control" matTooltipPosition="above" matTooltip="Đi muộn">M</th>
+                    <th class="text-center cell-reason">Lý do</th>
+                    <th class="text-center p-x-0 wid-120">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                    @for (row of attendances(); track row.id; let i = $index) {
+                        <tr>
+                            <td class="text-center cell-index p-x-0 wid-60">{{ 1 + i }}</td>
+                            <td class="p-0">
+                                <div class="d-flex">
+                                    <button class="class-session-attendance__btn-avatar" [matMenuTriggerFor]="menu" [matMenuTriggerData]="{student: row}">
+                                        <figure>
+                                            <img [ngSrc]=" row | studentAvatar :( 'images/user/circle-avatar-placeholder.png' | publicAsset)" [alt]="row.full_name" width="50" height="50">
+                                        </figure>
+                                    </button>
+                                    <div class="d-flex flex-fill flex-column m-l-10">
+                                        <b class="f-roboto f-14 fw-medium lh-base p-0 m-0 text-truncate w-100">{{ row.full_name }} {{ row.english_name ? ( '[ ' + row.english_name + ' ]' ) : '' }}</b>
+                                        <span class="f-roboto f-14 fw-normal lh-base p-0 m-0 text-secondary text-truncate w-100">{{ row.code }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center p-x-0 wid-100">{{ row.dob ? ( row.dob | date: 'dd/MM/yyyy' ) : '--/--/----' }}</td>
+                            <td class="cel-check-control p-0">
+                                <button (click)="changeAttendanceStatus(row,'PRESENT')" class="btn btn-attendance-control btn-attendance-control--present" matTooltipPosition="above" matTooltip="Có mặt" matTooltipShowDelay="500">
+                                    @if (row._diemDanh?.status === 'PRESENT') {
+                                        <i class="fa-classic fa-regular fa-check f-18"></i>
+                                    }
+                                </button>
+                            </td>
+                            <td class="cel-check-control p-0">
+                                <button (click)="changeAttendanceStatus(row,'EXCUSED')" class="btn btn-attendance-control btn-attendance-control--absent-excused" matTooltipPosition="above" matTooltip="Vắng có phép" matTooltipShowDelay="500">
+                                    @if (row._diemDanh?.status === 'EXCUSED') {
+                                        <i class="fa-classic fa-regular fa-check f-18"></i>
+                                    }
+                                </button>
+                            </td>
+                            <td class="cel-check-control p-0">
+                                <button (click)="changeAttendanceStatus(row,'UNEXCUSED')" class="btn btn-attendance-control btn-attendance-control--absent" matTooltipPosition="above" matTooltip="Vắng không phép" matTooltipShowDelay="500">
+                                    @if (row._diemDanh?.status === 'UNEXCUSED') {
+                                        <i class="fa-classic fa-regular fa-check f-18"></i>
+                                    }
+                                </button>
+                            </td>
+                            <td class="cel-check-control p-0">
+                                <button (click)="changeAttendanceStatus(row,'LATE')" class="btn btn-attendance-control btn-attendance-control--late" matTooltipPosition="above" matTooltip="Đi muộn" matTooltipShowDelay="500">
+                                    @if (row._diemDanh?.status === 'LATE') {
+                                        <i class="fa-classic fa-regular fa-check f-18"></i>
+                                    }
+                                </button>
+                            </td>
+                            <td class="cell-reason p-y-0 p-x-5">
+                                <label class="class-session-attendance-reason__label" [for]="'attendance-reason-'+i">
+                                    <input class="class-session-attendance-reason__text f-roboto f-14 lh-base fw-normal w-100" type="text" [name]="'attendance-reason-'+i" [id]="'attendance-reason-'+i" pInputText placeholder="..." [(ngModel)]="row._diemDanh.reason">
+                                </label>
+                            </td>
+                            <td class="wid-120 text-center p-0" style="min-width: 120px;">
+                                <div class="admin-table__btn-actions">
+                                    <button (click)="btnOpenDialog('PARENT',row, false)" mat-flat-button class="btn ictu-button-success-light" matTooltip="Thông tin phụ huynh" matTooltipPosition="above">
+                                        <i class="fa-classic fa-regular fa-contact-book"></i>
+                                    </button>
+                                    <button (click)="btnOpenDialog('STUDENT_FEEDBACK',row,disabled())" [disabled]="disabled()" mat-flat-button class="btn ictu-button-primary-light" matTooltip="Nhận xét học sinh" matTooltipPosition="above">
+                                        <i class="fa-classic fa-regular fa-message-captions"></i>
+                                    </button>
+                                    <button (click)="btnOpenDialog('STUDENT_SPEAKING_TEST',row,disabled())" [disabled]="disabled()" mat-flat-button class="btn ictu-button-info-light" matTooltip="Video/Audio speaking test" matTooltipPosition="above">
+                                        <i class="fa-classic fa-regular fa-user-microphone"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </ng-scrollbar>
+    </div>
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Tải dữ liệu..."></app-loading-progress>
+    }
+    @if (state() === 'submitting') {
+        <app-loading-progress heading="Cập nhật dữ liệu..."></app-loading-progress>
+    }
+</div>
+
+<mat-menu #menu="matMenu" yPosition="above">
+    <ng-template matMenuContent let-student="student">
+        <div class="student-profile-avatar d-flex justify-content-center align-items-center">
+            @if (student.avatar) {
+                <figure>
+                    <img [ngSrc]=" student | studentAvatar :( 'images/user/circle-avatar-placeholder.png' | publicAsset)" [alt]="student.full_name" width="50" height="50">
+                </figure>
+            } @else {
+                <p class="m-0 p-30 f-roboto f-14 fw-normal lh-base text-danger">Học sinh chưa có ảnh đại diện.</p>
+            }
+        </div>
+    </ng-template>
+</mat-menu>

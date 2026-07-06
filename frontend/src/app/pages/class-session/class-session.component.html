@@ -1,0 +1,88 @@
+<section class="class-planning-panel course-editor-layout class-session">
+    @switch (state()) {
+        @case ('unauthorized') {
+            <div class="d-flex justify-content-center align-items-center w-100" style="height:  var(--device-height); padding: 10px;">
+                <span class="f-14 ictu-badge ictu-badge--danger p-10">Bạn không có quyền truy cập nội dung này. Vui lòng kiểm tra lại.</span>
+            </div>
+        }
+        @case ('invalid') {
+            <div class="d-flex justify-content-center align-items-center w-100" style="height:  var(--device-height); padding: 10px;">
+                <span class="f-14 ictu-badge ictu-badge--danger p-10">Bạn không được phân quyền truy cập nội dung của lớp học này.</span>
+            </div>
+        }
+        @case ('notFound') {
+            <div class="d-flex justify-content-center align-items-center w-100" style="height:  var(--device-height); padding: 10px;">
+                <span class="f-14 ictu-badge ictu-badge--danger p-10">Lớp học không tồn tại hoặc bạn không được phân quyền truy cập nội dung của lóp học này. Vui lòng kiểm tra lại.</span>
+            </div>
+        }
+        @case ('error') {
+            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="btnReload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+        }
+        @default {
+            @if (classSession()) {
+                <div class="course-editor-layout__inner w-100">
+                    <div class="course-editor-layout__header">
+                        <div class="course-editor-layout__header__container">
+                            <button (click)="backToClassList()" mat-flat-button class="btn ictu-badge-btn--secondary-reverse course-editor-layout__header__btn-back" pTooltip="Trở lại lịch học" tooltipPosition="right">
+                                <i class="pi-arrow-left pi"></i>
+                            </button>
+                            <div class="course-editor-layout__header__divider"></div>
+                            <div class="flex flex-column">
+                                <h4 class="course-editor-layout__heading">Lớp : {{ classObject()?.name || '----' }}</h4>
+                                <i class="course-editor-layout__heading fw-normal">{{ classSession().time_start | date: 'dd/MM/yyyy HH:mm' }}{{ classSession().parent_class_id != 0 ? ' (Buổi học bổ trợ)' : '' }}</i>
+                            </div>
+                            <nav class="course-editor-layout__main-nav">
+                                <ul class="course-editor-layout__main-nav__list">
+                                    @for (m of navList(); track m.name) {
+                                        <li>
+                                            <button class="course-editor-layout__main-nav__btn btn" [class.course-editor-layout__main-nav__btn--active]="m.name === activeMenu()" (click)="selectMenu(m.name)">
+                                                <i class="m-r-5 f-16" [ngClass]="m.icon"></i>{{ m.label }}
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                            <div class="course-editor-layout__header__actions">
+                                @if (timePassed()) {
+                                    <div style="color: white">{{ timePassed() }}</div>
+                                }
+                                @if (userCanChangeData()) {
+                                    <button (click)="changeSessionStatus()" [disabled]="(classSession() | classSessionButton : 'visibility') === 'hidden'" mat-flat-button style="color: #ffffff;" class="btn ictu-badge-btn--primary-reverse" [style.background-color]="classSession() | classSessionButton : 'background'">
+                                        <i class="f-14 m-r-5" [ngClass]="classSession() | classSessionButton : 'icon'"></i>{{ classSession() | classSessionButton : 'label' }}
+                                    </button>
+                                } @else {
+                                    <span class="class-session-state-label d-flex justify-content-center align-items-center f-roboto f-14 fw-normal" [style.background-color]="classSession() | classSessionButton : 'background'">
+                                    <i class="f-14 m-r-5" [ngClass]="classSession() | classSessionButton : 'icon'"></i>{{ classSession() | classSessionButton : 'state' }}
+                                </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="class-progress-panel__body">
+                        <div class="class-progress-panel__content">
+                            @switch (activeMenu()) {
+                                @case ('sessions') {
+                                    <class-session-detail [classObject]="classObject()" [(classSession)]="classSession" [role]="role()" [canChanges]="userCanChangeData()"></class-session-detail>
+                                }
+                                @case ('attendance') {
+                                    <class-session-attendance [classObject]="classObject()" [(classSession)]="classSession" [canChanges]="userCanChangeData()"></class-session-attendance>
+                                }
+                                @case ('assignment') {
+                                    <class-session-assignments [classObject]="classObject()" [(classSession)]="classSession" [canChanges]="userCanChangeData()"></class-session-assignments>
+                                }
+                                @default {
+
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (state() === 'loading') {
+                <app-loading-progress heading="Loading..."></app-loading-progress>
+            }
+        }
+    }
+</section>

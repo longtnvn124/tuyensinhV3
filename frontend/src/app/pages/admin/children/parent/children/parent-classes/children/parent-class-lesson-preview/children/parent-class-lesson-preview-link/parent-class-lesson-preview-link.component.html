@@ -1,0 +1,8 @@
+@if (link()) {
+    <div class="parent-class-lesson-preview-link p-y-10 p-x-15">
+        <a [href]="link() | safeUrl" target="_blank" class="f-14 f-roboto lh-base fw-normal" [innerHTML]="link() | safeHtml"></a>
+    </div>
+} @else {
+    <span class="ictu-badge ictu-badge--warning f-roboto fw-normal lh-base p-y-10 p-x-15 f-14" style="color: #444444;background-color: #e9ecef;">Không có link.</span>
+}
+

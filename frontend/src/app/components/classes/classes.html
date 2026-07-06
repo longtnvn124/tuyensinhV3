@@ -1,0 +1,193 @@
+<section class="admin-section--table position-relative">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    <div class="admin-wrap-table">
+        @if (state() !== 'error') {
+            <div class="admin-wrap-table__head d-flex">
+                <h4 class="admin-wrap-table__heading">
+                    <svg>
+                        <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+                    </svg>
+                    Danh sách lớp học
+                </h4>
+                <div class="admin-wrap-table__head-actions">
+                    <input [(ngModel)]="searchInfoClasses" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchData()">
+                    <button (click)="deleteSelectedRows()" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+                        <!-- <i class="ti ti-trash"></i> -->
+                        <i class="fa-classic fa-regular fa-trash-alt f-16"></i>
+                    </button>
+                    <button (click)="addNewItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                        <!-- <i class="ti ti-plus"></i> -->
+                        <i class="fa-classic fa-regular fa-plus f-14"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="admin-wrap-table__body">
+                <table class="tbl admin-table table-hover">
+                    <thead>
+                    <tr>
+                        <th class="col-checkbox">
+                            <mat-checkbox [checked]="totalChecked()" [indeterminate]="partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="disabledCheckbox()"></mat-checkbox>
+                        </th>
+                        <th class="col-index text-center">#</th>
+                        <th class="text-center">Lớp học</th>
+                        <th class="text-center">Mô tả</th>
+                        <th class="wid-100 text-center px-0">Khai giảng</th>
+                        <th class="wid-65 text-center px-0">Số buổi</th>
+                        <th class="wid-65 text-center px-0">Số HS</th>
+                        <th class="wid-130 text-center px-0">Tiến độ</th>
+                        <th class="wid-130 text-center px-0">Giáo viên</th>
+                        <th class="wid-140 text-center">Trạng thái</th>
+                        <!-- <th class="wid-90 text-center px-0">Hành động</th> -->
+                        <th class="wid-45 text-center">
+                            <i class="fa-classic fa-solid fa-computer-mouse-button-left f-14"></i>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @for (_class of dataTable.data(); track _class; let i = $index) {
+                            <tr [class.item--highlight]="classCourseUpgrade()?.id === _class.id">
+                                <td class="col-checkbox">
+                                    <mat-checkbox [checked]="_class._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)" [disabled]="_class.status === 1"></mat-checkbox>
+                                </td>
+                                <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+                                <td class="text-justify p-10">
+                                    <button class="btn-link btn d-block p-0 m-0 border-0" (click)="editRow(_class)">
+                                        <b class="m-0 f-14 f-roboto fw-medium d-block text-justify lh-base">{{ _class.name }}</b>
+                                    </button>
+                                    @if (_class.course) {
+                                        <button class="btn-link btn d-block p-0 m-0 border-0" (click)="btnGetToCourseDetails(_class)">
+                                            <i class="m-0 f-14 f-roboto fw-normal d-block text-justify lh-base">{{ _class.course.title }}</i>
+                                        </button>
+                                    }
+                                </td>
+                                <td class="text-justify p-10">{{ _class.desc }}</td>
+                                <td class="wid-100 text-center px-0">{{ _class.started_date ? ( _class.started_date | date : 'dd/MM/yyyy' ) : '' }}</td>
+                                <td class="wid-65 text-center p-x-0">{{ _class._totalLessons }}</td>
+                                <td class="wid-65 text-center p-x-0">{{ _class.total_student }}</td>
+                                <td class="wid-130 text-center p-0">
+                                    <app-class-progress-calculator [value]="_class._progress"></app-class-progress-calculator>
+                                </td>
+                                <td class="wid-130 text-justify p-5" style="padding-right: 0 !important;">
+                                    @if (_class.teachers?.length || _class.assistants?.length) {
+                                        <div class="avatar-list-stacked" style="justify-content: flex-start;margin-top: -5px;display: flex;flex-wrap: wrap;gap: 5px;">
+                                            @for (_staff of _class.teachers; track _staff.id) {
+                                                <button class="btn avatar-list-stacked__btn" (click)="avoidCloseMenuByClicking($event)" [matMenuTriggerFor]="staffInfo" [matMenuTriggerData]="{staff: _staff}" [matTooltip]="'Giáo viên : '+_staff.full_name" matTooltipPosition="above" matTooltipShowDelay="200">
+                                                    <figure class="avatar-list-stacked__avatar-rounded">
+                                                        <img [src]="_staff | employeePhoto" [alt]="_staff.full_name">
+                                                    </figure>
+                                                </button>
+                                            }
+                                            @for (_staff of _class.assistants; track _staff.id) {
+                                                <button class="btn avatar-list-stacked__btn" (click)="avoidCloseMenuByClicking($event)" [matMenuTriggerFor]="staffInfo" [matMenuTriggerData]="{staff: _staff}" [matTooltip]="'Trợ giảng : '+_staff.full_name" matTooltipPosition="above" matTooltipShowDelay="200">
+                                                    <figure class="avatar-list-stacked__avatar-rounded">
+                                                        <img [src]="_staff | employeePhoto" [alt]="_staff.full_name">
+                                                    </figure>
+                                                </button>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                                <td class="wid-140 text-center p-0">
+                                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                                        @if (_class.status === 1) {
+                                            <span class="ictu-badge ictu-badge--success">Đang hoạt động</span>
+                                        } @else {
+                                            <span class="ictu-badge ictu-badge--secondary">Dừng hoạt động</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="p-0 wid-45 text-center">
+                                    <!-- <div class="admin-table__btn-actions" style="gap : 5px">
+                                        <button (click)="editRow(_class)" class="btn ictu-button-info-light" pTooltip="Cập nhật thông tin lớp học" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body" tooltipPosition="left" showDelay="1000">
+                                            <i class="ti ti-edit"></i>
+                                        </button>
+                                        <button [disabled]="_class.status === 1" (click)="deleteRow(_class)" class="btn ictu-button-danger-light" [tooltipDisabled]="_class.status === 1" pTooltip="Xóa lớp học" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body" tooltipPosition="left" showDelay="1000">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </div> -->
+                                    <button mat-flat-button class="btn ictu-badge-btn--secondary btn-call-nav-menu" [matMenuTriggerFor]="actions" [matMenuTriggerData]="{class: _class}">
+                                        <i class="fa-classic fa-solid fa-ellipsis-vertical f-14"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="13">Không có bản ghi nào.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="admin-wrap-table__foot">
+                <div class="d-flex justify-content-center align-items-center w-100">
+                    <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+                </div>
+            </div>
+        } @else {
+            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+        }
+    </div>
+</section>
+
+<mat-menu #staffInfo="matMenu" class="ictu-switchers-menu" xPosition="after" yPosition="below">
+    <ng-template matMenuContent let-staff="staff">
+        <div class="employee-popup-details d-flex flex-column justify-content-center align-items-center" (click)="avoidCloseMenuByClicking($event)">
+            <div class="employee-popup-details__avatar">
+                <img class="employee-popup-details__avatar__img wid-80 hei-80" [src]="staff | employeePhoto" alt=" student.full_name" width="100" height="100">
+            </div>
+            <b class="f-roboto f-14 fw-medium lh-base text-truncate m-t-15 m-b-10" style="max-width: 100%">{{ staff.full_name }}</b>
+            <div class="employee-popup-details__contact-field d-flex flex-column justify-content-center align-items-start w-100">
+                <div class="employee-popup-details__contact-field__info d-flex justify-content-start align-items-center">
+                    <i class="pi-envelope pi text-secondary m-r-10"></i>
+                    <p class="employee-popup-details__contact-field__info__text f-14 lh-base fw-normal text-secondary m-0 text-truncate">{{ staff.email ?? '' }}</p>
+                </div>
+                <div class="employee-popup-details__contact-field__info d-flex justify-content-start align-items-center">
+                    <i class="pi-phone pi text-secondary m-r-10"></i>
+                    <p class="employee-popup-details__contact-field__info__text f-14 lh-base fw-normal text-secondary m-0 text-truncate">{{ staff.phone ?? '' }}</p>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</mat-menu>
+
+<mat-menu #actions="matMenu" class="ictu-nav-menu" xPosition="after" yPosition="below">
+    <ng-template matMenuContent let-classObject="class">
+        <button mat-menu-item class="ictu-nav-menu__element" (click)="editRow(classObject)">
+            <i class="fa-classic fa-regular fa-file-edit f-14"></i>
+            <span class="f-roboto f-14 fw-normal m-l-10">Cập nhật thông tin</span>
+        </button>
+        <button mat-menu-item class="ictu-nav-menu__element" (click)="btnCreateClassLessons(classObject)" [disabled]="!classObject._isAllLessonCompleted">
+            <i class="fa-classic fa-solid fa-book-open f-14"></i>
+            <span class="f-roboto f-14 fw-normal m-l-10">Khởi tạo chương trình học mới</span>
+        </button>
+        <button mat-menu-item class="ictu-nav-menu__element" (click)="getToCourseOverView(classObject)">
+            <i class="fa-classic fa-solid fa-book-open f-14"></i>
+            <span class="f-roboto f-14 fw-normal m-l-10">Xem tóm tắt chương trình học</span>
+        </button>
+        <button mat-menu-item class="ictu-nav-menu__element" [class.text-danger]="classObject.status !== 1" [disabled]="classObject.status === 1" (click)="deleteRow(classObject)">
+            <i class="fa-classic fa-solid fa-trash-can f-14"></i>
+            <span class="f-roboto f-14 fw-normal m-l-10">Xóa lớp học</span>
+        </button>
+    </ng-template>
+</mat-menu>
+
+<p-dialog [(visible)]="visibleUpgradeCourseClassDialog" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '650px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+    <div class="ictu-dialog-layout__wrapper">
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Khởi tạo chương trình học mới</h4>
+            <button (click)="closeUpgradeCourseClassPanel(null)" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div class="ictu-dialog-layout__body p-0" style="min-height: 100px">
+            @if (classCourseUpgrade()) {
+                <app-class-course-upgrade [classCourseUpgrade]="classCourseUpgrade()" [(courseOptions)]="courseOptions" (onClose)="closeUpgradeCourseClassPanel($event)"></app-class-course-upgrade>
+            }
+        </div>
+    </div>
+</p-dialog>
+

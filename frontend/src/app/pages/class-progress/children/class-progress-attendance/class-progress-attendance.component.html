@@ -1,0 +1,737 @@
+<section class="admin-wrap-table-attendance position-relative">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    @if (state() === 'upload') {
+        <app-loading-progress heading="Đang thêm mới..." backdropFilter="none"></app-loading-progress>
+    }
+    <div class="admin-wrap-table">
+        @if (state() === 'success') {
+            @switch (modeState()) {
+                @case ('default') {
+                    <div class="admin-wrap-table__head d-flex">
+                        <h4 class="admin-wrap-table__heading">
+                            <svg>
+                                <use href="fonts/custom-icon.svg#custom-graduation-cap"></use>
+                            </svg>
+                            Sĩ số: {{ dataTable.data().length }} | Đi học: {{ TTDiemDanh().dihoc.length }} | Đi muộn: {{ TTDiemDanh().dimuon.length }} | Nghỉ học: {{ TTDiemDanh().nghihoc.length }}
+                        </h4>
+                        <div style="display: flex; gap: 10px">
+                            <button mat-flat-button class="btn ictu-badge-btn--pink" (click)="setMode('media')">Media
+                                <i class="ti ti-aspect-ratio"></i></button>
+                            <button [disabled]="!canChange() || !isCanSubmit()" mat-flat-button class="btn ictu-badge-btn--primary" (click)="confirmUpdateStatus()">Lưu
+                                <i class="pi pi-save"></i></button>
+                        </div>
+                    </div>
+                    <div class="admin-wrap-table__body">
+                        @if (class_session_value().parent_id == 0) {
+                            <table class="tbl admin-table table-hover">
+                                <thead>
+                                <tr>
+                                    <!-- <th class="col-index text-left">#</th> -->
+                                    <th class="wid-60 text-center">Ảnh</th>
+                                    <th class="text-left">Họ và tên</th>
+                                    <th class="wid-100 text-center">Ngày sinh</th>
+                                    <!-- <th class="wid-100 text-center">Giới tính</th> -->
+                                    <th class="wid-460 text-center">Trạng thái</th>
+                                    <th class="text-center">Lý do nghỉ</th>
+                                    <!-- <th class="wid-200 text-center">Cập nhật mới</th> -->
+                                    <th class="wid-160 text-center">Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    @for (row of dataTable.data(); track row.id; let i = $index) {
+                                        <tr class="select-item">
+                                            <!-- (click)="btnGetToSingle(row)" -->
+                                            <!-- <td class="col-index text-left">{{ dataTable.paginator.startIndex() + i }}</td> -->
+                                            <td class="wid-60 text-center" style="line-height: 0;padding: 5px 0;">
+                                                <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{data: row.hocsinh}" class="button--un-set-style">
+                                                    <img class="profile-avatar-circle" [src]="row.hocsinh.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">
+                                                </button>
+                                            </td>
+                                            <td class="text-left">
+                                                <div class="flex flex-column">
+                                                    <div style="font-weight: 500;">{{ row.hocsinh.full_name }}{{ row.hocsinh.english_name ? ' (' + row.hocsinh.english_name + ')' : '' }}</div>
+                                                    <div>{{ row.hocsinh.code }}</div>
+                                                </div>
+                                            </td>
+                                            <td class="wid-100 text-center">{{ row.hocsinh.dob | date: 'dd/MM/yyyy' }}</td>
+                                            <!-- <td class="wid-100 text-center">{{ row.hocsinh.gioitinh }}</td> -->
+                                            <td class="wid-460 text-center">
+                                                <button (click)="updateStatusDiemDanh('PRESENT', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-PRESENT">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="PRESENT" [(ngModel)]="row.diemdanh.status"/>Đi học
+                                                    </div>
+                                                </button>
+                                                <button (click)="updateStatusDiemDanh('UNEXCUSED', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-UNEXCUSED">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="UNEXCUSED" [(ngModel)]="row.diemdanh.status"/>Nghỉ không phép
+                                                    </div>
+                                                </button>
+                                                <button (click)="updateStatusDiemDanh('EXCUSED', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-EXCUSED">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="EXCUSED" [(ngModel)]="row.diemdanh.status"/>Nghỉ có phép
+                                                    </div>
+                                                </button>
+                                                <button (click)="updateStatusDiemDanh('LATE', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-LATE">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="LATE" [(ngModel)]="row.diemdanh.status"/>Đi muộn
+                                                    </div>
+                                                </button>
+                                            </td>
+                                            <!-- || getRole() == 'training_management' -->
+                                            <td>
+                                                <textarea [disabled]="row.diemdanh.status == 'PRESENT' || !canChange()" rows="1" style="width: 100%; box-sizing: border-box;background: white; resize: vertical;" [(ngModel)]="row.diemdanh.reason" variant="filled" pTextarea (input)="updateStatusDiemDanh(row.diemdanh.status, i)"></textarea>
+                                            </td>
+                                            <!-- <td class="wid-200 text-center p-0">
+                                                @if(row.attendance_socet){
+                                                    <div style="display: flex; flex-direction: column;">
+                                                        <div style="font-weight: 500;">
+                                                            {{row.attendance_socet?.creator}}
+                                                        </div>
+                                                        <div>
+                                                            {{row.attendance_socet?.created_at}}
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </td> -->
+                                            <td class="wid-160 text-center p-0">
+                                                <div class="admin-table__btn-actions">
+                                                    <button mat-flat-button class="btn ictu-button-danger-light" (click)="selectAttendance(row)" [ngClass]="{ 'warning-btn': row.attendance_socet }" [disabled]="!row.attendance_socet" pTooltip="Trạng thái điểm danh đã được cập nhật" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-alert-circle"></i>
+                                                    </button>
+                                                    <button class="btn ictu-button-success-light" (click)="opendialogPhuHuynh(row)" pTooltip="Thông tin phụ huynh" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-eye"></i>
+                                                    </button>
+                                                    <button class="btn ictu-button-primary-light" [disabled]="!canChange()" (click)="opendialogComment(row, true)" pTooltip="Nhận xét học sinh" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-notebook"></i>
+                                                    </button>
+                                                    <button class="btn ictu-button-info-light" [disabled]="!canChange()" (click)="opendialogSpeakingTest(row)" pTooltip="Speaking test" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <!-- <i class="ti ti-device-audio-tape"></i>-->
+                                                        <i class="fa-classic fa-regular fa-microphone"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="12">Không có bản ghi nào.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        } @else {
+                            <table class="tbl admin-table table-hover">
+                                <thead>
+                                <tr>
+                                    <th class="wid-60 text-center">Ảnh</th>
+                                    <th class="text-left">Họ và tên</th>
+                                    <th class="wid-100 text-center">Ngày sinh</th>
+                                    <th class="wid-460 text-center">Trạng thái</th>
+                                    <th class="text-center">Lý do nghỉ</th>
+                                    <th class="wid-140 text-center">Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    @for (row of dataTable.data(); track row.id; let i = $index) {
+                                        <tr class="select-item">
+                                            <td class="wid-60 text-center" style="line-height: 0;padding: 5px 0;">
+                                                <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{data: row.hocsinh}" class="button--un-set-style">
+                                                    <img class="profile-avatar-circle" [src]="row.hocsinh.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">
+                                                </button>
+                                            </td>
+                                            <td class="text-left">
+                                                <div class="flex flex-column">
+                                                    <div style="font-weight: 500;">{{ row.hocsinh.full_name }}{{ row.hocsinh.english_name ? ' (' + row.hocsinh.english_name + ')' : '' }}</div>
+                                                    <div>{{ row.hocsinh.code }}</div>
+                                                </div>
+                                            </td>
+                                            <td class="wid-100 text-center">{{ row.hocsinh.dob | date: 'dd/MM/yyyy' }}</td>
+                                            <td class="wid-460 text-center">
+                                                <button (click)="updateStatusDiemDanh('PRESENT', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-PRESENT">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="PRESENT" [(ngModel)]="row.diemdanh.status"/>Đi học
+                                                    </div>
+                                                </button>
+                                                <button (click)="updateStatusDiemDanh('UNEXCUSED', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-UNEXCUSED">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="UNEXCUSED" [(ngModel)]="row.diemdanh.status"/>Nghỉ không phép
+                                                    </div>
+                                                </button>
+                                                <button (click)="updateStatusDiemDanh('EXCUSED', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-EXCUSED">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="EXCUSED" [(ngModel)]="row.diemdanh.status"/>Nghỉ có phép
+                                                    </div>
+                                                </button>
+                                                <button (click)="updateStatusDiemDanh('LATE', i)" [disabled]="!canChange()" class="button--un-set-style">
+                                                    <div class="class-progress-attendance-selec-radio-label radio-LATE">
+                                                        <input [disabled]="!canChange()" type="radio" [name]="'status-' + i" value="LATE" [(ngModel)]="row.diemdanh.status"/>Đi muộn
+                                                    </div>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <textarea [disabled]="row.diemdanh.status == 'PRESENT' || !canChange()" rows="1" style="width: 100%; box-sizing: border-box;background: white; resize: vertical;" [(ngModel)]="row.diemdanh.reason" variant="filled" pTextarea (input)="updateStatusDiemDanh(row.diemdanh.status, i)"></textarea>
+                                            </td>
+                                            <td class="wid-140 text-center p-0">
+                                                <div class="admin-table__btn-actions">
+                                                    <button mat-flat-button class="btn ictu-button-danger-light" (click)="selectAttendance(row)" [ngClass]="{ 'warning-btn': row.attendance_socet }" [disabled]="!row.attendance_socet" pTooltip="Trạng thái điểm danh đã được cập nhật" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-alert-circle"></i>
+                                                    </button>
+                                                    <button class="btn ictu-button-success-light" (click)="opendialogPhuHuynh(row)" pTooltip="Thông tin phụ huynh" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-eye"></i>
+                                                    </button>
+                                                    <button class="btn ictu-button-primary-light" [disabled]="!canChange()" (click)="opendialogComment(row, true)" pTooltip="Nhận xét học sinh" tooltipPosition="left" tooltipStyleClass="ictu-input-form__tooltip">
+                                                        <i class="ti ti-notebook"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td colspan="12">Không có bản ghi nào.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>                        <!-- <div class="admin-wrap-table__foot">
+							<div class="d-flex justify-content-center align-items-center w-100">
+								<ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"></ictu-paginator>
+							</div>
+						</div> -->
+                }
+                @case ('media') {
+                    <div class="admin-wrap-table__head d-flex">
+                        <h4 class="admin-wrap-table__heading">
+                            <svg>
+                                <use href="fonts/custom-icon.svg#custom-graduation-cap"></use>
+                            </svg>
+                            Media hoạt dộng
+                        </h4>
+                        <div style="display: flex; gap: 10px">
+                            <button mat-flat-button (click)="btnCallFileChooser('media')" class="btn ictu-button-info-light" style="height: 40px; padding: 0px 10px;">
+                                <i class="ti ti-circle-plus"></i> Thêm File
+                            </button>
+                            <button mat-flat-button class="btn ictu-badge-btn--danger-reverse" (click)="setMode('default')">
+                                <i class="ti ti-x"></i></button>
+                        </div>
+
+                    </div>
+                    <div class="admin-wrap-table__body">
+                        <div class="class-activities-album-media-format class-activities-album-media-format--border-none">
+                            <div class="class-activities-album-media-session d-flex flex-wrap">
+                                @if (visibleMedia) {
+                                    @for (item of classMediaDataTable.data(); track item.id; let index = $index) {
+                                        <!-- @if (deletingFormItemIndex() === index) {
+                                            <mat-progress-bar class="class-activities-album-media__item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+                                        } -->
+                                        <div class="class-activities-album-media__item-session">
+                                            <div class="class-activities-album-media__item_media-session">
+                                                @switch (checkTypeFile( item.media )) {
+                                                    @case ('image') {
+                                                        <app-class-curriculum-lecture-media-picture [media]="setMediaContentClassMedia(item.media)" class="w-100 h-100"></app-class-curriculum-lecture-media-picture>
+                                                    }
+                                                    @case ('video') {
+                                                        <app-view-document type_view="VIDEO" [link]="setSrcMedia(item.media)"></app-view-document>
+                                                    }
+                                                    @case ('undefine') {
+                                                    }
+                                                }
+                                            </div>
+                                            <div class="ictu-form ictu-form--label-on-top" style="width: 100%; padding: 0px 10px 10px 10px; gap: 10px;">
+                                                <div class="ictu-form__row">
+                                                    <label class="ictu-form__label" for="f_caption">Caption</label>
+                                                    <input class="ictu-form__input-field" [(ngModel)]="item.content" id="f_caption" pInputText placeholder="Caption" type="text" (ngModelChange)="setIsUpdateClassMedia(index, true)">
+                                                </div>
+                                                <div class="ictu-form__row">
+                                                    <label class="ictu-form__label" for="f_student_ids" style="top: -6px;">Tags</label>
+                                                    <div class="class-student-control-wrapper" id="f_student_ids">
+                                                        <div class="class-student-control-wrapper__left">
+                                                            <div style="font-weight: 500;">{{ item.student_ids.length }}</div>
+                                                        </div>
+                                                        <button class="btn ictu-button-info-light" pTooltip="Chọn học sinh" tooltipPosition="top" (click)="openDialogClassMedia(item,index)">
+                                                            <i class="ti ti-edit"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @if (item._ictuDataTableRowChecked) {
+                                                <button mat-flat-button class="btn ictu-badge-btn--info-reverse save-btn" (click)="updateClassMedia(item); setIsUpdateClassMedia(index, false)">
+                                                    <i class="pi pi-save"></i>
+                                                </button>
+                                            }
+                                            <button (click)="$event.stopPropagation(); btnRemoveFormItem(index,'media')" mat-flat-button class="btn ictu-badge-btn--danger-reverse delete-btn">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        } @else if (state() === 'unset_class_group') {
+            <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+                <span class="ictu-badge ictu-badge--danger">Bạn chưa được phân vào nhóm</span>
+            </div>
+        } @else if (state() === 'error') {
+            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+        }
+    </div>
+</section>
+
+<p-dialog [modal]="true" [(visible)]="visibleDialogPhuHuynh" [closable]="false" [draggable]="true" [style]="{ width: '500px', height: '75vh' }" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+    <div class="ictu-dialog-layout__wrapper">
+        @if (stateDialog() == 'load') {
+            <app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+        }
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Danh sách phụ huynh của học sinh {{ hocsinhSelected?.hocsinh?.full_name }}</h4>
+            <button (click)="visibleDialogPhuHuynh = !visibleDialogPhuHuynh" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        @switch (stateDialog()) {
+            @case ('success') {
+                <div class="ictu-dialog-layout__body">
+                    @for (row of listPhuHuynh; track row.id; let i = $index) {
+                        <div class="class-student-parent-dialog-body__profile-card">
+                            <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{data: row, defaultAvatar: 'images/user/avatar-placeholder.jpg'}" class="button--un-set-style">
+                                <img class="profile-avatar-circle" style="width: 60px; height: 60px; margin-right: 10px;" [src]="row.avatar || 'images/user/avatar-placeholder.jpg'" alt="" width="50" height="50">
+                            </button>
+                            <div class="class-student-parent-dialog-body__profile-info">
+                                @if (row.vaitro) {
+                                    <div class="profile-info-name">{{ row.code }} ({{ row.vaitro }})</div>
+                                } @else {
+                                    <div class="profile-info-name">{{ row.full_name }}</div>
+                                }
+                                <div class="profile-info-dob">Ngày sinh: {{ row.dob | date: 'dd/MM/yyyy' }}</div>
+                                <div class="profile-info-tag">
+                                    <span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai1 }}</span>
+                                    @if (row.dienthoai2) {
+                                        <span class="ictu-badge ictu-badge--purple"><i class="ti ti-phone"></i>&nbsp;{{ row.dienthoai2 }}</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                @if (listPhuHuynh.length == 0) {
+                    <div class="ictu-dialog-layout__body" class="empty-message-wrapper">Không có phụ huynh</div>
+                }
+            }
+            @case ('error') {
+                <div class="ictu-dialog-layout__body">
+                    <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                        <a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="loadPhuHuynh(hocsinhSelected)">tải lại</a>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+</p-dialog><!-- <p-dialog class="p-dialog--no-header" [modal]="true" [(visible)]="visibleDialogComment" [closable]="false" [draggable]="true" [style]="{height: '65vh' }">
+	<div class="class-student-parent-dialog">
+		<div class="class-student-parent-dialog-header">
+			<div class="d-flex justify-content-center align-items-center">
+				<div>Nhận xét học sinh</div>
+			</div>
+			<div class="d-flex justify-content-center align-items-center">
+				<button class="class-student-parent-dialog-btnclose" (click)="visibleDialogComment = false">
+					<i class="ti ti-x"></i>
+				</button>
+			</div>
+		</div>
+		@switch (statePagePhuHuynh()) {
+			@case ('load') {
+				<app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+			}
+			@case ('success') {
+				<form [formGroup]="formControl.formGroup" style="flex: 1 1 auto;">
+					<div class="class-student-parent-dialog-body">
+						@if(!valueStudentCommentOnly){
+							<p-multiselect class="class-progress-attendance-select" [disabled]="getRole() == 'training_management'" [options]="dataTable.data()" placeholder="Chọn học sinh" optionLabel="hocsinh.hoten" optionValue="hocsinh.id" formControlName="user_ids">
+							<ng-template let-item #item>
+								<div class="flex items-center gap-2" style="align-items: center;">
+									<img class="class-progress-attendance__avatar" [src]="item.hocsinh.avata ? item.hocsinh.avata : 'images/user/avatar-1.jpg'" alt="" width="40" height="40">
+									<div>{{ item.hocsinh.hoten }}</div>
+								</div>
+							</ng-template>
+						</p-multiselect>
+						}@else{
+							<div class="class-student-parent-dialog-body__user-item">
+								<img class="user-item-avatar" [src]="valueStudentCommentOnly.hocsinh.avatar ? valueStudentCommentOnly.hocsinh.avatar : 'images/user/avatar-1.jpg'" alt="avatar" />
+								<span class="user-item-name" >{{ valueStudentCommentOnly.hocsinh.hoten }}</span>
+							</div>
+
+						}
+
+						@if (getRole() == 'teaching_assistant') {
+							<textarea placeholder="Nhập nhận xét" formControlName="comment" pTextarea style="width: 100%; box-sizing: border-box; background: #F8F9FA; resize: vertical; flex: 1 1 auto;"></textarea>
+						}@else{
+							<div style="width: 100%; box-sizing: border-box; background: #F8F9FA; resize: vertical; flex: 1 1 auto;">{{getvalueFormControl()}}</div>
+						}
+						<button mat-flat-button class="btn ictu-badge-btn--secondary custom-btn" ><i class="ti ti-camera-plus" style=" font-size: 20px; line-height: 1;"></i></button>
+					</div>
+				</form>
+				<div class="class-student-parent-dialog-footer">
+					<button (click)="visibleDialogComment = false; valueStudentCommentOnly = null" mat-flat-button class="btn ictu-badge-btn--secondary">Đóng</button>
+					@if(getRole() == 'teaching_assistant'){
+						<button [disabled]="getRole() != 'teaching_assistant'" mat-flat-button class="btn ictu-badge-btn--info-reverse" (click)="submitActivitiesStudent(); valueStudentCommentOnly = null">Lưu</button>
+					}
+				</div>
+			}
+			@case ('error') {
+				<div style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;">
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="reloadComment($event)">tải lại</a>
+					</div>
+				</div>
+			}
+		}
+	</div>
+</p-dialog> -->
+
+
+<p-dialog [(visible)]="visibleDialogComment" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '50vh', 'min-height': '200px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+    <div class="ictu-dialog-layout__wrapper">
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">{{ headTitleDialog }}</h4>
+            <button (click)="visibleDialogComment = false" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div class="ictu-dialog-layout__body">
+            @switch (stateDialog()) {
+                @case ('load') {
+                    <app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+                }
+                @case ('upload') {
+                    <app-loading-progress heading="Đang cập nhật..." backdropFilter="none"></app-loading-progress>
+                }
+                @case ('success') {
+                    <form [formGroup]="formControl.formGroup" style="flex: 1 1 auto;">
+                        <div class="class-student-parent-dialog-body">
+                            @if (!valueStudentCommentOnly) {
+                                <p-multiselect class="class-progress-attendance-select" [options]="dataTable.data()" placeholder="Chọn học sinh" optionLabel="hocsinh.hoten" optionValue="hocsinh.id" formControlName="student_ids">
+                                    <ng-template let-item #item>
+                                        <div class="flex items-center gap-2" style="align-items: center;">
+                                            <img class="class-progress-attendance__avatar" [src]="item.hocsinh.avatar ? item.hocsinh.avatar : 'images/user/avatar-1.jpg'" alt="" width="40" height="40">
+                                            <div>{{ item.hocsinh.full_name }}</div>
+                                        </div>
+                                    </ng-template>
+                                </p-multiselect>
+                            } @else {
+                                <div class="class-student-parent-dialog-body__user-item">
+                                    <img class="user-item-avatar" [src]="valueStudentCommentOnly?.hocsinh?.avatar ? valueStudentCommentOnly.hocsinh.avatar : 'images/user/avatar-1.jpg'" alt="avatar"/>
+                                    <span class="user-item-name">{{ valueStudentCommentOnly?.hocsinh?.full_name }}</span>
+                                </div>
+
+                            }
+
+                            <textarea placeholder="Nhập nhận xét" formControlName="comment" pTextarea style="width: 100%; height:100px; box-sizing: border-box; background: #F8F9FA; resize: vertical; flex: 1 1 auto;"></textarea>
+
+                            @if (this.formField( 'type' ).value != 'HOAT_DONG') {
+                                <div>
+                                    <label>File đính kèm</label>
+                                    <div class="class-activities-album-media-format">
+                                        <div class="class-activities-album-media">
+                                            @if (visibleMedia) {
+                                                @for (item of getControl( 'media' ).value; track item?.title ?? item.title; let idx = $index) {
+                                                    <button class="button--un-set-style" (click)="btnPreviewFile(item)">
+                                                        @if (deletingFormItemIndex() === idx) {
+                                                            <mat-progress-bar class="class-activities-album-media__item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+                                                        }
+                                                        <div class="class-activities-album-media__item">
+                                                            @switch (checkTypeFile( item )) {
+                                                                @case ('image') {
+                                                                    <img [ICTUMediaLoader]="item" alt="" width="100" height="100" style="width: 100px; height: 100px; object-fit: cover;">
+                                                                }
+                                                                @case ('video') {
+                                                                    <img class="video-preview" src="images/footage.png" alt="" width="100" height="100">
+                                                                }
+                                                                @case ('undefine') {
+                                                                }
+                                                            }
+                                                            <button (click)="$event.stopPropagation(); btnRemoveFormItem(idx,'activities')" mat-flat-button class="btn ictu-badge-btn--danger-reverse delete-btn">
+                                                                <i class="ti ti-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                        <button mat-flat-button (click)="btnCallFileChooser('activities')" class="btn ictu-button-info-light w-100 f-14 fw-normal" style="height: 40px">
+                                            <i class="pi pi-plus"></i> Thêm File đính kèm
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </form>
+                    <div class="class-student-parent-dialog-footer">
+                        <button (click)="visibleDialogComment = false;" mat-flat-button class="btn ictu-badge-btn--secondary">Đóng</button>
+                        @if (getRole() == 'teaching_assistant' || getRole() == 'teacher') {
+                            <button mat-flat-button class="btn ictu-badge-btn--info-reverse" (click)="submitSaveDialog();">Lưu</button>
+                        }
+                    </div>
+                }
+                @case ('error') {
+                    <div style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                            <a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="reloadComment($event)">tải lại</a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</p-dialog>
+
+
+<!-- <p-dialog [(visible)]="visibleDialogSpeakingTest" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '50vh', 'min-height': '300px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Speaking Test</h4>
+			<button (click)="visibleDialogSpeakingTest = false" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body">
+			@switch (stateDialog()) {
+			@case ('load') {
+				<app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+			}
+			@case ('upload') {
+				<app-loading-progress heading="Đang cập nhật..." backdropFilter="none"></app-loading-progress>
+			}
+			@case ('success') {
+				<form [formGroup]="formControl.formGroup" style="flex: 1 1 auto;">
+					<div class="class-student-parent-dialog-body">
+						<div class="class-student-parent-dialog-body__user-item">
+							<img class="user-item-avatar" [src]="valueStudentCommentOnly?.hocsinh?.avatar ? valueStudentCommentOnly.hocsinh.avatar : 'images/user/avatar-1.jpg'" alt="avatar" />
+							<span class="user-item-name" >{{ valueStudentCommentOnly?.hocsinh?.full_name }}</span>
+						</div>
+						<textarea placeholder="Nhập nhận xét" formControlName="comment" pTextarea style="width: 100%; height:300px; box-sizing: border-box; background: #F8F9FA; resize: vertical; flex: 1 1 auto;"></textarea>
+							<div>
+								<label>File đính kèm</label>
+								<div class="class-activities-album-media-format">
+									<div class="class-activities-album-media">
+										@if(visibleMedia){
+											@for (item of getControl('media').value; track item?.title ?? item.title; let idx = $index) {
+												<button class="button--un-set-style" (click)="btnPreviewFile(item)">
+													@if (deletingFormItemIndex() === idx) {
+														<mat-progress-bar class="class-activities-album-media__item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+													}
+													<div class="class-activities-album-media__item">
+														@switch(checkTypeFile(item)){
+															@case('image'){
+																<img [ICTUMediaLoader]="item" alt="" width="100" height="100" style="width: 100px; height: 100px; object-fit: cover;">
+															}
+															@case('video'){
+																<img class="video-preview" src="images/footage.png" alt="" width="100" height="100">
+															}
+															@case('undefine'){}
+														}
+														<button (click)="$event.stopPropagation(); btnRemoveFormItem(idx,'activities')" mat-flat-button class="btn ictu-badge-btn--danger-reverse delete-btn">
+															<i class="ti ti-trash"></i>
+														</button>
+													</div>
+												</button>
+											}
+										}
+									</div>
+									<button mat-flat-button (click)="btnCallFileChooser('activities')" class="btn ictu-button-info-light w-100 f-14 fw-normal"  style="height: 40px">
+										<i class="pi pi-plus"></i> Thêm File đính kèm
+									</button>
+								</div>
+							</div>
+					</div>
+				</form>
+				<div class="class-student-parent-dialog-footer">
+					<button (click)="visibleDialogSpeakingTest = false" mat-flat-button class="btn ictu-badge-btn--secondary">Đóng</button>
+					@if(getRole() == 'teaching_assistant' || getRole() == 'teacher'){
+						<button mat-flat-button class="btn ictu-badge-btn--info-reverse" (click)="submitSaveDialog()">Lưu</button>
+					}
+				</div>
+			}
+			@case ('error') {
+				<div style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;">
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="reloadComment($event)">tải lại</a>
+					</div>
+				</div>
+			}
+		}
+		</div>
+	</div>
+</p-dialog> -->
+
+<p-dialog [(visible)]="visibleDialogSpeakingTest" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '90vh', 'min-height': '300px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header">
+    <div class="ictu-dialog-layout__wrapper">
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Speaking Test</h4>
+            <button mat-flat-button style="margin-right: 40px;" (click)="btnCallFileChooser('media')" class="btn  ictu-badge-btn--info-reverse ictu-dialog-layout__btn-close">
+                <i class="ti ti-circle-plus"></i>
+            </button>
+            <button (click)="visibleDialogSpeakingTest = false" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div class="ictu-dialog-layout__body">
+            @switch (stateDialog()) {
+                @case ('load') {
+                    <app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+                }
+                @case ('upload') {
+                    <app-loading-progress heading="Đang cập nhật..." backdropFilter="none"></app-loading-progress>
+                }
+                @case ('success') {
+                    <form [formGroup]="formControl.formGroup" style="flex: 1 1 auto;">
+                        <div class="class-student-parent-dialog-body">
+                            <div class="class-student-parent-dialog-body__user-item">
+                                <img class="user-item-avatar" [src]="valueStudentCommentOnly?.hocsinh?.avatar ? valueStudentCommentOnly.hocsinh.avatar : 'images/user/avatar-1.jpg'" alt="avatar"/>
+                                <span class="user-item-name">{{ valueStudentCommentOnly?.hocsinh?.full_name }}</span>
+                            </div>
+                            <div class="d-flex flex-column m-t-10">
+                                <b class="m-b-5 d-block p-0 f-roboto f-14 fw-medium lh-base">Nhận xét</b>
+                                <textarea class="f-roboto f-14 fw-normal lh-base d-block w-100" rows="5" placeholder="Nhập nhận xét" formControlName="comment" pTextarea style="box-sizing: border-box; background: #F8F9FA; resize: vertical;"></textarea>
+                            </div>
+                            <div class="d-flex flex-column m-t-10">
+                                <b class="m-b-5 d-block p-0 f-roboto f-14 fw-medium lh-base">File media</b>
+                                <div class="class-activities-album-media-format p-10">
+                                    @if (visibleMedia && getControl( 'media' ).value?.length) {
+                                        <div class="class-activities-album-media">
+                                            @for (item of getControl( 'media' ).value; track item?.title ?? item.title; let idx = $index) {
+                                                <button class="button--un-set-style" (click)="btnPreviewFile(item)">
+                                                    @if (deletingFormItemIndex() === idx) {
+                                                        <mat-progress-bar class="class-activities-album-media__item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+                                                    }
+                                                    <div class="class-activities-album-media__item">
+                                                        @switch (checkTypeFile( item )) {
+                                                            @case ('image') {
+                                                                <img [ICTUMediaLoader]="item" alt="" width="100" height="100" style="width: 100px; height: 100px; object-fit: cover;">
+                                                            }
+                                                            @case ('video') {
+                                                                <img class="video-preview" src="images/footage.png" alt="" width="100" height="100">
+                                                            }
+                                                            @case ('undefine') {
+                                                            }
+                                                        }
+                                                        <button (click)="$event.stopPropagation(); btnRemoveFormItem(idx,'activities')" mat-flat-button class="btn ictu-badge-btn--danger-reverse delete-btn">
+                                                            <i class="ti ti-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </button>
+                                            }
+                                        </div>
+                                    }
+                                    <button mat-flat-button (click)="btnCallFileChooser('activities')" class="btn ictu-button-info-light w-100 p-0 m-0 hei-40">
+                                        <i class="fa-classic fa-solid fa-plus"></i>
+                                        <span class="f-roboto f-14 lh-base fw-normal m-l-5">Thêm file media</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column m-t-10">
+                                <b class="m-b-5 d-block p-0 f-roboto f-14 fw-medium lh-base">Điểm theo tiêu chí</b>
+                                <ictu-criteria-scores-control formControlName="criteria_scores"></ictu-criteria-scores-control>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="class-student-parent-dialog-footer">
+                        <button (click)="visibleDialogSpeakingTest = false" mat-flat-button class="btn ictu-badge-btn--secondary">Đóng</button>
+                        @if (getRole() == 'teaching_assistant' || getRole() == 'teacher') {
+                            <button mat-flat-button class="btn ictu-badge-btn--info-reverse" (click)="submitSaveDialog()">Lưu</button>
+                        }
+                    </div>
+                }
+                @case ('error') {
+                    <div style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                            <a href="javascript:" class="admin-table__alert-danger__btn-reload" (click)="reloadComment($event)">tải lại</a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</p-dialog>
+
+<p-dialog [(visible)]="visibleDialogClassStudent" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '500px',  minHeight: '400px', maxHeight: '100vh'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--hide-overflow">
+    <div class="ictu-dialog-layout__wrapper">
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Danh sách học sinh được tags</h4>
+            <button (click)="visibleDialogClassStudent = false" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div class="ictu-dialog-layout__body">
+            <div class="ictu-p-drawer__content position-relative">
+                <div class="ictu-p-drawer__content__body position-relative">
+                    <div class="edit-course-lesson-test-table">
+                        <table class="tbl admin-table table-hover">
+                            <thead>
+                            <tr>
+                                <th class="col-checkbox">
+                                    <mat-checkbox [checked]="dataTableClassStudent.totalChecked()" [indeterminate]="dataTableClassStudent.partiallyChecked()" (change)="dataTableClassStudent.selectRow($event.checked)"></mat-checkbox>
+                                </th>
+                                <th class="text-left">Học sinh</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of dataTableClassStudent.data(); track row.id; let i = $index) {
+                                    <tr>
+                                        <td class="col-checkbox">
+                                            <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTableClassStudent.selectRow($event.checked, i)"></mat-checkbox>
+                                        </td>
+                                        <td class="text-left">
+                                            <div class="class-student-control-multiple__item" [class.active]="false">
+                                                <button [matMenuTriggerFor]="menu" [matMenuTriggerData]="{data: row.hocsinh, defaultAvatar: 'images/user/avatar-1.jpg'}" class="button--un-set-style">
+                                                    <img class="class-student-control-multiple__item-avatar" [src]="row.hocsinh.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">
+                                                </button>
+                                                <div class="class-student-control-multiple__item-info">
+                                                    <span class="class-student-control-multiple__item-name">{{ row.hocsinh.full_name }}{{ row.hocsinh.english_name ? ' (' + row.hocsinh.english_name + ')' : '' }}</span>
+                                                    <span class="class-student-control-multiple__item-email">{{ row.hocsinh.code }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="ictu-p-drawer__content__footer">
+            <button (click)="visibleDialogClassStudent = false" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+            <button (click)="updateListClassStudentTestSelect()" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+        </div>
+    </div>
+</p-dialog>
+<mat-menu #menu="matMenu" yPosition="above">
+    <ng-template matMenuContent let-data="data" let-defaultAvatar="defaultAvatar">
+        <div class="profile-avatar-menu">
+            <img [src]="data.avatar || defaultAvatar" alt="Preview"/>
+        </div>
+    </ng-template>
+</mat-menu>
+
+<p-dialog [(visible)]="visibleDialogAttendanceSocet" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '300px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+    <div class="ictu-dialog-layout__wrapper">
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thông tin thay đổi điểm danh</h4>
+            <button (click)="visibleDialogAttendanceSocet = false;" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; font-size: 14px; width: 100%; padding: 10px;">
+            <div>Người cập nhật: {{ attendance_selected()?.attendance_socet?.creator }}</div>
+            <div>Thời gian: {{ attendance_selected()?.attendance_socet?.created_at }}</div>
+        </div>
+    </div>
+</p-dialog>

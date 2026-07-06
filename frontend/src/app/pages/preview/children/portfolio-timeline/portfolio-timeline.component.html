@@ -1,0 +1,117 @@
+<div class="timeline-wrapper">
+    <div class="timeline-container">
+        <!-- Timeline vertical line -->
+        <div class="timeline-line"></div>
+
+        @for (entry of sortedEntries(); track entry.id; let last = $last) {
+            <div class="timeline-item" [class.timeline-item-last]="last">
+                <!-- Dot marker -->
+                <div class="timeline-dot" [ngClass]="getDotColorClass(entry.type)">
+                    <i class="fas" [ngClass]="getTypeIcon(entry.type)"></i>
+                </div>
+
+                <!-- Date badge -->
+                <div class="timeline-date">
+                    <div class="date-badge">
+                        <span class="date-day">{{ entry.date | date:'dd' }}</span>
+                        <span class="date-month">{{ entry.date | date:'MMM' }}</span>
+                        <span class="date-year">{{ entry.date | date:'yyyy' }}</span>
+                    </div>
+                </div>
+
+                <!-- Content card -->
+                <div class="timeline-card" [ngClass]="getEntryAccentClass(entry.type)">
+                    <!-- Card header -->
+                    <div class="card-header">
+                        <div class="card-type-badge" [ngClass]="getTypeBadgeClass(entry.type)">
+                            <i class="fas" [ngClass]="getTypeIcon(entry.type)"></i>
+                            <span>{{ getTypeName(entry.type) }}</span>
+                        </div>
+                        <span class="card-class-name">{{ entry.className }}</span>
+                    </div>
+
+                    <!-- Card title -->
+                    <h3 class="card-title">
+                        {{ entry.lessonTitle || 'Hoạt động ngoại khóa' }}
+                    </h3>
+
+                    <!-- Media gallery -->
+                    @if (entry.media && entry.media.length > 0) {
+                        <div class="media-gallery">
+                            @for (m of entry.media; track m.url) {
+                                <div class="media-item">
+                                    @if (m.type === 'IMAGE') {
+                                        <img [src]="m.url" class="media-image" [alt]="m.caption" loading="lazy">
+                                    } @else {
+                                        <div class="media-video">
+                                            @if (m.thumbnail) {
+                                                <img [src]="m.thumbnail" class="media-video-thumb" alt="">
+                                            }
+                                            <div class="play-overlay">
+                                                <i class="fas fa-play-circle"></i>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (m.caption) {
+                                        <div class="media-caption">{{ m.caption }}</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Feedback section -->
+                    @if (entry.feedbacks && entry.feedbacks.length > 0) {
+                        <div class="feedback-section">
+                            @for (fb of entry.feedbacks; track fb.staffId) {
+                                <div class="feedback-card" [ngClass]="fb.staffRole === 'TEACHER' ? 'feedback-teacher' : 'feedback-ta'">
+                                    <div class="feedback-avatar">
+                                        <div class="avatar-circle" [ngClass]="fb.staffRole === 'TEACHER' ? 'avatar-teacher' : 'avatar-ta'">
+                                            <i class="fas" [ngClass]="fb.staffRole === 'TEACHER' ? 'fa-chalkboard-user' : 'fa-user-graduate'"></i>
+                                        </div>
+                                    </div>
+                                    <div class="feedback-content">
+                                        <div class="feedback-header">
+                                            <span class="feedback-name">{{ fb.staffName }}</span>
+                                            <span class="feedback-role">{{ fb.staffRole === 'TEACHER' ? 'Giáo viên' : 'Trợ giảng' }}</span>
+                                        </div>
+                                        <p class="feedback-text">{{ fb.content }}</p>
+                                        @if (fb.criteriaScores && fb.criteriaScores.length > 0) {
+                                            <div class="criteria-scores">
+                                                @for (score of fb.criteriaScores; track score.criteria) {
+                                                    <div class="criteria-item">
+                                                        <span class="criteria-label">{{ score.criteria }}</span>
+                                                        <div class="criteria-bar">
+                                                            <div class="criteria-fill" [style.width.%]="(score.score / 10) * 100" [style.background]="getScoreColor(score.score)"></div>
+                                                        </div>
+                                                        <span class="criteria-score">{{ score.score }}/10</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Tags -->
+                    @if (entry.tags && entry.tags.length > 0) {
+                        <div class="tags-section">
+                            @for (tag of entry.tags; track tag) {
+                                <span class="tag-item">#{{ tag }}</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- End marker -->
+        <div class="timeline-end">
+            <div class="end-dot pulse-animation">
+                <i class="fas fa-flag-checkered"></i>
+            </div>
+        </div>
+    </div>
+</div>

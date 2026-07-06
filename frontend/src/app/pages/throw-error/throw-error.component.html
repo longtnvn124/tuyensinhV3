@@ -1,0 +1,36 @@
+<div class="throw-error-template">
+    @if (state() === 'loading') {
+        <div class="throw-error-template__inner position-relative">
+            <app-loading-progress heading="Processing..."></app-loading-progress>
+        </div>
+    } @else {
+        <div class="throw-error-template__inner throw-error-template-bg-gradient position-relative d-flex justify-content-center align-items-center">
+            <div class="error-page d-flex align-items-center justify-content-center position-relative zdx-8">
+                <div class="container text-center">
+                    <h1 class="d-block f-60 f-roboto lh-sm error-code glitch m-b-0">404</h1>
+                    <h2 class="d-block f-26 fw-bold f-roboto m-b-0 error-title">Opps! The page is not found</h2>
+                    <div class="d-flex justify-content-center m-t-30">
+                        <a (click)="btnGetHome($event)" class="et_pb_button_0 f-roboto f-16 lh-base fw-bold" href="#">Return Home</a>
+                    </div>
+                </div>
+            </div>
+            <div class="bubble position-absolute inset-0 zdx-5">
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+                <div><span class="dot"></span></div>
+            </div>
+        </div>
+    }
+</div>

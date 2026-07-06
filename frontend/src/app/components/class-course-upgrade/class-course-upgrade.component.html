@@ -1,0 +1,128 @@
+<div class="class-course-upgrade w-100 flex-column d-flex flex-column position-relative p-15 m-0">
+    @switch (state()) {
+        @case ('success') {
+            @if (courseOptions().length) {
+                @if (courseSelected()) {
+                    <div class="cpd-reschedule-class-session-form__overlay d-flex flex-column justify-content-center align-items-center">
+                        <h4 class="d-block text-center f-roboto f-18 fw-medium m-0 p-t-5 p-b-15 lh-base">Thông tin chương trình học</h4>
+                        <div class="admin-wrap-table__body p-x-10">
+                            <table class="tbl admin-table table-hover">
+                                <tr>
+                                    <th>Lớp</th>
+                                    <td>{{ classCourseUpgrade().name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Khóa học</th>
+                                    <td>{{ (courseOptions() | findInArray : 'value' : courseSelected())?.label }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tổng số buổi học</th>
+                                    <td>{{ (courseOptions() | findInArray : 'value' : courseSelected())?.raw.sobaigiang }} buổi</td>
+                                </tr>
+                                <tr>
+                                    <th>Giáo viên</th>
+                                    <td class="text-left">
+                                        @if (classCourseUpgrade().teachers && classCourseUpgrade().teachers.length) {
+                                            <div class="d-flex flex-column gap-10">
+                                                @for (employee of classCourseUpgrade().teachers; track employee) {
+                                                    <div class="d-flex flex-row">
+                                                        <figure class="ictu-media-wrapper">
+                                                            <img [src]="employee | employeePhoto" alt="">
+                                                        </figure>
+                                                        <div class="d-flex flex-column flex-fill">
+                                                            <p class="f-roboto m-0 f-14 fw-medium lh-base text-start">{{ employee.full_name }}</p>
+                                                            <p class="f-roboto m-0 f-14 fw-normal lh-base text-start text-secondary">{{ employee.email }}</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Trợ giảng</th>
+                                    <td class="text-left">
+                                        @if (classCourseUpgrade().assistants && classCourseUpgrade().assistants.length) {
+                                            <div class="d-flex flex-column gap-10">
+                                                @for (staff of classCourseUpgrade().assistants; track staff) {
+                                                    <div class="d-flex flex-row">
+                                                        <figure class="ictu-media-wrapper">
+                                                            <img [src]="staff | employeePhoto" alt="">
+                                                        </figure>
+                                                        <div class="d-flex flex-column flex-fill">
+                                                            <p class="f-roboto m-0 f-14 fw-medium lh-base text-start">{{ staff.full_name }}</p>
+                                                            <p class="f-roboto m-0 f-14 fw-normal lh-base text-start text-secondary">{{ staff.email }}</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="d-flex justify-content-center align-items-center p-t-30 p-b-15" style="gap: 15px;">
+                            <button (click)="buttonEvent('backForward')" class="btn ictu-badge-btn--dark-reverse" mat-flat-button>
+                                <i class="fa-classic fa-solid fa-left m-r-5"></i> Quay lại
+                            </button>
+                            <button (click)="buttonEvent('submit')" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>
+                                <i class="fa-classic fa-solid fa-send m-r-5"></i> Khởi tạo
+                            </button>
+                        </div>
+                    </div>
+                } @else {
+                    <div class="cpd-reschedule-class-session-form__head">
+                        <h4 class="d-block text-center f-roboto f-18 fw-medium m-0 p-t-10 pb-0 lh-base">Thông tin khóa học</h4>
+                    </div>
+                    <div class="cpd-reschedule-class-session-form__body p-t-10 p-b-15">
+                        <div class="ictu-form ictu-form--label-on-top wid-250 m-auto p-0">
+                            <div class="ictu-form__row">
+                                <p-select [options]="courseOptions()" class="w-100" [(ngModel)]="courseSelected" optionLabel="label" optionValue="value" placeholder="Chọn khóa học" appendTo="body">
+                                    <!--                                     <ng-template #selectedItem let-selectedOption> -->
+                                    <!--                                         @if (selectedOption) { -->
+                                    <!--                                             <div class="d-flex flex-column gap-10 w-100"> -->
+                                    <!--                                                 <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png" class="w-100" [alt]="selectedOption.raw.code.toLowerCase()"/> -->
+                                    <!--                                                 <p class="f-roboto f-14 text-truncate m-0 text-break">{{ selectedOption.label }}</p> -->
+                                    <!--                                             </div> -->
+                                    <!--                                         } -->
+                                    <!--                                     </ng-template> -->
+                                    <!--                                     <ng-template let-course #item> -->
+                                    <!--                                         <div class="d-flex flex-column gap-10 w-100" style="max-width: 205px"> -->
+                                    <!--                                             <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png" class="w-100" [alt]="course.raw.code.toLowerCase()"/> -->
+                                    <!--                                             <p class="f-roboto f-14 m-0 text-break" style="white-space: break-spaces;">{{ course.label }}</p> -->
+                                    <!--                                         </div> -->
+                                    <!--                                     </ng-template> -->
+                                    <ng-template #dropdownicon>
+                                        <i class="pi pi-bookmark-fill"></i>
+                                    </ng-template>
+                                </p-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cpd-reschedule-class-session-form__foot d-flex justify-content-center align-items-center p-t-15 p-b-15" style="gap: 15px;">
+                        <button (click)="btnClose(false)" class="btn ictu-badge-btn--secondary" mat-flat-button style="min-width: 100px">Hủy</button>
+                        <button [disabled]="!courseSelected()" class="btn ictu-badge-btn--primary-reverse" mat-flat-button style="min-width: 100px">Bắt đầu</button>
+                    </div>
+                }
+            } @else {
+                <h4 class="d-block text-center f-roboto f-14 fw-normal m-auto p-0 lh-base">Đang xử lý thông tin...</h4>
+            }
+        }
+        @case ('loading') {
+            <div class="d-flex align-items-center justify-content-center gap-2" style="min-height: 100px">
+                <span class="f-roboto f-14 lh-base fw-normal">Loading...</span>
+                <span class="spinner-border spinner-border-sm text-danger"></span>
+            </div>
+        }
+        @case ('error') {
+            <div class="d-flex justify-content-center align-items-center flex-column m-auto" style="width: min(calc(100% - 30px) , 520px);gap: 15px;color: #333333;">
+                <p class="ictu-alert ictu-alert-danger m-0 text-center">Mất kết nối với máy chủ!.</p>
+                <button (click)="btnReload()" mat-flat-button class="btn ictu-badge-btn--primary-reverse">
+                    <i class="ti ti-refresh"></i> Bắt đầu lại
+                </button>
+            </div>
+        }
+        @default {
+        }
+    }
+</div>

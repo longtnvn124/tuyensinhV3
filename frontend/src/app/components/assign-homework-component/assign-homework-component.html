@@ -1,0 +1,428 @@
+<section class="edit-course-lesson-test-section">
+    @if (state() == 'loading') {
+		<app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+	}@else if (state() == 'success'){
+        <div class="edit-course-lesson-test-wrapper">
+            @if(canChange()){
+                <div class="edit-course-lesson-test__head">
+                    <div class="edit-course-lesson-test__lesson-title m-0 d-inline-flex justify-content-start align-items-center">
+                        <i class="ti ti-pencil"></i>
+                        <div class="d-inline-flex flex-column h-100">
+                            <!-- <p class="f-roboto f-13 fw-medium lh-base m-0 d-inline-flex" style="color: #5B6B79;">Bài tập</p> -->
+                            <h4 class="f-roboto f-16 fw-bold lh-base m-0">Bài tập về nhà</h4>
+                        </div>
+                        @if(checkAssign()){
+                            <i class="ti ti-circle-check" style="color: #28a745; padding-left: 10px;"></i>
+                        }
+                    </div>
+                    <div class="edit-course-lesson-test__instructors d-inline-flex justify-content-end align-items-center ms-auto">
+                        <!-- <p-select [loading]="state() === 'loading'" [options]="optionListType" appendTo="body" placeholder="Lọc theo hình thức" [(ngModel)]="search.type" [showClear]="true" (onChange)="onSearchCourseLessonTestType()"/> -->
+                        <!-- <div class="admin-wrap-table__switchers" pTooltip="Chế độ hiển thị" tooltipPosition="left" showDelay="1000">
+                            <button (click)="btnSetViewMode('default')" type="button" [class.active]="viewMode()==='default'" class="admin-wrap-table__switchers__btn btn">Bài đã giao</button>
+                            <button (click)="btnSetViewMode('sample')" type="button" [class.active]="viewMode()==='sample'" class="admin-wrap-table__switchers__btn btn">Bài mẫu</button>
+                        </div> -->
+                        @if(tableAssignDefault.length != 0){
+                            <button mat-flat-button class="btn ictu-button-primary-light" style="height: 40px; padding: 6px;" (click)="settypeAssign('default'); addNewItem()">Giao bài tập chính
+                                <i class="ti ti-git-pull-request"></i>
+                            </button>
+                        }
+                        <button mat-flat-button class="btn ictu-button-info-light" style="height: 40px; padding: 6px;" (click)="settypeAssign('additional'); addNewItem()">Giao bài bổ sung
+                            <i class="ti ti-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="edit-course-lesson-test__body">
+                    <div class="edit-course-lesson-test-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="text-left">Tên bài tập</th>
+                                    <th class="wid-95 text-center">Số lượng</th>
+                                    <th class="wid-140 text-center">Loại bài tập</th>
+                                    <th class="wid-160 text-center">Bắt buộc</th>
+                                    <th class="wid-140 text-center">Hình thức</th>
+                                    <th class="wid-140 text-center">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of dataTableAssignAdditional.data(); track row.id; let i = $index) {
+                                    <tr>
+                                        <td class="text-left">{{row.course_lesson_test_id == 0 ? row.title : row.course_lesson_test.title}}</td>
+                                        <td class="wid-95 text-center">{{row.student_ids.length}}</td>
+                                        <td class="wid-140 text-center">
+                                            @if(row.course_lesson_test_id == 0){
+                                                <span class="ictu-badge ictu-badge--primary">Bài bổ sung</span>
+                                            }@else{
+                                                <span class="ictu-badge ictu-badge--secondary">Bài chính</span>
+                                            }
+                                        </td>
+                                        @if(row.course_lesson_test_id == 0 ? row.required == 0 : row.course_lesson_test.required == 0){
+                                            <td class="wid-140 text-center">
+                                                <span class="ictu-badge ictu-badge--success">Không bắt buộc</span>
+                                            </td>
+                                        }@else {
+                                            <td class="wid-140 text-center">
+                                                <span class="ictu-badge ictu-badge--danger">Bắt buộc</span>
+                                            </td>
+                                        }
+                                        <td class="wid-140 text-center">
+                                            @if(row.course_lesson_test_id == 0 ? row.type == 'TU_LUAN' : row.course_lesson_test.type == 'TU_LUAN'){
+                                                <span class="ictu-badge ictu-badge--teal">Tự luận</span>
+                                            }@else {
+                                                <span class="ictu-badge ictu-badge--purple">Trắc nghiệm</span>
+                                            }
+                                        </td>
+                                        <td class="wid-140 text-center">
+                                            <div class="admin-table__btn-actions">
+                                                @if(row.course_lesson_test_id == 0 ? row.type == 'TRAC_NGHIEM' : row.course_lesson_test.type == 'TRAC_NGHIEM'){
+                                                    <button class="btn ictu-button-teal-light" pTooltip="Cập nhật ngân hàng đề" tooltipPosition="top"><i class="ti ti-settings"></i></button>
+                                                }
+                                                <!-- @else {
+                                                    <button class="btn ictu-button-secondary-light" pTooltip="Chấm bài tự luận" tooltipPosition="top" (click)="setMode('score',row.id)"><i class="ti ti-clipboard-list"></i></button>
+                                                } -->
+                                                <button class="btn ictu-button-info-light" pTooltip="Chỉnh sửa bài tập" tooltipPosition="top" (click)="settypeAssign(row.course_lesson_test_id == 0 ? 'additional' : 'updateDefault', row.course_lesson_test); editRow(row)"><i class="ti ti-edit"></i></button>
+                                                <button [disabled]="row.course_lesson_test_id != 0" class="btn ictu-button-danger-light" pTooltip="Xóa bài tập" tooltipPosition="top" (click)="deleteRow(row)"><i class="ti ti-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }@empty {
+                                    <tr>
+                                        <td colspan="12">Chưa có bài tập được giao.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }@else {
+                <div style="height: 90vh; display: flex; justify-content: center; align-items: center;">
+                    <span class="ictu-badge ictu-badge--danger">Buổi học chưa bắt đầu</span>
+                </div>
+            }
+        </div>
+        
+    }@else if(state() == 'error'){
+        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+			<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload" >tải lại</a>
+		</div>
+    }
+    
+</section>
+
+<p-drawer #pDrawer (onHide)="onDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'700px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+	<div class="ictu-p-drawer__content position-relative">
+		@if (formControl.enableLoading()) {
+			<app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+		}
+		<div class="ictu-p-drawer__content__body position-relative">
+			@switch (formControl.state()) {
+				@case ('READY') {
+					<form [formGroup]="formControl.formGroup">
+                        @if(typeAssign() == 'additional'){
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required" for="f_title">Tên bài</label>
+                                    <input class="ictu-form__input-field" id="f_title" pInputText placeholder="Tên bài tập" formControlName="title" type="text">
+                                </div>
+                                <div class="ictu-form__row">
+                                    <div class="row">
+                                        <div class="col-12 col-sm-6">
+                                            <div class="ictu-form__row">
+                                                <label class="ictu-form__label ictu-form__label--required lh-1" for="f_time_start">Thời gian bắt đầu</label>
+                                                <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" [showTime]="true" hourFormat="24" formControlName="time_start" id="f_time_start" inputId="buttondisplay"></p-datepicker>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6">
+                                            <div class="ictu-form__row">
+                                                <label class="ictu-form__label lh-1" for="f_time_end">Thời gian kết thúc</label>
+                                                <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" [showTime]="true" hourFormat="24" formControlName="time_end" id="f_time_end" inputId="buttondisplay"></p-datepicker>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required" for="f_content">Nội dung</label>
+                                    <div class="ngx-editor__wrapper d-flex flex-column" id="f_content">
+                                        <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+                                        <ngx-editor class="editor-transcription" [editor]="editor" formControlName="content" placeholder="..."></ngx-editor>
+                                    </div> 
+                                </div>
+                                <div class="ictu-form__row">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="ictu-form__row">
+                                                <label class="ictu-form__label ictu-form__label--required" for="f_type">Hình thức</label>
+                                                <p-select [options]="optionListType" appendTo="body" class="ictu-form__input-field" placeholder="Hình thức" formControlName="type" id="f_type"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="ictu-form__row">
+                                                <label class="ictu-form__label ictu-form__label--required" for="f_student_ids" style="top: -6px;">Học sinh</label>
+                                                <div class="class-student-control-wrapper" id="f_student_ids">
+                                                    <div class="class-student-control-wrapper__left">
+                                                        <div>Số lượng học sinh được giao bài</div>
+                                                        <div style="font-weight: 500;">{{getLengthClassStudent(false)}}/{{getLengthClassStudent(true)}}</div>
+                                                    </div>
+                                                    <button class="btn ictu-button-info-light" pTooltip="Chọn học sinh" tooltipPosition="top" (click)="visibleDialogClassStudent = true;"><i class="ti ti-edit"></i></button>    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @if(getControl('type').value != 'TRAC_NGHIEM'){
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label">Tài liệu</label>
+                                        <div class="edit-course-lesson-test-format">
+                                            @for (item of getControl('files').value; track item.file?.title ?? item.title; let idx = $index) {
+                                                <div class="ictu-attachment-item" [ngClass]="'ictu-attachment-item--type-' + item.location">
+                                                    <div class="ictu-attachment-item__container w-100">
+                                                        @if (deletingFormItemIndex() === idx) {
+                                                            <mat-progress-bar class="edit-course-lesson-test-format__item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+                                                        }
+                                                        <div class="ictu-attachment-item__icon d-inline-flex justify-content-center align-items-center position-relative p-0 m-0" [innerHTML]="item.file | fileIcon | safeHtml"></div>
+                                                        <div class="ictu-attachment-item__info">
+                                                            <b class="ictu-attachment-item__info__label text-truncate w-100 f-roboto f-14 fw-medium lh-base m-0 p-0">{{ item.file?.title ?? '' }}</b>
+                                                            <p class="ictu-attachment-item__info__info text-truncate w-100 f-roboto f-14 fw-normal lh-base text-muted m-0 p-0">{{ item.file?.size ?? 0 | formatBytes }}</p>
+                                                        </div>
+                                                        <div class="ictu-attachment-item__controls">
+                                                            <button (click)="btnPreviewFile(item.file)" class="btn ictu-attachment-item__controls__btn ictu-attachment-item__controls__btn--preview" pTooltip="Xem trước" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+                                                                <i class="ti ti-eye"></i>
+                                                            </button>
+                                                            <button (click)="btnRemoveFormItem(idx,'documents')" class="btn ictu-attachment-item__controls__btn ictu-attachment-item__controls__btn--delete" pTooltip="Xóa file" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip" appendTo="body">
+                                                                <i class="ti ti-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                            <button mat-flat-button (click)="btnCallFileChooser()" class="btn ictu-button-info-light w-100 edit-course-lesson-test-format__btn-add-item f-14 fw-normal">
+                                                <i class="pi pi-plus"></i> Thêm tài liệu
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                                @if(getControl('type').value == 'TRAC_NGHIEM'){
+                                    <div class="ictu-form__row">
+                                        <label class="ictu-form__label" for="f_time">Thời gian làm bài</label>
+                                        <input class="ictu-form__input-field"id="f_time" pInputText placeholder="Thời gian làm bài trắc nghiệm" formControlName="time" type="text">
+                                    </div>
+                                }
+                            </div>
+                        }@else {
+                            <div class="ictu-form">
+                                <div class="ictu-form__row">
+                                <label class="ictu-form__label">Bài tập</label>
+                                <div class="edit-course-lesson-test-table" style="padding-top: 6px;">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-left">Tên bài tập</th>
+                                                    <th class="wid-140 text-center">Loại bài tập</th>
+                                                    <th class="wid-140 text-center">Hình thức</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (row of dataTableAssignView.data(); track row.id; let i = $index) {
+                                                    <tr>
+                                                        <td class="text-left">{{row.title}}</td>
+                                                        <td class="wid-140 text-center">
+                                                            <span class="ictu-badge ictu-badge--secondary">Bài chính</span>
+                                                        </td>
+                                                        <td class="wid-140 text-center">
+                                                            @if(row.type == 'TU_LUAN'){
+                                                                <span class="ictu-badge ictu-badge--teal">Tự luận</span>
+                                                            }@else {
+                                                                <span class="ictu-badge ictu-badge--purple">Trắc nghiệm</span>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }@empty {
+                                                    <tr>
+                                                        <td colspan="12">Không có bản ghi nào.</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <div class="row">
+                                        <div class="col-12 col-sm-6">
+                                            <div class="ictu-form__row">
+                                                <label class="ictu-form__label ictu-form__label--required lh-1" for="f_time_start">Thời gian bắt đầu</label>
+                                                <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" [showTime]="true" hourFormat="24" formControlName="time_start" id="f_time_start" inputId="buttondisplay"></p-datepicker>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6">
+                                            <div class="ictu-form__row">
+                                                <label class="ictu-form__label lh-1" for="f_time_end">Thời gian kết thúc</label>
+                                                <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" [showTime]="true" hourFormat="24" formControlName="time_end" id="f_time_end" inputId="buttondisplay"></p-datepicker>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required" for="f_student_ids" style="top: -6px;">Học sinh</label>
+                                    <div class="class-student-control-wrapper" id="f_student_ids">
+                                        <div class="class-student-control-wrapper__left">
+                                            <div>Số lượng học sinh được giao bài</div>
+                                            <div style="font-weight: 500;">{{getLengthClassStudent(false)}}/{{getLengthClassStudent(true)}}</div>
+                                        </div>
+                                        <button class="btn ictu-button-info-light" pTooltip="Chọn học sinh" tooltipPosition="top" (click)="visibleDialogClassStudent = true;"><i class="ti ti-edit"></i></button>    
+                                    </div>
+                                </div>
+                            </div>
+                        }
+					</form>
+				}
+				@case ('PREPARATION_FAILED') {
+					<div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+						<a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+					</div>
+				}
+			}
+		</div>
+		<div class="ictu-p-drawer__content__footer">
+			<button (click)="pDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+			<button (click)="submitForm()" [disabled]="typeAssign() == 'additional' ? !formControl.formFilledAndValid : !formFilledAndValidStudent_ids" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+		</div>
+	</div>
+</p-drawer>
+<!-- 
+<p-drawer #pDrawer (onHide)="onDrawerHide()" [(visible)]="visible_DrawerAssignDefault" [dismissible]="false" header="Bài tập chính" [style]="{'width':'700px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+	<div class="ictu-p-drawer__content position-relative">
+		<div class="ictu-p-drawer__content__body position-relative">
+			<form [formGroup]="formControl.formGroup">
+                <div class="ictu-form">
+                     <div class="ictu-form__row">
+                    <label class="ictu-form__label">Bài tập</label>
+                       <div class="edit-course-lesson-test-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="text-left">Tên bài tập</th>
+                                        <th class="wid-140 text-center">Loại bài tập</th>
+                                        <th class="wid-140 text-center">Hình thức</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (row of dataTableAssignView.data(); track row.id; let i = $index) {
+                                        <tr>
+                                            <td class="text-left">{{row.title}}</td>
+                                            <td class="wid-140 text-center">
+                                                <span class="ictu-badge ictu-badge--secondary">Bài chính</span>
+                                            </td>
+                                            <td class="wid-140 text-center">
+                                                @if(row.type == 'TU_LUAN'){
+                                                    <span class="ictu-badge ictu-badge--teal">Tự luận</span>
+                                                }@else {
+                                                    <span class="ictu-badge ictu-badge--purple">Trắc nghiệm</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }@empty {
+                                        <tr>
+                                            <td colspan="12">Không có bản ghi nào.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                     </div>
+                    <div class="ictu-form__row">
+                        <div class="row">
+                            <div class="col-12 col-sm-6">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required lh-1" for="f_time_start">Thời gian bắt đầu</label>
+                                    <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" [showTime]="true" hourFormat="24" formControlName="time_start" id="f_time_start" inputId="buttondisplay"></p-datepicker>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label lh-1" for="f_time_end">Thời gian kết thúc</label>
+                                    <p-datepicker [showIcon]="true" [showOnFocus]="false" class="ictu-form__input-field" [showTime]="true" hourFormat="24" formControlName="time_end" id="f_time_end" inputId="buttondisplay"></p-datepicker>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label ictu-form__label--required" for="f_student_ids" style="top: -6px;">Học sinh</label>
+                        <div class="class-student-control-wrapper" id="f_student_ids">
+                            <div class="class-student-control-wrapper__left">
+                                <div>Số lượng học sinh được giao bài</div>
+                                <div style="font-weight: 500;">{{getLengthClassStudent(false)}}/{{getLengthClassStudent(true)}}</div>
+                            </div>
+                            <button class="btn ictu-button-info-light" pTooltip="Chọn học sinh" tooltipPosition="top" (click)="visibleDialogClassStudent = true;"><i class="ti ti-edit"></i></button>    
+                        </div>
+                    </div>
+                </div>
+            </form>
+		</div>
+		<div class="ictu-p-drawer__content__footer">
+			<button (click)="pDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+			<button (click)="submitForm()" [disabled]="!formFilledAndValidStudent_ids" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+		</div>
+	</div>
+</p-drawer> -->
+
+<p-dialog [(visible)]="visibleDialogClassStudent" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '500px', maxHeight: '90vh'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--hide-overflow">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Danh sách học sinh được giao bài</h4>
+			<button (click)="updateListClassStudentTestSelect(); visibleDialogClassStudent = false" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body">
+			<div class="ictu-p-drawer__content position-relative">
+                <div class="ictu-p-drawer__content__body position-relative">
+                    <div class="edit-course-lesson-test-table">
+					<table class="tbl admin-table table-hover">
+						<thead>
+							<tr>
+                                <th class="col-checkbox">
+								    <mat-checkbox [checked]="dataTableClassStudent.totalChecked()" [indeterminate]="dataTableClassStudent.partiallyChecked()" (change)="dataTableClassStudent.selectRow($event.checked)"></mat-checkbox>
+							    </th>
+								<th class="text-left">Học sinh</th>
+							</tr>
+						</thead>
+						<tbody>
+							@for (row of dataTableClassStudent.data(); track row.id; let i = $index) {
+								<tr>
+                                    <td class="col-checkbox">
+									    <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTableClassStudent.selectRow($event.checked, i)"></mat-checkbox>
+								    </td>
+									<td class="text-left">
+										<div class="class-student-control-multiple__item" [class.active]="false">
+											  <button [matMenuTriggerFor]="matMenuIMG" [matMenuTriggerData]="{student: row.hocsinh}" class="button--un-set-style">
+												<img class="class-student-control-multiple__item-avatar" [src]="row.hocsinh.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">	
+											</button>
+                                            <div class="class-student-control-multiple__item-info">
+                                                <span class="class-student-control-multiple__item-name">{{ row.hocsinh.full_name }}{{ row.hocsinh.english_name ? ' (' + row.hocsinh.english_name + ')' : '' }}</span>
+                                                <span class="class-student-control-multiple__item-email">{{ row.hocsinh.code }}</span>
+                                            </div>
+                                        </div>
+									</td>
+									
+								</tr>
+							}
+						</tbody>
+					</table>
+				    </div>
+                </div>
+                <div class="ictu-p-drawer__content__footer">
+                    <button (click)="visibleDialogClassStudent = false" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+                    <button (click)="updateListClassStudentTestSelect()" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+                </div>
+	        </div>
+		</div>
+	</div>
+</p-dialog>
+
+<mat-menu #matMenuIMG="matMenu" yPosition="above" >
+	<ng-template matMenuContent let-student="student">
+		<div class="profile-avatar-menu">
+			<img [src]="student.avatar || 'images/user/avatar-1.jpg'" alt="Preview"/>
+		</div>
+	</ng-template>
+</mat-menu>

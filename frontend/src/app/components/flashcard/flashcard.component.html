@@ -1,0 +1,21 @@
+<div class="flashcard__inner h-100 w-100 d-flex flex-column">
+    <div class="flashcard__head d-flex justify-content-center align-items-center position-relative">
+        @if (audioSrc()) {
+            <button (click)="btnPlayAudio($event)" class="btn flashcard__head__btn-play-audio position-absolute zdx-5 d-flex justify-content-center align-items-center">
+                <i class="fa-classic fa-light fa-volume f-16"></i>
+            </button>
+        }
+        <h4 class="flashcard__word-translated f-roboto f-18 fw-bold lh-base text-truncate m-0">{{ word().define }}</h4>
+    </div>
+    <div class="flashcard__image flex-fill overflow-hidden">
+        @if (word().thumbnail) {
+            <img class="flashcard__word-image" [ICTUMediaLoader]="word().thumbnail" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='172' height='110' viewBox='0 0 172 110'%3E%3Crect width='100%25' height='100%25' fill='%23DDDDDD'/%3E%3Cpath fill='%23999999' d='M102.4 40.925h5.17l-8.96 28.21h-5.45q-.93 0-1.29-1.21l-5.06-16.31q-.25-.82-.45-1.63-.21-.81-.35-1.64-.16.83-.37 1.66-.2.84-.45 1.67l-5.14 16.25q-.33 1.21-1.46 1.21h-5.23l-8.93-28.21h5.41q.75 0 1.27.35.52.36.69.91l4.04 15.07q.3 1.24.53 2.42.24 1.18.4 2.37.31-1.19.65-2.37t.73-2.42l4.67-15.12q.17-.55.65-.91t1.17-.36h3q.71 0 1.22.36t.67.91l4.54 15.12q.36 1.24.67 2.43.32 1.2.62 2.38.36-2.33 1.02-4.81l4.15-15.07q.2-.55.69-.91.5-.35 1.18-.35'/%3E%3C/svg%3E" alt="word image" width="100" height="100">
+        } @else {
+            <div class="flashcard__image__placeholder d-flex justify-content-center align-items-center w-100 h-100">
+                <p class="m-0 lh-base f-48 fw-bold text-center">{{ word().title.length ? word().title[0] : '-' }}</p>
+            </div>
+        }
+    </div>
+    <b class="flashcard__word m-0 lh-base f-18 fw-bold d-block text-center">{{ word().title }}</b>
+    <div class="flashcard__transliteration d-block text-center" [innerHTML]="word().transcription | safeHtml"></div>
+</div>

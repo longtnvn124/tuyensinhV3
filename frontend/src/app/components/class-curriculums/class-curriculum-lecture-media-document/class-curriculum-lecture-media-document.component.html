@@ -1,0 +1,15 @@
+@if (fileInfo()) {
+    <button class="btn edit-course-lesson-structure-media-element__btn-preview w-100 h-100 d-flex justify-content-center align-items-center p-0 m-0 position-relative overflow-hidden" (click)="btnPreviewFile()">
+        <img [src]="fileIcon()" [alt]="fileTitle()" width="150" height="150">
+        @if (fileInfo()) {
+            <p class="class-curriculum-lecture-media-picture__info m-0 position-absolute">{{ fileTitle() }} | {{ fileSize() }}</p>
+        }
+    </button>
+} @else {
+    <div class="d-flex justify-content-center align-items-center w-100 h-100">
+        <svg class="h-auto wid-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#549bff">
+            <rect opacity="0.4" height="18.5" rx="2.75" width="15.5" x="4.25" y="3.25"/>
+            <path d="m15.75 3.25v1.5c0 .552-.448 1-1 1h-5.5c-.552 0-1-.448-1-1v-1.5c0-.552.448-1 1-1h5.5c.552 0 1 .448 1 1zm-.75 6h-6c-.414 0-.75.336-.75.75s.336.75.75.75h6c.414 0 .75-.336.75-.75s-.336-.75-.75-.75zm0 3h-6c-.414 0-.75.336-.75.75s.336.75.75.75h6c.414 0 .75-.336.75-.75s-.336-.75-.75-.75zm-2 3h-4c-.414 0-.75.336-.75.75s.336.75.75.75h4c.414 0 .75-.336.75-.75s-.336-.75-.75-.75z"/>
+        </svg>
+    </div>
+}

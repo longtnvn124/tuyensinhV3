@@ -1,0 +1,32 @@
+:host {
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cpc-progress {
+    border-radius: 999px;
+    line-height: 0;
+    background-color: #E9EDF4;
+}
+
+.cpc-progress__pipe {
+    height: 5px;
+    border-radius: 999px;
+    /*background-color: #3D5EE1;*/
+    background-color: #22c03c;
+    width: 0;
+    transition: width .35s ease;
+}
+
+.cpc-percent {
+    font-size: 13px;
+    width: 32px;
+    text-align: right;
+}
+
+.ictu-badge-btn--danger {
+    padding: 5px 10px;
+    border-radius: 4px;
+}

@@ -1,0 +1,340 @@
+<div class="ictu-bank-questions__panel d-flex h-100 w-100 position-relative">
+	@switch (state()) {
+		@case ('error') {
+			<div class="admin-table__alert-danger text-center m-auto p-15">Tải dữ liệu thất bại. Vui lòng chọn
+				<a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+			</div>
+		}
+		@case ('success') {
+			<div class="ictu-bank-questions__panel__section d-flex flex-column ictu-bank-questions__panel__section-left">
+				<div class="ictu-bank-questions__parts d-flex flex-column h-100">
+					<div class="ictu-bank-questions__parts__head d-flex justify-content-start align-items-center">
+						<h4 class="f-roboto f-20 lh-base m-0 fw-medium">Danh mục câu hỏi</h4>
+						<button mat-flat-button class="btn ictu-badge-btn--secondary ictu-bank-questions__parts__btn-toggle ms-auto">
+							<svg width="20" height="12" viewBox="0 0 20 12" xmlns="http://www.w3.org/2000/svg" focusable="false">
+								<path fill="#4D5E6F" d="M3.71333 0.289941C3.61825 0.198919 3.50613 0.127568 3.3834 0.0799836C3.13999 -0.020014 2.86697 -0.020014 2.62355 0.0799836C2.50083 0.127568 2.38871 0.198919 2.29362 0.289941L0.294031 2.28953C0.105766 2.4778 -1.9837e-09 2.73314 0 2.99939C1.9837e-09 3.26563 0.105766 3.52098 0.294031 3.70924C0.482297 3.89751 0.737639 4.00327 1.00389 4.00327C1.27013 4.00327 1.52548 3.89751 1.71374 3.70924L2.00368 3.4093V10.9978C2.00368 11.2629 2.10902 11.5172 2.29652 11.7047C2.48401 11.8922 2.73832 11.9975 3.00348 11.9975C3.26864 11.9975 3.52294 11.8922 3.71044 11.7047C3.89794 11.5172 4.00327 11.2629 4.00327 10.9978V3.4093L4.29321 3.70924C4.38616 3.80295 4.49674 3.87733 4.61857 3.92809C4.7404 3.97885 4.87108 4.00498 5.00307 4.00498C5.13505 4.00498 5.26573 3.97885 5.38757 3.92809C5.5094 3.87733 5.61998 3.80295 5.71292 3.70924C5.80663 3.6163 5.88101 3.50572 5.93177 3.38388C5.98253 3.26205 6.00866 3.13137 6.00866 2.99939C6.00866 2.8674 5.98253 2.73672 5.93177 2.61489C5.88101 2.49305 5.80663 2.38248 5.71292 2.28953L3.71333 0.289941ZM9.00225 1.99959H19.0002C19.2654 1.99959 19.5197 1.89426 19.7072 1.70676C19.8947 1.51926 20 1.26496 20 0.999795C20 0.734633 19.8947 0.480332 19.7072 0.292834C19.5197 0.105335 19.2654 0 19.0002 0H9.00225C8.73709 0 8.48279 0.105335 8.29529 0.292834C8.10779 0.480332 8.00245 0.734633 8.00245 0.999795C8.00245 1.26496 8.10779 1.51926 8.29529 1.70676C8.48279 1.89426 8.73709 1.99959 9.00225 1.99959ZM19.0002 9.99796H9.00225C8.73709 9.99796 8.48279 10.1033 8.29529 10.2908C8.10779 10.4783 8.00245 10.7326 8.00245 10.9978C8.00245 11.2629 8.10779 11.5172 8.29529 11.7047C8.48279 11.8922 8.73709 11.9975 9.00225 11.9975H19.0002C19.2654 11.9975 19.5197 11.8922 19.7072 11.7047C19.8947 11.5172 20 11.2629 20 10.9978C20 10.7326 19.8947 10.4783 19.7072 10.2908C19.5197 10.1033 19.2654 9.99796 19.0002 9.99796ZM19.0002 4.99898H9.00225C8.73709 4.99898 8.48279 5.10431 8.29529 5.29181C8.10779 5.47931 8.00245 5.73361 8.00245 5.99877C8.00245 6.26394 8.10779 6.51824 8.29529 6.70573C8.48279 6.89323 8.73709 6.99857 9.00225 6.99857H19.0002C19.2654 6.99857 19.5197 6.89323 19.7072 6.70573C19.8947 6.51824 20 6.26394 20 5.99877C20 5.73361 19.8947 5.47931 19.7072 5.29181C19.5197 5.10431 19.2654 4.99898 19.0002 4.99898Z"></path>
+							</svg>
+						</button>
+					</div>
+					<div class="ictu-bank-questions__parts__body">
+						@if (bankPartParent().length) {
+							<div class="d-flex w-100 flex-column justify-content-start align-items-start" style="gap: 10px;">
+								@for (item of bankPartParent(); track item.id) {
+									<div class="ictu-bank-questions__group w-100">
+										<div class="ictu-bank-questions__group__head">
+											<div class="d-flex align-items-center justify-content-start flex-fill">
+												<div class="ictu-bank-questions__group__grab-circle d-inline-flex justify-content-center align-items-center">
+													<svg width="9" height="15" viewBox="0 0 9 15" xmlns="http://www.w3.org/2000/svg" focusable="false">
+														<path fill-rule="evenodd" clip-rule="evenodd" d="M1 0C0.447715 0 0 0.447716 0 1V2C0 2.55228 0.447715 3 1 3H1.99978C2.55206 3 2.99978 2.55228 2.99978 2V1C2.99978 0.447716 2.55206 0 1.99978 0H1ZM1 6C0.447715 6 0 6.44772 0 7V8C0 8.55228 0.447715 9 1 9H1.99978C2.55206 9 2.99978 8.55228 2.99978 8V7C2.99978 6.44772 2.55206 6 1.99978 6H1ZM0 13C0 12.4477 0.447715 12 1 12H1.99978C2.55206 12 2.99978 12.4477 2.99978 13V14C2.99978 14.5523 2.55206 15 1.99978 15H1C0.447715 15 0 14.5523 0 14V13ZM7.00003 0C6.44774 0 6.00003 0.447716 6.00003 1V2C6.00003 2.55228 6.44774 3 7.00003 3H7.99981C8.55209 3 8.99981 2.55228 8.99981 2V1C8.99981 0.447716 8.55209 0 7.99981 0H7.00003ZM6.00003 7C6.00003 6.44772 6.44774 6 7.00003 6H7.99981C8.55209 6 8.99981 6.44772 8.99981 7V8C8.99981 8.55228 8.55209 9 7.99981 9H7.00003C6.44774 9 6.00003 8.55228 6.00003 8V7ZM7.00003 12C6.44774 12 6.00003 12.4477 6.00003 13V14C6.00003 14.5523 6.44774 15 7.00003 15H7.99981C8.55209 15 8.99981 14.5523 8.99981 14V13C8.99981 12.4477 8.55209 12 7.99981 12H7.00003Z"></path>
+													</svg>
+												</div>
+												<div class="ictu-bank-questions__group__heading d-flex align-items-center flex-fill">
+													@if (item.editingName) {
+														<input pInputText [id]="'--elm-bnk-'+item.id" (blur)="evtUpdateTitle(item)" (keydown.enter)="evtUpdateTitle(item)" class="w-100 ictu-bank-questions__group__heading__text ictu-bank-questions__group__heading__text--input" [(ngModel)]="item.name" type="text" placeholder="Tiêu đề chương">
+													} @else {
+														<span class="ictu-bank-questions__group__heading__text" (click)="btnEnableEditingMode(item)">{{ item.name }}</span>
+														<button class="btn ictu-bank-questions__group__heading__btn-edit" (click)="btnEnableEditingMode(item)">
+															<svg width="17" height="16" viewBox="0 0 17 16" xmlns="http://www.w3.org/2000/svg" focusable="false">
+																<path d="M15.7624 4.01638L12.1272 0.381237C12.0063 0.260371 11.8628 0.164494 11.7049 0.0990806C11.547 0.0336676 11.3777 0 11.2068 0C11.0359 0 10.8666 0.0336676 10.7087 0.0990806C10.5508 0.164494 10.4073 0.260371 10.2864 0.381237L8.1435 2.52408L0.524363 10.1429C0.403101 10.2635 0.306963 10.4069 0.241514 10.5649C0.176065 10.7229 0.142605 10.8923 0.143071 11.0633V14.6984C0.143466 15.0435 0.280727 15.3743 0.524741 15.6183C0.768756 15.8623 1.0996 15.9996 1.44469 16H5.07997C5.25097 16.0005 5.42036 15.967 5.57835 15.9016C5.73633 15.8361 5.87976 15.74 6.00034 15.6188L15.7625 5.85703C16.0062 5.61275 16.1431 5.28177 16.1431 4.9367C16.1431 4.59163 16.0062 4.26066 15.7624 4.01638ZM13.1592 6.61951L9.52395 2.98436L11.2068 1.30156L14.8421 4.93671L13.1592 6.61951Z"></path>
+															</svg>
+														</button>
+													}
+												</div>
+											</div>
+											<div class="d-flex align-items-center justify-content-end ictu-bank-questions__group__head__buttons">
+												<button class="btn ictu-bank-questions__group__btn ictu-bank-questions__group__btn--delete d-inline-flex justify-content-center align-items-center">
+													<svg width="20" height="20" viewBox="0 0 16 17" xmlns="http://www.w3.org/2000/svg" focusable="false">
+														<path d="M15.2 3.2011H11.2V1.8651C11.1812 1.35296 10.9602 0.86915 10.5853 0.519737C10.2104 0.170324 9.7122 -0.0161828 9.2 0.00110275H6.8C6.2878 -0.0161828 5.78965 0.170324 5.41474 0.519737C5.03984 0.86915 4.81877 1.35296 4.8 1.8651V3.2011H0.8C0.587827 3.2011 0.384344 3.28539 0.234315 3.43542C0.0842854 3.58545 0 3.78893 0 4.0011C0 4.21328 0.0842854 4.41676 0.234315 4.56679C0.384344 4.71682 0.587827 4.8011 0.8 4.8011H1.6V13.6011C1.6 14.2376 1.85286 14.8481 2.30294 15.2982C2.75303 15.7482 3.36348 16.0011 4 16.0011H12C12.6365 16.0011 13.247 15.7482 13.6971 15.2982C14.1471 14.8481 14.4 14.2376 14.4 13.6011V4.8011H15.2C15.4122 4.8011 15.6157 4.71682 15.7657 4.56679C15.9157 4.41676 16 4.21328 16 4.0011C16 3.78893 15.9157 3.58545 15.7657 3.43542C15.6157 3.28539 15.4122 3.2011 15.2 3.2011ZM6.4 11.2011C6.4 11.4133 6.31571 11.6168 6.16569 11.7668C6.01566 11.9168 5.81217 12.0011 5.6 12.0011C5.38783 12.0011 5.18434 11.9168 5.03431 11.7668C4.88429 11.6168 4.8 11.4133 4.8 11.2011V8.0011C4.8 7.78893 4.88429 7.58545 5.03431 7.43542C5.18434 7.28539 5.38783 7.2011 5.6 7.2011C5.81217 7.2011 6.01566 7.28539 6.16569 7.43542C6.31571 7.58545 6.4 7.78893 6.4 8.0011V11.2011ZM6.4 1.8651C6.4 1.7371 6.568 1.6011 6.8 1.6011H9.2C9.432 1.6011 9.6 1.7371 9.6 1.8651V3.2011H6.4V1.8651ZM11.2 11.2011C11.2 11.4133 11.1157 11.6168 10.9657 11.7668C10.8157 11.9168 10.6122 12.0011 10.4 12.0011C10.1878 12.0011 9.98434 11.9168 9.83432 11.7668C9.68429 11.6168 9.6 11.4133 9.6 11.2011V8.0011C9.6 7.78893 9.68429 7.58545 9.83432 7.43542C9.98434 7.28539 10.1878 7.2011 10.4 7.2011C10.6122 7.2011 10.8157 7.28539 10.9657 7.43542C11.1157 7.58545 11.2 7.78893 11.2 8.0011V11.2011Z"></path>
+													</svg>
+												</button>
+												<button (click)="collapse.panel.toggle()" class="btn ictu-bank-questions__group__btn ictu-bank-questions__group__btn--toggle d-inline-flex justify-content-center align-items-center">
+													<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+														<circle cx="12" cy="12" r="12" fill="#EEF1F7"></circle>
+														<path d="M12.351 14.8367C12.356 14.8307 12.358 14.8227 12.363 14.8167L15.8538 10.9599C16.0487 10.7429 16.0487 10.391 15.8538 10.174C15.8518 10.172 15.8498 10.171 15.8478 10.17C15.8044 10.1174 15.75 10.075 15.6886 10.0457C15.6271 10.0163 15.5599 10.0007 15.4918 10H8.50927C8.43988 10.0011 8.37159 10.0175 8.30922 10.0479C8.24684 10.0783 8.19191 10.122 8.14829 10.176L8.14629 10.174C8.05193 10.2832 8 10.4227 8 10.567C8 10.7113 8.05193 10.8508 8.14629 10.9599L11.645 14.8367C11.6886 14.8877 11.7427 14.9287 11.8037 14.9568C11.8646 14.985 11.9309 14.9995 11.998 14.9995C12.0651 14.9995 12.1315 14.985 12.1924 14.9568C12.2533 14.9287 12.3074 14.8877 12.351 14.8367Z" fill="#808C98"></path>
+													</svg>
+												</button>
+											</div>
+										</div>
+										<collapse-panel #collapse>
+											<div class="ictu-bank-questions__group__body">
+												<div class="d-flex flex-column justify-content-start align-items-start w-100 position-relative" style="gap:10px">
+													@for (child of item.children; track child.id) {
+														<div class="ictu-bank-questions__group__child w-100 d-flex align-items-center justify-content-start" [attr.data-id]="child.id" [ngClass]="{ 'ictu-bank-questions__group__child--selected' : bankPartActive()?.id === child.id }">
+															<div class="ictu-bank-questions__group__child__grab-circle d-inline-flex justify-content-center align-items-center">
+																<svg width="9" height="15" viewBox="0 0 9 15" xmlns="http://www.w3.org/2000/svg" focusable="false">
+																	<path fill-rule="evenodd" clip-rule="evenodd" d="M1 0C0.447715 0 0 0.447716 0 1V2C0 2.55228 0.447715 3 1 3H1.99978C2.55206 3 2.99978 2.55228 2.99978 2V1C2.99978 0.447716 2.55206 0 1.99978 0H1ZM1 6C0.447715 6 0 6.44772 0 7V8C0 8.55228 0.447715 9 1 9H1.99978C2.55206 9 2.99978 8.55228 2.99978 8V7C2.99978 6.44772 2.55206 6 1.99978 6H1ZM0 13C0 12.4477 0.447715 12 1 12H1.99978C2.55206 12 2.99978 12.4477 2.99978 13V14C2.99978 14.5523 2.55206 15 1.99978 15H1C0.447715 15 0 14.5523 0 14V13ZM7.00003 0C6.44774 0 6.00003 0.447716 6.00003 1V2C6.00003 2.55228 6.44774 3 7.00003 3H7.99981C8.55209 3 8.99981 2.55228 8.99981 2V1C8.99981 0.447716 8.55209 0 7.99981 0H7.00003ZM6.00003 7C6.00003 6.44772 6.44774 6 7.00003 6H7.99981C8.55209 6 8.99981 6.44772 8.99981 7V8C8.99981 8.55228 8.55209 9 7.99981 9H7.00003C6.44774 9 6.00003 8.55228 6.00003 8V7ZM7.00003 12C6.44774 12 6.00003 12.4477 6.00003 13V14C6.00003 14.5523 6.44774 15 7.00003 15H7.99981C8.55209 15 8.99981 14.5523 8.99981 14V13C8.99981 12.4477 8.55209 12 7.99981 12H7.00003Z"></path>
+																</svg>
+															</div>
+															<div class="ictu-bank-questions__group__child__middle d-flex align-items-center flex-fill position-relative">
+																<span class="ictu-bank-questions__group__child__heading">{{ child.name }}</span>
+																<button (click)="btnActiveBankPart(child)" class="btn ictu-bank-questions__group__btn-active-child position-absolute w-100 h-100"></button>
+															</div>
+															<div class="ictu-bank-questions__group__child__buttons d-flex align-items-center justify-content-end">
+																<button class="btn ictu-bank-questions__group__btn ictu-bank-questions__group__btn--delete d-inline-flex justify-content-center align-items-center">
+																	<svg width="19" height="17" viewBox="0 0 19 17" xmlns="http://www.w3.org/2000/svg" focusable="false">
+																		<path fill-rule="evenodd" clip-rule="evenodd" d="M11.3848 8.29584C11.6777 8.58874 11.6777 9.06361 11.3848 9.3565L8.97054 11.7708C8.67764 12.0637 8.20277 12.0637 7.90988 11.7708L5.49559 9.3565C5.2027 9.06361 5.2027 8.58873 5.49559 8.29584C5.78848 8.00295 6.26336 8.00295 6.55625 8.29584L8.44021 10.1798L10.3242 8.29584C10.6171 8.00295 11.0919 8.00295 11.3848 8.29584Z"></path>
+																		<path fill-rule="evenodd" clip-rule="evenodd" d="M17.9854 0.0605468C18.3996 0.0605469 18.7354 0.396333 18.7354 0.810547L18.7354 2.29626C18.7354 2.71047 18.3996 3.04626 17.9854 3.04626C17.5711 3.04626 17.2354 2.71047 17.2354 2.29626L17.2354 1.56055L16.4996 1.56055C16.0854 1.56055 15.7496 1.22476 15.7496 0.810547C15.7496 0.396333 16.0854 0.0605468 16.4996 0.0605468L17.9854 0.0605468ZM17.9854 3.77483C18.3996 3.77483 18.7354 4.11062 18.7354 4.52483L18.7354 6.38198C18.7354 6.79619 18.3996 7.13198 17.9854 7.13198C17.5711 7.13198 17.2354 6.79619 17.2354 6.38198L17.2354 4.52483C17.2354 4.11062 17.5711 3.77483 17.9854 3.77483ZM17.9854 8.23198C18.3996 8.23198 18.7354 8.56776 18.7354 8.98198L18.7354 10.4677C18.7354 10.8819 18.3996 11.2177 17.9854 11.2177L16.4996 11.2177C16.0854 11.2177 15.7496 10.8819 15.7496 10.4677C15.7496 10.0535 16.0854 9.71769 16.4996 9.71769L17.2354 9.71769L17.2354 8.98198C17.2354 8.56776 17.5711 8.23198 17.9854 8.23198ZM15.0211 0.810547C15.0211 1.22476 14.6853 1.56055 14.2711 1.56055L12.4139 1.56055C11.9997 1.56055 11.6639 1.22476 11.6639 0.810547C11.6639 0.396333 11.9997 0.0605466 12.4139 0.0605466L14.2711 0.0605467C14.6853 0.0605467 15.0211 0.396333 15.0211 0.810547ZM10.5639 0.810547C10.5639 1.22476 10.2281 1.56055 9.81392 1.56055L7.95678 1.56055C7.54257 1.56055 7.20678 1.22476 7.20678 0.810546C7.20678 0.396333 7.54257 0.0605464 7.95678 0.0605464L9.81392 0.0605465C10.2281 0.0605465 10.5639 0.396333 10.5639 0.810547ZM9.79417 4.53178C10.2003 4.52254 10.5268 4.19038 10.5268 3.78198C10.5268 3.36776 10.191 3.03198 9.77678 3.03198L9.77678 3.78198C9.77678 3.03198 9.77626 3.03198 9.77573 3.03198L9.77464 3.03198L9.77235 3.03199L9.76734 3.03203L9.75557 3.03223C9.74697 3.03243 9.73684 3.03276 9.72529 3.0333C9.70223 3.03439 9.67331 3.03632 9.63937 3.03974C9.57174 3.04655 9.48257 3.05941 9.37884 3.08379C9.1728 3.13222 8.89739 3.229 8.62029 3.42439C8.02627 3.84325 7.57821 4.6024 7.57821 5.82483L7.57821 11.2105C7.57821 11.6248 7.91399 11.9605 8.32821 11.9605C8.74242 11.9605 9.07821 11.6248 9.07821 11.2105L9.07821 5.82483C9.07821 5.00441 9.35443 4.74213 9.4847 4.65028C9.56974 4.59031 9.65647 4.55941 9.72205 4.544C9.75412 4.53646 9.77811 4.53336 9.78971 4.53219C9.79158 4.532 9.79307 4.53187 9.79417 4.53178ZM6.47821 0.810546C6.47821 1.22476 6.14242 1.56055 5.72821 1.56055L5.36392 1.56055L5.36392 2.29626C5.36392 2.71047 5.02814 3.04626 4.61392 3.04626C4.19971 3.04626 3.86392 2.71047 3.86392 2.29626L3.86392 0.810546C3.86392 0.396333 4.19971 0.0605462 4.61392 0.0605463L5.72821 0.0605463C6.14242 0.0605463 6.47821 0.396333 6.47821 0.810546ZM4.61392 3.77483C5.02814 3.77483 5.36392 4.11062 5.36392 4.52483L5.36392 5.63912C5.36392 6.05333 5.02814 6.38912 4.61392 6.38912C4.19971 6.38912 3.86392 6.05333 3.86392 5.63912L3.86392 4.52483C3.86392 4.11062 4.19971 3.77483 4.61392 3.77483Z"></path>
+																		<path fill-rule="evenodd" clip-rule="evenodd" d="M15.0146 4.88867C15.4289 4.88867 15.7646 5.22446 15.7646 5.63867L15.7646 15.2958C15.7646 15.71 15.4289 16.0458 15.0146 16.0458L1.64322 16.0458C1.22901 16.0458 0.893219 15.71 0.893219 15.2958L0.89322 5.63867C0.89322 5.22446 1.22901 4.88867 1.64322 4.88867L5.72893 4.88867C6.14315 4.88867 6.47893 5.22446 6.47893 5.63867C6.47893 6.05289 6.14315 6.38867 5.72893 6.38867L2.39322 6.38867L2.39322 14.5458L14.2646 14.5458L14.2646 6.38867L10.9289 6.38867C10.5147 6.38867 10.1789 6.05289 10.1789 5.63867C10.1789 5.22446 10.5147 4.88867 10.9289 4.88867L15.0146 4.88867Z"></path>
+																	</svg>
+																</button>
+																<button class="btn ictu-bank-questions__group__btn ictu-bank-questions__group__btn--delete d-inline-flex justify-content-center align-items-center">
+																	<svg width="20" height="20" viewBox="0 0 16 17" xmlns="http://www.w3.org/2000/svg" focusable="false">
+																		<path d="M15.2 3.2011H11.2V1.8651C11.1812 1.35296 10.9602 0.86915 10.5853 0.519737C10.2104 0.170324 9.7122 -0.0161828 9.2 0.00110275H6.8C6.2878 -0.0161828 5.78965 0.170324 5.41474 0.519737C5.03984 0.86915 4.81877 1.35296 4.8 1.8651V3.2011H0.8C0.587827 3.2011 0.384344 3.28539 0.234315 3.43542C0.0842854 3.58545 0 3.78893 0 4.0011C0 4.21328 0.0842854 4.41676 0.234315 4.56679C0.384344 4.71682 0.587827 4.8011 0.8 4.8011H1.6V13.6011C1.6 14.2376 1.85286 14.8481 2.30294 15.2982C2.75303 15.7482 3.36348 16.0011 4 16.0011H12C12.6365 16.0011 13.247 15.7482 13.6971 15.2982C14.1471 14.8481 14.4 14.2376 14.4 13.6011V4.8011H15.2C15.4122 4.8011 15.6157 4.71682 15.7657 4.56679C15.9157 4.41676 16 4.21328 16 4.0011C16 3.78893 15.9157 3.58545 15.7657 3.43542C15.6157 3.28539 15.4122 3.2011 15.2 3.2011ZM6.4 11.2011C6.4 11.4133 6.31571 11.6168 6.16569 11.7668C6.01566 11.9168 5.81217 12.0011 5.6 12.0011C5.38783 12.0011 5.18434 11.9168 5.03431 11.7668C4.88429 11.6168 4.8 11.4133 4.8 11.2011V8.0011C4.8 7.78893 4.88429 7.58545 5.03431 7.43542C5.18434 7.28539 5.38783 7.2011 5.6 7.2011C5.81217 7.2011 6.01566 7.28539 6.16569 7.43542C6.31571 7.58545 6.4 7.78893 6.4 8.0011V11.2011ZM6.4 1.8651C6.4 1.7371 6.568 1.6011 6.8 1.6011H9.2C9.432 1.6011 9.6 1.7371 9.6 1.8651V3.2011H6.4V1.8651ZM11.2 11.2011C11.2 11.4133 11.1157 11.6168 10.9657 11.7668C10.8157 11.9168 10.6122 12.0011 10.4 12.0011C10.1878 12.0011 9.98434 11.9168 9.83432 11.7668C9.68429 11.6168 9.6 11.4133 9.6 11.2011V8.0011C9.6 7.78893 9.68429 7.58545 9.83432 7.43542C9.98434 7.28539 10.1878 7.2011 10.4 7.2011C10.6122 7.2011 10.8157 7.28539 10.9657 7.43542C11.1157 7.58545 11.2 7.78893 11.2 8.0011V11.2011Z"></path>
+																	</svg>
+																</button>
+															</div>
+														</div>
+													}
+													<div class="d-flex position-relative w-100">
+														<button (click)="btnAddChildSection(item)" mat-flat-button class="w-100 btn ictu-badge-btn--primary">
+															<span class="d-flex justify-content-center align-items-center">
+																<i class="ti ti-new-section f-18"></i>
+																<span class="f-roboto f-14 lh-base fw-normal m-l-5">Thêm mục</span>
+															</span>
+														</button>
+														@if (item.updatingChild) {
+															<div class="ictu-circle-loading position-absolute w-100 h-100 d-flex justify-content-center align-items-center">
+																<div class="ictu-circle-loading__overlay w-100 d-flex justify-content-center align-items-center">
+																	<div class="ictu-circle-loading__circle"></div>
+																</div>
+															</div>
+														}
+													</div>
+												</div>
+											</div>
+										</collapse-panel>
+									</div>
+								}
+							</div>
+						} @else {
+							<div class="h-100 w-100 d-flex m-0 p-0">
+								<div class="admin-table__alert-info text-center m-auto p-15">Danh mục trống</div>
+							</div>
+						}
+					</div>
+					<div class="ictu-bank-questions__parts__foot d-flex justify-content-center align-items-center position-relative">
+						<button (click)="btnAddNewSection()" [disabled]="enableNewSectionButtonLoading()" class="btn ictu-bank-questions__parts__btn-add-section ictu-button-info-light w-100 d-flex align-items-center justify-content-center">
+							<svg style="width:20px; height:20px;">
+								<use href="fonts/custom-icon.svg#custom-element-plus"></use>
+							</svg>
+							<span class="f-roboto f-14 lh-base fw-normal m-l-5">Thêm chương mới</span>
+						</button>
+						@if (enableNewSectionButtonLoading()) {
+							<div class="ictu-circle-loading position-absolute w-100 h-100 d-flex justify-content-center align-items-center">
+								<div class="ictu-circle-loading__overlay w-100 d-flex justify-content-center align-items-center">
+									<div class="ictu-circle-loading__circle"></div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+			<div class="ictu-bank-questions__panel__section d-flex flex-column ictu-bank-questions__panel__section-right">
+				@if (bankPartActive()) {
+					@switch (questionSectionState()) {
+						@case ('success') {
+							<div class="ictu-bank-questions__content w-100 d-flex flex-column justify-content-start align-items-start position-relative">
+								<div class="ictu-bank-questions__content__head d-flex justify-content-center align-items-center w-100">
+									<label for="bank_part_name" class="ictu-bank-questions__content__head__icon d-inline-flex justify-content-center align-items-center h-100">
+										<i class="ti ti-bookmark f-20"></i> </label>
+									<input id="bank_part_name" type="text" pInputText class="ictu-bank-questions__content__head__input h-100 flex-fill f-roboto f-16 fw-normal lh-base" [(ngModel)]="bankPartActive()._temp" (ngModelChange)="triggerBankPartChanges(bankPartActive())" placeholder="Tên danh mục"/>
+									<button [disabled]="!bankPartActive().dirty" mat-flat-button class="btn ictu-badge-btn--primary-reverse ictu-bank-questions__content__head__btn-save h-100">Lưu lại</button>
+								</div>
+								@if (questionSectionTabName() === 'LIST') {
+									<div class="ictu-bank-questions__content__body ictu-bank-questions__list w-100">
+										<div class="ictu-bank-questions__list__head d-flex justify-content-center align-items-center p-15">
+											<label for="filter_question_by_name" class="m-0 p-0 d-inline-block m-r-10">
+												<input id="filter_question_by_name" type="text" pInputText class="ictu-bank-questions__list__head__controls__input f-roboto f-14 fw-normal lh-base" [(ngModel)]="filterQuestionByName" placeholder="Tìm kiếm theo nội dung câu hỏi">
+											</label>
+											<div class="admin-wrap-table__switchers">
+												<button [matMenuTriggerFor]="menu" pTooltip="Lọc theo độ khó của câu hỏi" tooltipPosition="top" type="button" class="admin-wrap-table__switchers__btn-label btn m-0 p-0">
+												<span class="admin-wrap-table__switchers__btn-label__lbl">
+													<i class="ti ti-filter"></i><span>Độ khó : {{ filterQuestionByDifficultyLevel().label }}</span><i class="ti ti-chevron-down" style="background: transparent;"></i>
+												</span>
+												</button>
+											</div>
+											<button (click)="changeQuestionSectionTabValue('FORM_CREATE',null)" mat-flat-button class="btn ictu-badge-btn--primary-reverse m-l-10 ictu-bank-questions__list__head__btn-add-new">
+												<div class="d-inline-flex justify-content-center align-items-center">
+													<i class="ti ti-circle-plus f-18 m-r-5"></i>
+													<span class="f-14 fw-normal lh-base d-inline-flex" style=";margin: 0 0 -2px;">Thêm câu hỏi mới</span>
+												</div>
+											</button>
+										</div>
+										<div class="ictu-bank-questions__list__body"></div>
+									</div>
+								} @else {
+									<div class="ictu-bank-questions__content__body ictu-bank-questions__form w-100">
+										<form class="ictu-form" [formGroup]="formGroup">
+											<div class="ictu-form__row">
+												<div class="row">
+													<div class="col-sm-8 col-12">
+														<div class="ictu-form__row">
+															<label class="ictu-form__label" for="q_type" [class.ictu-form__label--required]="getControl('type').hasValidator(Validators.required)">Dạng câu hỏi</label>
+															<p-select id="q_type" [options]="questionTypeOptions()" appendTo="body" class="ictu-form__input-field" formControlName="type" placeholder="Chọn loại câu hỏi">
+																<ng-template #selectedItem let-selectedOption>
+																	<div class="ictu-question-label-group d-flex align-items-center">
+																		<span class="ictu-question-label-group__type f-roboto f-12 fw-normal lh-base">{{ selectedOption.value | questionTypeToLabel }}</span>
+																		<span class="ictu-question-label-group__name f-roboto f-14 fw-normal lh-base">{{ selectedOption.value | questionTypeToName }}</span>
+																	</div>
+																</ng-template>
+																<ng-template let-option #item>
+																	<div class="ictu-question-label-group d-flex align-items-center">
+																		<span class="ictu-question-label-group__type f-roboto f-12 fw-normal lh-base">{{ option.value | questionTypeToLabel }}</span>
+																		<span class="ictu-question-label-group__name f-roboto f-14 fw-normal lh-base">{{ option.value | questionTypeToName }}</span>
+																	</div>
+																</ng-template>
+																<ng-template #dropdownicon>
+																	<i class="pi pi-question-circle"></i>
+																</ng-template>
+															</p-select>
+														</div>
+													</div>
+													<div class="col-sm-4 col-12">
+														<div class="ictu-form__row">
+															<label class="ictu-form__label" for="q_difficulty_level" [class.ictu-form__label--required]="getControl('difficulty').hasValidator(Validators.required)">Mức độ khó</label>
+															<p-select id="q_difficulty_level" [options]="difficultyLevelOptions()" appendTo="body" class="ictu-form__input-field" formControlName="difficulty" placeholder="Chọn mức độ khó của câu hỏi">
+																<ng-template #selectedItem let-selectedOption>
+																	<div class="ictu-question-label-group d-flex align-items-center">
+																		<span class="ictu-question-label-group__difficulty-type f-roboto f-12 fw-normal lh-base" [ngClass]="'ictu-question-label-group__difficulty-type--'+selectedOption.value">{{ selectedOption.value }}</span>
+																		<span class="ictu-question-label-group__difficulty-name f-roboto f-14 fw-normal lh-base">{{ selectedOption.label }}</span>
+																	</div>
+																</ng-template>
+																<ng-template let-option #item>
+																	<div class="ictu-question-label-group d-flex align-items-center">
+																		<span class="ictu-question-label-group__difficulty-type f-roboto f-12 fw-normal lh-base" [ngClass]="'ictu-question-label-group__difficulty-type--'+option.value">{{ option.value }}</span>
+																		<span class="ictu-question-label-group__difficulty-name f-roboto f-14 fw-normal lh-base">{{ option.label }}</span>
+																	</div>
+																</ng-template>
+															</p-select>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="d-block ictu-bank-questions__form__contents">
+												<div class="ictu-bank-questions__form__contents__head p-20">
+													<div class="ictu-form__row">
+														<div class="d-flex justify-content-start align-items-center p-b-10">
+															<b class="f-roboto m-0 p-0 f-15 fw-medium lh-base">Nội dung câu hỏi</b>
+															<div class="d-inline-flex ms-auto align-items-center p-0" style="gap:15px;">
+																<button (click)="changeBankQuestionDialogState('OPEN_HINT_EDITOR')" mat-flat-button class="btn ictu-badge-btn--warning-reverse ictu-bank-questions__btn-toggle-guide-explain p-0 m-0 lh-1" [class.ictu-bank-questions__btn-toggle-guide-explain--empty]="!getControl('hint')?.value" [matTooltip]="!getControl('hint')?.value ? 'Thêm gợi ý' : 'Hiển thị gợi ý'" matTooltipPosition="above">
+																	<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 0 12.7 12.7" width="48">
+																		<g>
+																			<path d="m1.3993994.44960641c-.135181-.0018-.271057.04776-.375687.149345-.21359597.207433-.21402797.55004899-.001.75809299l.798401.797885c.208044.212989.550658.212553.758093-.001.203144-.20926.198827-.543433-.0098-.747241l-.798401-.79788399c-.101906-.104342-.236373-.157384-.371554-.159164zm9.9012046 0c-.135181.0018-.269648.05482-.371554.159164l-.798401.79788399c-.2086446.203808-.2129626.537981-.0098.747241.207435.213587.550049.214023.758093.001l.798401-.797885c.212994-.208044.212562-.55065999-.001-.75809299-.10463-.101589-.240507-.151124-.375687-.149345zm-4.9433676 1.21594699c-1.632241 0-2.964677 1.337626-2.964677 2.972428 0 .846965.399143 1.577705.968933 2.119251v1.299145c0 .55386.462667 1.017509 1.017509 1.017509h1.949235c.554843 0 1.015442-.463649 1.015442-1.017509v-1.289327c.576503-.542145.978752-1.276433.978752-2.129069 0-.817497-.331417-1.563679-.867131-2.101164-.535712-.537484-1.281845-.871264-2.098063-.871264zm0 1.058333c.529095 0 1.001811.213635 1.347722.560689.345911.347056.558622.821141.558622 1.353406 0 .631132-.301351 1.183199-.767395 1.53324a.52921955.52921955 0 0 0 -.21084.424263v1.419552h-1.865519v-1.42782a.52921955.52921955 0 0 0 -.208773-.42168c-.461827-.350403-.759644-.899802-.759644-1.527555 0-1.064721.847443-1.914095 1.905827-1.914095zm-5.2927 1.6738c-.29169897-.0035-.53106797.229776-.53536797.521415-.0044.297712.237649.540418.53536797.536918h1.128613c.297716.0035.539668-.239211.535368-.536918-.0043-.291613-.243719-.524835-.535368-.521415zm9.4423176 0c-.291699-.0035-.5310676.229776-.5353676.521415-.0044.297712.2376486.540418.5353676.536918h1.128613c.297716.0035.539668-.239211.535368-.536918-.0043-.291613-.243719-.524835-.535368-.521415zm-8.3064696 3.15898c-.13762-.0002-.275283.05267-.379305.159163l-.798401.798401c-.21299397.208044-.21256197.550661.001.758094.20926.203178.54343.198895.747241-.0098l.798401-.797884c.208645-.20381.212962-.537983.0098-.747241-.103717-.106794-.241168-.160514-.378788-.160714zm8.3069866 0c-.135181-.0018-.270541.04776-.375171.149345-.2135956.207433-.2145436.550566-.0016.75861l.798401.797884c.208044.21299.550658.212553.758093-.001.203144-.209259.198827-.543432-.0098-.747241l-.797884-.797884c-.101906-.104357-.23689-.157897-.37207-.15968zm-5.2782306 2.04742c-.291649-.0034-.531068.229777-.535368.5214146-.0044.297706.23765.540418.535368.536919h2.257226c.297718.0035.53972-.239213.535368-.536919-.0043-.2916376-.243719-.5248346-.535368-.5214146zm.564306 1.5880166c-.291699-.0035-.531067.229776-.535367.521415-.0044.297712.237648.540418.535367.536918h1.128614c.297716.0035.539667-.23921.535367-.536918-.0043-.291613-.243718-.524815-.535367-.521415z"/>
+																		</g>
+																	</svg>
+																</button>
+																<button (click)="changeBankQuestionDialogState('OPEN_EXPLAIN_EDITOR')" mat-flat-button class="btn ictu-badge-btn--success-reverse ictu-bank-questions__btn-toggle-guide-explain p-0 m-0 lh-1" [class.ictu-bank-questions__btn-toggle-guide-explain--empty]="!getControl('explanation')?.value" [matTooltip]="!getControl('explanation')?.value ? 'Thêm bài giải' : 'Hiển thị bài giải'" matTooltipPosition="above">
+																	<svg xmlns="http://www.w3.org/2000/svg" height="512" viewBox="0 0 24 24" width="512">
+																		<g>
+																			<path d="m21 22h-18c-.6 0-1-.4-1-1s.4-1 1-1h18c.6 0 1 .4 1 1s-.4 1-1 1z"/>
+																			<path d="m8.7 18h-3.7c-.6 0-1-.4-1-1v-3.6c0-.3.1-.5.3-.7l10.3-10.4c.4-.4 1-.4 1.4 0l3.7 3.7c.4.4.4 1 0 1.4l-10.3 10.3c-.2.2-.5.3-.7.3zm-2.7-2h2.2l9.3-9.3-2.2-2.2-9.3 9.3z"/>
+																		</g>
+																	</svg>
+																</button>
+															</div>
+														</div>
+														<!-- <label class="ictu-form__label" for="q_content" [class.ictu-form__label&#45;&#45;required]="getControl('content').hasValidator(Validators.required)">Nội dung câu hỏi</label> -->
+														<ictu-editor class="d-block" formControlName="content" [config]="{ height : 300 }"></ictu-editor>
+													</div>
+												</div>
+												<hr>
+												<div class="ictu-bank-questions__form__contents__body p-20">
+													<div class="d-flex justify-content-start align-items-center">
+														<b class="f-roboto m-0 p-0 f-15 fw-medium lh-base">Phương án trả lời</b>
+														<div class="d-inline-flex ms-auto align-items-center" style="gap:15px;">
+															<div class="d-inline-flex align-items-center">
+																<div class="ictu-form__row">
+																	<div class="d-flex align-items-center" style="--p-select-padding-y: 5px;">
+																		<label class="d-inline-block f-14 lh-base fw-medium" style="margin:0 10px -2px 0; white-space: nowrap;" for="q_columns">Chế độ hiển thị</label>
+																		<p-select id="q_columns" [options]="answersDisplayOptions()" appendTo="body" class="ictu-form__input-field" formControlName="columns" placeholder="Chế độ hiển thị"/>
+																	</div>
+																</div>
+															</div>
+															<span class="ictu-bank-questions__form__contents__separator-vertical" style="height: 30px;"></span>
+															<div class="d-inline-flex align-items-center">
+																<p-checkbox formControlName="shuffle" [binary]="true" inputId="q_shuffle" [trueValue]="1" [falseValue]="0"/>
+																<label class="d-inline-block f-14 lh-base" style="margin: 0 0 -2px 10px;" for="q_shuffle">Đảo vị trí các phương án trả lời</label>
+															</div>
+														</div>
+													</div>
+													<div class="d-flex ictu-bank-questions__form__answers">
+														@switch (getControl('type').value) {
+															@case ('radio') {
+																<input-bank-question-type-radio [formObject]="formGroup" class="w-100 d-flex"/>
+															}
+														}
+													</div>
+												</div>
+												<hr>
+												<div class="ictu-bank-questions__form__contents__footer p-20">
+													<div class="d-flex align-items-center justify-content-center" style="gap: 20px">
+														<button (click)="btnFormAction('CANCEL')" mat-flat-button class="btn ictu-badge-btn--secondary me-auto">
+															<span class="d-flex align-items-center justify-content-center"><i class="ti ti-arrow-back-up f-18 m-r-5 lh-1" style="margin-top: -3px;"></i>Quay lại danh sách câu hỏi</span>
+														</button>
+														<button (click)="btnFormAction('PREVIEW')" [disabled]="formGroup.invalid" mat-flat-button class="btn ictu-badge-btn--primary-reverse">
+															<span class="d-flex align-items-center justify-content-center"><i class="ti ti-eye-check f-18 m-r-5 lh-1" style="margin-top: -3px;"></i>Xem trước</span>
+														</button>
+														<button (click)="btnFormAction('SUBMIT')" [disabled]="formGroup.invalid || formGroup.untouched" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+															<span class="d-flex align-items-center justify-content-center"><i class="ti ti-device-floppy f-18 m-r-5 lh-1" style="margin-top: -3px;"></i>Lưu lại</span>
+														</button>
+													</div>
+												</div>
+											</div>
+										</form>
+									</div>
+									@if (formLoading()) {
+										<app-loading-progress heading="Đang xử lý dữ liệu..."></app-loading-progress>
+									}
+								}
+							</div>
+						}
+						@case ('error') {
+							<div class="admin-table__alert-danger text-center m-auto p-15">Tải dữ liệu thất bại. Vui lòng chọn
+								<a (click)="reloadQuestionsFromSelectedBankPart($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+							</div>
+						}
+						@default {
+							<div class="m-auto p-15 lh-1">
+								<div class="ictu-bank-questions__group__spinner"></div>
+							</div>
+						}
+					}
+
+				} @else {
+					<div class="admin-table__alert-info text-center m-auto p-15">
+						Chọn một bài học để hiển thị danh mục câu hỏi
+					</div>
+				}
+			</div>
+		}
+		@default {
+			<app-loading-progress heading="Tải xuống dữ liệu..."></app-loading-progress>
+		}
+	}
+</div>
+
+<mat-menu #menu="matMenu" class="ictu-switchers-menu">
+	@for (level of difficultyLevels(); track level.value) {
+		<button (click)="changeFilterDifficultyLevel(level.value)" mat-menu-item class="ictu-switchers-menu__item" [class.ictu-switchers-menu__item--active]="filterQuestionByDifficultyLevelValue() === level.value">
+			<b class="text-left d-block f-14 fw-medium" style="margin: 0 0 1px;">{{ level.label }}</b>
+		</button>
+	}
+</mat-menu>
+
+<p-dialog [modal]="true" [(visible)]="visibleDialog" [closable]="false" [draggable]="false" appendTo="body" position="center" styleClass="ictu-dialog-layout ictu-dialog-layout--full-screen">
+	<div class="ictu-bank-question-dialog">
+		<div class="ictu-bank-question-dialog__head d-flex justify-content-start align-items-center p-l-15 p-r-15 p-t-15">
+			<b class="f-roboto m-0 p-0 f-16 fw-bold lh-base">{{ dialogHeading() }}</b>
+			<button (click)="changeBankQuestionDialogState('CLOSED')" mat-flat-button class="btn ictu-badge-btn--danger-reverse ictu-bank-question-dialog__head__btn-close ms-auto">
+				<i class="ti ti-x f-18"></i>
+			</button>
+		</div>
+		<div class="ictu-form">
+			<div class="ictu-form__row">
+				@if (visibleDialog) {
+					<ictu-editor [content]="dialogControl.value" (onEditorBlur)="dialogControl.markAsTouched()" (contentChange)="dialogControl.setValue($event)"></ictu-editor>
+				}
+			</div>
+		</div>
+	</div>
+</p-dialog>

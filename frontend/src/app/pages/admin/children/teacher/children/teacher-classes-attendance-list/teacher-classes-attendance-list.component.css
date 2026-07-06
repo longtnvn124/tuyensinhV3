@@ -1,0 +1,30 @@
+.row-status{
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    gap: 10px;
+}
+.admin-table td {
+    border: none;
+    border-bottom: 1px solid var(--admin-table-border-color);
+}
+.admin-table th {
+    border: none;
+    border-bottom: 1px solid var(--admin-table-border-color);
+}
+
+.admin-wrap-table__body{
+    border: 1px solid var(--admin-table-border-color);
+    border-bottom: none;
+}
+.hoc-sinh-section__avatar {
+    width: 50px;
+    aspect-ratio: 1;
+    height: auto;
+    margin: auto;
+    border-radius: 999px;
+}
+
+.ictu-badge{
+    height: 46.5px;
+}

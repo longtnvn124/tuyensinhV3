@@ -1,0 +1,229 @@
+<div class="admin-wrap-table">
+    <div class="admin-wrap-table__head d-flex">
+        <h4 class="admin-wrap-table__heading">
+            <i class="fa-classic fa-regular fa-chart-simple f-18 m-r-5"></i>Teacher dashboard </h4>
+        <div class="admin-wrap-table__head-actions position-relative">
+            @switch (branchesState()) {
+                @case ('loading') {
+                    <div class="teacher-dashboard__overlay position-absolute d-flex justify-content-center align-items-center inset-0 zdx-5">
+                        <span class="loader-line"></span>
+                    </div>
+                }
+                @case ('error') {
+                    <div class="teacher-dashboard__overlay position-absolute d-flex justify-content-center align-items-center inset-0 zdx-5">
+                        <p class="admin-table__alert-danger text-center p-10 m-0">Tải dữ liệu thất bại. Vui lòng chọn
+                            <a (click)="reloadBranches($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                        </p>
+                    </div>
+                }
+            }
+            <div class="ictu-form ictu-form-on-head-filter p-0 ictu-topbar-filter-menu" style="--p-inputtext-padding-y:6px;--p-datepicker-input-width: 190px;">
+                <div class="ictu-form__row" pTooltip="Lọc từ ngày - đến ngày" tooltipPosition="bottom">
+                    <p-datepicker [(ngModel)]="rangeDates" style="--ictu-form-group-after-input-width:40px" class="w-100 ictu-p-calendar" dateFormat="dd/mm/yy" [autofocus]="false" [focusTrap]="false" [showIcon]="true" [inline]="false" [showWeek]="false" placeholder="Từ ngày - đến ngày" inputId="f_time_start" selectionMode="range" [readonlyInput]="true"></p-datepicker>
+                </div>
+            </div>
+            <p-select [options]="branches()" [(ngModel)]="selectedBranch" appendTo="body" optionLabel="ten" [showClear]="false" class="ictu-form__input-field wid-175" placeholder="Chọn cơ sở đào tạo"/>
+        </div>
+    </div>
+    <div class="admin-wrap-table__body">
+        <div class="teacher-dashboard p-20 d-flex flex-column gap-20">
+            <div class="row">
+                <!-- Students -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card position-relative">
+                        <div class="stat-left">
+                            <div class="stat-icon green">
+                                <i class="fa-classic fa-solid fa-users"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h6 class="f-roboto fw-medium lh-base m-0 p-0 text-uppercase">Students</h6>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="stat-value text-center">
+                            <ng-container [ngTemplateOutlet]="counterValueTpl" [ngTemplateOutletContext]="{ value: report().totalStudents }"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Classes -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card position-relative">
+                        <div class="stat-left">
+                            <div class="stat-icon yellow">
+                                <i class="fa-classic fa-solid fa-chalkboard-teacher"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h6 class="f-roboto fw-medium lh-base m-0 p-0 text-uppercase">Classes</h6>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="stat-value text-center">
+                            <ng-container [ngTemplateOutlet]="counterValueTpl" [ngTemplateOutletContext]="{value: report().totalClasses}"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sessions -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card position-relative">
+                        <div class="stat-left">
+                            <div class="stat-icon blue">
+                                <i class="fa-classic fa-solid fa-presentation"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h6 class="f-roboto fw-medium lh-base m-0 p-0 text-uppercase">Sessions</h6>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="stat-value text-center">
+                            <ng-container [ngTemplateOutlet]="counterValueTpl" [ngTemplateOutletContext]="{value: report().totalSessions}"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teaching Days -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card position-relative">
+                        <div class="stat-left">
+                            <div class="stat-icon cyan">
+                                <i class="fa-classic fa-solid fa-calendar-days"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h6 class="f-roboto fw-medium lh-base m-0 p-0 text-uppercase">Teaching Days</h6>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="stat-value text-center">
+                            <ng-container [ngTemplateOutlet]="counterValueTpl" [ngTemplateOutletContext]="{value: report().totalTeachingDays}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="tbl admin-table">
+                        <thead>
+                        <tr>
+                            <th class="col-index text-center">#</th>
+                            <th class="text-center">Lớp học</th>
+                            <th class="text-center">Khoá học</th>
+                            <th class="text-center wid-80 p-x-0">Sỹ số</th>
+                            <th class="text-center wid-200">Tiến độ</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            @switch (classesTableState()) {
+                                @case ('error') {
+                                    <tr>
+                                        <td class="text-center p-15" colspan="5">
+                                            <p class="m-0 f-roboto f-14 lh-base fw-normal text-danger">
+                                                <i class="fa-classic fa-solid fa-warning f-18"></i> Mất kết nối với máy chủ.
+                                                <a href="#" class="link-primary" (click)="btnReloadMyActiveClasses($event)">Tải lại</a>
+                                            </p>
+                                        </td>
+                                    </tr>
+                                }
+                                @case ('success') {
+                                    @for (_class of myActiveClassesTable(); let i = $index; track _class.id) {
+                                        <tr>
+                                            <td class="col-index text-center">{{ ( 1 + i ) }}</td>
+                                            <td class="text-left">
+                                                <a href="#" class="tbl-inline-link" (click)="getToClassPlanning(_class.id, $event)">{{ _class.name }}</a>
+                                            </td>
+                                            <td class="text-left">{{ _class.courseName }}</td>
+                                            <td class="text-center wid-80 p-x-0">{{ _class.total_student }}</td>
+                                            <td class="text-center wid-200 p-y-0 p-x-5">
+                                                <app-class-progress-calculator [value]="_class.progress"></app-class-progress-calculator>
+                                            </td>
+                                        </tr>
+                                    } @empty {
+                                        <tr>
+                                            <td class="text-center p-10" colspan="5">
+                                                <p class="m-0 f-roboto f-14 lh-base fw-normal text-secondary">Không có lớp phụ trách</p>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                @default {
+                                    <tr>
+                                        <td class="col-index text-center p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10 wid-80">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-center wid-200 p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-index text-center p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10 wid-80">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-center wid-200 p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-index text-center p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-left p-10 wid-80">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                        <td class="text-center wid-200 p-10">
+                                            <span class="ictu-skeleton w-100 hei-20 d-block"></span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #counterValueTpl let-value="value">
+    @switch (state()) {
+        @case ('success') {
+            <b class="f-roboto f-36 fw-medium lh-base m-0 p-0">{{ value }}</b>
+        }
+        @case ('error') {
+            <div class="teacher-dashboard__overlay position-absolute d-flex justify-content-center align-items-center inset-0 zdx-5">
+                <p class="admin-table__alert-danger text-center p-10 m-0">Tải dữ liệu thất bại. Vui lòng chọn
+                    <a (click)="reloadData($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                </p>
+            </div>
+        }
+        @default {
+            <div class="d-flex flex-column justify-content-center align-items-center">
+                <p class="f-roboto f-14 fw-normal lh-base m-b-5">loading...</p>
+                <span class="loader-line"></span>
+            </div>
+        }
+    }
+</ng-template>

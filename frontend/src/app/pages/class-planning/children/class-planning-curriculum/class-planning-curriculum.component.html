@@ -1,0 +1,360 @@
+<mat-drawer-container [autosize]="true" class="drawer-container course-editor-layout-grid" style="--drawer-container-height : calc(var(--device-height) - var(--course-editor-layout-header-height))">
+    <mat-drawer [disableClose]="true" [mode]="drawerMode()" class="pc-sidebar" opened style="top: var(--course-editor-layout-header-height); width: 400px">
+        <div class="d-flex flex-column w-100 h-100">
+            <div class="course-editor-layout-grid__header">
+                <div class="course-editor-layout-grid__container d-flex align-items-center justify-content-start w-100 h-100">
+                    <h4 class="course-editor-layout-grid__heading">Danh mục bài học</h4>
+                    <div class="d-inline-flex justify-content-center align-items-center ms-auto" style="gap: 10px;">
+                        <!-- <button appendTo="body" class="course-editor-layout-grid__header__btn-control btn ictu-button-info-gradient" mat-flat-button pTooltip="Phân công giảng dạy" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip">
+                            <i class="ti ti-user f-20"></i>
+                        </button> -->
+                        <!-- <button appendTo="body" class="course-editor-layout-grid__header__btn-control btn ictu-button-info-light" mat-flat-button pTooltip="Thêm bài học" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip">
+                            <i class="ti ti-file-plus f-20"></i>
+                        </button> -->
+                        <button (click)="saveClassCurriculum()" [disabled]="!dirty()" appendTo="body" class="course-editor-layout-grid__header__btn-control btn ictu-badge-btn--success-reverse" mat-flat-button pTooltip="Lưu lại" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip">
+                            <i class="ti ti-device-floppy f-20"></i>
+                        </button>
+                        <button (click)="btnCollapsedMenu()" appendTo="body" class="course-editor-layout-grid__header__btn-control btn ictu-badge-btn--secondary" mat-flat-button pTooltip="Ẩn danh sách" tooltipPosition="top" tooltipStyleClass="ictu-input-form__tooltip">
+                            <i class="ti ti-chevrons-left f-20"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div [class.course-editor-layout-grid--no-footer]="classCurriculums().length === 0" class="course-editor-layout-grid__body position-relative">
+                @if (state() === 'loading') {
+                    <app-loading-progress heading="Tải danh sách bài học..."></app-loading-progress>
+                }
+                @if (state() === 'error') {
+                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                        <div class="admin-table__alert-danger text-center" style="padding: 10px 15px;line-height: 1.5;">Tải dữ liệu thất bại. Vui lòng chọn
+                            <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                        </div>
+                    </div>
+                } @else {
+                    <div class="course-editor-layout-grid__container w-100 ictu-drag-drop">
+                        @if (classCurriculums().length) {
+                            <ul class="class-planning-curriculum__list ictu-drag-drop__list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="changeClassLessonsOrder($event)">
+                                @for (_lesson of classCurriculums(); track _lesson.code; let i = $index) {
+                                    <li class="class-planning-curriculum__elm ictu-drag-drop__list__element position-relative" [ngClass]="{ 'class-planning-curriculum__elm--active' : activeLessonCode() === _lesson.code }" cdkDrag>
+                                        @if (confirmDeleteElement() === _lesson.code) {
+                                            <mat-progress-bar class="class-planning-curriculum__elm__pending-load w-100 position-absolute zdx-5" mode="indeterminate" value="40"></mat-progress-bar>
+                                        }
+                                        <div class="class-planning-curriculum__item d-flex">
+                                            <span cdkDragHandle [cdkDragHandleDisabled]="_lesson.ordering <= lastActivatedLessonOrdering()" [class.item--move-disabled]="_lesson.ordering <= lastActivatedLessonOrdering()" class="class-planning-curriculum__item__icon d-inline-flex justify-content-center align-items-center">{{ 1 + i }}</span>
+                                            <div class="class-planning-curriculum__item__info d-inline-flex flex-column justify-content-center align-items-start">
+                                                <p class="f-roboto f-13 fw-medium lh-base m-0 w-100" style="color: #5B6B79;">{{ _lesson | classLessonExtendLabel : 'supTitle' }}</p>
+                                                <b class="f-roboto f-14 fw-bold m-0 lh-base w-100 text-truncate" style="color: #333333;">{{ _lesson | classLessonExtendLabel : 'title' }}</b>
+                                                @if (_lesson.relation.classSession) {
+                                                    <span class="f-roboto f-14 fw-normal lh-base w-100 text-truncate" style="color: #424242;margin: 2px 0 0;"><i class="pi pi-calendar-clock f-14"></i> {{ _lesson.relation.classSession.time_start ? ( _lesson.relation.classSession.time_start | date : 'dd/MM/yyyy' : 'UTC+7' ) : '--/--/----' }}</span>
+                                                }
+                                            </div>
+                                            <span class="class-planning-curriculum__item__tick" [ngClass]="{ 'text-primary' : _lesson.state.complete }"><i class="ti ti-check"></i></span>
+                                        </div>
+                                        <button class="btn class-planning-curriculum__btn-swap-teacher d-flex justify-content-center align-items-center" [matTooltip]="_lesson.relation.classSession?.teacher?.full_name ?? 'Chưa có giáo viên'" matTooltipPosition="above" [disabled]="!_lesson.relation.classSession?.teacher" [matMenuTriggerFor]="employeeInfo" [matMenuTriggerData]="{staff: _lesson.relation.classSession?.teacher}">
+                                            <figure class="overflow-hidden p-0 m-0">
+                                                <img [src]="_lesson.relation.classSession?.teacher | employeePhoto" alt="" width="100" height="100">
+                                            </figure>
+                                        </button>
+                                        <button class="btn class-planning-curriculum__btn-select" (click)="btnSelectSession(_lesson)"></button>
+                                        @if (_lesson.state.activated) {
+                                            @if (_lesson.state.complete) {
+                                                <div class="class-planning-curriculum__verified-label d-inline-flex justify-content-center align-items-center" pTooltip="Bài học đã hoàn thành" tooltipPosition="top">
+                                                    <i class="pi pi-verified"></i>
+                                                </div>
+                                            } @else {
+                                                <div class="class-planning-curriculum__verified-label d-inline-flex justify-content-center align-items-center" pTooltip="Bài học đang diễn ra" tooltipPosition="top">
+                                                    <span class="ictu-circle-waving-animation" style="--icwa-size: 8px;"></span>
+                                                </div>
+                                            }
+                                        } @else {
+                                            @if (_lesson.ordering > lastActivatedLessonOrdering()) {
+                                                <button (click)="btnRemoveClassCurriculum(_lesson.code)" class="btn ictu-button-danger-light class-planning-curriculum__btn-remove" mat-flat-button matTooltip="Xóa bài học khỏi chương trình" matTooltipPosition="above">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            }
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        } @else {
+                            <div class="d-flex flex-column w-100 h-100 justify-content-center align-items-center position-absolute" style="inset: 0;z-index: 5">
+                                <div class="ictu-alert ictu-alert-primary mb-5">Lớp học chưa có chương trình học.</div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            @if (classCurriculums().length) {
+                <div class="course-editor-layout-grid__footer">
+                    <div class="course-editor-layout-grid__container d-flex align-items-center justify-content-center w-100 h-100">
+                        <button class="btn ictu-button-info-light course-editor-layout-grid__footer-btn-add" mat-flat-button (click)="btnAddClassLesson()">
+                            <span class="d-inline-flex align-items-center justify-content-center" style="gap : 10px;"><i class="pi pi-plus-circle" style="display: inline-block;margin: -4px 0 0 0;"></i>Thêm bài học</span>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </mat-drawer>
+    <mat-drawer-content>
+        <div class="course-editor-layout-grid__body--full-height">
+            @if (activeLessonCode()) {
+                <div class="class-planning-curriculum__lesson-content">
+                    <div class="class-planning-curriculum__lesson-content__head">
+                        <div class="class-planning-curriculum__lesson-content__lesson-title m-0 d-inline-flex justify-content-start align-items-center">
+                            <i class="ti ti-bookmarks"></i>
+                            <div class="d-inline-flex flex-column h-100">
+                                <p class="f-roboto f-13 fw-medium lh-base m-0 d-inline-flex" style="color: #5B6B79;">{{ activeCourseLesson() | classLessonExtendLabel : 'supTitle' }}</p>
+                                <h4 class="f-roboto f-16 fw-bold lh-base m-0">{{ activeCourseLesson() | classLessonExtendLabel : 'title' }}</h4>
+                            </div>
+                        </div>
+                        <div class="class-planning-curriculum__lesson-content__instructors d-inline-flex justify-content-end align-items-center ms-auto">
+                            <div class="class-planning-curriculum__lesson-content__circle-man d-inline-flex justify-content-center align-items-center position-relative">
+                                <button class="btn class-planning-curriculum__lesson-content__man" [disabled]="!activeCourseLesson().relation.classSession?.teacher" [matMenuTriggerFor]="employeeInfo" [matMenuTriggerData]="{staff: activeCourseLesson().relation.classSession?.teacher}" [matTooltip]="activeCourseLesson().relation.classSession?.teacher?.full_name ?? 'Giáo viên'" matTooltipPosition="above">
+                                    <img [src]="activeCourseLesson().relation.classSession?.teacher | employeePhoto" alt="" width="100" height="100">
+                                </button>
+                            </div>
+                            <button class="btn class-planning-curriculum__lesson-content__man" [disabled]="!activeCourseLesson().relation.classSession?.assistants" [matMenuTriggerFor]="employeeInfo" [matMenuTriggerData]="{staff: activeCourseLesson().relation.classSession?.assistants}" [matTooltip]="activeCourseLesson().relation.classSession?.assistants?.full_name ?? 'Trợ giảng'" matTooltipPosition="above">
+                                <img [src]="activeCourseLesson().relation.classSession?.assistants | employeePhoto" alt="" width="100" height="100">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="class-planning-curriculum__lesson-content__body">
+                        <div class="class-planning-curriculum__lesson-content__tab d-flex flex-column">
+                            <div class="class-planning-curriculum__lesson-content__tab__head">
+                                <ul class="class-planning-curriculum__lesson-content__tab-list d-flex justify-content-center align-items-center">
+                                    <li class="class-planning-curriculum__lesson-content__tab-list__elm" [ngClass]="lessonContentTab() === 'lecture' ? 'cpc-lesson-tab--active':''">
+                                        <button (click)="changeLessonContentTab('lecture')" class="btn class-planning-curriculum__lesson-content__tab-list__btn d-flex justify-content-center align-items-center f-roboto f-14 fw-normal">
+                                            <i class="ti ti-presentation-analytics"></i>Bài giảng
+                                        </button>
+                                    </li>
+                                    <li class="class-planning-curriculum__lesson-content__tab-list__elm" [ngClass]="lessonContentTab() === 'checkin' ? 'cpc-lesson-tab--active':''">
+                                        <button (click)="changeLessonContentTab('checkin')" class="btn class-planning-curriculum__lesson-content__tab-list__btn d-flex justify-content-center align-items-center f-roboto f-14 fw-normal">
+                                            <i class="ti ti-checkbox"></i>Điểm danh
+                                        </button>
+                                    </li>
+                                    <li class="class-planning-curriculum__lesson-content__tab-list__elm" [ngClass]="lessonContentTab() === 'activities' ? 'cpc-lesson-tab--active':''">
+                                        <button (click)="changeLessonContentTab('activities')" class="btn class-planning-curriculum__lesson-content__tab-list__btn d-flex justify-content-center align-items-center f-roboto f-14 fw-normal">
+                                            <i class="ti ti-clipboard-check"></i>Hoạt động
+                                        </button>
+                                    </li>
+                                    <li class="class-planning-curriculum__lesson-content__tab-list__elm" [ngClass]="lessonContentTab() === 'documents' ? 'cpc-lesson-tab--active':''">
+                                        <button (click)="changeLessonContentTab('documents')" class="btn class-planning-curriculum__lesson-content__tab-list__btn d-flex justify-content-center align-items-center f-roboto f-14 fw-normal">
+                                            <i class="ti ti-paperclip"></i>Tài liệu
+                                        </button>
+                                    </li>
+                                    <li class="class-planning-curriculum__lesson-content__tab-list__elm" [ngClass]="lessonContentTab() === 'test' ? 'cpc-lesson-tab--active':''">
+                                        <button (click)="changeLessonContentTab('test')" class="btn class-planning-curriculum__lesson-content__tab-list__btn d-flex justify-content-center align-items-center f-roboto f-14 fw-normal">
+                                            <i class="ti ti-report-analytics"></i>Kiểm tra
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="class-planning-curriculum__lesson-content__tab__body position-relative">
+                                @switch (lessonContentState()) {
+                                    @case ('success') {
+                                        @switch (lessonContentTab()) {
+                                            @case ('lecture') {
+                                                <div class="class-planning-curriculum__lesson-content__tab-content">
+                                                    @switch (activeCourseLesson().type) {
+                                                        @case ('other') {
+                                                            <div class="d-flex w-100 justify-content-center align-items-center admin-coming-soon">
+                                                                <div class="ictu-alert ictu-alert-warning">Không có nội dung!</div>
+                                                            </div>
+                                                        }
+                                                        @case ('activity') {
+                                                            <div class="d-flex w-100 justify-content-center align-items-center admin-coming-soon">
+                                                                <div class="ictu-alert ictu-alert-warning">Không có nội dung!</div>
+                                                            </div>
+                                                        }
+                                                        @default {
+                                                            <class-planning-curriculum-lecture [lecture]="classLessonContentTabLecture()" [class]="classObject()" [course]="course()" [role]="role()"></class-planning-curriculum-lecture>
+                                                        }
+                                                    }
+                                                </div>
+                                            }
+                                            @case ('checkin') {
+                                                <div class="class-planning-curriculum__lesson-content__tab-content">
+                                                    @if (activeCourseLesson().relation.classSession) {
+                                                        <app-class-planning-curriculum-attendance [class_session]="activeCourseLesson().relation.classSession"></app-class-planning-curriculum-attendance>
+                                                    } @else {
+                                                        <div class="d-flex w-100 justify-content-center align-items-center admin-coming-soon">
+                                                            <div class="ictu-alert ictu-alert-warning">Bài học chưa được lên lịch học.</div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                            @case ('activities') {
+                                                <div class="class-planning-curriculum__lesson-content__tab-content">
+                                                    @if (activeCourseLesson().relation.classSession) {
+                                                        <app-class-planning-curriculum-activities [class_session]="activeCourseLesson().relation.classSession"></app-class-planning-curriculum-activities>
+                                                    } @else {
+                                                        <div class="d-flex w-100 justify-content-center align-items-center admin-coming-soon">
+                                                            <div class="ictu-alert ictu-alert-warning">Bài học chưa được lên lịch học.</div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                            @case ('test') {
+                                                <div class="class-planning-curriculum__lesson-content__tab-content">
+                                                    <coming-soon></coming-soon>
+                                                </div>
+                                            }
+                                            @default {
+                                                <div class="class-planning-curriculum__lesson-content__tab-content">
+                                                    <coming-soon></coming-soon>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                    @case ('error') {
+                                        <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                                            <div class="admin-table__alert-danger text-center" style="padding: 10px 15px;line-height: 1.5;">Tải dữ liệu thất bại. Vui lòng chọn
+                                                <a (click)="btnReloadingLessonContent($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                                            </div>
+                                        </div>
+                                    }
+                                    @default {
+                                        <app-loading-progress [heading]="lessonContentLoadingLbl()"></app-loading-progress>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            } @else {
+                <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                    <div class="ictu-alert ictu-alert-primary">Chọn một bài học để hiển thị nội dung.</div>
+                </div>
+            }
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>
+
+<div [@btnToggleSidebar]="toggleSidebarMode()" class="class-planning-curriculum__toggle-sidebar">
+    <button (click)="btnExpandMenu()" class="class-planning-curriculum__toggle-sidebar__button btn">
+        <i class="ti ti-chevrons-right"></i>
+    </button>
+</div>
+
+@if (isEmpty()) {
+    <div class="class-planning-curriculum-empty d-flex justify-content-center align-items-center flex-column" style="background-color: rgb(255 255 255 / 71%);z-index: 50;border-radius: 0;backdrop-filter: blur(10px);gap: 10px;color: #333333;">
+        @switch (emptySectionState()) {
+            @case ('button') {
+                <button (click)="btnRequestCreatingClassCurriculum()" mat-flat-button class="btn ictu-badge-btn--primary-reverse">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <i class="fa-classic fa-regular fa-folder-tree f-18 m-r-10"></i>
+                        <p class="m-0 f-roboto f-14 fw-normal">Khởi tạo chương trình học</p>
+                    </div>
+                </button>
+            }
+            @case ('form') {
+                <div class="class-planning-curriculum-empty__teaching-assignments">
+                    <div class="d-flex flex-column justify-content-center align-items-center m-auto">
+                        <h4 class="cpc-empty__teaching-assignments__heading">Thông tin chương trình học</h4>
+                        <div class="cpc-empty__teaching-assignments__body">
+                            <table class="cpc-empty__teaching-assignments__table table tbl">
+                                <tbody>
+                                <tr>
+                                    <th>Tổng số bài học</th>
+                                    <td>{{ curriculumTemp().length }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Giáo viên</th>
+                                    <td>
+                                        @if (classObject().teacher_ids && classObject().teacher_ids.length) {
+                                            <div class="d-flex flex-column" style="gap:10px">
+                                                @for (_teacherID of classObject().teacher_ids; track _teacherID) {
+                                                    <employee-card [user_id]="_teacherID"></employee-card>
+                                                }
+                                            </div>
+                                        } @else {
+                                            <span>Chưa có giáo viên.</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Trợ giảng</th>
+                                    <td>
+                                        @if (classObject().assistant_ids && classObject().assistant_ids.length) {
+                                            <div class="d-flex flex-column" style="gap:10px">
+                                                @for (_assistantID of classObject().assistant_ids; track _assistantID) {
+                                                    <employee-card [user_id]="_assistantID"></employee-card>
+                                                }
+                                            </div>
+                                        } @else {
+                                            <span>Chưa có trợ giảng.</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <!--                                     @if (classObject().teacher_ids && classObject().teacher_ids.length && classObject().teacher_ids.length >= 2) { -->
+                                <!--                                         <tr> -->
+                                <!--                                             <th>Cách phân công</th> -->
+                                <!--                                             <td class="p-0"> -->
+                                <!--                                                 <button [matMenuTriggerFor]="menuTeachingAssignment" class="btn cpc-empty__teaching-assignments__btn d-flex align-items-center justify-content-start">{{ teachingAssignmentMethodLabel[teachingAssignmentMethod()] }}</button> -->
+                                <!--                                             </td> -->
+                                <!--                                         </tr> -->
+                                <!--                                     } -->
+                                </tbody>
+                            </table>
+                            <div class="d-flex justify-content-center align-items-center" style="margin: 15px 0 0">
+                                <button (click)="btnCreateClassCurriculumsForFirstTime()" mat-flat-button class="btn ictu-badge-btn--primary-reverse">Tạo chương trình</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            @default {
+
+            }
+        }
+    </div>
+}
+
+@if (enableAnimation()) {
+    <div class="class-planning-curriculum-empty d-flex position-absolute justify-content-center align-items-center flex-column" style="background-color: rgb(255 255 255 / 71%);z-index: 50;border-radius: 0;backdrop-filter: blur(10px);gap: 10px;color: #333333;">
+        <p class="f-15 fw-normal f-roboto lh-base m-0">Khởi tạo chương trình học...</p>
+        <div class="ictu-progress-bar ictu-progress-bar--animated">
+            <div [style.width.%]="animationPercent()" class="ictu-progress-bar__pipe" style="background-color: #28a745;"></div>
+        </div>
+        <p class="f-18 fw-bold f-roboto lh-base">{{ animationPercent() }}%</p>
+    </div>
+}
+
+<!-- <mat-menu #menuTeachingAssignment="matMenu"> --><!--     <ng-template matMenuContent> --><!--         <button (click)="setTeachingAssignmentMethod('AUTO_50_50')" mat-menu-item>{{ teachingAssignmentMethodLabel.AUTO_50_50 }}</button> --><!--         <button (click)="setTeachingAssignmentMethod('MANUALLY')" mat-menu-item>{{ teachingAssignmentMethodLabel.MANUALLY }}</button> --><!--     </ng-template> --><!-- </mat-menu> -->
+
+<p-dialog [(visible)]="visibleAddClassLessonDialog" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '650px'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--no-footer">
+    <div class="ictu-dialog-layout__wrapper">
+        <div class="ictu-dialog-layout__header">
+            <h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Thêm bài học</h4>
+            <button (click)="closeAddClassLessonDialog(false)" class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button>
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div class="ictu-dialog-layout__body p-0">
+            @if (visibleAddClassLessonDialog) {
+                <class-planning-curriculum-add-new [(classObject)]="classObject" [course]="course()" [courseLessons]="courseLessons()" (close)="closeAddClassLessonDialog($event)"></class-planning-curriculum-add-new>
+            }
+        </div>
+    </div>
+</p-dialog>
+
+<mat-menu #employeeInfo="matMenu" class="ictu-switchers-menu" xPosition="after" yPosition="below">
+    <ng-template matMenuContent let-staff="staff">
+        <div class="employee-popup-details d-flex flex-column justify-content-center align-items-center" (click)="avoidCloseMenuByClicking($event)">
+            <div class="employee-popup-details__avatar">
+                <img class="employee-popup-details__avatar__img wid-60 hei-60" [src]="staff | employeePhoto" alt="" width="100" height="100">
+            </div>
+            <b class="f-roboto f-14 fw-medium lh-base text-truncate m-t-15 m-b-10" style="max-width: 100%">{{ staff.full_name }}</b>
+            <div class="employee-popup-details__contact-field d-flex flex-column justify-content-center align-items-start">
+                <div class="employee-popup-details__contact-field__info d-flex justify-content-start align-items-start">
+                    <i class="pi-envelope pi text-secondary m-r-10"></i>
+                    <p class="employee-popup-details__contact-field__info__text f-14 lh-base fw-normal text-secondary m-0 text-truncate">{{ staff.email }}</p>
+                </div>
+                <div class="employee-popup-details__contact-field__info d-flex justify-content-start align-items-start">
+                    <i class="pi-phone pi text-secondary m-r-10"></i>
+                    <p class="employee-popup-details__contact-field__info__text f-14 lh-base fw-normal text-secondary m-0 text-truncate">{{ staff.phone }}</p>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</mat-menu>

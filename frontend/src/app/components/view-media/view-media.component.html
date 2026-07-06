@@ -1,0 +1,71 @@
+<section class="admin-wrap-view-media position-relative">
+    <div class="class-activities-album-media-format class-activities-album-media-format--border-none">
+        <!-- <button mat-flat-button class="btn ictu-badge-btn--info-reverse" (click)="updateClassMediaList()">updateClassMediaList()</button> -->
+        <div class="class-activities-album-media-session d-flex flex-wrap">
+                @for (item of class_media(); track item.id; let index = $index) {
+                        <!-- @if (deletingFormItemIndex() === index) {
+                            <mat-progress-bar class="class-activities-album-media__item__loading" mode="indeterminate" value="40"></mat-progress-bar>
+                        } -->
+                        <div class="class-activities-album-media__item-session">
+                                <div class="class-activities-album-media__item_media-session">
+                                    @switch(checkTypeFile(item.media)){
+                                        @case('image'){
+                                            <app-class-curriculum-lecture-media-picture [media]="setMediaContentClassMedia(item.media, 'picture')" class="w-100 h-100"></app-class-curriculum-lecture-media-picture>
+                                        }
+                                        @case('video'){
+                                            <!-- <class-curriculum-lecture-media-video [hidden]="visibleDialogClassStudent" [media]="setMediaContentClassMedia(item.media.file, 'video')" class="w-100 h-100"></class-curriculum-lecture-media-video> -->
+                                            <app-view-document type_view="VIDEO" [link]="setSrcMedia(item.media)"></app-view-document>
+                                        }
+                                        @case('undefine'){}
+                                    }
+                                </div>
+                                <div class="view-media-content">
+                                    <div>{{item.content}}</div>
+                                    <button (click)="setValueClassMediaSelect(item)" class="btn ictu-button-info-light">{{item.student_ids.length}} Tag <i class="ti ti-tag"></i></button>
+                                </div>
+                        </div>
+                }@empty {
+                    <div style="height: calc(var(--device-height) - 60px); width: 100%; display: flex; justify-content: center; align-items: center;">
+                        <span class="ictu-badge ictu-badge--danger">Không có Media</span>
+                    </div>
+                }
+        </div>
+    </div>
+</section>
+<p-dialog [(visible)]="visibleDialogClassStudent" [closable]="false" [draggable]="false" [modal]="true" [style]="{ width: '400px', minHeight: '400px', maxHeight: '100vh'}" appendTo="body" styleClass="ictu-dialog-layout ictu-dialog-layout--no-border ictu-dialog-layout--hide-header ictu-dialog-layout--hide-overflow">
+	<div class="ictu-dialog-layout__wrapper">
+		<div class="ictu-dialog-layout__header">
+			<h4 class="ictu-dialog-layout__heading m-0 text-start w-100 fw-bold">Học sinh được Tag</h4>
+			<button class="btn ictu-badge-btn--danger-reverse ictu-dialog-layout__btn-close" mat-flat-button (click)="visibleDialogClassStudent = false">
+				<i class="ti ti-x"></i>
+			</button>
+		</div>
+		<div class="ictu-dialog-layout__body">
+                <div class="class-student-control-multiple-wrapper">
+                    @for (row of classMediaSelect()?.students; track row.id; let i = $index) {
+                        <div class="class-student-control-multiple__item class-student-control-multiple__item--set-border" [class.active]="false">
+                                <button [matMenuTriggerFor]="matMenuIMG" [matMenuTriggerData]="{student: row}" class="button--un-set-style">
+                                <img class="class-student-control-multiple__item-avatar" [src]="row.avatar || 'images/user/avatar-1.jpg'" alt="" width="50" height="50">	
+                            </button>
+                            <div class="class-student-control-multiple__item-info">
+                                <span class="class-student-control-multiple__item-name">{{ row.full_name }}{{ row.english_name ? ' (' + row.english_name + ')' : '' }}</span>
+                                <span class="class-student-control-multiple__item-email">{{ row.code }}</span>
+                            </div>
+                        </div>
+                    }@empty{
+                        <div class="flex-item--center" style="height: 354px;">
+                            Không có học sinh nào được tag
+                        </div>
+                    }
+                </div>
+		</div>
+	</div>
+
+</p-dialog>
+<mat-menu #matMenuIMG="matMenu" yPosition="above" >
+	<ng-template matMenuContent let-student="student">
+		<div class="profile-avatar-menu">
+			<img [src]="student.avatar || 'images/user/avatar-1.jpg'" alt="Preview"/>
+		</div>
+	</ng-template>
+</mat-menu>
