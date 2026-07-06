@@ -32,16 +32,8 @@ const routes : Routes = [
 				canActivate  : [ adminModuleGuard ] ,
 				loadChildren : () : Promise<any> => import('@pages/admin/children/teacher/teacher.module').then( ( m ) : any => m.TeacherModule )
 			} ,
-			{
-				path         : 'parent' ,
-				canActivate  : [ adminModuleGuard ] ,
-				loadChildren : () : Promise<any> => import('@pages/admin/children/parent/parent.module').then( ( m ) : any => m.ParentModule )
-			} ,
-			{
-				path         : 'student' ,
-				canActivate  : [ adminModuleGuard ] ,
-				loadChildren : () : Promise<any> => import('@pages/admin/children/student/student-module').then( ( m ) : any => m.StudentModule )
-			} ,
+
+
 			{
 				path         : 'training-management' ,
 				canActivate  : [ adminModuleGuard ] ,
