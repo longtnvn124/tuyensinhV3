@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "npm run build",
+    "buildCommand": "cd \"d:/data/project/angular/v19/tuyensinh/frontend\" && ./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | head -100",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -114,15 +114,33 @@
       "type": "directory"
     },
     {
+      "path": "src\\app\\pages\\admin\\children\\hoso-tuyensinh\\hoso-tuyensinh.component.ts",
+      "accessCount": 6,
+      "lastAccessed": 1783928148780,
+      "type": "file"
+    },
+    {
       "path": "src\\app\\components\\class-curriculums\\class-curriculum-lecture-media-document\\class-curriculum-lecture-media-document.component.ts",
       "accessCount": 3,
       "lastAccessed": 1783305844190,
       "type": "file"
     },
     {
+      "path": "src\\app\\pages\\admin\\children\\nganh-hoc\\chuongtrinh-daotao\\chuongtrinh-daotao.component.css",
+      "accessCount": 3,
+      "lastAccessed": 1783567887395,
+      "type": "file"
+    },
+    {
       "path": "src\\app\\models\\course-lesson.ts",
       "accessCount": 2,
       "lastAccessed": 1783305836989,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\admin-layout\\admin-layout.component.ts",
+      "accessCount": 2,
+      "lastAccessed": 1783330997471,
       "type": "file"
     },
     {
@@ -243,6 +261,24 @@
       "path": "src\\app\\components\\class-curriculums\\class-curriculum-lecture-media-picture\\class-curriculum-lecture-media-picture.component.ts",
       "accessCount": 1,
       "lastAccessed": 1783305309812,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1783566928329,
+      "type": "directory"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\nganh-hoc\\chuongtrinh-daotao\\chuongtrinh-daotao.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1783566944976,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1783915651425,
       "type": "file"
     }
   ],

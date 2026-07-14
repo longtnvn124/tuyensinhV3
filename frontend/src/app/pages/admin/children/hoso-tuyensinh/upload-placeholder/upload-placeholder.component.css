@@ -1,0 +1,75 @@
+.up-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 2px dashed #d4d4d8;
+    border-radius: 10px;
+    background: #fafafa;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.up-wrap__icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e4e4e7;
+    color: #71717a;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.up-wrap__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.up-wrap__label {
+    font-weight: 600;
+    color: #18181b;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.up-wrap__hint {
+    color: #a1a1aa;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.up-wrap__sub {
+    color: #71717a;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.up-wrap__btn {
+    background: #f4f4f5 !important;
+    color: #a1a1aa !important;
+    cursor: not-allowed !important;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.up-wrap__btn[disabled] {
+    opacity: 0.7;
+}
+
+.up-wrap--multi {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+}
+
+.up-wrap--multi .up-wrap__icon {
+    margin: 0 auto;
+}
+
+.up-wrap--multi .up-wrap__btn {
+    align-self: center;
+}

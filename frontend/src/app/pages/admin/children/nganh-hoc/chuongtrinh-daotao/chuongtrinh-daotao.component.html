@@ -1,0 +1,293 @@
+<div class="ctd-page">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+
+    @if (state() !== 'error') {
+        <!-- ═══ Toolbar ═══ -->
+        <div class="ctd-toolbar">
+            <div class="ctd-toolbar__left">
+                <!-- <h4 class="ctd-toolbar__title">Chương trình đào tạo</h4>
+                @if (nganh) {
+                    <span class="ctd-toolbar__subtitle">{{ nganh.name }}</span>
+                } -->
+            </div>
+            <div class="ctd-toolbar__right">
+                <!-- Search -->
+                <span class="p-input-icon-left ctd-search">
+                    <i class="ti ti-search"></i>
+                    <input [(ngModel)]="searchInfo.search"
+                           pInputText
+                           placeholder="Tìm kiếm..."
+                           (keyup.enter)="onSearch()" />
+                </span>
+
+                <!-- View toggle -->
+                <p-selectButton
+                    [options]="viewModeOptions"
+                    [(ngModel)]="viewMode"
+                    styleClass="p-selectbutton-sm" />
+
+               
+
+                <!-- Add -->
+                @if (permission.canCreate) {
+                    <p-button
+                        icon="ti ti-plus"
+                        label="Thêm"
+                        severity="success"
+                        (onClick)="addProgram()" />
+                }
+            </div>
+        </div>
+
+        <!-- ═══ Table View ═══ -->
+        @if (viewMode() === 'table') {
+            <div class="ctd-table-wrap">
+                <div class="ctd-table-scroll">
+                    <table class="ctd-table">
+                        <thead>
+                            <tr>
+                                <th class="ctd-col-check">
+                                    <p-checkbox
+                                        [binary]="true"
+                                        [ngModel]="dataTable.totalChecked()"
+                                        (onChange)="dataTable.selectRow($event.checked)"
+                                        [disabled]="!dataTable.data().length || !permission.canDelete" />
+                                </th>
+                                <th class="ctd-col-idx">#</th>
+                                <th class="ctd-col-code">Mã CT</th>
+                                <th>Tên chương trình</th>
+                                <th class="ctd-col-period">TG</th>
+                                <th class="ctd-col-fee">Học phí</th>
+                                <th class="ctd-col-quota">CT</th>
+                                <th class="ctd-col-status">Trạng thái</th>
+                                <th class="ctd-col-actions">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (row of dataTable.data(); track row.id; let i = $index) {
+                                <tr>
+                                    <td class="ctd-col-check">
+                                        <p-checkbox
+                                            [binary]="true"
+                                            [ngModel]="row._ictuDataTableRowChecked"
+                                            (onChange)="dataTable.selectRow($event.checked, i)"
+                                            [disabled]="!permission.canDelete" />
+                                    </td>
+                                    <td class="ctd-col-idx">{{ dataTable.paginator.startIndex() + i }}</td>
+                                    <td class="ctd-col-code">
+                                        <p-tag [value]="row.code" severity="info" [rounded]="true" />
+                                    </td>
+                                    <td class="ctd-col-name">{{ row.name }}</td>
+                                    <td class="ctd-col-period">{{ row.thoi_gian_dao_tao }}</td>
+                                    <td class="ctd-col-fee">{{ row.hoc_phi | number }}</td>
+                                    <td class="ctd-col-quota">{{ row.chi_tieu }}</td>
+                                    <td class="ctd-col-status">
+                                        @if (row.is_active) {
+                                            <p-tag value="Đã kích hoạt" severity="success" />
+                                        } @else {
+                                            <p-tag value="Chưa kích hoạt" severity="secondary" />
+                                        }
+                                    </td>
+                                    <td class="ctd-col-actions">
+                                        <div class="ctd-action-group">
+                                            @if (permission.canUpdate) {
+                                                <p-button
+                                                    icon="ti ti-edit"
+                                                    severity="info"
+                                                    [text]="true"
+                                                    [rounded]="true"
+                                                    (onClick)="editProgram(row)" />
+                                            }
+                                            @if (permission.canDelete) {
+                                                <p-button
+                                                    icon="ti ti-trash"
+                                                    severity="danger"
+                                                    [text]="true"
+                                                    [rounded]="true"
+                                                    (onClick)="deleteProgram(row)" />
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            } @empty {
+                                <tr>
+                                    <td colspan="9" class="ctd-empty">Không có bản ghi nào.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- ═══ Card View ═══ -->
+        @if (viewMode() === 'card') {
+            <div class="ctd-card-grid">
+                @for (row of dataTable.data(); track row.id) {
+                    <p-card>
+                        <ng-template #header>
+                            <div class="ctd-card-header">
+                                <p-tag [value]="row.code" severity="info" [rounded]="true" />
+                                @if (row.is_active) {
+                                    <p-tag value="Đã kích hoạt" severity="success" />
+                                } @else {
+                                    <p-tag value="Chưa kích hoạt" severity="secondary" />
+                                }
+                            </div>
+                        </ng-template>
+                        <ng-template #title>{{ row.name }}</ng-template>
+                        <ng-template #content>
+                            <div class="ctd-card-body">
+                                @if (row.description) {
+                                    <p class="ctd-card-desc">{{ row.description }}</p>
+                                }
+                                <div class="ctd-card-info">
+                                    <div class="ctd-card-info__item">
+                                        <i class="ti ti-clock"></i>
+                                        <span>TG đào tạo: <strong>{{ row.thoi_gian_dao_tao || '---' }}</strong></span>
+                                    </div>
+                                    <div class="ctd-card-info__item">
+                                        <i class="ti ti-coin"></i>
+                                        <span>Học phí: <strong>{{ row.hoc_phi ? (row.hoc_phi | number) + ' VNĐ' : '---' }}</strong></span>
+                                    </div>
+                                    <div class="ctd-card-info__item">
+                                        <i class="ti ti-users"></i>
+                                        <span>Chỉ tiêu: <strong>{{ row.chi_tieu || '---' }}</strong></span>
+                                    </div>
+                                    @if (row.dieu_kien_xet_tuyen) {
+                                        <div class="ctd-card-info__item">
+                                            <i class="ti ti-checklist"></i>
+                                            <span>{{ row.dieu_kien_xet_tuyen }}</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </ng-template>
+                        <ng-template #footer>
+                            <div class="ctd-card-actions">
+                                @if (permission.canUpdate) {
+                                    <p-button
+                                        icon="ti ti-edit"
+                                        label="Sửa"
+                                        severity="info"
+                                        [text]="true"
+                                        size="small"
+                                        (onClick)="editProgram(row)" />
+                                }
+                                @if (permission.canDelete) {
+                                    <p-button
+                                        icon="ti ti-trash"
+                                        label="Xóa"
+                                        severity="danger"
+                                        [text]="true"
+                                        size="small"
+                                        (onClick)="deleteProgram(row)" />
+                                }
+                            </div>
+                        </ng-template>
+                    </p-card>
+                } @empty {
+                    <div class="ctd-empty-card">Không có bản ghi nào.</div>
+                }
+            </div>
+
+        
+        }
+
+        <div class="ctd-table-footer">
+                    <ictu-paginator
+                        [control]="dataTable.paginator"
+                        (onChangePage)="onChangePage($event)" />
+                </div>
+    } @else {
+        <div class="ctd-error">
+            Tải dữ liệu thất bại. Vui lòng
+            <a (click)="reloadDetail($event)" href="javascript:" class="ctd-error__link">tải lại</a>
+        </div>
+    }
+</div>
+
+<!-- ═══ Form Dialog ═══ -->
+<p-dialog
+    [visible]="formVisible()"
+    (visibleChange)="formVisible.set($event)"
+    [header]="formMode() === 'add' ? 'Thêm chương trình đào tạo' : 'Cập nhật chương trình đào tạo'"
+    [modal]="true"
+    [style]="{ width: '520px' }"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="ctd-dialog">
+    <form [formGroup]="formGroup" class="ctd-form">
+        <div class="ctd-form__field">
+            <label class="ctd-form__label ctd-form__label--req">Tên chương trình</label>
+            <input formControlName="name" pInputText placeholder="Nhập tên chương trình" class="ctd-form__input" />
+            @if (formGroup.get('name')?.invalid && formGroup.get('name')?.touched) {
+                <small class="ctd-form__error">Vui lòng nhập tên chương trình (tối thiểu 2 ký tự)</small>
+            }
+        </div>
+        <div class="ctd-form__row">
+            <div class="ctd-form__field ctd-form__field--half">
+                <label class="ctd-form__label ctd-form__label--req">Mã chương trình</label>
+                <input formControlName="code" pInputText placeholder="Nhập mã" class="ctd-form__input" />
+            </div>
+            <div class="ctd-form__field ctd-form__field--half">
+                <label class="ctd-form__label">Trạng thái</label>
+                <p-select
+                    [options]="optionList"
+                    appendTo="body"
+                    class="ctd-form__input"
+                    formControlName="is_active"
+                    placeholder="Chọn trạng thái" />
+            </div>
+        </div>
+        <div class="ctd-form__field">
+            <label class="ctd-form__label">Mô tả</label>
+            <textarea formControlName="description" pTextarea placeholder="Mô tả chương trình" class="ctd-form__input ctd-form__input--area"></textarea>
+        </div>
+        <div class="ctd-form__field">
+            <label class="ctd-form__label">Điều kiện xét tuyển</label>
+            <textarea formControlName="dieu_kien_xet_tuyen" pTextarea placeholder="Điều kiện xét tuyển" class="ctd-form__input ctd-form__input--area"></textarea>
+        </div>
+        <div class="ctd-form__row">
+            <div class="ctd-form__field ctd-form__field--half">
+                <label class="ctd-form__label">Học phí</label>
+                <p-inputNumber
+                    formControlName="hoc_phi"
+                    [useGrouping]="true"
+                    mode="currency"
+                    currency="VND"
+                    locale="vi-VN"
+                    [min]="0"
+                    class="ctd-form__input" />
+            </div>
+            <div class="ctd-form__field ctd-form__field--half">
+                <label class="ctd-form__label">Chỉ tiêu</label>
+                <p-inputNumber
+                    formControlName="chi_tieu"
+                    [min]="0"
+                    class="ctd-form__input" />
+            </div>
+        </div>
+        <div class="ctd-form__field">
+            <label class="ctd-form__label">Thời gian đào tạo</label>
+            <input formControlName="thoi_gian_dao_tao" pInputText placeholder="VD: 4 năm" class="ctd-form__input" />
+        </div>
+    </form>
+    <ng-template #footer>
+        <div class="ctd-dialog-actions">
+            <p-button
+                label="Hủy"
+                severity="secondary"
+                [text]="true"
+                (onClick)="cancelForm()" />
+            <p-button
+                [label]="formMode() === 'add' ? 'Thêm mới' : 'Cập nhật'"
+                severity="primary"
+                [disabled]="!formFilledAndValid()"
+                (onClick)="submitForm()" />
+        </div>
+    </ng-template>
+</p-dialog>

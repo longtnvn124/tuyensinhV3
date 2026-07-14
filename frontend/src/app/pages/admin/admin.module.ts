@@ -5,7 +5,6 @@ import { IctuVerticalMenuComponent } from '@theme/layouts/menu/ictu-vertical-men
 import { MatDrawer , MatDrawerContainer } from '@angular/material/sidenav';
 import { NavBarComponent } from '@theme/layouts/toolbar/toolbar.component';
 import { MatButton } from '@angular/material/button';
-import { ROLE_PROVIDER } from '@app/providers/admin-role.provider';
 
 @NgModule( {
 	imports   : [
@@ -18,7 +17,7 @@ import { ROLE_PROVIDER } from '@app/providers/admin-role.provider';
 		NgOptimizedImage ,
 		MatButton
 	] ,
-	providers : [ ROLE_PROVIDER.parent ]
+	providers : []
 } )
 export class AdminModule {
 }

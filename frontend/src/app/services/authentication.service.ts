@@ -16,18 +16,15 @@ import { refreshTokenSetter , tokenGetter , tokenSetter } from '@app/app.config'
 import { SysConfigsService } from '@services//sys-configs.service';
 import { IctuNavigation , IctuNavigationItemPms } from '@theme/types/navigation';
 
-
-import { HocSinh } from '@models/hoc-sinh';
 import { Socket , SocketIoConfig } from 'ngx-socket-io';
 import { ManagerOptions } from 'socket.io-client';
-import { PhuHuynh } from '@models/phu-huynh';
 import { joinSources } from '@utilities/join-sources';
 import { isArray } from 'lodash-es';
-import { PhuHuynhService } from '@services/phu-huynh.service';
+
 
 interface IdentityStoreData {
 	user : User | null,
-	
+
 	permission : Permission | null
 }
 
@@ -35,7 +32,7 @@ const nullPermission : Permission = Object.freeze( { data : { menus : [] , roles
 
 export type PickSystemConfig = Pick<SystemConfig , 'config_key' | 'value' | 'params'>
 
-const matchRoute : ( route : string , menu : IctuNavigation ) => boolean = ( route : string , { url } : IctuNavigation ) : boolean => url === route;
+const matchRoute : ( route : string , menu : IctuNavigation ) => boolean = ( route : string , { id } : IctuNavigation ) : boolean => id === route;
 
 const extractPms : ( menu : IctuNavigation ) => IctuNavigationItemPms = ( { pms } : IctuNavigation ) : IctuNavigationItemPms => Object.assign<IctuNavigationItemPms , IctuNavigationItemPms>( [ 0 , 0 , 0 , 0 ] , pms );
 
@@ -72,9 +69,7 @@ export interface ResetPasswordInfo {
 	password_confirmation : string,
 }
 
-export interface AmsParent extends PhuHuynh {
-	hocsinhs : HocSinh[];
-}
+
 
 @Injectable( {
 	providedIn : 'root'
@@ -86,9 +81,6 @@ export class AuthenticationService {
 	private _socket : AppSocket;
 
 	private appRef : ApplicationRef = inject( ApplicationRef );
-
-
-	private readonly phuHuynhService : PhuHuynhService = inject( PhuHuynhService );
 
 	private readonly sysConfigsService : SysConfigsService = inject( SysConfigsService );
 
@@ -108,9 +100,6 @@ export class AuthenticationService {
 
 	private readonly userSetupBehavior : BehaviorSubject<User | null> = new BehaviorSubject<User | null>( null );
 
-	private readonly parentSetupBehavior : BehaviorSubject<AmsParent | null> = new BehaviorSubject<AmsParent | null>( null );
-
-	private readonly studentSetupBehavior : BehaviorSubject<HocSinh | null> = new BehaviorSubject<HocSinh | null>( null );
 
 	private readonly permissionSetupBehavior : BehaviorSubject<Permission | null> = new BehaviorSubject<Permission | null>( null );
 
@@ -161,12 +150,15 @@ export class AuthenticationService {
 	}
 
 	getUserPermission( route : string ) : UserPermission {
+		console.log( 'getUserPermission' , route );
 		const _pms : IctuNavigationItemPms = this.permission?.data?.menus ? this.permission.data.menus.reduce( ( reducer : IctuNavigationItemPms , menu : IctuNavigation ) : IctuNavigationItemPms => {
+			
 			if ( matchRoute( route , menu ) ) {
 				return extractPms( menu );
 			} else if ( menu.child ) {
 				return menu.child.reduce( ( childReducer : IctuNavigationItemPms , menuChild : IctuNavigation ) : IctuNavigationItemPms => ( matchRoute( route , menuChild ) ? extractPms( menuChild ) : childReducer ) , reducer );
 			}
+
 			return reducer;
 		} , [ 0 , 0 , 0 , 0 ] ) : [ 0 , 0 , 0 , 0 ];
 		return {
@@ -228,10 +220,6 @@ export class AuthenticationService {
 		return this.permissionSetupBehavior.asObservable().pipe( filter( Boolean ) );
 	}
 
-	get onParentSetup() : Observable<AmsParent> {
-		// return this.parentSetupBehavior.asObservable().pipe( filter( Boolean ) );
-		return this.parentSetupBehavior.asObservable();
-	}
 
 	get onGetToLoginPage() : Observable<string> {
 		return this.observeGetToLoginPage$.asObservable();
@@ -509,20 +497,7 @@ export class AuthenticationService {
 		return this.http.get<Permission>( getApiRouteLink( 'permission' ) );
 	}
 
-	private loadParenInfo( { id , donvi_id } : User ) : Observable<AmsParent> {
-		const conditions : IctuConditionParam[] = [
-			{ conditionName : 'user_id' , condition : IctuQueryCondition.equal , value : id.toString( 10 ) } ,
-			{ conditionName : 'donvi_id' , condition : IctuQueryCondition.equal , value : donvi_id.toString( 10 ) , orWhere : 'and' }
-		];
-		const queryParams : IctuQueryParams     = {
-			paged : 1 ,
-			limit : 1 ,
-			with  : 'hocsinhs'
-		};
-		return this.phuHuynhService.query( conditions , queryParams ).pipe(
-			map( ( response : DtoObject<PhuHuynh[]> ) : AmsParent => response.data.length ? ( response.data[ 0 ] as AmsParent ) : null )
-		);
-	}
+
 
 	private saveToken( token : Token ) : void {
 		if ( token && token.access_token ) {

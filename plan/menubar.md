@@ -1,207 +1,132 @@
 # Kế hoạch thiết kế lại Menu Sidebar (Admin Layout)
 
-## 1. Hiện trạng
+## 1. Hiện trạng (trước khi sửa)
 
 Sidebar hiện tại nằm trong `ictu-vertical-menu`:
-- **Cấu trúc**: Tab strip trái 80px + content panel phải (danh sách menu con)
-- **Logo & version**: Nằm trong `admin-layout.component.html` (trong `.m-header`), không phải trong sidebar component
+- **Cấu trúc cũ**: Tab strip trái 80px + content panel phải (danh sách menu con), dùng `<ng-scrollbar>` toàn bộ
+- **Logo & version**: Nằm trong `admin-layout.component.html` (trong `.m-header`)
 - **User avatar**: Nằm dưới cùng tab strip, thông tin chi tiết trong popup `MatMenu`
 - **Menu server**: Đã có logic lấy từ `auth.userMenu`, chỉ cần chỉnh sửa HTML/CSS
+- **Đăng xuất**: Nằm trong tab strip + trong user popup
 
-Vấn đề: Bố cục phân tán (logo ở layout, menu ở component riêng), chưa có phân khu rõ ràng.
+Vấn đề: Bố cục phân tán, thiếu phân khu rõ ràng, scroll toàn bộ sidebar, không có logout ở footer.
 
 ## 2. Yêu cầu thiết kế
 
-Sidebar gồm 3 phần rõ rệt:
+Sidebar gồm 3 phần + 1 footer:
 
 | Phần | Nội dung | Ghi chú |
 |------|----------|---------|
-| **Header** | Logo + tên viết tắt website | Luôn hiển thị, kể cả khi thu gọn |
-| **User Info** | Avatar + tên + email + chức năng (TK, Cài đặt, Đổi MK, ĐX) | Thay cho popup hiện tại |
-| **Menu** | Danh sách menu từ server | Giữ nguyên logic, chỉ sửa HTML/CSS |
+| **Header** | Logo + tên viết tắt website + nút toggle | Fixed, collapsed → ẩn logo, chỉ nút toggle |
+| **User Info** | Avatar bo tròn + tên + email + nút popup (TK, Cài đặt, Đổi MK, ĐX) | Fixed, collapsed → chỉ avatar |
+| **Menu** | Danh sách menu từ server | Scroll nếu overflow |
+| **Footer** | Nút Đăng xuất | Fixed, dưới cùng |
 
-## 3. Phạm vi thay đổi
+## 3. Files đã sửa
 
 | File | Thay đổi |
 |------|----------|
-| `admin-layout.component.html` | Di chuyển `.m-header` (logo) vào sidebar; đơn giản hóa layout |
-| `ictu-vertical-menu.component.html` | **Sửa cấu trúc** thành 3 phần Header + User + Menu |
-| `ictu-vertical-menu.component.scss` | **Viết lại style** cho 3 phần, tông màu xanh #4680ff |
-| `ictu-menu-item.component.html` | Chỉnh nhỏ (nếu cần) cho phù hợp layout mới |
-| `_menu.scss` | Cập nhật global style sidebar |
+| `admin-layout.component.html` | Bỏ `<nav>/<navbar-wrapper>/<m-header>`, pass `[logo]` + `[version]` |
+| `admin-layout.component.ts` | Dọn unused imports (`MatButton`, `NgOptimizedImage`) |
+| `ictu-vertical-menu.component.ts` | Thêm `@Input logo, version`, inject `LayoutService`, thêm `toggleMenu()` |
+| `ictu-vertical-menu.component.html` | Template mới 4 phần: Header → User → Menu → Footer |
+| `ictu-vertical-menu.component.scss` | Style mới: flex column, `flex-shrink:0` cho fixed parts, menu scroll |
 
-## 4. Thiết kế chi tiết
+## 4. Bố cục chi tiết
 
-### 4.1 Bố cục tổng thể
-
-```
-┌──────────────────────┐
-│ ┌─┐  Logo + Tên      │ ← Phần 1: Header (56px)
-│ └─┘  website         │
-├──────────────────────┤
-│ ┌──┐                 │
-│ │  │  Nguyễn Văn A   │ ← Phần 2: User Info (auto height)
-│ │  │  a@email.com    │
-│ └──┘  [TK][CĐ][MK]   │
-├──────────────────────┤
-│                      │
-│  📊  Dashboard       │
-│  📋  Quản lý HS      │ ← Phần 3: Menu (scroll, flex: 1)
-│  📚  Khóa học        │
-│  ⚙️  Cài đặt         │
-│                      │
-│                      │
-├──────────────────────┤
-│ 🌙  Thu gọn / Mở     │ ← Footer: toggle (optional)
-└──────────────────────┘
-```
-
-### 4.2 Khi sidebar thu gọn (collapsed - 80px)
+### 4.1 Khi expanded (280px)
 
 ```
-┌────────┐
-│  L     │ ← Logo thu nhỏ
-├────────┤
-│ [A]    │ ← Avatar nhỏ
-├────────┤
-│ 📊     │ ← Icon menu
-│ 📋     │
-│ 📚     │
-│ ⚙️     │
-├────────┤
-│ ◀     │
-└────────┘
+┌──────────────────────────────┐
+│ ┌──┐ TUYENSINH          [≡]  │ ← Header (56px, fixed)
+│ └──┘                         │
+├──────────────────────────────┤
+│ ┌────┐                       │
+│ │ 😊 │ Nguyễn Văn A     [▾]  │ ← User (auto, fixed)
+│ │    │ a@email.com           │
+│ └────┘                       │
+├──────────────────────────────┤
+│ Menu                         │
+│ 📊 Dashboard                 │ ← Menu (flex:1, scroll)
+│ 📋 Quản lý HS                │
+│ 📚 Khóa học                  │
+│ ...                          │
+├─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┤
+│ 🚪 Đăng xuất                 │ ← Footer (fixed)
+└──────────────────────────────┘
 ```
 
-### 4.3 Màu sắc (theme hiện tại)
+### 4.2 Khi collapsed (80px)
+
+```
+┌──────────┐
+│     [≡]  │ ← Header: chỉ nút toggle
+├──────────┤
+│  ┌────┐  │ ← User: chỉ avatar bo tròn
+│  │ 😊 │  │
+│  └────┘  │
+├──────────┤
+│  📊      │ ← Menu: icon + hover popup
+│  📋      │
+│  📚      │
+├──────────┤
+│  🚪      │ ← Footer: chỉ icon
+└──────────┘
+```
+
+### 4.3 User Popup (giữ nguyên từ cũ)
+
+Bấm nút `▾` bên phải user → mở `#userMenu` MatMenu:
+- Avatar + Tên + Email
+- Tài khoản (routerLink account/profile)
+- Cài đặt (routerLink account/info)
+- Cập nhật mật khẩu (routerLink account/password)
+- Đăng xuất (confirmSignOut)
+
+## 5. Style & Màu sắc
 
 ```scss
-// Phần Header
---sidebar-header-bg: #ffffff;          // Nền trắng
---sidebar-header-border: #dbe0e5;      // Border dưới
+// Header
+height: 56px; border-bottom: 1px solid var(--accent-300, #dbe0e5)
+Name: var(--primary-500, #4680ff), font-weight: 700
 
-// Phần User Info  
---sidebar-user-bg: #f8f9fa;            // Nền xám nhạt
---sidebar-user-name: #3e4853;          // Tên đậm
---sidebar-user-email: #8996a4;         // Email mờ
---sidebar-user-accent: #4680ff;        // Màu xanh chủ đạo
+// User
+bg: var(--accent-100, #f8f9fa); border-radius: 10px; margin: 8px 12px
+Avatar: border-radius: 50%, border: 2px solid white, box-shadow nhẹ
 
-// Phần Menu
---sidebar-menu-bg: #ffffff;            // Nền trắng
---sidebar-menu-text: #5b6b79;          // Text menu
---sidebar-menu-active: #4680ff;        // Active (xanh)
---sidebar-menu-hover-bg: #f0f5ff;      // Hover (xanh nhạt)
---sidebar-menu-active-bg: #e8f0fe;     // Active bg
+// Menu item
+padding: 10px 12px; border-radius: 8px
+Default: color var(--accent-600, #5b6b79)
+Hover: bg var(--accent-100, #f8f9fa); color var(--primary-500, #4680ff)
+Active: bg #eef4ff; color var(--primary-500, #4680ff); font-weight: 500
+
+// Footer logout
+hover bg #fef2f2; color #ef4444 (red)
 ```
 
-### 4.4 Thay đổi cụ thể từng file
+## 6. Luồng dữ liệu
 
-#### `admin-layout.component.html`
-- **Giữ nguyên** `mat-drawer-container`, `mat-drawer`, `app-container`
-- **Di chuyển** `.m-header` (logo, version) vào bên trong `ictu-vertical-menu`
-- Bỏ bớt wrapper không cần thiết
-
-#### `ictu-vertical-menu.component.html` (thay đổi chính)
-Cấu trúc mới:
-```html
-<ng-scrollbar style="height: 100vh">
-  <!-- PHẦN 1: HEADER -->
-  <div class="sidebar-header">
-    <div class="sidebar-header__logo">
-      <img [ngSrc]="logo" height="40" width="40">
-    </div>
-    @if (!collapsed()) {
-      <div class="sidebar-header__info">
-        <span class="sidebar-header__info__name">TUYENSINH</span>
-        <span class="sidebar-header__info__version">v{{ version }}</span>
-      </div>
-    }
-    <button class="sidebar-header__toggle" (click)="toggleMenu()">
-      <i class="ti ti-menu-2"></i>
-    </button>
-  </div>
-
-  <!-- PHẦN 2: USER INFO -->
-  <div class="sidebar-user">
-    <div class="sidebar-user__avatar">
-      <img [ngSrc]="avatar() | safeUrl" width="44" height="44">
-    </div>
-    @if (!collapsed()) {
-      <div class="sidebar-user__details">
-        <span class="sidebar-user__details__name">{{ displayName() }}</span>
-        <span class="sidebar-user__details__email">{{ email() }}</span>
-        <div class="sidebar-user__actions">
-          <button [routerLink]="['/admin/account/profile']" title="Tài khoản">
-            <i class="ti ti-user"></i>
-          </button>
-          <button [routerLink]="['/admin/account/password']" title="Đổi mật khẩu">
-            <i class="ti ti-lock"></i>
-          </button>
-          <button (click)="confirmSignOut()" title="Đăng xuất">
-            <i class="ti ti-logout"></i>
-          </button>
-        </div>
-      </div>
-    }
-  </div>
-
-  <!-- PHẦN 3: MENU -->
-  <div class="sidebar-menu">
-    <div class="sidebar-menu__label">Menu</div>
-    <ul class="nav coded-inner-navbar">
-      @for (item of menus(); track item.id) {
-        @if (!item.url) {
-          <li class="nav-item coded-menu-caption">
-            <label>{{ item.title }}</label>
-          </li>
-        } @else {
-          <app-ictu-menu-item [item]="item" [collapsed]="collapsed()"/>
-        }
-      }
-    </ul>
-  </div>
-</ng-scrollbar>
+```
+Server login → Permission.data.menus → auth.userMenu → AdminLayout.menus
+                                                              ↓
+Logo + Version  ───→  ictu-vertical-menu [logo] [version] [menus] [collapsed]
+                                                              ↓
+User info ← auth.onUserSetup observable → avatar/displayName/email
 ```
 
-#### `ictu-vertical-menu.component.ts`
-- Thêm `@Input() logo: string`
-- Thêm `@Input() version: string`
-- Thêm method `toggleMenu()` gọi `layoutService.toggleSideDrawer()`
+## 7. Files cần sửa (thực tế đã sửa)
 
-#### `ictu-menu-item.component.ts`
-- Thêm `@Input() collapsed: boolean = false`
+1. [ictu-vertical-menu.component.ts](frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-vertical-menu.component.ts)
+2. [ictu-vertical-menu.component.html](frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-vertical-menu.component.html)
+3. [ictu-vertical-menu.component.scss](frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-vertical-menu.component.scss)
+4. [admin-layout.component.html](frontend/src/app/pages/admin/admin-layout/admin-layout.component.html)
+5. [admin-layout.component.ts](frontend/src/app/pages/admin/admin-layout/admin-layout.component.ts)
 
-#### `ictu-menu-item.component.html`
-- Nếu `collapsed`: chỉ hiển thị icon, ẩn text
-- Giữ nguyên logic routerLink, external link
+## 8. Verify
 
-## 5. Các bước triển khai
-
-| Step | Mô tả | Files |
-|------|-------|-------|
-| 1 | Thêm @Input logo, version, toggleMenu vào ictu-vertical-menu.component.ts | `.ts` |
-| 2 | Viết lại template ictu-vertical-menu 3 phần | `.html` |
-| 3 | Viết lại style ictu-vertical-menu | `.scss` |
-| 4 | Cập nhật admin-layout: pass logo, version, bỏ m-header | `.html` |
-| 5 | Thêm collapsed input vào ictu-menu-item | `.ts` |
-| 6 | Điều chỉnh ictu-menu-item hiển thị theo collapsed | `.html` |
-| 7 | Cập nhật _menu.scss global | `_menu.scss` |
-| 8 | Build & verify | `ng build` |
-
-## 6. Rủi ro & Lưu ý
-
-- **Không phá vỡ logic menu**: Menu từ server vẫn giữ nguyên, chỉ thay đổi HTML/CSS
-- **Responsive**: Cần test trên mobile (drawer over mode)
-- **Toggle hoạt động**: Collapse/expand vẫn dùng LayoutService.toggleSideDrawer()
-- **User popup**: Chuyển từ MatMenu popup sang inline trong sidebar
-- **Hiệu ứng**: Cần transition mượt khi collapse/expand (width, opacity, transform)
-
-## 7. File cần sửa
-
-1. `frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-vertical-menu.component.ts` — Thêm @Input logo, version
-2. `frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-vertical-menu.component.html` — Viết lại template
-3. `frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-vertical-menu.component.scss` — Viết lại style
-4. `frontend/src/app/pages/admin/admin-layout/admin-layout.component.html` — Pass logo, version, bỏ m-header
-5. `frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-menu-item/ictu-menu-item.component.ts` — Thêm collapsed input
-6. `frontend/src/app/theme/layouts/menu/ictu-vertical-menu/ictu-menu-item/ictu-menu-item.component.html` — Điều chỉnh hiển thị
-7. `frontend/src/app/theme/styles/layouts/_menu.scss` — Global menu styles
+- Build: `ng build` → 0 lỗi, 0 warning
+- Menu từ server giữ nguyên logic (chỉ sửa HTML/CSS)
+- Collapse/expand dùng LayoutService.toggleSideDrawer()
+- Header + User + Footer cố định (flex-shrink: 0), chỉ Menu scroll
+- Khi collapsed: ẩn logo, chỉ toggle; ẩn text user, chỉ avatar
+- Footer Đăng xuất hover đỏ

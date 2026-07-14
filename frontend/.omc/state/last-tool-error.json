@@ -1,7 +1,7 @@
 {
   "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx tsc --noEmit 2>&1 | Select-Object -First 60\",\"timeout\":120000,\"description\":\"Verify tsc after remaining fixes\"}",
-  "error": "Exit code 2\nsrc/app/components/class-curriculums/class-curriculum-lecture-media-document/class-curriculum-lecture-media-document.component.ts(71,17): error TS2322: Type 'string' is not assignable to type 'ICTUFileHostingService'.\r\nsrc/app/models/course-lesson.ts(59,11): error TS2740: Type 'CourseLessonChapter' is missing the following properties from type 'CourseLesson[]': length, pop, push, concat, and 29 more.\r\nsrc/app/models/course-lesson.ts(59,63): error TS2769: No overload matches this call...",
-  "timestamp": "2026-07-06T02:43:50.641Z",
+  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx tsc --noEmit 2>&1 | select -First 30\",\"timeout\":120000,\"description\":\"TypeScript type-check\"}",
+  "error": "Exit code 255\nsrc/app/components/assign-homework-component/assign-homework-component.ts(40,8): error TS2307: Cannot find module '@app/models/course-lesson-test' or its corresponding type declarations.\r\nsrc/app/components/assign-homework-component/assign-homework-component.ts(72,34): error TS2307: Cannot find module '@app/models/course' or its corresponding type declarations.\r\nsrc/app/components/assign-homework-component/assign-homework-component.ts(82,8): error TS2307: Cannot find module '@app/m...",
+  "timestamp": "2026-07-08T09:35:37.941Z",
   "retry_count": 1
 }

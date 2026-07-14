@@ -1,0 +1,358 @@
+.ctd-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    /* gap: 16px; */
+}
+
+/* ═══ Toolbar ═══ */
+
+.ctd-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 8px;
+}
+
+.ctd-toolbar__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ctd-toolbar__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent-900, #1e293b);
+    margin: 0;
+}
+
+.ctd-toolbar__subtitle {
+    font-size: 13px;
+    color: var(--accent-500, #94a3b8);
+    padding: 2px 10px;
+    border-left: 1px solid var(--accent-300, #cbd5e1);
+}
+
+.ctd-toolbar__right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ctd-search {
+    position: relative;
+}
+
+.ctd-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-400, #94a3b8);
+    font-size: 14px;
+    z-index: 1;
+}
+
+.ctd-search input {
+    padding-left: 36px !important;
+    width: 220px;
+    font-size: 13px;
+}
+
+/* ═══ Table View ═══ */
+
+.ctd-table-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--accent-200, #e2e8f0);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.ctd-table-scroll {
+    flex: 1;
+    overflow: auto;
+}
+
+.ctd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.ctd-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.ctd-table thead th {
+    background: var(--accent-100, #f1f5f9);
+    color: var(--accent-700, #334155);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 10px 12px;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--accent-200, #e2e8f0);
+    text-align: left;
+}
+
+.ctd-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--accent-100, #f1f5f9);
+    vertical-align: middle;
+}
+
+.ctd-table tbody tr:hover {
+    background: var(--accent-50, #f8fafc);
+}
+
+.ctd-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ctd-table .ctd-col-idx,
+.ctd-table thead .ctd-col-idx {
+    width: 50px;
+    text-align: center;
+    color: var(--accent-500, #94a3b8);
+}
+
+.ctd-table .ctd-col-check {
+    width: 48px;
+    text-align: center;
+}
+
+.ctd-table .ctd-col-code {
+    width: 120px;
+}
+
+.ctd-table .ctd-col-name {
+    min-width: 180px;
+}
+
+.ctd-table .ctd-col-period {
+    width: 60px;
+    text-align: center;
+}
+
+.ctd-table .ctd-col-fee {
+    width: 110px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.ctd-table .ctd-col-quota {
+    width: 60px;
+    text-align: center;
+}
+
+.ctd-table .ctd-col-status {
+    width: 130px;
+    text-align: center;
+}
+
+.ctd-table .ctd-col-actions {
+    width: 100px;
+    text-align: center;
+}
+
+.ctd-action-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.ctd-table .ctd-empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--accent-400, #94a3b8);
+    font-style: italic;
+}
+
+.ctd-table-footer {
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+    border-top: 1px solid var(--accent-200, #e2e8f0);
+    background: var(--accent-50, #f8fafc);
+}
+
+/* ═══ Card View ═══ */
+
+.ctd-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    flex: 1;
+    align-content: start;
+    padding: 16px;
+    background: #fbfbfb;
+    overflow-y: scroll;
+}
+
+.ctd-card-grid ::ng-deep .p-card {
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.ctd-card-grid ::ng-deep .p-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ctd-card-grid ::ng-deep .p-card-header {
+    padding: 16px 16px 0;
+}
+
+.ctd-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ctd-card-body {
+    font-size: 13px;
+}
+
+.ctd-card-desc {
+    color: var(--accent-600, #475569);
+    margin: 0 0 12px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+}
+
+.ctd-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ctd-card-info__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-600, #475569);
+    font-size: 13px;
+}
+
+.ctd-card-info__item i {
+    font-size: 16px;
+    color: var(--accent-400, #94a3b8);
+    width: 18px;
+    text-align: center;
+}
+
+.ctd-card-info__item strong {
+    color: var(--accent-800, #1e293b);
+}
+
+.ctd-card-actions {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.ctd-empty-card {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 16px;
+    color: var(--accent-400, #94a3b8);
+    font-style: italic;
+}
+
+/* ═══ Form Dialog ═══ */
+
+::ng-deep .ctd-dialog .p-dialog-content {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+::ng-deep .ctd-dialog .p-dialog-footer {
+    border-top: 1px solid var(--accent-200, #e2e8f0);
+    padding: 12px 24px;
+    flex-shrink: 0;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.ctd-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ctd-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ctd-form__row {
+    display: flex;
+    gap: 12px;
+}
+
+.ctd-form__field--half {
+    flex: 1;
+}
+
+.ctd-form__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-700, #334155);
+}
+
+.ctd-form__label--req::after {
+    content: ' *';
+    color: #ef4444;
+}
+
+.ctd-form__input {
+    width: 100%;
+}
+
+.ctd-form__input--area {
+    resize: vertical;
+    min-height: 72px;
+}
+
+.ctd-form__error {
+    color: #ef4444;
+    font-size: 12px;
+}
+
+.ctd-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ═══ Error state ═══ */
+
+.ctd-error {
+    text-align: center;
+    padding: 60px 16px;
+    color: var(--accent-500, #94a3b8);
+    font-size: 14px;
+}
+
+.ctd-error__link {
+    color: var(--primary-500, #3b82f6);
+    text-decoration: underline;
+    cursor: pointer;
+}

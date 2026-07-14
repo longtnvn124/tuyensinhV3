@@ -1,84 +1,76 @@
 import { InjectionToken } from '@angular/core';
 
 export interface Role {
-	id : number,
-	description : string,
-	name : SysRoleName,
-	ordering : number,
-	title : string
-	realm : string,
-	ucase_ids : UseCasePermission[],
-	provider : RolePermission[],
-	is_default : number,
-	status : number,
-	created_at? : string,
-	updated_at? : string,
+	id: number;
+	description: string;
+	name: SysRoleName;
+	ordering: number;
+	title: string;
+	realm: string;
+	ucase_ids: UseCasePermission[];
+	provider: RolePermission[];
+	is_default: number;
+	status: number;
+	created_at?: string;
+	updated_at?: string;
 }
 
-export type PickRole = Pick<Role , 'id' | 'description' | 'name' | 'ordering' | 'title'>;
+export type PickRole = Pick<Role, 'id' | 'description' | 'name' | 'ordering' | 'title'>;
 
 export interface UseCasePermission {
-	id : string, // UseCase name : 'he-thong/thong-tin-tai-khoan'
-	pms : string // 1.1.1.1 = access.read.update.delete
+	id: string; // UseCase name : 'he-thong/thong-tin-tai-khoan'
+	pms: string; // 1.1.1.1 = access.read.update.delete
 }
 
 export interface RolePermission {
-	id : string, // router : 'users'
-	pms : string // 1.1.1.1 = access.read.update.delete
+	id: string; // router : 'users'
+	pms: string; // 1.1.1.1 = access.read.update.delete
 }
 
+// 8 nhóm quyền có tài khoản đăng nhập theo plan/du-an.md (mục 2.1 + 11)
+// 'thi-sinh' không có tài khoản → không nằm trong SysRoleName
 export type AdminRole = 'admin';
+export type DirectionRole = 'direction';
+export type ManagerRole = 'manager';
+export type StaffRole = 'staff';
+export type TrainingStaffRole = 'training_staff';
+export type ReviewerRole = 'reviewer';
+export type DoiTacRole = 'doi-tac';
+export type DoiTacCvRole = 'doi-tac-cv';
 
-export type CeoRole = 'ceo';
+export type SysRoleName =
+	| AdminRole
+	| DirectionRole
+	| ManagerRole
+	| StaffRole
+	| TrainingStaffRole
+	| ReviewerRole
+	| DoiTacRole
+	| DoiTacCvRole;
 
-export type TeacherRole = 'teacher';
+export const APP_REDIRECT_LINKS: InjectionToken<Map<SysRoleName, string>> =
+	new InjectionToken<Map<SysRoleName, string>>('default redirect for each role');
 
-export type TeachingAssistantRole = 'teaching_assistant';
+export const createAppRedirectLinks: () => Map<SysRoleName, string> =
+	(): Map<SysRoleName, string> => {
+		return new Map<SysRoleName, string>([
+			['admin', '/admin/dashboard'],
+			['direction', '/admin/dashboard'],
+			['manager', '/admin/hoso-tuyensinh'],
+			['staff', '/admin/hoso-tuyensinh'],
+			['training_staff', '/admin/hoso-tuyensinh'],
+			['reviewer', '/admin/dashboard'],
+			['doi-tac', '/admin/hoso-tuyensinh'],
+			['doi-tac-cv', '/admin/hoso-tuyensinh']
+		]);
+	};
 
-export type TrainingManagementRole = 'training_management';
-
-export type GeneralManagementRole = 'general_management';
-
-export type SalesRole = 'sales';
-
-export type AccountantRole = 'accountant';
-
-export type SupporterRole = 'supporter';
-
-export type ParentRole = 'parent';
-
-export type StudentRole = 'student';
-
-export type MarketingRole = 'marketing';
-
-export type ModeratorMedia = 'mod_media';
-
-export type ModeratorComments = 'mod_comments';
-
-export type ContentReviewerRole = 'content_reviewer';
-
-export type SysRoleName = AdminRole | CeoRole | TeacherRole | TrainingManagementRole | GeneralManagementRole | SalesRole | AccountantRole | SupporterRole | TeachingAssistantRole | ModeratorMedia | ModeratorComments | ParentRole | StudentRole | MarketingRole | ContentReviewerRole;
-
-export const APP_REDIRECT_LINKS : InjectionToken<Map<SysRoleName , string>> = new InjectionToken<Map<SysRoleName , string>>( 'default redirect for each role' );
-
-export const createAppRedirectLinks : () => Map<SysRoleName , string> = () : Map<SysRoleName , string> => {
-	return new Map<SysRoleName , string>( [
-		[ 'admin' , '/admin/administrator' ] ,
-		[ 'ceo' , '/admin/ceo' ] ,
-		[ 'general_management' , '/admin/general-management' ] ,
-		[ 'training_management' , '/admin/training-management' ] ,
-		[ 'teacher' , '/admin/teacher' ] ,
-		[ 'accountant' , '/admin/accountant' ] ,
-		[ 'teaching_assistant' , '/admin/teaching-assistant' ] ,
-		[ 'sales' , '/admin/sales' ] ,
-		[ 'supporter' , '/admin/supporter' ] ,
-		[ 'parent' , '/admin/parent' ] ,
-		[ 'student' , '/admin/student' ] ,
-		[ 'marketing' , '/admin/marketing' ] ,
-		[ 'mod_media' , '/admin/moderation' ] ,
-		[ 'mod_comments' , '/admin/moderation' ] ,
-		[ 'content_reviewer' , '/admin/content-reviewer' ]
-	] );
-};
-
-export const ARRAY_EMPLOYEE_ROLES : Omit<SysRoleName , StudentRole | ParentRole>[] = [ 'admin' , 'ceo' , 'teacher' , 'teaching_assistant' , 'training_management' , 'general_management' , 'sales' , 'accountant' , 'supporter' ] as const;
+// Nhân viên nội bộ (không bao gồm đối tác ngoài)
+export const ARRAY_EMPLOYEE_ROLES: SysRoleName[] = [
+	'admin',
+	'direction',
+	'manager',
+	'staff',
+	'training_staff',
+	'reviewer'
+];

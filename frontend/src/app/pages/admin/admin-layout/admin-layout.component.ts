@@ -1,8 +1,7 @@
 import { Component , computed , inject , OnDestroy , OnInit , signal , Signal , viewChild , WritableSignal } from '@angular/core';
 import { IctuVerticalMenuComponent } from '@theme/layouts/menu/ictu-vertical-menu/ictu-vertical-menu.component';
-import { MatButton } from '@angular/material/button';
 import { MatDrawer , MatDrawerContainer , MatDrawerMode } from '@angular/material/sidenav';
-import { CommonModule , NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthenticationService } from '@services/authentication.service';
 import { IctuNavigation } from '@theme/types/navigation';
@@ -28,7 +27,7 @@ type NavResizeState = '280px' | '80px';
 
 @Component( {
 	selector    : 'app-admin-layout' ,
-	imports     : [ CommonModule , IctuVerticalMenuComponent , MatButton , MatDrawer , MatDrawerContainer , NgOptimizedImage , RouterOutlet ] ,
+	imports     : [ CommonModule , IctuVerticalMenuComponent , MatDrawer , MatDrawerContainer , RouterOutlet ] ,
 	templateUrl : './admin-layout.component.html' ,
 	styleUrl    : './admin-layout.component.scss'
 } )

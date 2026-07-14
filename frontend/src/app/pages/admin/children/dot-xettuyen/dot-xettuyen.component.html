@@ -1,0 +1,215 @@
+<section class="admin-section--table position-relative">
+    @if (state() === 'loading') {
+    <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    <div class="admin-wrap-table">
+        @if (state() !== 'error') {
+        <div class="admin-wrap-table__head d-flex">
+            <h4 class="admin-wrap-table__heading">
+                <svg>
+                    <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+                </svg>
+                Danh sách đợt xét tuyển
+            </h4>
+            <div class="admin-wrap-table__head-actions">
+                <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText
+                    placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearch()">
+                @if (permissionControl().canDelete) {
+                <button (click)="deleteSelected()" [disabled]="!dataTable.someItemsChecked()"
+                    class="btn ictu-button-danger-gradient" mat-flat-button>
+                    <i class="ti ti-trash"></i>
+                </button>
+                }
+                @if (permissionControl().canCreate) {
+                <button (click)="addItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                    <i class="ti ti-plus"></i>
+                </button>
+                }
+            </div>
+        </div>
+        <div class="admin-wrap-table__body wrap-tb">
+            <table class="tbl admin-table table-hover">
+                <thead>
+                    <tr>
+                        <th class="col-checkbox">
+                            <mat-checkbox [checked]="dataTable.totalChecked()"
+                                [indeterminate]="dataTable.partiallyChecked()"
+                                (change)="dataTable.selectRow($event.checked)"
+                                [disabled]="!dataTable.data().length || !permissionControl().canDelete"></mat-checkbox>
+                        </th>
+                        <th class="col-index text-center">#</th>
+                        <th class="text-left">Tên đợt</th>
+                        <th class="text-center">Thời gian</th>
+                        <th class="wid-120 text-center">Trạng thái</th>
+                        <th class="wid-90 text-center px-0">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of dataTable.data(); track row.id; let i = $index) {
+                    <tr>
+                        <td class="col-checkbox">
+                            <mat-checkbox [checked]="row._ictuDataTableRowChecked"
+                                (change)="dataTable.selectRow($event.checked, i)"
+                                [disabled]="!permissionControl().canDelete"></mat-checkbox>
+                        </td>
+                        <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+                        <td class="text-left">{{ row.name }}</td>
+                        <td class="text-center">{{ formatDateRange(row) }}</td>
+                        <td class="wid-120 text-center p-0">
+                            <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                                @if (row.status === 'dang_mo') {
+                                <span class="ictu-badge ictu-badge--success">Đang mở</span>
+                                } @else {
+                                <span class="ictu-badge ictu-badge--secondary">Đã đóng</span>
+                                }
+                            </div>
+                        </td>
+                        <td class="p-0 wid-120">
+                            <div class="admin-table__btn-actions">
+                                @if (permissionControl().canUpdate) {
+                                <button (click)="editItem(row)" class="btn ictu-button-info-light">
+                                    <i class="ti ti-edit"></i>
+                                </button>
+                                }
+                                @if (permissionControl().canDelete) {
+                                <button (click)="deleteItem(row)" class="btn ictu-button-danger-light">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="6">Không có bản ghi nào.</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="admin-wrap-table__foot">
+            <div class="d-flex justify-content-center align-items-center w-100">
+                <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"
+                    style="--ictu-paginator-gap:10px"></ictu-paginator>
+            </div>
+        </div>
+        } @else {
+        <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+            <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+        </div>
+        }
+    </div>
+</section>
+
+<p-drawer #masterDrawer (onHide)="onDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false"
+    [header]="formControl.heading()" [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right"
+    styleClass="ictu-p-drawer">
+    <div class="ictu-p-drawer__content position-relative">
+        @if (formControl.enableLoading()) {
+        <app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+        }
+        <div class="ictu-p-drawer__content__body position-relative">
+            @switch (formControl.state()) {
+            @case ('READY') {
+            <form [formGroup]="formControl.formGroup">
+                <div class="ictu-form ictu-form--label-on-top">
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label ictu-form__label--required" for="d_name">Tên đợt xét
+                            tuyển</label>
+                        <input class="ictu-form__input-field" formControlName="name" id="d_name" pInputText
+                            placeholder="VD: Đợt xét tuyển 2026" type="text">
+                        @if (formControl.formGroup.get('name')?.invalid && formControl.formGroup.get('name')?.touched) {
+                        <small class="ictu-form__error">Vui lòng nhập tên đợt (tối thiểu 2 ký tự)</small>
+                        }
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 col-sm-6">
+                            <div class="ictu-form__row">
+
+                                <label class="ictu-form__label ictu-form__label--required" for="d_start">Thời gian bắt
+                                đầu</label>
+                            <p-datepicker formControlName="thoi_gian_bat_dau" inputId="d_start" dateFormat="dd/mm/yy"
+                                appendTo="body" [showIcon]="true"  [showTime]="false" [showSeconds]="false"
+                                placeholder="Chọn ngày bắt đầu" />
+                            @if (formControl.formGroup.get('thoi_gian_bat_dau')?.invalid &&
+                            formControl.formGroup.get('thoi_gian_bat_dau')?.touched) {
+                            <small class="ictu-form__error">Vui lòng chọn thời gian bắt đầu</small>
+                            }
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="ictu-form__row">
+                                <label class="ictu-form__label ictu-form__label--required" for="d_end">Thời gian kết
+                                thúc</label>
+                            <p-datepicker formControlName="thoi_gian_ket_thuc" inputId="d_end" dateFormat="dd/mm/yy"
+                                appendTo="body" [showIcon]="true"  [showTime]="false" [showSeconds]="false"
+                                placeholder="Chọn ngày kết thúc" />
+                            @if (formControl.formGroup.get('thoi_gian_ket_thuc')?.invalid &&
+                            formControl.formGroup.get('thoi_gian_ket_thuc')?.touched) {
+                            <small class="ictu-form__error">Vui lòng chọn thời gian kết thúc</small>
+                            }
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- <div class="ictu-form__row ictu-form__row--date">
+                        <div class="ictu-form__field">
+                            <label class="ictu-form__label ictu-form__label--required" for="d_start">Thời gian bắt
+                                đầu</label>
+                            <p-datepicker formControlName="thoi_gian_bat_dau" inputId="d_start" dateFormat="dd/mm/yy"
+                                appendTo="body" [showIcon]="true" styleClass="ictu-form__input-field"
+                                placeholder="Chọn ngày bắt đầu" />
+                            @if (formControl.formGroup.get('thoi_gian_bat_dau')?.invalid &&
+                            formControl.formGroup.get('thoi_gian_bat_dau')?.touched) {
+                            <small class="ictu-form__error">Vui lòng chọn thời gian bắt đầu</small>
+                            }
+                        </div>
+                        <div class="ictu-form__field">
+                            <label class="ictu-form__label ictu-form__label--required" for="d_end">Thời gian kết
+                                thúc</label>
+                            <p-datepicker formControlName="thoi_gian_ket_thuc" inputId="d_end" dateFormat="dd/mm/yy"
+                                appendTo="body" [showIcon]="true" styleClass="ictu-form__input-field"
+                                placeholder="Chọn ngày kết thúc" />
+                            @if (formControl.formGroup.get('thoi_gian_ket_thuc')?.invalid &&
+                            formControl.formGroup.get('thoi_gian_ket_thuc')?.touched) {
+                            <small class="ictu-form__error">Vui lòng chọn thời gian kết thúc</small>
+                            }
+                        </div>
+                    </div> -->
+                    @if (formControl.formGroup.errors?.['dateRange']) {
+                    <small class="ictu-form__error">Thời gian kết thúc phải sau thời gian bắt đầu</small>
+                    }
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label" for="d_desc">Mô tả</label>
+                        <textarea class="ictu-form__input-field" formControlName="mo_ta" id="d_desc" pTextarea
+                            placeholder="Mô tả đợt xét tuyển"></textarea>
+                    </div>
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label" for="d_status">Trạng thái</label>
+                        <p-select [options]="optionList" appendTo="body" class="ictu-form__input-field"
+                            formControlName="status" placeholder="Trạng thái" inputId="d_status" />
+                    </div>
+                    <small class="ictu-form__hint">Chỉ 1 đợt có thể đang mở tại 1 thời điểm. Khi kích hoạt đợt mới, các
+                        đợt đang mở khác sẽ tự đóng.</small>
+                </div>
+            </form>
+            }
+            @case ('PREPARATION_FAILED') {
+            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="formControl.preparation()" href="javascript:"
+                    class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+            }
+            }
+        </div>
+        <div class="ictu-p-drawer__content__footer">
+            <button (click)="masterDrawer.close($event)" class="btn ictu-badge-btn--secondary"
+                mat-flat-button>Hủy</button>
+            <button (click)="submitForm()" [disabled]="!formControl.formFilledAndValid"
+                class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+        </div>
+    </div>
+</p-drawer>

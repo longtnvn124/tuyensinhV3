@@ -1,0 +1,12 @@
+<div class="up-wrap" [class.up-wrap--multi]="maxCount > 1">
+    <div class="up-wrap__icon"><i class="pi pi-cloud-upload"></i></div>
+    <div class="up-wrap__body">
+        <div class="up-wrap__label">{{ label }}</div>
+        <div class="up-wrap__hint">— chờ thiết kế —</div>
+        <div class="up-wrap__sub">{{ hintText }} · {{ accept }}</div>
+    </div>
+    <button type="button" class="btn up-wrap__btn" mat-flat-button disabled>
+        <i class="ti ti-upload"></i>
+        <span>Upload ảnh</span>
+    </button>
+</div>

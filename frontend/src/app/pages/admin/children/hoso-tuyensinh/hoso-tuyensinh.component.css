@@ -1,0 +1,136 @@
+.hoso-filter-select {
+    min-width: 160px;
+}
+
+.hoso-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-bottom: 24px;
+}
+
+.hoso-form__section {
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    background: #fcfcfd;
+    padding: 14px 16px 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.hoso-form__section:hover {
+    border-color: #d4d4d8;
+    box-shadow: 0 1px 2px rgba(24, 24, 27, 0.04);
+}
+
+.hoso-form__section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #18181b;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-left: 3px solid #2563eb;
+    padding-left: 8px;
+}
+
+.ictu-form__row--two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.ictu-form__row--two > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+@media (max-width: 640px) {
+    .ictu-form__row--two {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* CCCD dialog */
+.cccd-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 2px;
+}
+
+.cccd-dialog__desc {
+    margin: 0;
+    font-size: 13px;
+    color: #52525b;
+    line-height: 1.5;
+}
+
+.cccd-dialog__loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #2563eb;
+    font-style: italic;
+}
+
+.cccd-dialog__readonly {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cccd-dialog__alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.cccd-dialog__alert i {
+    color: #b45309;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.cccd-dialog__readonly-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #18181b;
+    margin: 4px 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.cccd-dialog__readonly-list {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 8px 14px;
+    margin: 0;
+    font-size: 13px;
+}
+
+.cccd-dialog__readonly-list dt {
+    color: #71717a;
+    font-weight: 500;
+    margin: 0;
+}
+
+.cccd-dialog__readonly-list dd {
+    color: #18181b;
+    margin: 0;
+    word-break: break-word;
+}
+
+.cccd-dialog__readonly-list dd .ictu-badge {
+    display: inline-flex;
+    align-items: center;
+}

@@ -1,5 +1,5 @@
 import { IctuBaseModel } from '@models/ictu-base-model';
-import { TeacherRole, TeachingAssistantRole } from '@models/role';
+import { SysRoleName } from '@models/role';
 import { IctuDropdownOption } from './ictu-dropdown-option';
 
 export type TeacherPricingType = 'PER_SESSION' | 'TIERED';
@@ -15,7 +15,7 @@ export interface PricingPlan {
 }
 export interface PricingPlanSession {
     price: number;
-    role: TeachingAssistantRole | TeacherRole;
+    role: SysRoleName;
     pricing_plan_items?: PricingPlanSessionItem[];
 }
 

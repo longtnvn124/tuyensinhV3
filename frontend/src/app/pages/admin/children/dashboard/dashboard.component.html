@@ -1,0 +1,374 @@
+<div class="dash-container blue-theme">
+
+    <!-- ======== HEADER ======== -->
+    <div class="dash-header">
+        <div>
+            <h1 class="dash-title">Tổng quan tuyển sinh</h1>
+            <p class="dash-subtitle">Dữ liệu cập nhật đến hôm nay · <span class="text-primary-500">{{ lastUpdate }}</span></p>
+        </div>
+        <div class="dash-header-actions">
+            <select class="dash-select" [(ngModel)]="selectedPeriod" (change)="onPeriodChange()">
+                <option [value]="7">7 ngày</option>
+                <option [value]="30" selected>30 ngày</option>
+                <option [value]="90">90 ngày</option>
+                <option [value]="365">Năm nay</option>
+            </select>
+            <button class="dash-btn dash-btn-primary" (click)="refresh()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                Làm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- ======== ROW 1: KPI CARDS ======== -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon--blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-label">Tổng hồ sơ</span>
+                    <span class="kpi-value">{{ summary.totalRegistrations ?? '--' }}</span>
+                
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon--yellow">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-label">Doanh thu (VNĐ)</span>
+                    <span class="kpi-value">{{ summary.totalRevenue ?? '--' }}</span>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon--green">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-label">Trúng tuyển</span>
+                    <span class="kpi-value">{{ summary.totalAdmitted ?? '--' }}</span>
+                
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon--red">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                </div>
+                <div class="kpi-body">
+                    <span class="kpi-label">Hồ sơ chờ xử lý</span>
+                    <span class="kpi-value">{{ summary.pendingRegistrations ?? '--' }}</span>
+                
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== ROW 2: CHARTS ======== -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Hồ sơ theo ngành học</h3>
+                    <div class="card-actions">
+                        <span class="badge badge--primary">Theo đợt hiện tại</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Ngành học</th>
+                                <th style="text-align:right">Số lượng</th>
+                                <th style="text-align:right">Tỷ lệ</th>
+                                <th style="width:200px">Biểu đồ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of byMajor; track $index) {
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td style="text-align:right">{{ item.count ?? '--' }}</td>
+                                <td style="text-align:right">{{ item.pct ?? '--' }}</td>
+                                <td>
+                                    <div class="bar-chart">
+                                        <div class="bar-fill" [style.width.%]="item.barWidth" [class]="item.barClass || ''"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr><td colspan="4" style="text-align:center;color:#8996a4">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Trạng thái hồ sơ</h3>
+                </div>
+                <div class="card-body">
+                    <div class="status-list">
+                        @for (item of byStatus; track item.label) {
+                        <div class="status-item">
+                            <span class="status-dot" [class]="'status-dot--' + item.color"></span>
+                            <span class="status-label">{{ item.label }}</span>
+                            <span class="status-count">{{ item.count ?? '--' }}</span>
+                        </div>
+                        } @empty {
+                        <div class="status-item"><span class="status-label" style="color:#8996a4">Chưa có dữ liệu</span></div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== ROW 3: PERIODS & SOURCES ======== -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Hồ sơ theo đợt xét tuyển</h3>
+                </div>
+                <div class="card-body">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Đợt xét tuyển</th>
+                                <th style="text-align:right">Hồ sơ</th>
+                                <th style="text-align:right">Trúng tuyển</th>
+                                <th style="text-align:right">Tỷ lệ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of byPeriod; track $index) {
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td style="text-align:right">{{ item.count ?? '--' }}</td>
+                                <td style="text-align:right">{{ item.admitted ?? '--' }}</td>
+                                <td style="text-align:right">{{ item.rate ?? '--' }}</td>
+                            </tr>
+                            } @empty {
+                            <tr><td colspan="4" style="text-align:center;color:#8996a4">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Nguồn đăng ký</h3>
+                </div>
+                <div class="card-body">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Nguồn</th>
+                                <th style="text-align:right">Hồ sơ</th>
+                                <th style="text-align:right">Tỷ lệ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of bySource; track $index) {
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td style="text-align:right">{{ item.count ?? '--' }}</td>
+                                <td style="text-align:right">{{ item.pct ?? '--' }}</td>
+                            </tr>
+                            } @empty {
+                            <tr><td colspan="3" style="text-align:center;color:#8996a4">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== ROW 4: COUNCIL & REVENUE ======== -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Kết quả hội đồng xét tuyển</h3>
+                    <div class="card-actions">
+                        <span class="badge badge--warning">Chờ xử lý: {{ summary.pendingCouncil ?? '--' }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Hội đồng</th>
+                                <th style="text-align:right">Trúng tuyển</th>
+                                <th style="text-align:right">Không trúng</th>
+                                <th style="text-align:right">Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of councilResults; track $index) {
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td style="text-align:right">{{ item.admitted ?? '--' }}</td>
+                                <td style="text-align:right">{{ item.rejected ?? '--' }}</td>
+                                <td style="text-align:right">{{ item.total ?? '--' }}</td>
+                            </tr>
+                            } @empty {
+                            <tr><td colspan="4" style="text-align:center;color:#8996a4">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Doanh thu gần đây</h3>
+                    <div class="card-actions">
+                        <a href="#" class="card-link">Xem tất cả</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Mã GD</th>
+                                <th>Đối tác</th>
+                                <th style="text-align:right">Số tiền</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of recentRevenue; track $index) {
+                            <tr>
+                                <td>{{ item.code ?? '---' }}</td>
+                                <td>{{ item.partner ?? '---' }}</td>
+                                <td style="text-align:right">{{ item.amount ?? '--' }}</td>
+                                <td>
+                                    @if (item.status === 'done') { <span class="badge badge--success">Đã thanh toán</span> }
+                                    @else if (item.status === 'pending') { <span class="badge badge--warning">Chờ thanh toán</span> }
+                                    @else { <span class="badge badge--danger">Quá hạn</span> }
+                                </td>
+                            </tr>
+                            } @empty {
+                            <tr><td colspan="4" style="text-align:center;color:#8996a4">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== ROW 5: TỔNG QUAN HỆ THỐNG ======== -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Tổng quan hệ thống</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-6">
+                            <div class="stat-box">
+                                <div class="stat-box-icon stat-box-icon--blue">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                </div>
+                                <span class="stat-box-label">Ngành đào tạo</span>
+                                <span class="stat-box-value">{{ systemOverview.majors ?? '--' }}</span>
+                                <span class="stat-box-sub">đang hoạt động</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="stat-box">
+                                <div class="stat-box-icon stat-box-icon--green">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                </div>
+                                <span class="stat-box-label">CT Đào tạo</span>
+                                <span class="stat-box-value">{{ systemOverview.programs ?? '--' }}</span>
+                                <span class="stat-box-sub">chương trình</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="stat-box">
+                                <div class="stat-box-icon stat-box-icon--yellow">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </div>
+                                <span class="stat-box-label">Nhân viên</span>
+                                <span class="stat-box-value">{{ systemOverview.employees ?? '--' }}</span>
+                                <span class="stat-box-sub">đang hoạt động</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="stat-box">
+                                <div class="stat-box-icon stat-box-icon--red">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                </div>
+                                <span class="stat-box-label">Tư vấn viên</span>
+                                <span class="stat-box-value">{{ systemOverview.consultants ?? '--' }}</span>
+                                <span class="stat-box-sub">đang hoạt động</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== ROW 6: HOẠT ĐỘNG TƯ VẤN GẦN ĐÂY ======== -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Hoạt động tư vấn gần đây</h3>
+                    <div class="card-actions">
+                        <a href="#" class="card-link">Xem tất cả</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Hồ sơ</th>
+                                <th>Người tư vấn</th>
+                                <th>Hình thức</th>
+                                <th>Kết quả</th>
+                                <th>Follow-up</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (item of recentConsultations; track $index) {
+                            <tr>
+                                <td>{{ item.time ?? '--' }}</td>
+                                <td>{{ item.registration ?? '--' }}</td>
+                                <td>{{ item.consultant ?? '--' }}</td>
+                                <td>{{ item.method ?? '--' }}</td>
+                                <td>{{ item.result ?? '--' }}</td>
+                                <td>{{ item.followUp ?? '--' }}</td>
+                            </tr>
+                            } @empty {
+                            <tr><td colspan="6" style="text-align:center;color:#8996a4">Chưa có dữ liệu</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

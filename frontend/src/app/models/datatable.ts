@@ -11,7 +11,7 @@ export interface IctuDataTablePaginatorInfo {
     resetPaginator : boolean
 }
 
-export class IctuDataTable<T> {
+export class    IctuDataTable<T> {
 
     readonly paginator : IctuPaginatorControl;
 

@@ -10,18 +10,46 @@ const routes : Routes = [
 		children  : [
 			{
 				path       : '' ,
-				redirectTo : 'account' ,
+				redirectTo : 'dashboard' ,
 				pathMatch  : 'prefix'
 			} ,
-			{
-				path          : '404' ,
-				loadComponent : () : Promise<any> => import('@pages/admin/children/admin-not-found-404/admin-not-found-404.component')
-			} ,
+
 			{
 				path         : 'account' ,
 				canActivate  : [ adminModuleGuard ] ,
 				loadChildren : () : Promise<any> => import('@pages/admin/children/account/account.module').then( ( m ) : any => m.AccountModule )
 			} ,
+            {
+                path          : 'dashboard' ,
+                loadComponent : () : Promise<any> => import('@pages/admin/children/dashboard/dashboard.component').then( ( m ) : any => m.DashboardComponent )
+            },
+            {
+                path          : 'nganh-chuongtrinh' ,
+                loadComponent : () : Promise<any> => import('@app/pages/admin/children/nganh-hoc/nganh-hoc.component').then( ( m ) : any => m.NganhhocComponent ),
+            },
+            {
+                path          : 'dot-xettuyen' ,
+                loadComponent : () : Promise<any> => import('@app/pages/admin/children/dot-xettuyen/dot-xettuyen.component').then( ( m ) : any => m.DotXettuyenComponent ),
+            },
+            {
+                path          : 'hoidong-xettuyen' ,
+                loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoidong-xettuyen/hoidong-xettuyen.component').then( ( m ) : any => m.HoidongXettuyenComponent ),
+            },
+			
+			{
+                path          : 'hoso-tuyensinh' ,
+                loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso-tuyensinh/hoso-tuyensinh.component').then( ( m ) : any => m.HosoTuyensinhComponent ),
+            },
+{
+				path          : '404' ,
+				loadComponent : () : Promise<any> => import('@pages/admin/children/admin-not-found-404/admin-not-found-404.component')
+			} ,
+
+			{
+				path         : 'he-thong' ,
+				loadChildren : () : Promise<any> => import('@pages/admin/children/he-thong/he-thong.module').then( ( m ) : any => m.HeThongModule )
+			} ,
+
 			{
 				path       : '**' ,
 				redirectTo : '404' ,

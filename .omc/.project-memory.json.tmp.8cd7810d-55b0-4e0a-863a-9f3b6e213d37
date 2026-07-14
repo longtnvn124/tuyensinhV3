@@ -1,0 +1,269 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1783303105108,
+  "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "backend": {
+      "path": "backend",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1783303104999,
+      "keyFiles": []
+    },
+    "frontend": {
+      "path": "frontend",
+      "purpose": null,
+      "fileCount": 13,
+      "lastAccessed": 1783303105000,
+      "keyFiles": [
+        "angular.json",
+        "COURSE_OVERVIEW_NOTES.md",
+        "localhost.crt",
+        "localhost.key",
+        "package-lock.json"
+      ]
+    },
+    "plan": {
+      "path": "plan",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1783303105000,
+      "keyFiles": [
+        "database.md",
+        "du-an.md",
+        "FRONTEND_API_GUIDE.md"
+      ]
+    },
+    "frontend\\dist": {
+      "path": "frontend\\dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 0,
+      "lastAccessed": 1783303105002,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\login\\login.component.html",
+      "accessCount": 17,
+      "lastAccessed": 1783324730860,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\login\\login.component.css",
+      "accessCount": 15,
+      "lastAccessed": 1783324690676,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\auth-form.md",
+      "accessCount": 14,
+      "lastAccessed": 1783324862807,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\redirect-uri-call-back\\redirect-uri-call-back.ts",
+      "accessCount": 10,
+      "lastAccessed": 1783306590292,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.component.css",
+      "accessCount": 10,
+      "lastAccessed": 1783324690605,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\reset-password\\reset-password.component.css",
+      "accessCount": 10,
+      "lastAccessed": 1783324707107,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 10,
+      "lastAccessed": 1783329478081,
+      "type": "directory"
+    },
+    {
+      "path": "plan\\database.md",
+      "accessCount": 9,
+      "lastAccessed": 1783307780489,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.component.html",
+      "accessCount": 9,
+      "lastAccessed": 1783324740511,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\reset-password\\reset-password.component.html",
+      "accessCount": 9,
+      "lastAccessed": 1783324742297,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\login\\login.component.ts",
+      "accessCount": 5,
+      "lastAccessed": 1783306577159,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\unauthorized\\unauthorized.component.css",
+      "accessCount": 5,
+      "lastAccessed": 1783307747862,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\redirect-uri-call-back\\redirect-uri-call-back.css",
+      "accessCount": 5,
+      "lastAccessed": 1783307754229,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\redirect-uri-call-back\\redirect-uri-call-back.html",
+      "accessCount": 5,
+      "lastAccessed": 1783324676107,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\unauthorized\\unauthorized.component.html",
+      "accessCount": 5,
+      "lastAccessed": 1783324676158,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth",
+      "accessCount": 5,
+      "lastAccessed": 1783324707264,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app",
+      "accessCount": 5,
+      "lastAccessed": 1783329472215,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\reset-password\\reset-password.component.ts",
+      "accessCount": 3,
+      "lastAccessed": 1783306964908,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\unauthorized\\unauthorized.component.ts",
+      "accessCount": 2,
+      "lastAccessed": 1783306590351,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.component.ts",
+      "accessCount": 2,
+      "lastAccessed": 1783306964868,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src",
+      "accessCount": 2,
+      "lastAccessed": 1783310109492,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\styles.scss",
+      "accessCount": 1,
+      "lastAccessed": 1783306646875,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\auth\\auth-routing.module.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783306646969,
+      "type": "file"
+    },
+    {
+      "path": "C:\\Users\\2311\\.claude\\plans\\t-file-database-md-hay-buzzing-moore.md",
+      "accessCount": 1,
+      "lastAccessed": 1783307660961,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\package.json",
+      "accessCount": 1,
+      "lastAccessed": 1783310109403,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\vertical-menu.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783329496745,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\vertical-menu.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1783329496900,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\menu-item\\menu-item.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783329496963,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.scss",
+      "accessCount": 1,
+      "lastAccessed": 1783329497041,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1783329497102,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\menu-item\\menu-item.component.scss",
+      "accessCount": 1,
+      "lastAccessed": 1783329499945,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1783329500044,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

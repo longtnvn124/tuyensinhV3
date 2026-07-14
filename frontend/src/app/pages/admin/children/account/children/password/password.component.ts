@@ -158,7 +158,7 @@ export default class PasswordComponent implements OnDestroy {
 
     private updatePassword () : void {
         this.state.set( 'loading' );
-        this.userService.update( { password : this.f.password.value } ).pipe(
+        this.userService.updateProfile( { password : this.f.password.value } ).pipe(
             takeUntil( this.destroy$ )
         ).subscribe( {
             next  : () : void => {

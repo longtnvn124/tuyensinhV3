@@ -3,7 +3,7 @@
     "version"        : 1 ,
     "newProjectRoot" : "projects" ,
     "projects"       : {
-        "dacms" : {
+        "tuyensinhv3" : {
             "projectType" : "application" ,
             "schematics"  : {
                 "@schematics/angular:component"   : {
@@ -46,7 +46,7 @@
                     "builder"              : "@angular/build:application" ,
                     "options"              : {
                         "allowedCommonJsDependencies" : [ "crypto-js" , "apexcharts" , "dayjs" , "file-saver" , "lodash" , "jszip" , "plyr" , "loadjs" , "rangetouch" , "@ckeditor/ckeditor5-build-classic" , "buffer" , "exceljs" ] ,
-                        "outputPath"                  : "dist/dacms" ,
+                        "outputPath"                  : "dist/tuyensinhv3" ,
                         "index"                       : "src/index.html" ,
                         "polyfills"                   : [ "zone.js" ] ,
                         "tsConfig"                    : "tsconfig.app.json" ,
@@ -176,10 +176,10 @@
                     "builder"              : "@angular/build:dev-server" ,
                     "configurations"       : {
                         "production"  : {
-                            "buildTarget" : "dacms:build:production"
+                            "buildTarget" : "tuyensinhv3:build:production"
                         } ,
                         "development" : {
-                            "buildTarget" : "dacms:build:development" ,
+                            "buildTarget" : "tuyensinhv3:build:development" ,
                             "port"        : 8008 ,
                             "sslKey"      : "localhost.key" ,
                             "sslCert"     : "localhost.crt" ,

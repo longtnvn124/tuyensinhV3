@@ -24,10 +24,11 @@ const routes : Routes = [
 				path          : 'cap-nhat-thong-tin' ,
 				loadComponent : () : Promise<any> => import('./children/cap-nhat-thong-tin/cap-nhat-thong-tin.component')
 			} ,
-			{
-				path          : 'lich-su-truy-cap' ,
-				loadComponent : () : Promise<any> => import('./children/lich-su-truy-cap/lich-su-truy-cap.component')
-			}
+
+			// {
+			// 	path          : 'lich-su-truy-cap' ,
+			// 	loadComponent : () : Promise<any> => import('./children/lich-su-truy-cap/lich-su-truy-cap.component')
+			// }
 		]
 	}
 ];

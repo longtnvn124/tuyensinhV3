@@ -1,49 +1,93 @@
-<ng-scrollbar orientation="vertical" style="height: calc(var(--device-height, 100vh) - var(--mat-toolbar-standard-height, 54px))" visibility="hover">
-	<div class="navbar-content">
-		<div class="navbar-content__tab">
-			@for (item of menus(); track item.id) {
-				<button class="navbar-content__tab__btn mat-button-full-width" (click)="activeMenu(item)" [class.--active]="menuActivated()?.id === item.id">
-					<span class="navbar-content__tab__btn__inside">
-						@if (item.icon) {
-							<span class="coded-micon" [ngClass]="item.icon"></span>
-							<span class="coded-mtext">{{ item.title }}</span>
-						} @else if (item.customSvg) {
-							<span class="coded-micon"><svg class="pc-icon"><use [attr.href]="'fonts/custom-icon.svg#'+item.customSvg"></use></svg></span>
-							<span class="coded-mtext">{{ item.title }}</span>
-						} @else {
-							{{ item.title }}
-						}
-					</span>
-					@if (collapsed()) {
-						<a href="#" (click)="mouseEnter(menuTrigger,item , $event)" class="open-menu-on-hover" (mouseenter)="mouseEnter(menuTrigger,item)" (mouseleave)="mouseLeave(menuTrigger)"></a>
-						<span class="open-menu-on-hover__point" [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger"></span>
-					}
-				</button>
-			}
-			<button (click)="confirmSignOut()" class="navbar-content__tab__btn mat-button-full-width">
-				<span class="navbar-content__tab__btn__inside">
-					<span class="coded-micon"><svg class="pc-icon"><use href="fonts/custom-icon.svg#custom-stand-by"></use></svg></span>
-					<span class="coded-mtext">Đăng xuất</span>
-				</span>
-			</button>
-			<div class="d-flex w-100 justify-content-center align-items-center navbar-content__tab__avatar">
-				<button [matMenuTriggerFor]="userMenu" class="navbar-content__tab__avatar__btn" type="button">
-					<img [ngSrc]="avatar() | safeUrl" alt="img" class="img-fluid" fill>
-				</button>
-			</div>
-		</div>
-		<div class="navbar-content__content">
-			@if (! collapsed() && menuActivated()) {
-				<ul (click)="fireOutClick()" class="nav coded-inner-navbar w-100 d-flex">
-					@for (item of menuActivated()?.child; track item.id) {
-						<app-ictu-menu-item [item]="item"/>
-					}
-				</ul>
-			}
-		</div>
-	</div>
-</ng-scrollbar>
+<div class="sidebar" [class.--collapsed]="collapsed()">
 
+	<!-- PHẦN 1: HEADER (fixed) -->
+	<div class="sidebar-header">
+		@if (!collapsed()) {
+			<a class="sidebar-header__brand" [routerLink]="['/admin']">
+				@if (logo()) {
+					<img [ngSrc]="logo()" alt="" height="38" width="38" class="sidebar-header__logo">
+				}
+				<span class="sidebar-header__name">TUYENSINH</span>
+			</a>
+		}
+		<button class="sidebar-header__toggle" (click)="toggleMenu()" type="button">
+			<svg height="20" style="aspect-ratio: 1" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+				<g fill="currentColor">
+					<path d="m20.9 18h-16v2h16z"/>
+					<path d="m20.9 4h-16v2h16z"/>
+					<path d="m20.9 8.7h-7.4v2h7.4z"/>
+					<path d="m20.9 13.3h-7.4v2h7.4z"/>
+					@if (collapsed()) {
+						<path clip-rule="evenodd" d="m4 8v7.9l6.1-4z" fill-rule="evenodd"/>
+					} @else {
+						<path clip-rule="evenodd" d="m10.1 8-6.1 3.9 6.1 4z" fill-rule="evenodd"/>
+					}
+				</g>
+			</svg>
+		</button>
+	</div>
+
+	<!-- PHẦN 2: USER INFO (fixed) -->
+	<div class="sidebar-user" [class.--collapsed]="collapsed()">
+		<div class="sidebar-user__avatar">
+			<img [ngSrc]="avatar() | safeUrl" alt="avatar" fill>
+		</div>
+		@if (!collapsed()) {
+			<div class="sidebar-user__details">
+				<span class="sidebar-user__details__name">{{ displayName() }}</span>
+				<span class="sidebar-user__details__email">{{ email() }}</span>
+			</div>
+			<button class="sidebar-user__trigger" [matMenuTriggerFor]="userMenu" type="button">
+				<svg height="16" style="aspect-ratio: 1" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg">
+					<path d="m12 16.5-6-6h12z" fill="currentColor"/>
+				</svg>
+			</button>
+		}
+	</div>
+
+	<!-- PHẦN 3: MENU (scroll) -->
+	<div class="sidebar-menu">
+		@if (!collapsed()) {
+			<div class="sidebar-menu__label">Menu</div>
+		}
+		@for (item of menus(); track item.id) {
+			<button class="sidebar-menu__item" [class.--active]="menuActivated()?.id === item.id" (click)="activeMenu(item)" type="button">
+				@if (item.icon) {
+					<span class="sidebar-menu__item__icon" [ngClass]="item.icon"></span>
+				} @else if (item.customSvg) {
+					<svg class="sidebar-menu__item__icon pc-icon">
+						<use [attr.href]="'fonts/custom-icon.svg#'+item.customSvg"></use>
+					</svg>
+				}
+				@if (!collapsed()) {
+					<span class="sidebar-menu__item__label">{{ item.title }}</span>
+				}
+				@if (collapsed()) {
+					<a href="#" (click)="mouseEnter(menuTrigger,item , $event)" class="open-menu-on-hover" (mouseenter)="mouseEnter(menuTrigger,item)" (mouseleave)="mouseLeave(menuTrigger)"></a>
+					<span class="open-menu-on-hover__point" [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger"></span>
+				}
+			</button>
+		}
+	</div>
+
+	<!-- PHẦN 4: FOOTER (fixed - Đăng xuất) -->
+	<div class="sidebar-footer">
+		<button class="sidebar-footer__logout" (click)="confirmSignOut()" type="button">
+			<svg class="sidebar-footer__logout__icon" style="aspect-ratio: 1" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+				<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+					<path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"/>
+					<path d="M7 12h14l-3 -3m0 6l3 -3"/>
+				</g>
+			</svg>
+			@if (!collapsed()) {
+				<span>Đăng xuất</span>
+			}
+		</button>
+	</div>
+
+</div>
+
+<!-- Hover popup khi collapsed -->
 <mat-menu #menu="matMenu" [hasBackdrop]="false" class="ictu-pc-mat-mdc-menu" xPosition="after" yPosition="below">
 	<div (mouseenter)="mouseEnter(activatedMenuTrigger)" (mouseleave)="mouseLeave(activatedMenuTrigger)" class="ictu-sidebar-menu__content pc-sidebar">
 		<div class="navbar-content__content w-100">
@@ -58,6 +102,7 @@
 	</div>
 </mat-menu>
 
+<!-- User popup menu -->
 <mat-menu #userMenu="matMenu" [hasBackdrop]="true" class="ictu-pc-mat-mdc-menu" xPosition="after" yPosition="below">
 	<div class="dacms-user-popup-menu">
 		<div (click)="clickPreventDefault($event)" class="dacms-user-popup-menu__avatar flex align-items-center">

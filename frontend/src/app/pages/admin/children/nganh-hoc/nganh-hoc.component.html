@@ -1,0 +1,154 @@
+<section class="admin-section--table position-relative">
+    @if (masterState() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    <div class="admin-wrap-table">
+        @if (masterState() !== 'error') {
+            <div class="admin-wrap-table__head d-flex">
+                <h4 class="admin-wrap-table__heading">
+                    <svg>
+                        <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+                    </svg>
+                    Danh sách ngành học
+                </h4>
+                <div class="admin-wrap-table__head-actions">
+                    <input [(ngModel)]="masterSearchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearchMajor()">
+                    @if (permissionControl().canDelete) {
+                        <button (click)="deleteSelectedMajors()" [disabled]="!masterDataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    }
+                    @if (permissionControl().canCreate) {
+                        <button (click)="addMajor()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                            <i class="ti ti-plus"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+            <div class="admin-wrap-table__body wrap-tb">
+                <table class="tbl admin-table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="col-checkbox">
+                                <mat-checkbox [checked]="masterDataTable.totalChecked()" [indeterminate]="masterDataTable.partiallyChecked()" (change)="masterDataTable.selectRow($event.checked)" [disabled]="!masterDataTable.data().length || !permissionControl().canDelete"></mat-checkbox>
+                            </th>
+                            <th class="col-index text-center">#</th>
+                            <th class="wid-100 text-center">Mã ngành</th>
+                            <th class="text-center">Tên ngành</th>
+                            <th class="wid-120 text-center">Trạng thái</th>
+                            <th class="wid-90 text-center px-0">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of masterDataTable.data(); track row.id; let i = $index) {
+                            <tr>
+                                <td class="col-checkbox">
+                                    <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="masterDataTable.selectRow($event.checked, i)" [disabled]="!permissionControl().canDelete"></mat-checkbox>
+                                </td>
+                                <td class="col-index text-center">{{ masterDataTable.paginator.startIndex() + i }}</td>
+                                <td class="wid-100 text-center">{{ row.code }}</td>
+                                <td class="text-left">{{ row.name }}</td>
+                                <td class="wid-120 text-center p-0">
+                                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                                        @if (row.is_active) {
+                                            <span class="ictu-badge ictu-badge--success">Đã kích hoạt</span>
+                                        } @else {
+                                            <span class="ictu-badge ictu-badge--secondary">Chưa kích hoạt</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="p-0 wid-120">
+                                    <div class="admin-table__btn-actions">
+                                        @if (permissionControl().canView) {
+                                            <button (click)="showCTDT(row)" class="btn ictu-button-success-light" tooltip="Chương trình đào tạo">
+                                                <i class="ti ti-layout-grid-add"></i>
+                                            </button>
+                                        }
+                                        @if (permissionControl().canUpdate) {
+                                            <button (click)="editMajor(row)" class="btn ictu-button-info-light">
+                                                <i class="ti ti-edit"></i>
+                                            </button>
+                                        }
+                                        @if (permissionControl().canDelete) {
+                                            <button (click)="deleteMajor(row)" class="btn ictu-button-danger-light">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="7">Không có bản ghi nào.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="admin-wrap-table__foot">
+                <div class="d-flex justify-content-center align-items-center w-100">
+                    <ictu-paginator [control]="paginatorControl()" (onChangePage)="onMasterChangePage($event)" style="--ictu-paginator-gap:10px"></ictu-paginator>
+                </div>
+            </div>
+        } @else {
+            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="reloadMaster($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Detail Drawer: ChuongtrinhDaotao -->
+<p-drawer #detailDrawer (onHide)="onDetailDrawerHide()" [(visible)]="detailDrawerVisible" [dismissible]="false" [header]="detailDrawerHeader()" [style]="{'width':'100vw'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+    <div class="ictu-p-drawer__content position-relative">
+        <div class="ictu-p-drawer__content__body position-relative w-100">
+            @if (selectedMajor()) {
+                <app-chuongtrinh-daotao class="w-100" [nganh]="selectedMajor()" [permission]="permissionControl()"></app-chuongtrinh-daotao>
+            }
+        </div>
+    </div>
+</p-drawer>
+
+<!-- Master Drawer: Nganhhoc -->
+<p-drawer #masterDrawer (onHide)="onMasterDrawerHide()" [(visible)]="masterFormControl.visible" [dismissible]="false" [header]="masterFormControl.heading()" [style]="{'width':'400px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+    <div class="ictu-p-drawer__content position-relative">
+        @if (masterFormControl.enableLoading()) {
+            <app-loading-progress [heading]="masterFormControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+        }
+        <div class="ictu-p-drawer__content__body position-relative">
+            @switch (masterFormControl.state()) {
+                @case ('READY') {
+                    <form [formGroup]="masterFormControl.formGroup">
+                        <div class="ictu-form ictu-form--label-on-top">
+                            <div class="ictu-form__row">
+                                <label class="ictu-form__label ictu-form__label--required" for="f_name">Tên ngành</label>
+                                <input class="ictu-form__input-field" formControlName="name" id="f_name" pInputText placeholder="Tên ngành học" type="text">
+                            </div>
+                            <div class="ictu-form__row">
+                                <label class="ictu-form__label ictu-form__label--required" for="f_code">Mã ngành</label>
+                                <input class="ictu-form__input-field" formControlName="code" id="f_code" pInputText placeholder="Mã ngành học" type="text">
+                            </div>
+                            <div class="ictu-form__row">
+                                <label class="ictu-form__label" for="f_desc">Mô tả</label>
+                                <textarea class="ictu-form__input-field" formControlName="description" id="f_desc" pTextarea placeholder="Thêm mô tả cho ngành học"></textarea>
+                            </div>
+                            <div class="ictu-form__row">
+                                <label class="ictu-form__label">Trạng thái</label>
+                                <p-select [options]="optionList" appendTo="body" class="ictu-form__input-field" formControlName="is_active" placeholder="Trạng thái"/>
+                            </div>
+                        </div>
+                    </form>
+                }
+                @case ('PREPARATION_FAILED') {
+                    <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                        <a (click)="masterFormControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                    </div>
+                }
+            }
+        </div>
+        <div class="ictu-p-drawer__content__footer">
+            <button (click)="masterDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+            <button (click)="submitMasterForm()" [disabled]="!masterFormControl.formFilledAndValid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+        </div>
+    </div>
+</p-drawer>

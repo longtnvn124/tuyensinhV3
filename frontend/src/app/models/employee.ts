@@ -177,21 +177,14 @@ export interface EmployeePositionTag {
 }
 
 export const EmployeePositionTagOrdering : Record<SysRoleName , EmployeePositionTag> = {
-	admin               : { cssClasses : 'ictu-badge ictu-badge--orange' , label : 'Quản trị' , value : 'admin' , ordering : 1 , order : 0 } ,
-	ceo                 : { cssClasses : 'ictu-badge ictu-badge--danger' , label : 'CEO' , value : 'ceo' , ordering : 2 , order : 10 } ,
-	training_management : { cssClasses : 'ictu-badge ictu-badge--purple' , label : 'QL đào tạo' , value : 'training_management' , ordering : 3 , order : 20 } ,
-	general_management  : { cssClasses : 'ictu-badge ictu-badge--dark' , label : 'QL tổng hợp' , value : 'general_management' , ordering : 4 , order : 20 } ,
-	teacher             : { cssClasses : 'ictu-badge ictu-badge--primary' , label : 'Giáo viên' , value : 'teacher' , ordering : 5 , order : 30 } ,
-	teaching_assistant  : { cssClasses : 'ictu-badge ictu-badge--info' , label : 'Trợ giảng' , value : 'teaching_assistant' , ordering : 6 , order : 30 } ,
-	mod_comments        : { cssClasses : 'ictu-badge ictu-badge--info' , label : 'Duyệt nhận xét' , value : 'mod_comments' , ordering : 7 , order : 30 } ,
-	mod_media           : { cssClasses : 'ictu-badge ictu-badge--info' , label : 'Duyệt media' , value : 'mod_media' , ordering : 8 , order : 30 } ,
-	content_reviewer    : { cssClasses : 'ictu-badge ictu-badge--info' , label : 'Duyệt nội dung' , value : 'content_reviewer' , ordering : 8 , order : 30 } ,
-	marketing           : { cssClasses : 'ictu-badge ictu-badge--success' , label : 'Marketing' , value : 'marketing' , ordering : 12 , order : 30 } ,
-	supporter           : { cssClasses : 'ictu-badge ictu-badge--warning' , label : 'CS khách hàng' , value : 'supporter' , ordering : 9 , order : 30 } ,
-	sales               : { cssClasses : 'ictu-badge ictu-badge--teal' , label : 'Sales' , value : 'sales' , ordering : 10 , order : 30 } ,
-	accountant          : { cssClasses : 'ictu-badge ictu-badge--pink' , label : 'Kế toán' , value : 'accountant' , ordering : 11 , order : 30 } ,
-	parent              : { cssClasses : 'ictu-badge ictu-badge--success' , label : 'Phụ Huynh' , value : 'parent' , ordering : 13 , order : 90 } ,
-	student             : { cssClasses : 'ictu-badge ictu-badge--success' , label : 'Học sinh' , value : 'student' , ordering : 14 , order : 100 }
+	admin          : { cssClasses : 'ictu-badge ictu-badge--orange' , label : 'Quản trị' , value : 'admin' , ordering : 1 , order : 0 } ,
+	direction      : { cssClasses : 'ictu-badge ictu-badge--danger' , label : 'Giám đốc' , value : 'direction' , ordering : 2 , order : 10 } ,
+	manager        : { cssClasses : 'ictu-badge ictu-badge--purple' , label : 'Quản lý' , value : 'manager' , ordering : 3 , order : 20 } ,
+	staff          : { cssClasses : 'ictu-badge ictu-badge--primary' , label : 'Nhân viên TS' , value : 'staff' , ordering : 4 , order : 30 } ,
+	training_staff : { cssClasses : 'ictu-badge ictu-badge--info' , label : 'NV đào tạo' , value : 'training_staff' , ordering : 5 , order : 30 } ,
+	reviewer       : { cssClasses : 'ictu-badge ictu-badge--info' , label : 'Cán bộ quan sát' , value : 'reviewer' , ordering : 6 , order : 30 } ,
+	doi_tac        : { cssClasses : 'ictu-badge ictu-badge--warning' , label : 'Đối tác' , value : 'doi-tac' , ordering : 7 , order : 40 } ,
+	doi_tac_cv     : { cssClasses : 'ictu-badge ictu-badge--teal' , label : 'NV đối tác' , value : 'doi-tac-cv' , ordering : 8 , order : 50 }
 };
 
-export const EMPLOYEE_POSITION_OPTIONS : IctuDropdownOptionElement<string>[] = Object.values<{ label : string, value : string }>( EmployeePositionTagOrdering ).filter( ( o : IctuDropdownOptionElement<string> ) : boolean => ![ 'admin' , 'parent' ].includes( o.value ) );
+export const EMPLOYEE_POSITION_OPTIONS : IctuDropdownOptionElement<string>[] = Object.values<{ label : string, value : string }>( EmployeePositionTagOrdering ).filter( ( o : IctuDropdownOptionElement<string> ) : boolean => o.value !== 'admin' );

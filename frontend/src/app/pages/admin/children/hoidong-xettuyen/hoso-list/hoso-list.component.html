@@ -1,0 +1,168 @@
+<div class="hsl-wrapper">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    @if (state() !== 'error') {
+        <div class="hsl-toolbar">
+            <h5 class="hsl-toolbar__title">Danh sách hồ sơ thí sinh được phân công</h5>
+            <div class="hsl-toolbar__actions">
+                @if (permission?.canUpdate) {
+                    <button (click)="openAssignDialog()" class="btn ictu-badge-btn--success-reverse" mat-flat-button>
+                        <i class="ti ti-user-plus"></i> Gán hồ sơ
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="hsl-table-wrap">
+            <table class="hsl-table">
+                <thead>
+                    <tr>
+                        <th class="hsl-col-idx text-center">#</th>
+                        <th>Họ tên</th>
+                        <th class="hsl-col-phone">Số điện thoại</th>
+                        <th class="hsl-col-result">Kết quả</th>
+                        <th class="hsl-col-note">Ghi chú</th>
+                        <th class="hsl-col-actions text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of dataTable.data(); track row.id; let i = $index) {
+                        <tr>
+                            <td class="hsl-col-idx text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+                            <td>{{ getCandidate(row)?.full_name || ('Hồ sơ #' + row.registration_id) }}</td>
+                            <td class="hsl-col-phone">{{ getCandidate(row)?.phone || '---' }}</td>
+                            <td class="hsl-col-result">
+                                @if (permission?.canUpdate) {
+                                    <p-select
+                                        [options]="ketQuaOptions"
+                                        [ngModel]="row.ket_qua || ''"
+                                        (ngModelChange)="changeKetQua(row, $event)"
+                                        appendTo="body"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Chọn kết quả"
+                                        styleClass="hsl-result-select" />
+                                } @else {
+                                    @switch (row.ket_qua) {
+                                        @case ('trung_tuyen') { <span class="ictu-badge ictu-badge--success">Trúng tuyển</span> }
+                                        @case ('khong_trung_tuyen') { <span class="ictu-badge ictu-badge--danger">Không trúng tuyển</span> }
+                                        @default { <span class="ictu-badge ictu-badge--secondary">Chưa đánh giá</span> }
+                                    }
+                                }
+                            </td>
+                            <td class="hsl-col-note">
+                                @if (permission?.canUpdate) {
+                                    <input
+                                        class="hsl-note-input"
+                                        pInputText
+                                        type="text"
+                                        [ngModel]="row.ghi_chu || ''"
+                                        (blur)="updateGhiChu(row, $any($event.target).value)"
+                                        placeholder="Nhập ghi chú..." />
+                                } @else {
+                                    {{ row.ghi_chu || '---' }}
+                                }
+                            </td>
+                            <td class="hsl-col-actions text-center">
+                                @if (permission?.canDelete) {
+                                    <button (click)="removeAssigned(row)" class="btn ictu-button-danger-light" mat-flat-button tooltip="Xóa khỏi hội đồng">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    } @empty {
+                        <tr>
+                            <td colspan="6" class="hsl-empty">Hội đồng chưa có hồ sơ nào. Nhấn "Gán hồ sơ" để bắt đầu.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hsl-paginator">
+            <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)" style="--ictu-paginator-gap:10px"></ictu-paginator>
+        </div>
+    } @else {
+        <div class="hsl-error text-center w-100">Tải dữ liệu thất bại. Vui lòng
+            <a (click)="reload($event); $event.preventDefault()" href="#" role="button" class="hsl-error__link">tải lại</a>
+        </div>
+    }
+</div>
+
+<p-dialog
+    [(visible)]="assignDialogVisible"
+    [modal]="true"
+    [style]="{ width: '720px', maxWidth: '100%' }"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    header="Gán hồ sơ thí sinh vào hội đồng"
+    styleClass="hsl-assign-dialog">
+    <div class="hsl-assign">
+        <div class="hsl-assign__search">
+            <input
+                class="hsl-assign__search-input"
+                pInputText
+                type="text"
+                placeholder="Tìm theo tên hoặc SĐT..."
+                [(ngModel)]="assignSearch"
+                (keyup)="onAssignSearchKeyup($event)" />
+            <button (click)="loadCandidates()" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>
+                <i class="ti ti-search"></i>
+            </button>
+        </div>
+
+        @if (assignLoading) {
+            <app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+        } @else {
+            <div class="hsl-assign__table-wrap">
+                <table class="hsl-assign__table">
+                    <thead>
+                        <tr>
+                            <th class="hsl-assign__col-check">
+                                <mat-checkbox
+                                    [checked]="allCandidatesChecked()"
+                                    [indeterminate]="selectedAssignIds.size > 0 && !allCandidatesChecked()"
+                                    (change)="toggleSelectAllCandidates()" />
+                            </th>
+                            <th>Họ tên</th>
+                            <th class="hsl-assign__col-phone">Số điện thoại</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (c of assignCandidates; track c.id) {
+                            <tr>
+                                <td class="hsl-assign__col-check">
+                                    <mat-checkbox
+                                        [checked]="isCandidateSelected(c.id)"
+                                        (change)="toggleCandidate(c.id)" />
+                                </td>
+                                <td>{{ c.full_name }}</td>
+                                <td class="hsl-assign__col-phone">{{ c.phone }}</td>
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="3" class="hsl-assign__empty">Không còn thí sinh nào để gán.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <small class="hsl-assign__hint">Đã chọn <strong>{{ selectedAssignIds.size }}</strong> / {{ assignCandidates.length }} thí sinh.</small>
+        }
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="hsl-assign__footer">
+            <button (click)="cancelAssign()" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+            <button
+                (click)="confirmAssign()"
+                [disabled]="!selectedAssignIds.size"
+                class="btn ictu-badge-btn--primary-reverse"
+                mat-flat-button>
+                Gán {{ selectedAssignIds.size > 0 ? '(' + selectedAssignIds.size + ')' : '' }}
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>

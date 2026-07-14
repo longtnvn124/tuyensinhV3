@@ -1,0 +1,233 @@
+/* ═══ HosoList wrapper — flex column inside detail drawer ═══ */
+
+.hsl-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.hsl-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 4px 12px;
+    border-bottom: 1px solid var(--accent-200, #e2e8f0);
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.hsl-toolbar__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-800, #1e293b);
+    margin: 0;
+}
+
+.hsl-toolbar__actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ═══ Table area — sticky header scroll ═══ */
+
+.hsl-table-wrap {
+    flex: 1 1 auto;
+    height: 1%;
+    overflow: hidden;
+    overflow-y: auto;
+    border: 1px solid var(--accent-200, #e2e8f0);
+    border-radius: 6px;
+    background: #fff;
+}
+
+.hsl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.hsl-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.hsl-table thead th {
+    background: var(--accent-100, #f1f5f9);
+    color: var(--accent-700, #334155);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 10px 12px;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--accent-200, #e2e8f0);
+    text-align: left;
+}
+
+.hsl-table tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--accent-100, #f1f5f9);
+    vertical-align: middle;
+}
+
+.hsl-table tbody tr:hover {
+    background: var(--accent-50, #f8fafc);
+}
+
+.hsl-col-idx {
+    width: 50px;
+    color: var(--accent-500, #94a3b8);
+}
+
+.hsl-col-phone {
+    width: 130px;
+    font-variant-numeric: tabular-nums;
+}
+
+.hsl-col-result {
+    width: 200px;
+}
+
+.hsl-col-note {
+    min-width: 200px;
+}
+
+.hsl-col-actions {
+    width: 80px;
+}
+
+.hsl-empty {
+    text-align: center;
+    padding: 60px 16px;
+    color: var(--accent-400, #94a3b8);
+    font-style: italic;
+}
+
+.hsl-note-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--accent-200, #e2e8f0);
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.hsl-note-input:focus {
+    outline: none;
+    border-color: var(--primary-500, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+/* PrimeNG select trong cell — full width */
+.hsl-result-select {
+    width: 100%;
+}
+
+/* ═══ Paginator ═══ */
+
+.hsl-paginator {
+    flex-shrink: 0;
+    border-top: 1px solid var(--accent-200, #e2e8f0);
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* ═══ Error ═══ */
+
+.hsl-error {
+    padding: 60px 16px;
+    color: var(--accent-500, #94a3b8);
+    font-size: 14px;
+}
+
+.hsl-error__link {
+    color: var(--primary-500, #3b82f6);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ═══ Assign dialog ═══ */
+
+.hsl-assign {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 360px;
+    max-height: 60vh;
+}
+
+.hsl-assign__search {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.hsl-assign__search-input {
+    flex: 1;
+}
+
+.hsl-assign__table-wrap {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    border: 1px solid var(--accent-200, #e2e8f0);
+    border-radius: 6px;
+}
+
+.hsl-assign__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.hsl-assign__table thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--accent-100, #f1f5f9);
+}
+
+.hsl-assign__table thead th {
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--accent-700, #334155);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--accent-200, #e2e8f0);
+}
+
+.hsl-assign__table tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--accent-100, #f1f5f9);
+}
+
+.hsl-assign__col-check {
+    width: 48px;
+    text-align: center;
+}
+
+.hsl-assign__col-phone {
+    width: 130px;
+}
+
+.hsl-assign__empty {
+    text-align: center;
+    padding: 40px 12px;
+    color: var(--accent-400, #94a3b8);
+    font-style: italic;
+}
+
+.hsl-assign__hint {
+    font-size: 12px;
+    color: var(--accent-500, #94a3b8);
+    flex-shrink: 0;
+}
+
+.hsl-assign__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}

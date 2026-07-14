@@ -19,7 +19,7 @@ Thiết kế MongoDB schema đủ cho MVP: lưu tài khoản nội bộ, nhóm q
 
 Ngành học (ví dụ: Công nghệ thông tin, Quản trị kinh doanh...).
 
-interface Majors {
+interface Nganhhoc {
     id?: number;
     name: string; // tên ngành
     code: string; // mã ngành, unique
@@ -33,7 +33,7 @@ interface Majors {
 
 Chương trình đào tạo thuộc một ngành học (ví dụ: CNTT đại trà, CNTT chất lượng cao...).
 
-interface Programs {
+interface Chuongtrinh_daotao {
     id?: number;
     major_id: number; // thuộc ngành học nào
     name: string;
@@ -54,7 +54,7 @@ interface Programs {
 
 Đợt đăng ký xét tuyển.
 
-interface RegistrationPeriods {
+interface Dot_xettuyen {
     id?: number;
     name: string; // tên đợt
     thoi_gian_bat_dau: Date;
@@ -69,7 +69,7 @@ interface RegistrationPeriods {
 
 Hồ sơ thí sinh.
 
-interface Registrations {
+interface Hoso_thisinh {
     id?: number;
     full_name: string; // họ và tên
     phone: string; // số điện thoại
@@ -122,7 +122,7 @@ interface Registrations {
 
 Lịch sử tư vấn.
 
-interface ConsultationLogs {
+interface Lichsu_tuvan {
     id?: number;
     registration_id: number; // id của hồ sơ tư vấn
     content: string; // nội dung tư vấn
@@ -139,9 +139,9 @@ interface ConsultationLogs {
 
 Lịch sử phân công/chuyển đổi người tư vấn cho hồ sơ.
 
-interface TuvanAssignment {
+interface Phancong_tuvan {
     id?: number;
-    registration_id: number; // Hồ sơ được phân công
+    hoso_id: number; // Hồ sơ được phân công
     tuvan_id: number; // Người tư vấn được gán
     assigned_by: number; // Người thực hiện phân công
     assigned_at: Date; // Thời điểm phân công
@@ -154,10 +154,10 @@ interface TuvanAssignment {
 
 Doanh thu/hoa hồng. Đối tác dùng chung user nội bộ.
 
-interface PartnerCommission {
+interface Doitac_doanhthu {
     id?: number;
     user_id: number; // đối tác
-    applicant_id: number; // hồ sơ tạo ra doanh thu
+    hoso_id: number; // hồ sơ tạo ra doanh thu
     rule_code?: string; // mã công thức áp dụng
     amount: number;
     status: number;
@@ -170,7 +170,7 @@ interface PartnerCommission {
 
 Hội đồng xét tuyển.
 
-interface AdmissionCouncils {
+interface Hoidong_xettuyen {
     id?: number;
     name: string; // tên hội đồng
     dot_dangky_id: number; // đợt xét tuyển
@@ -184,7 +184,7 @@ interface AdmissionCouncils {
 
 Hội đồng - thí sinh : dùng để lưu hồ sơ đã thêm vào hội đồng, có thể dùng để lưu kết quả tuyển sinh.
 
-interface AdmissionCouncilProfiles {
+interface Hoidong_hoso_thisinh {
     id?: number;
     hoidong_id: number; // hội đồng id
     registration_id: number; // hồ sơ id
@@ -249,6 +249,7 @@ interface Parents {
 - 2026-06-30: Thêm registration_periods, admission_councils, council_results, parents; cập nhật roles (9 roles mới); thêm dot_dangky_id vào applicants.
 - 2026-07-01: Sửa đánh số section; đồng bộ tên interface (Registrations→Applicants, hoidong→AdmissionCouncils, hoidong_thisinh→AdmissionCouncilProfiles); sửa index sai field (profile_id→registration_id, council_results→admission_council_profiles, applicant_id→registration_id); thêm collection tinh/huyen/xa; cập nhật registration_periods.nganh_ids thành mảng object chứa major_id + program_ids; sửa hoidong_id kiểu string→number.
 - 2026-07-06: Chuyển ObjectId → number; thêm SQL CREATE TABLE scripts.
+- 2026-07-07: Đồng bộ SQL table names với interface names mục 3.
 
 ## 7. SQL CREATE TABLE scripts
 
@@ -256,9 +257,9 @@ Scripts dùng MySQL 8+.
 
 ```sql
 -- ============================================================
--- 7.1. majors
+-- 7.1. nganhhoc
 -- ============================================================
-CREATE TABLE majors (
+CREATE TABLE nganhhoc (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(255) NOT NULL,
     code         VARCHAR(50)  NOT NULL UNIQUE,
@@ -269,9 +270,9 @@ CREATE TABLE majors (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.2. programs
+-- 7.2. chuongtrinh_daotao
 -- ============================================================
-CREATE TABLE programs (
+CREATE TABLE chuongtrinh_daotao (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     major_id            INT NOT NULL,
     name                VARCHAR(255) NOT NULL,
@@ -284,13 +285,13 @@ CREATE TABLE programs (
     is_active           TINYINT(1) NOT NULL DEFAULT 1,
     created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (major_id) REFERENCES majors(id) ON DELETE RESTRICT
+    FOREIGN KEY (major_id) REFERENCES nganhhoc(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.3. registration_periods
+-- 7.3. dot_xettuyen
 -- ============================================================
-CREATE TABLE registration_periods (
+CREATE TABLE dot_xettuyen (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     name                VARCHAR(255) NOT NULL,
     thoi_gian_bat_dau   DATETIME NOT NULL,
@@ -303,9 +304,9 @@ CREATE TABLE registration_periods (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.4. registrations
+-- 7.4. hoso_thisinh
 -- ============================================================
-CREATE TABLE registrations (
+CREATE TABLE hoso_thisinh (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     full_name           VARCHAR(255) NOT NULL,
     phone               VARCHAR(20)  NOT NULL,
@@ -324,7 +325,7 @@ CREATE TABLE registrations (
     cccd_noicap         VARCHAR(255),
 
     major_id            INT,
-    program_id          INT,
+    chuongtrinh_daotao_id INT,
     dot_dangky_id       INT,
 
     vb_tn               VARCHAR(255),
@@ -356,48 +357,48 @@ CREATE TABLE registrations (
     INDEX idx_nguoi_tuvan_id (nguoi_tuvan_id),
     INDEX idx_dot_dangky_id (dot_dangky_id),
     INDEX idx_owner_by (owner_by),
-    FOREIGN KEY (major_id)      REFERENCES majors(id) ON DELETE SET NULL,
-    FOREIGN KEY (program_id)    REFERENCES programs(id) ON DELETE SET NULL,
-    FOREIGN KEY (dot_dangky_id) REFERENCES registration_periods(id) ON DELETE SET NULL
+    FOREIGN KEY (major_id)              REFERENCES nganhhoc(id) ON DELETE SET NULL,
+    FOREIGN KEY (chuongtrinh_daotao_id) REFERENCES chuongtrinh_daotao(id) ON DELETE SET NULL,
+    FOREIGN KEY (dot_dangky_id)         REFERENCES dot_xettuyen(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.5. consult_logs
+-- 7.5. lichsu_tuvan
 -- ============================================================
-CREATE TABLE consult_logs (
+CREATE TABLE lichsu_tuvan (
     id                INT AUTO_INCREMENT PRIMARY KEY,
-    registration_id   INT NOT NULL,
+    hoso_id           INT NOT NULL,
     content           TEXT NOT NULL,
     hinhthuc_tuvan    VARCHAR(50) NOT NULL,
     user_id           INT NOT NULL,
     ketqua_tuvan      TEXT,
     next_follow_up    DATETIME,
     created_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_registration_created (registration_id, created_at),
-    FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE
+    INDEX idx_hoso_created (hoso_id, created_at),
+    FOREIGN KEY (hoso_id) REFERENCES hoso_thisinh(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.6. tuvan_assignments
+-- 7.6. phancong_tuvan
 -- ============================================================
-CREATE TABLE tuvan_assignments (
+CREATE TABLE phancong_tuvan (
     id                INT AUTO_INCREMENT PRIMARY KEY,
-    registration_id   INT NOT NULL,
+    hoso_id           INT NOT NULL,
     tuvan_id          INT NOT NULL,
     assigned_by       INT NOT NULL,
     assigned_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     note              TEXT,
-    INDEX idx_registration_assigned (registration_id, assigned_at),
-    FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE
+    INDEX idx_hoso_assigned (hoso_id, assigned_at),
+    FOREIGN KEY (hoso_id) REFERENCES hoso_thisinh(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.7. partner_commissions
+-- 7.7. doitac_doanhthu
 -- ============================================================
-CREATE TABLE partner_commissions (
+CREATE TABLE doitac_doanhthu (
     id                INT AUTO_INCREMENT PRIMARY KEY,
     user_id           INT NOT NULL,
-    applicant_id      INT NOT NULL,
+    hoso_id           INT NOT NULL,
     rule_code         VARCHAR(100),
     amount            DECIMAL(15,2) NOT NULL,
     status            TINYINT NOT NULL DEFAULT 0,
@@ -405,39 +406,39 @@ CREATE TABLE partner_commissions (
     created_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_user_created (user_id, created_at),
-    FOREIGN KEY (applicant_id) REFERENCES registrations(id) ON DELETE CASCADE
+    FOREIGN KEY (hoso_id) REFERENCES hoso_thisinh(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.8. admission_councils
+-- 7.8. hoidong_xettuyen
 -- ============================================================
-CREATE TABLE admission_councils (
-    id                 INT AUTO_INCREMENT PRIMARY KEY,
-    name               VARCHAR(255) NOT NULL,
-    dot_dangky_id      INT NOT NULL,
+CREATE TABLE hoidong_xettuyen (
+    id                  INT AUTO_INCREMENT PRIMARY KEY,
+    name                VARCHAR(255) NOT NULL,
+    dot_dangky_id       INT NOT NULL,
     thoi_gian_xet_tuyen DATETIME NOT NULL,
-    status             ENUM('dang_mo', 'da_dong') NOT NULL DEFAULT 'dang_mo',
-    created_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status              ENUM('dang_mo', 'da_dong') NOT NULL DEFAULT 'dang_mo',
+    created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_dot_dangky_id (dot_dangky_id),
-    FOREIGN KEY (dot_dangky_id) REFERENCES registration_periods(id) ON DELETE RESTRICT
+    FOREIGN KEY (dot_dangky_id) REFERENCES dot_xettuyen(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 7.9. admission_council_profiles
+-- 7.9. hoidong_hoso_thisinh
 -- ============================================================
-CREATE TABLE admission_council_profiles (
+CREATE TABLE hoidong_hoso_thisinh (
     id                INT AUTO_INCREMENT PRIMARY KEY,
     hoidong_id        INT NOT NULL,
-    registration_id   INT NOT NULL,
+    hoso_id           INT NOT NULL,
     ket_qua           ENUM('trung_tuyen', 'khong_trung_tuyen'),
     ghi_chu           TEXT,
     created_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE INDEX idx_hoidong_registration (hoidong_id, registration_id),
-    INDEX idx_registration_id (registration_id),
-    FOREIGN KEY (hoidong_id)      REFERENCES admission_councils(id) ON DELETE CASCADE,
-    FOREIGN KEY (registration_id) REFERENCES registrations(id) ON DELETE CASCADE
+    UNIQUE INDEX idx_hoidong_hoso (hoidong_id, hoso_id),
+    INDEX idx_hoso_id (hoso_id),
+    FOREIGN KEY (hoidong_id) REFERENCES hoidong_xettuyen(id) ON DELETE CASCADE,
+    FOREIGN KEY (hoso_id)    REFERENCES hoso_thisinh(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

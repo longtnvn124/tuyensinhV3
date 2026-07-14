@@ -8,6 +8,7 @@ import { ActivatedRoute , Event , NavigationEnd , Router , RouterLink , RouterLi
 import { MatMenuTrigger } from '@angular/material/menu';
 import { User } from '@models/user';
 import { AuthenticationService } from '@services/authentication.service';
+import { LayoutService } from '@theme/services/layout.service';
 import { Subject , takeUntil } from 'rxjs';
 import { SafeUrlPipe } from '@pipes/safe-url.pipe';
 import { filter } from 'rxjs/operators';
@@ -30,7 +31,13 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 
 	private locationStrategy : LocationStrategy = inject( LocationStrategy );
 
+	logo : InputSignal<string> = input<string>( '' );
+
+	version : InputSignal<string> = input<string>( '' );
+
 	private auth : AuthenticationService = inject( AuthenticationService );
+
+	private layoutService : LayoutService = inject( LayoutService );
 
 	menuActivated : WritableSignal<IctuNavigation | undefined> = signal<undefined>( undefined );
 
@@ -130,8 +137,15 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 			} catch ( e ) {
 				alert( e );
 			}
+		}else{
+			console.log('menu.id', menu.id);
+			await this.router.navigate( [ [ 'admin' , menu.id ].join( '/' ) ] );
 		}
 		this.menuActivated.set( menu );
+	}
+
+	toggleMenu() : void {
+		this.layoutService.toggleSideDrawer();
 	}
 
 	async showChildMenu( menu : IctuNavigation , event? : MouseEvent ) : Promise<void> {

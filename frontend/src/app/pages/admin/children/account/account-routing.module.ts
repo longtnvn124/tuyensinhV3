@@ -23,10 +23,10 @@ const routes : Routes = [ {
 			path          : 'activities-logs' ,
 			loadComponent : () : Promise<any> => import('./children/activities-logs/activities-logs.component')
 		} ,
-		{
-			path          : 'info' ,
-			loadComponent : () : Promise<any> => import('./children/info/info.component')
-		}
+		// {
+		// 	path          : 'info' ,
+		// 	loadComponent : () : Promise<any> => import('./children/info/info.component')
+		// }
 	]
 } ];
 

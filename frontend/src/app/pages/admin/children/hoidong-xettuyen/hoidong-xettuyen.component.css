@@ -1,0 +1,111 @@
+.admin-wrap-table {
+    height: calc(100vh);
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-wrap-table__body {
+    flex: 1 1 auto;
+    height: 1%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.admin-wrap-table__body.wrap-tb {
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+.wrap-tb > table > thead {
+    position: sticky;
+    top: 0;
+    right: 0;
+    overflow: hidden;
+    z-index: 20;
+}
+
+.admin-wrap-table__foot {
+    border-top: 1px solid var(--accent-200);
+    height: 60px;
+}
+
+.admin-wrap-table__head-info h5 {
+    font-size: 15px;
+    color: var(--accent-800);
+}
+
+.admin-wrap-table__head-info .btn {
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* ═══ Drawer layout — body (form) on top, footer (buttons) below ═══ */
+
+.ictu-p-drawer__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.ictu-p-drawer__content__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 24px;
+}
+
+.ictu-p-drawer__content__footer {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 24px;
+    border-top: 1px solid var(--accent-200);
+    background: #fff;
+}
+
+/* ═══ Form rows ═══ */
+
+.ictu-form__row--date {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.ictu-form__row--date .ictu-form__field {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ═══ DatePicker — full-width inside grid cells ═══ */
+
+.ictu-form__row--date p-datepicker {
+    display: block;
+    width: 100%;
+}
+
+.ictu-form__row--date p-datepicker > .p-datepicker,
+.ictu-form__row--date p-datepicker .p-datepicker-input {
+    width: 100%;
+}
+
+.ictu-form__row--date .p-datepicker {
+    display: block;
+}
+
+/* ═══ Hint + error ═══ */
+
+.ictu-form__hint {
+    font-size: 12px;
+    color: var(--accent-500);
+    margin-top: 6px;
+    line-height: 1.4;
+    display: block;
+}
+
+.ictu-form__error {
+    font-size: 12px;
+    color: var(--red-500, #ef4444);
+    margin-top: 4px;
+    display: block;
+}

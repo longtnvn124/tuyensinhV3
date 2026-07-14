@@ -1,0 +1,347 @@
+<section class="admin-section--table position-relative">
+    @if (masterState() === 'loading') {
+        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    }
+    <div class="admin-wrap-table">
+        @if (masterState() !== 'error') {
+            <div class="admin-wrap-table__head d-flex">
+                <h4 class="admin-wrap-table__heading">
+                    <svg>
+                        <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+                    </svg>
+                    Danh sách hồ sơ tuyển sinh
+                </h4>
+                <div class="admin-wrap-table__head-actions">
+                    <input [(ngModel)]="masterSearchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm theo tên, SĐT..." type="text" (keyup.enter)="onSearch()">
+                    <p-select [(ngModel)]="masterSearchInfo.status" [options]="statusOptions" appendTo="body" placeholder="Trạng thái" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
+                    <p-select [(ngModel)]="masterSearchInfo.major_id" [options]="majors()" appendTo="body" placeholder="Ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
+                    <p-select [(ngModel)]="masterSearchInfo.dot_dangky_id" [options]="dots()" appendTo="body" placeholder="Đợt XT" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
+                    @if (permissionControl().canDelete) {
+                        <button (click)="deleteSelectedHoso()" [disabled]="!masterDataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    }
+                    @if (permissionControl().canCreate) {
+                        <button (click)="addHoso()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
+                            <i class="ti ti-plus"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+            <div class="admin-wrap-table__body wrap-tb">
+                <table class="tbl admin-table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="col-checkbox">
+                                <mat-checkbox [checked]="masterDataTable.totalChecked()" [indeterminate]="masterDataTable.partiallyChecked()" (change)="masterDataTable.selectRow($event.checked)" [disabled]="!masterDataTable.data().length || !permissionControl().canDelete"></mat-checkbox>
+                            </th>
+                            <th class="col-index text-center">#</th>
+                            <th class="wid-200">Họ tên</th>
+                            <th class="wid-120">SĐT</th>
+                            <th>Ngành</th>
+                            <th>Chương trình</th>
+                            <th>Đợt</th>
+                            <th class="wid-140 text-center">Trạng thái</th>
+                            <th class="wid-90 text-center px-0">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of masterDataTable.data(); track row.id; let i = $index) {
+                            <tr>
+                                <td class="col-checkbox">
+                                    <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="masterDataTable.selectRow($event.checked, i)" [disabled]="!permissionControl().canDelete"></mat-checkbox>
+                                </td>
+                                <td class="col-index text-center">{{ masterDataTable.paginator.startIndex() + i }}</td>
+                                <td class="text-left">{{ row.full_name }}</td>
+                                <td>{{ row.phone }}</td>
+                                <td>{{ majorLabel(row.major_id) }}</td>
+                                <td>{{ programLabel(row.program_id) }}</td>
+                                <td>{{ dotLabel(row.dot_dangky_id) }}</td>
+                                <td class="wid-140 text-center p-0">
+                                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                                        <span class="ictu-badge" [ngClass]="statusBadgeClass(row.status)">{{ statusLabel(row.status) }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-0 wid-120">
+                                    <div class="admin-table__btn-actions">
+                                        @if (permissionControl().canUpdate) {
+                                            <button (click)="editHoso(row)" class="btn ictu-button-info-light" tooltip="Chỉnh sửa">
+                                                <i class="ti ti-edit"></i>
+                                            </button>
+                                        }
+                                        @if (permissionControl().canDelete) {
+                                            <button (click)="deleteHoso(row)" class="btn ictu-button-danger-light" tooltip="Xóa">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="9">Không có bản ghi nào.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="admin-wrap-table__foot">
+                <div class="d-flex justify-content-center align-items-center w-100">
+                    <ictu-paginator [control]="masterDataTable.paginator" (onChangePage)="onMasterChangePage($event)" style="--ictu-paginator-gap:10px"></ictu-paginator>
+                </div>
+            </div>
+        } @else {
+            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="reloadMaster($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- CCCD check dialog -->
+<p-dialog [(visible)]="cccdDialogVisible" [modal]="true" [draggable]="false" [resizable]="false" [closable]="!cccdLoading" [style]="{ width: '480px' }" header="🔍 Kiểm tra hồ sơ theo CCCD" appendTo="body" styleClass="ictu-p-dialog">
+    <div class="cccd-dialog">
+        @if (!cccdResult) {
+            <p class="cccd-dialog__desc">Nhập số CCCD để kiểm tra. Nếu chưa có hồ sơ hoặc hồ sơ cũ đã <b>bỏ học</b>, bạn có thể tạo hồ sơ mới.</p>
+            <div class="ictu-form ictu-form--label-on-top">
+                <div class="ictu-form__row">
+                    <label class="ictu-form__label ictu-form__label--required" for="cccd-input">Số CCCD</label>
+                    <input #cccdInputEl class="ictu-form__input-field" id="cccd-input" pInputText [(ngModel)]="cccdInput" placeholder="Nhập 12 số CCCD" type="text" autocomplete="off" (keyup.enter)="runCccdCheck()" maxlength="12"/>
+                </div>
+            </div>
+            @if (cccdLoading) {
+                <div class="cccd-dialog__loading">
+                    <i class="ti ti-loader"></i> Đang kiểm tra...
+                </div>
+            }
+        } @else if (cccdResult.found) {
+            <div class="cccd-dialog__readonly">
+                <div class="cccd-dialog__alert">
+                    <i class="ti ti-info-circle"></i>
+                    Đã tồn tại hồ sơ với CCCD này. Không thể tạo mới.
+                </div>
+                <h5 class="cccd-dialog__readonly-title">Thông tin hồ sơ</h5>
+                <dl class="cccd-dialog__readonly-list">
+                    <dt>Họ tên</dt><dd>{{ cccdResult.record.full_name }}</dd>
+                    <dt>SĐT</dt><dd>{{ cccdResult.record.phone }}</dd>
+                    <dt>Ngành</dt><dd>{{ majorLabel(cccdResult.record.major_id) }}</dd>
+                    <dt>Chương trình</dt><dd>{{ programLabel(cccdResult.record.program_id) }}</dd>
+                    <dt>Đợt</dt><dd>{{ dotLabel(cccdResult.record.dot_dangky_id) }}</dd>
+                    <dt>Trạng thái</dt>
+                    <dd><span class="ictu-badge" [ngClass]="statusBadgeClass(cccdResult.record.status)">{{ statusLabel(cccdResult.record.status) }}</span></dd>
+                    <dt>Ngày tạo</dt><dd>{{ cccdResult.record.created_at }}</dd>
+                </dl>
+            </div>
+        }
+    </div>
+    <ng-template pTemplate="footer">
+        @if (!cccdResult) {
+            <button (click)="closeCccdDialog()" [disabled]="cccdLoading" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+            <button (click)="runCccdCheck()" [disabled]="cccdLoading || !cccdInput" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>
+                <i class="ti ti-search"></i>
+                <span>Kiểm tra</span>
+            </button>
+        } @else {
+            <button (click)="closeCccdDialog()" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Đóng</button>
+        }
+    </ng-template>
+</p-dialog>
+
+<!-- Drawer form -->
+<p-drawer #masterDrawer (onHide)="onMasterDrawerHide()" [(visible)]="masterFormControl.visible" [dismissible]="false" [header]="masterFormControl.heading()" [style]="{'width':'800px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+    <div class="ictu-p-drawer__content position-relative">
+        @if (masterFormControl.enableLoading()) {
+            <app-loading-progress [heading]="masterFormControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+        }
+        <div class="ictu-p-drawer__content__body position-relative">
+            @switch (masterFormControl.state()) {
+                @case ('READY') {
+                    <form [formGroup]="masterFormControl.formGroup" class="hoso-form">
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">1. Thông tin cá nhân</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Họ và tên</label>
+                                    <input class="ictu-form__input-field" formControlName="full_name" pInputText type="text" placeholder="Nguyễn Văn A"/>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label ictu-form__label--required">Số điện thoại</label>
+                                        <input class="ictu-form__input-field" formControlName="phone" pInputText type="text" placeholder="09xx..."/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Email</label>
+                                        <input class="ictu-form__input-field" formControlName="email" pInputText type="email" placeholder="email@example.com"/>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Ngày sinh</label>
+                                        <input class="ictu-form__input-field" formControlName="birthday" pInputText type="date"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Dân tộc</label>
+                                        <input class="ictu-form__input-field" formControlName="dan_toc" pInputText type="text" placeholder="Kinh..."/>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Nơi sinh</label>
+                                    <input class="ictu-form__input-field" formControlName="noi_sinh" pInputText type="text" placeholder="Tỉnh/TP"/>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Địa chỉ chi tiết</label>
+                                    <textarea class="ictu-form__input-field" formControlName="address" pTextarea placeholder="Số nhà, ngõ, đường..."></textarea>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">2. CCCD</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Số CCCD</label>
+                                    <input class="ictu-form__input-field" formControlName="cccd" pInputText type="text" placeholder="12 số"/>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Ngày cấp</label>
+                                        <input class="ictu-form__input-field" formControlName="cccd_ngaycap" pInputText type="date"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Nơi cấp</label>
+                                        <input class="ictu-form__input-field" formControlName="cccd_noicap" pInputText type="text"/>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <app-upload-placeholder label="Ảnh CCCD mặt trước"></app-upload-placeholder>
+                                    <app-upload-placeholder label="Ảnh CCCD mặt sau"></app-upload-placeholder>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">3. Thông tin xét tuyển</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Ngành</label>
+                                        <p-select [options]="majors()" appendTo="body" formControlName="major_id" placeholder="Chọn ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onMajorChange($event.value)"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Chương trình đào tạo</label>
+                                        <p-select [options]="programsByMajor(masterFormControl.formGroup.get('major_id')?.value)" appendTo="body" formControlName="program_id" placeholder="Chọn CTĐT" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Đợt xét tuyển</label>
+                                    <p-select [options]="dots()" appendTo="body" formControlName="dot_dangky_id" placeholder="Chọn đợt" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Hình thức xét tuyển</label>
+                                        <p-select [options]="hinhthucOptions" appendTo="body" formControlName="hinhthuc_xettuyen" placeholder="Hình thức" optionLabel="label" optionValue="value"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Nguồn đăng ký</label>
+                                        <p-select [options]="nguonOptions" appendTo="body" formControlName="nguon_dang_ky" placeholder="Nguồn" optionLabel="label" optionValue="value"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">4. Văn bằng TN THPT</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Loại văn bằng</label>
+                                        <input class="ictu-form__input-field" formControlName="vb_tn" pInputText type="text"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Năm tốt nghiệp</label>
+                                        <input class="ictu-form__input-field" formControlName="vb_tn_nam" pInputText type="text"/>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Số hiệu</label>
+                                        <input class="ictu-form__input-field" formControlName="vb_tn_sohieu" pInputText type="text"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Điểm xét tuyển</label>
+                                        <input class="ictu-form__input-field" formControlName="diem_xettuyen" pInputText type="number" step="0.01"/>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <app-upload-placeholder label="Ảnh văn bằng tốt nghiệp"></app-upload-placeholder>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">5. Văn bằng chuyên môn (khác)</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Văn bằng</label>
+                                    <input class="ictu-form__input-field" formControlName="vb_chuyenmon" pInputText type="text"/>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Ngành học</label>
+                                        <input class="ictu-form__input-field" formControlName="vb_chuyenmon_nganh" pInputText type="text"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Nơi cấp</label>
+                                        <input class="ictu-form__input-field" formControlName="vb_chuyenmon_noicap" pInputText type="text"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">6. Hình ảnh khác</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <app-upload-placeholder label="Ảnh thẻ"></app-upload-placeholder>
+                                    <app-upload-placeholder label="Ảnh phiếu đăng ký"></app-upload-placeholder>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <app-upload-placeholder label="Ảnh học bạ" [maxCount]="10"></app-upload-placeholder>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">7. Phân công</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Người tư vấn</label>
+                                    <input class="ictu-form__input-field" formControlName="nguoi_tuvan_id" pInputText type="number" placeholder="ID người tư vấn"/>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="hoso-form__section">
+                            <h6 class="hoso-form__section-title">8. Trạng thái</h6>
+                            <div class="ictu-form ictu-form--label-on-top">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Trạng thái</label>
+                                    <p-select [options]="statusOptions" appendTo="body" formControlName="status" placeholder="Chọn trạng thái" optionLabel="label" optionValue="value"/>
+                                </div>
+                            </div>
+                        </section>
+                    </form>
+                }
+                @case ('PREPARATION_FAILED') {
+                    <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                        <a (click)="masterFormControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+                    </div>
+                }
+            }
+        </div>
+        <div class="ictu-p-drawer__content__footer">
+            <button (click)="masterDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
+            <button (click)="submitMasterForm()" [disabled]="!masterFormControl.formFilledAndValid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+        </div>
+    </div>
+</p-drawer>
