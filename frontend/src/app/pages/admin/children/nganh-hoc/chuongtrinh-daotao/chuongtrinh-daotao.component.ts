@@ -13,7 +13,6 @@ import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-pa
 import { InputText } from 'primeng/inputtext';
 import { Textarea } from 'primeng/textarea';
 import { Select } from 'primeng/select';
-import { DecimalPipe } from '@angular/common';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { LoadingProgressComponent } from "@app/theme/components/loading-progress/loading-progress.component";
 
@@ -29,11 +28,11 @@ import { Checkbox } from 'primeng/checkbox';
 @Component({
     selector: 'app-chuongtrinh-daotao',
     imports: [
-        IctuPaginatorComponent, InputText, Textarea, Select,
-        ReactiveFormsModule, FormsModule, DecimalPipe,
-        LoadingProgressComponent,
-        Button, SelectButton, Tag, Card, Dialog, InputNumber, Checkbox,
-    ],
+    IctuPaginatorComponent, InputText, Textarea, Select,
+    ReactiveFormsModule, FormsModule,
+    LoadingProgressComponent,
+    Button, SelectButton, Tag, Card, Dialog, InputNumber, Checkbox
+],
     templateUrl: './chuongtrinh-daotao.component.html',
     styleUrl: './chuongtrinh-daotao.component.css',
     standalone: true,
@@ -64,9 +63,9 @@ export class ChuongtrinhDaotaoComponent implements OnChanges {
     ];
 
     listDoituong_xettuyen = [
-        {value:'caodang', label:'Cao đẳng'},
-        {value:'trungcap', label:'Trung cấp'},
         {value:'thpt', label:'Trung học Phổ thông'},
+        {value:'trungcap', label:'Trung cấp'},
+        {value:'caodang', label:'Cao đẳng'},
         {value:'daihoc', label:'Đại học'},
     ]
 
@@ -185,7 +184,6 @@ export class ChuongtrinhDaotaoComponent implements OnChanges {
             code: data.code,
             description: data.description || '',
             dieu_kien_xet_tuyen: data.dieu_kien_xet_tuyen || '',
-            hoc_phi: data.hoc_phi || 0,
             thoi_gian_dao_tao: data.thoi_gian_dao_tao || '',
             chi_tieu: data.chi_tieu || 0,
             is_active: data.is_active ? 1 : 0,
@@ -212,7 +210,6 @@ export class ChuongtrinhDaotaoComponent implements OnChanges {
             code: raw.code || '',
             description: raw.description || '',
             dieu_kien_xet_tuyen: raw.dieu_kien_xet_tuyen || '',
-            hoc_phi: raw.hoc_phi || 0,
             thoi_gian_dao_tao: raw.thoi_gian_dao_tao || '',
             chi_tieu: raw.chi_tieu || 0,
             major_id: this.selectedMajorId,
@@ -249,10 +246,14 @@ export class ChuongtrinhDaotaoComponent implements OnChanges {
             code: '',
             description: '',
             dieu_kien_xet_tuyen: '',
-            hoc_phi: 0,
             thoi_gian_dao_tao: '',
             chi_tieu: 0,
             is_active: 1,
         });
+    }
+
+    viewdkxt(text: string){
+    
+        return text || this.listDoituong_xettuyen.find(f=>f.value == text) ? this.listDoituong_xettuyen.find(f=>f.value == text).label : '' ;
     }
 }

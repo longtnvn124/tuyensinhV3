@@ -106,7 +106,7 @@
             <div class="ictu-form ictu-form--label-on-top">
                 <div class="ictu-form__row">
                     <label class="ictu-form__label ictu-form__label--required" for="cccd-input">Số CCCD</label>
-                    <input #cccdInputEl class="ictu-form__input-field" id="cccd-input" pInputText [(ngModel)]="cccdInput" placeholder="Nhập 12 số CCCD" type="text" autocomplete="off" (keyup.enter)="runCccdCheck()" maxlength="12"/>
+                    <input #cccdInputEl class="ictu-form__input-field" id="cccd-input" pInputText [(ngModel)]="cccdInput" placeholder="Nhập và bấm enter" type="text" autocomplete="off" (keyup.enter)="runCccdCheck()" maxlength="12"/>
                 </div>
             </div>
             @if (cccdLoading) {

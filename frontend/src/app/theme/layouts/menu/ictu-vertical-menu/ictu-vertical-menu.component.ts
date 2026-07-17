@@ -1,7 +1,7 @@
-import { Component , computed , inject , input , InputSignal , OnDestroy , OnInit , Signal , signal , WritableSignal } from '@angular/core';
+import { Component , computed , inject , input , InputSignal , OnInit , Signal , signal , WritableSignal } from '@angular/core';
 import { SharedModule } from '@shared/shared.module';
 import { CommonModule , Location , LocationStrategy , NgOptimizedImage } from '@angular/common';
-import { IctuNavigation } from '@theme/types/navigation';
+import { IctuNavigation , IctuNavigationItem } from '@theme/types/navigation';
 import { IctuMenuItemComponent } from '@theme/layouts/menu/ictu-vertical-menu/ictu-menu-item/ictu-menu-item.component';
 import { NotificationService } from '@services/notification.service';
 import { ActivatedRoute , Event , NavigationEnd , Router , RouterLink , RouterLinkActive } from '@angular/router';
@@ -9,9 +9,9 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { User } from '@models/user';
 import { AuthenticationService } from '@services/authentication.service';
 import { LayoutService } from '@theme/services/layout.service';
-import { Subject , takeUntil } from 'rxjs';
 import { SafeUrlPipe } from '@pipes/safe-url.pipe';
 import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component( {
 	selector    : 'ictu-vertical-menu' ,
@@ -19,7 +19,7 @@ import { filter } from 'rxjs/operators';
 	templateUrl : './ictu-vertical-menu.component.html' ,
 	styleUrl    : './ictu-vertical-menu.component.scss'
 } )
-export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
+export class IctuVerticalMenuComponent implements OnInit {
 
 	collapsed : InputSignal<boolean> = input.required<boolean>();
 
@@ -43,6 +43,8 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 
 	collapsedMenuChild : WritableSignal<IctuNavigation | undefined> = signal<undefined>( undefined );
 
+	readonly expandedMenuIds : WritableSignal<Set<string>> = signal<Set<string>>( new Set() );
+
 	private activatedRoute : ActivatedRoute = inject( ActivatedRoute );
 
 	private router : Router = inject( Router );
@@ -55,7 +57,7 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 		return this._menuTrigger;
 	}
 
-	set activatedMenuTrigger( trigger : MatMenuTrigger ) {
+	private openMenuTriggerOnHover( trigger : MatMenuTrigger ) : void {
 		trigger.openMenu();
 		this._menuTrigger = trigger;
 	}
@@ -68,40 +70,81 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 
 	readonly email : Signal<string> = computed( () : string => this.user() ? this.user().email : 'Empty email' );
 
-	private destroy$ : Subject<void> = new Subject<void>();
-
 	constructor() {
 		this.auth.onUserSetup.pipe(
-			takeUntil( this.destroy$ )
+			takeUntilDestroyed()
 		).subscribe( ( user : User ) : void => {
 			this.user.set( user );
 		} );
 	}
 
 	ngOnInit() : void {
-		// const _menuId : string | undefined      = this.activatedRoute.snapshot.children[ 0 ].routeConfig?.path;
-		// const menu : IctuNavigation | undefined = _menuId ? this.menus().find( ( i : IctuNavigation ) : boolean => i.id === _menuId ) : undefined;
-		// if ( menu ) {
-		// 	this.menuActivated.set( menu );
-		// }
-
 		this.router.events.pipe(
-			takeUntil( this.destroy$ ) ,
+			takeUntilDestroyed() ,
 			filter( ( event : Event ) : boolean => event instanceof NavigationEnd )
 		).subscribe( ( router : NavigationEnd ) : void => {
-			this.tryActiveMenuByRouting( router.url ? router.url.replace( /\/?admin\//gmi , '' ).split( '/' ).shift() : null );
+			this.tryActiveMenuByRouting( router.url ? router.url.replace( /\/?admin\/?/gmi , '' ).replace( /^\//gmi , '' ) : null );
 		} );
 
-		const _currentMenuId : string | undefined = this.activatedRoute.snapshot.children[ 0 ].routeConfig?.path;
+		const _currentMenuId : string | undefined = this.activatedRoute.snapshot.children[ 0 ]?.routeConfig?.path;
 		this.tryActiveMenuByRouting( _currentMenuId );
 	}
 
 
 	private tryActiveMenuByRouting( router : string | undefined | null ) : void {
-		const menu : IctuNavigation | undefined = router ? this.menus().find( ( i : IctuNavigation ) : boolean => i.id === router ) : undefined;
-		if ( menu ) {
-			this.menuActivated.set( menu );
+		if ( !router ) {
+			return;
 		}
+		const segments : string[] = router.split( '/' ).filter( ( s : string ) : boolean => !!s );
+		for ( const parent of this.menus() ) {
+			if ( segments[ 0 ] === parent.id ) {
+				if ( segments.length > 1 ) {
+					const child : IctuNavigationItem | undefined = parent.child?.find( ( c : IctuNavigationItem ) : boolean => c.id === segments[ 1 ] );
+					if ( child ) {
+						this.menuActivated.set( { ...parent , id : child.id , title : child.title , icon : child.icon , url : child.url } as IctuNavigation );
+						this.expandedMenuIds.update( ( s : Set<string> ) : Set<string> => new Set( s ).add( parent.id ) );
+						return;
+					}
+				}
+				this.menuActivated.set( parent );
+				return;
+			}
+		}
+	}
+
+	isExpanded( menuId : string ) : boolean {
+		return this.expandedMenuIds().has( menuId );
+	}
+
+	hasActiveChild( menu : IctuNavigation ) : boolean {
+		return !!menu.child?.some( ( c : IctuNavigation ) : boolean => this.menuActivated()?.id === c.id );
+	}
+
+	toggleSubmenu( menu : IctuNavigation ) : void {
+		if ( !menu.child?.length ) {
+			void this.navigateToMenu( menu );
+			return;
+		}
+		this.expandedMenuIds.update( ( set : Set<string> ) : Set<string> => {
+			const next : Set<string> = new Set( set );
+			if ( next.has( menu.id ) ) {
+				next.delete( menu.id );
+			} else {
+				next.add( menu.id );
+			}
+			return next;
+		} );
+	}
+
+	async navigateToMenu( menu : IctuNavigation ) : Promise<void> {
+		const parent : IctuNavigation | undefined = this.menus().find( ( m : IctuNavigation ) : boolean => !!m.child?.some( ( c : IctuNavigationItem ) : boolean => c.id === menu.id ) );
+		const path : string[]                      = parent ? [ 'admin' , parent.id , menu.id ] : [ 'admin' , menu.id ];
+		try {
+			await this.router.navigate( path );
+		} catch ( e ) {
+			alert( e );
+		}
+		this.menuActivated.set( menu );
 	}
 
 	fireOutClick() : void {
@@ -129,21 +172,6 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 		}
 	}
 
-	async activeMenu( menu : IctuNavigation ) : Promise<void> {
-		const _child : IctuNavigation | undefined = menu.child ? menu.child.find( ( node : IctuNavigation ) : boolean => !!node.url ) : undefined;
-		if ( _child ) {
-			try {
-				await this.router.navigate( [ [ 'admin' , _child.url ].join( '/' ) ] );
-			} catch ( e ) {
-				alert( e );
-			}
-		}else{
-			console.log('menu.id', menu.id);
-			await this.router.navigate( [ [ 'admin' , menu.id ].join( '/' ) ] );
-		}
-		this.menuActivated.set( menu );
-	}
-
 	toggleMenu() : void {
 		this.layoutService.toggleSideDrawer();
 	}
@@ -168,7 +196,7 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 		if ( this.timedOutCloser ) {
 			clearTimeout( this.timedOutCloser );
 		}
-		this.activatedMenuTrigger = trigger;
+		this.openMenuTriggerOnHover( trigger );
 	}
 
 	mouseLeave( trigger : MatMenuTrigger ) : void {
@@ -184,11 +212,6 @@ export class IctuVerticalMenuComponent implements OnInit , OnDestroy {
 	clickPreventDefault( event : MouseEvent ) : void {
 		event.stopPropagation();
 		event.preventDefault();
-	}
-
-	ngOnDestroy() : void {
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 }

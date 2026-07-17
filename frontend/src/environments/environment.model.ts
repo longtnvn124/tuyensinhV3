@@ -55,6 +55,7 @@ export class DeploymentEnvironment implements ApiServiceConfig {
     public readonly media : string;
     public readonly driverFile : string;
     public readonly aws : string;
+    public readonly externalApi : string;
     public readonly X_APP_ID : string;
     public readonly client : DeploymentClient;
     public readonly enableSignInWithGoogle : boolean;
@@ -80,7 +81,8 @@ export class DeploymentEnvironment implements ApiServiceConfig {
         this.fileDir    = `${ protocol }://${ domainName }:${ port }/folder/${ realm }/`;
         this.media      = `${ protocol }://${ domainName }:${ port }/${ realm }/api/uploads/`;
         this.driverFile = `${ protocol }://${ domainName }:${ port }/${ realm }/api/driver/`;
-        this.aws        = `${ protocol }://${ domainName }:${ port }/${ realm }/api/aws/`;
+        this.aws          = `${ protocol }://${ domainName }:${ port }/${ realm }/api/aws/`;
+        this.externalApi  = `${ protocol }://${ domainName }:${ port }/lcms/api/`;
 
         return new Proxy( this , {
             get ( target : DeploymentEnvironment , prop : string | symbol , receiver ) {

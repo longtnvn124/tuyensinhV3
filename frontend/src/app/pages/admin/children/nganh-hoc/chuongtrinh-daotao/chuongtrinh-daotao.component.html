@@ -58,9 +58,10 @@
                                 <th class="ctd-col-idx">#</th>
                                 <th class="ctd-col-code">Mã CT</th>
                                 <th>Tên chương trình</th>
-                                <th class="ctd-col-period">TG</th>
-                                <th class="ctd-col-fee">Học phí</th>
-                                <th class="ctd-col-quota">CT</th>
+                                <th>Điều kiện xét tuyển </th>
+                                <th class="ctd-col-period">thời gian đào tạo</th>
+                              
+                                <th class="ctd-col-period">Chi tiêu</th>
                                 <th class="ctd-col-status">Trạng thái</th>
                                 <th class="ctd-col-actions">Hành động</th>
                             </tr>
@@ -80,9 +81,9 @@
                                         <p-tag [value]="row.code" severity="info" [rounded]="true" />
                                     </td>
                                     <td class="ctd-col-name">{{ row.name }}</td>
-                                    <td class="ctd-col-period">{{ row.thoi_gian_dao_tao }}</td>
-                                    <td class="ctd-col-fee">{{ row.hoc_phi | number }}</td>
-                                    <td class="ctd-col-quota">{{ row.chi_tieu }}</td>
+                                    <td class="ctd-col-name">{{ viewdkxt(row.dieu_kien_xet_tuyen) }}</td>
+                                    <td class="ctd-col-period">{{ row.thoi_gian_dao_tao + ' năm' }}</td>
+                                    <td class="ctd-col-period">{{ row.chi_tieu }}</td>
                                     <td class="ctd-col-status">
                                         @if (row.is_active) {
                                             <p-tag value="Đã kích hoạt" severity="success" />
@@ -140,28 +141,23 @@
                         <ng-template #title>{{ row.name }}</ng-template>
                         <ng-template #content>
                             <div class="ctd-card-body">
-                                @if (row.description) {
-                                    <p class="ctd-card-desc">{{ row.description }}</p>
-                                }
+                                
+                                    <p class="ctd-card-desc">{{ row.description ? row.description : '' }}</p>
+                                
                                 <div class="ctd-card-info">
                                     <div class="ctd-card-info__item">
                                         <i class="ti ti-clock"></i>
                                         <span>TG đào tạo: <strong>{{ row.thoi_gian_dao_tao || '---' }}</strong></span>
                                     </div>
                                     <div class="ctd-card-info__item">
-                                        <i class="ti ti-coin"></i>
-                                        <span>Học phí: <strong>{{ row.hoc_phi ? (row.hoc_phi | number) + ' VNĐ' : '---' }}</strong></span>
+                                        <i class="ti ti-check"></i>
+                                        <span>Điều kiện xét tuyển: <strong>{{ row.dieu_kien_xet_tuyen ? listDoituong_xettuyen.find(f=>f.value == row.dieu_kien_xet_tuyen ).label  :'' }}</strong></span>
                                     </div>
                                     <div class="ctd-card-info__item">
                                         <i class="ti ti-users"></i>
                                         <span>Chỉ tiêu: <strong>{{ row.chi_tieu || '---' }}</strong></span>
                                     </div>
-                                    @if (row.dieu_kien_xet_tuyen) {
-                                        <div class="ctd-card-info__item">
-                                            <i class="ti ti-checklist"></i>
-                                            <span>{{ row.dieu_kien_xet_tuyen }}</span>
-                                        </div>
-                                    }
+                                    
                                 </div>
                             </div>
                         </ng-template>
@@ -247,34 +243,36 @@
             <label class="ctd-form__label">Mô tả</label>
             <textarea formControlName="description" pTextarea placeholder="Mô tả chương trình" class="ctd-form__input ctd-form__input--area"></textarea>
         </div>
+
         <div class="ctd-form__field">
             <label class="ctd-form__label">Điều kiện xét tuyển</label>
-            <textarea formControlName="dieu_kien_xet_tuyen" pTextarea placeholder="Điều kiện xét tuyển" class="ctd-form__input ctd-form__input--area"></textarea>
+            <p-select
+                    [options]="listDoituong_xettuyen" optionLabel="label" optionValue="value"
+                    appendTo="body"
+                    class="ctd-form__input"
+                    formControlName="dieu_kien_xet_tuyen" 
+                    placeholder="Chọn trạng thái" />        
         </div>
+        
         <div class="ctd-form__row">
-            <div class="ctd-form__field ctd-form__field--half">
-                <label class="ctd-form__label">Học phí</label>
-                <p-inputNumber
-                    formControlName="hoc_phi"
-                    [useGrouping]="true"
-                    mode="currency"
-                    currency="VND"
-                    locale="vi-VN"
-                    [min]="0"
-                    class="ctd-form__input" />
-            </div>
+        
             <div class="ctd-form__field ctd-form__field--half">
                 <label class="ctd-form__label">Chỉ tiêu</label>
                 <p-inputNumber
                     formControlName="chi_tieu"
-                    [min]="0"
+                    [min]="0"   
+                    class="ctd-form__input" />
+            </div>
+
+            <div class="ctd-form__field ctd-form__field--half">
+                <label class="ctd-form__label">Thời gian đào tạo(năm)</label>
+                <p-inputNumber
+                    formControlName="thoi_gian_dao_tao"
+                    [min]="0"   
                     class="ctd-form__input" />
             </div>
         </div>
-        <div class="ctd-form__field">
-            <label class="ctd-form__label">Thời gian đào tạo</label>
-            <input formControlName="thoi_gian_dao_tao" pInputText placeholder="VD: 4 năm" class="ctd-form__input" />
-        </div>
+        
     </form>
     <ng-template #footer>
         <div class="ctd-dialog-actions">

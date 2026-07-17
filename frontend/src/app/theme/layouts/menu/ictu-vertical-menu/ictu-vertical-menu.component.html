@@ -51,7 +51,14 @@
 			<div class="sidebar-menu__label">Menu</div>
 		}
 		@for (item of menus(); track item.id) {
-			<button class="sidebar-menu__item" [class.--active]="menuActivated()?.id === item.id" (click)="activeMenu(item)" type="button">
+			<button
+				class="sidebar-menu__item"
+				[class.--active]="menuActivated()?.id === item.id"
+				[class.--has-child]="!!item.child?.length"
+				[class.--child-active]="hasActiveChild(item)"
+				[class.--expanded]="isExpanded(item.id)"
+				(click)="toggleSubmenu(item)"
+				type="button">
 				@if (item.icon) {
 					<span class="sidebar-menu__item__icon" [ngClass]="item.icon"></span>
 				} @else if (item.customSvg) {
@@ -61,12 +68,34 @@
 				}
 				@if (!collapsed()) {
 					<span class="sidebar-menu__item__label">{{ item.title }}</span>
+					@if (item.child?.length) {
+						<svg class="sidebar-menu__item__chevron" viewBox="0 0 24 24" width="14" height="14">
+							<path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2"/>
+						</svg>
+					}
 				}
 				@if (collapsed()) {
 					<a href="#" (click)="mouseEnter(menuTrigger,item , $event)" class="open-menu-on-hover" (mouseenter)="mouseEnter(menuTrigger,item)" (mouseleave)="mouseLeave(menuTrigger)"></a>
 					<span class="open-menu-on-hover__point" [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger"></span>
 				}
 			</button>
+
+			@if (item.child?.length && isExpanded(item.id) && !collapsed()) {
+				<div class="sidebar-menu__submenu">
+					@for (child of item.child; track child.id) {
+						<button
+							class="sidebar-menu__submenu__item"
+							[class.--active]="menuActivated()?.id === child.id"
+							(click)="navigateToMenu(child)"
+							type="button">
+							@if (child.icon) {
+								<span class="sidebar-menu__submenu__item__icon" [ngClass]="child.icon"></span>
+							}
+							<span>{{ child.title }}</span>
+						</button>
+					}
+				</div>
+			}
 		}
 	</div>
 

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1783304522667,
+  "lastScanned": 1784173223582,
   "projectRoot": "D:\\data\\project\\angular\\v19\\tuyensinh\\frontend",
   "techStack": {
     "languages": [
@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd \"d:/data/project/angular/v19/tuyensinh/frontend\" && ./node_modules/.bin/tsc --noEmit -p tsconfig.json 2>&1 | head -100",
+    "buildCommand": "npm run build",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -71,14 +71,14 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1783304522632,
+      "lastAccessed": 1784173223560,
       "keyFiles": []
     },
     "public": {
       "path": "public",
       "purpose": "Public files",
       "fileCount": 1,
-      "lastAccessed": 1783304522633,
+      "lastAccessed": 1784173223560,
       "keyFiles": [
         "favicon.ico"
       ]
@@ -87,7 +87,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 3,
-      "lastAccessed": 1783304522640,
+      "lastAccessed": 1784173223566,
       "keyFiles": [
         "index.html",
         "main.ts",
@@ -98,7 +98,7 @@
       "path": "src\\app",
       "purpose": "Application code",
       "fileCount": 5,
-      "lastAccessed": 1783304522642,
+      "lastAccessed": 1784173223567,
       "keyFiles": [
         "app.component.css",
         "app.component.html",
@@ -129,6 +129,18 @@
       "path": "src\\app\\pages\\admin\\children\\nganh-hoc\\chuongtrinh-daotao\\chuongtrinh-daotao.component.css",
       "accessCount": 3,
       "lastAccessed": 1783567887395,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
+      "accessCount": 3,
+      "lastAccessed": 1784173241423,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.html",
+      "accessCount": 3,
+      "lastAccessed": 1784173257785,
       "type": "file"
     },
     {

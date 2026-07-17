@@ -1,0 +1,169 @@
+.imgchecksize {
+
+}
+
+.imgchecksize.vertical{
+    max-height:100%;
+    width: unset;
+}
+.imgchecksize.horizontal{
+    max-height:100%;
+    width:100%;
+}
+
+
+@media(max-width:1024px) {
+    .imgchecksize {
+        max-height: unset;
+        width: 100%;
+    }
+
+    .imgchecksize.vertical {
+        width: unset;
+        height: 100%;
+    }
+
+}
+
+/*-------------------------------------*/
+.bg-container{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.view-btn{
+    display: none;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    gap:10px;
+    background: rgba(166, 166, 166, 0.58);
+}
+
+
+.btn.file-upload-anh-the {
+    height: 228px;
+
+}
+
+.btn.file--uploaded {
+    position: relative;
+}
+
+
+.btn.file--uploaded:hover::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    /* Màu nền đen với độ mờ */
+    z-index: 1;
+}
+
+.btn.file--uploaded:hover .overlay-buttons {
+    display: flex;
+}
+
+.overlay-buttons {
+    /*position: absolute;*/
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /*display: none;*/
+    /*z-index: 2;*/
+}
+
+.overlay-buttons .button {
+    width: 50px;
+    height: 40px;
+    margin: 10px;
+    color: #fff;
+    background-color: #33333300;
+    border: none;
+    padding: 0px 5px;
+    cursor: pointer;
+}
+
+.overlay-buttons .button:hover {
+    border: 2px solid #ffffff;
+    /* background-color: #555555; */
+}
+/*-------------------------------------------*/
+.btn-Add{
+    display: flex;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    gap:10px;
+    background: rgba(166, 166, 166, 0.58);
+}
+.btn-Add .button{
+    width: 50px;
+    height: 40px;
+    margin: 10px;
+    color: #fff;
+    background-color: #33333300;
+    border: none;
+    padding: 0 5px;
+    cursor: pointer;
+}
+.btn-Add.view-list-item{
+    flex-direction: column;
+    width: 100px;
+    position: relative;
+}
+
+
+.btn-Add.view-list-item .view-total-file{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.list-file{
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    overflow: hidden;
+    overflow-x: auto;
+    height: 100%;
+    margin-left: 10px;
+    padding-left: 10px;
+    border-left: 1px solid #ccc;
+    display: flex;
+    flex-direction: row;
+    gap:20px;
+}
+.list-file_item{
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.list-file_item .btn-delete{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 1000;
+}
+.list-file_item .btn-delete button{
+    height: 30px;
+    width: 30px;
+    border-radius: 10px !important;
+}
+.list-file_item:hover .view-btn{
+    display: flex;
+    z-index: 100;
+}

@@ -1,0 +1,43 @@
+<input type="file" #fileChooser hidden="true" [accept]="accept" (change)="onInputAvatar($event , fileChooser)">
+
+<div class="w-100 h-100 p-3" style="border:1px dashed #ccc">
+    <div class="bg-container" [ngClass]="characterAvatar ? 'active' : 'in-active'" [ngStyle]="{'height':height }" >
+        <img class="imgchecksize" [ngClass]="footage == 'vertical' ? 'vertical' :'horizontal'"  [src]="characterAvatar " alt="">
+
+        <div  class="view-btn overlay-buttons " >
+            <ng-container *ngIf="disabled">
+                <button class="button">
+                    <i class="fa fa-camera"></i>
+                </button>
+            </ng-container>
+
+            <ng-container *ngIf="!disabled">
+                <button class="button" (click)="fileChooser.click()">
+                    <i class="fa fa-camera"></i>
+                </button>
+            </ng-container>
+
+            <button class="button" *ngIf="characterAvatar" (click)="btnviewImage()">
+                <i class="fa fa-picture-o"></i>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!--<p-image [src]="characterAvatar" alt="Image" width="500" [preview]="viewImage" [appendTo]="'body'"></p-image>-->
+<p-galleria [value]="[characterAvatar]" galleriaClass="p-galleria-class" [(visible)]="displayBasic"
+            [responsiveOptions]="responsiveOptions" [containerStyle]="{'max-width': '50%'}"
+            [circular]="true" [fullScreen]="true" [showItemNavigators]="true" [baseZIndex]="100000">
+    <ng-template pTemplate="item" let-item>
+        <p-image [src]="item" alt="Image" width="500" [preview]="true"></p-image>
+    </ng-template>
+    <ng-template pTemplate="thumbnail" let-item>
+        <div class="grid grid-nogutter justify-content-center">
+            <img [src]="item" style="display: block;" />
+        </div>
+    </ng-template>
+<!--    <ng-template pTemplate="caption" let-item>-->
+<!--        <h4 style="margin-bottom: .5rem; color: #ffffff;">{{item.title}}</h4>-->
+<!--    </ng-template>-->
+</p-galleria>

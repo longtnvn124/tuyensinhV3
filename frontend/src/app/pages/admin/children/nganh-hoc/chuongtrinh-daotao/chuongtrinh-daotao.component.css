@@ -225,6 +225,7 @@
 }
 
 .ctd-card-desc {
+    height: 40px;
     color: var(--accent-600, #475569);
     margin: 0 0 12px;
     line-height: 1.5;

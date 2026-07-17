@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1783994871597,
+  "lastScanned": 1784194163967,
   "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1783994871583,
+      "lastAccessed": 1784194163947,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1783994871584,
+      "lastAccessed": 1784194163948,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -55,40 +55,53 @@
     "plan": {
       "path": "plan",
       "purpose": null,
-      "fileCount": 4,
-      "lastAccessed": 1783994871584,
+      "fileCount": 6,
+      "lastAccessed": 1784194163948,
       "keyFiles": [
+        "api-outsite.md",
         "database.md",
         "du-an.md",
         "FRONTEND_API_GUIDE.md",
-        "menubar.md"
+        "hoso-them.md"
       ]
     },
     "frontend\\dist": {
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1783994871584,
+      "lastAccessed": 1784194163949,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "",
-      "accessCount": 33,
-      "lastAccessed": 1783997976636,
+      "accessCount": 34,
+      "lastAccessed": 1784165619534,
       "type": "directory"
     },
     {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
+      "accessCount": 34,
+      "lastAccessed": 1784196902346,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src",
-      "accessCount": 26,
-      "lastAccessed": 1784001346889,
+      "accessCount": 32,
+      "lastAccessed": 1784196154920,
       "type": "directory"
     },
     {
       "path": "plan\\database.md",
-      "accessCount": 20,
-      "lastAccessed": 1783997993758,
+      "accessCount": 21,
+      "lastAccessed": 1784171196242,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.scss",
+      "accessCount": 19,
+      "lastAccessed": 1784197146320,
       "type": "file"
     },
     {
@@ -98,9 +111,21 @@
       "type": "file"
     },
     {
+      "path": "plan\\menubar.md",
+      "accessCount": 16,
+      "lastAccessed": 1784196850997,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src\\app\\pages\\auth\\login\\login.component.css",
       "accessCount": 15,
       "lastAccessed": 1783324690676,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.html",
+      "accessCount": 15,
+      "lastAccessed": 1784197002463,
       "type": "file"
     },
     {
@@ -140,6 +165,12 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\services\\authentication.service.ts",
+      "accessCount": 10,
+      "lastAccessed": 1784165608552,
+      "type": "directory"
+    },
+    {
       "path": "frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.component.html",
       "accessCount": 9,
       "lastAccessed": 1783324740511,
@@ -152,27 +183,9 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\services\\authentication.service.ts",
-      "accessCount": 9,
-      "lastAccessed": 1783934926694,
-      "type": "directory"
-    },
-    {
-      "path": "plan\\menubar.md",
-      "accessCount": 8,
-      "lastAccessed": 1783997994252,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.html",
-      "accessCount": 7,
-      "lastAccessed": 1783387371132,
-      "type": "file"
-    },
-    {
       "path": "frontend\\src\\app\\models",
-      "accessCount": 7,
-      "lastAccessed": 1783914131529,
+      "accessCount": 8,
+      "lastAccessed": 1784168813831,
       "type": "directory"
     },
     {
@@ -182,9 +195,9 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.scss",
+      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.ts",
       "accessCount": 6,
-      "lastAccessed": 1783387413675,
+      "lastAccessed": 1784196008747,
       "type": "file"
     },
     {
@@ -230,15 +243,15 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.ts",
+      "path": "frontend\\package.json",
       "accessCount": 5,
-      "lastAccessed": 1783655250401,
-      "type": "file"
+      "lastAccessed": 1784195998761,
+      "type": "directory"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-menu-item\\ictu-menu-item.component.ts",
       "accessCount": 5,
-      "lastAccessed": 1783998407228,
+      "lastAccessed": 1784196373330,
       "type": "file"
     },
     {
@@ -246,12 +259,6 @@
       "accessCount": 4,
       "lastAccessed": 1783475579629,
       "type": "file"
-    },
-    {
-      "path": "frontend\\package.json",
-      "accessCount": 4,
-      "lastAccessed": 1783905507023,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\auth\\reset-password\\reset-password.component.ts",
@@ -290,9 +297,9 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-menu-item\\ictu-menu-item.component.ts",
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-menu-item\\ictu-menu-item.component.html",
       "accessCount": 2,
-      "lastAccessed": 1783998407073,
+      "lastAccessed": 1784196053175,
       "type": "file"
     },
     {
@@ -359,12 +366,6 @@
       "path": "frontend\\src\\app\\pages\\admin\\children\\administrator\\administrator-routing.module.ts",
       "accessCount": 1,
       "lastAccessed": 1783329545075,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-menu-item\\ictu-menu-item.component.html",
-      "accessCount": 1,
-      "lastAccessed": 1783330485862,
       "type": "file"
     },
     {

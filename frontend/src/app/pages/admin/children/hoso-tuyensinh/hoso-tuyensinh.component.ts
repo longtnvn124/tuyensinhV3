@@ -48,6 +48,8 @@ import { LoadingProgressComponent } from '@theme/components/loading-progress/loa
 import { UploadPlaceholderComponent } from './upload-placeholder/upload-placeholder.component';
 import { forkJoin, Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import { LocationService } from '@app/services/location.service';
+import { Locations } from '@app/models/location';
 
 type HosoStatus = 'cho_duyet' | 'da_duyet' | 'da_nhap_hoc' | 'bo_hoc' | 'huy';
 
@@ -81,7 +83,7 @@ interface HosoStatusOption {
 export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermission {
 
     // ── Services ────────────────────────────────────────────────
-
+    private locationService: LocationService = inject(LocationService);
     private hosoService: HosoThisinhService = inject(HosoThisinhService);
     private nganhHocService: NganhhocService = inject(NganhhocService);
     private ctdtService: ChuongtrinhDaotaoService = inject(ChuongtrinhDaotaoService);
@@ -115,6 +117,9 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     majors: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
     programs: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
     dots: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
+
+    listTinh: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
+    listXa: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
 
     // ── CCCD dialog ────────────────────────────────────────────
 
@@ -256,17 +261,36 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 (res.data ?? []).map((d) => ({ value: d.id, label: d.name })),
             ));
 
+
+        const tinh$: Observable<DtoObject<Locations[]>> =
+            this.locationService.queryLocation([], { paged: 1, limit: -1 }, 'regions') ;
+                // .pipe(map((res: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
+                //     (res.data ?? []).map((d) => ({ value: d.id, label: d.name })),
+                // ));
+
+        const xaphuong$: Observable<IctuDropdownOption<number>[]> =
+            this.locationService.queryLocation([], { paged: 1, limit: -1 }, 'provinces')
+                .pipe(map((res: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
+                    (res.data ?? []).map((d) => ({ value: d.id, label: d.name })),
+                ));
+
         forkJoin({
             majors: loadMajors$,
             programs: loadPrograms$,
             dots: loadDots$,
+            listTinh: tinh$,
+            listXaphuong:xaphuong$
         })
             .pipe(takeUntil(this.onDestroy$))
             .subscribe({
-                next: ({ majors, programs, dots }) => {
+                next: ({ majors, programs, dots,listTinh,listXaphuong }) => {
                     this.majors.set(majors);
                     this.programs.set(programs);
                     this.dots.set(dots);
+                    // this.listTinh.set(listTinh.data);
+
+                    console.log(listTinh.data,listXaphuong);
+                    
                 },
                 error: () => {
                     this.notification.toastError('Tải dữ liệu danh mục thất bại');
@@ -563,4 +587,19 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     private masterFormField(path: keyof HosoThisinh): AbstractControl | null {
         return this.masterFormControl.formGroup.get(path);
     }
+
+
+    // onChangeTinh(event) {
+    //     if (event) {
+    //         this.locationService.queryLocation([],{limit:-1,paged:1}, 'provinces').subscribe({
+    //             next: (_res) => {
+                    
+    //                 this.listXa.set(_);
+    //             },
+    //             error: () => {
+    //                 this.notification.toastError("Không tải được Phường/Xã huyện trực thuộc")
+    //             }
+    //         });
+    //     }
+    // }
 }
