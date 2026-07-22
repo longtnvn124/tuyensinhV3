@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"Get-Content \\\"d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend\\\\src\\\\app\\\\theme\\\\layouts\\\\menu\\\\ictu-vertical-menu\\\\ictu-vertical-menu.component.html\\\" -Raw\",\"description\":\"Read HTML f...",
-  "error": "Exit code 127\n/usr/bin/bash: line 1: Get-Content: command not found",
-  "timestamp": "2026-07-16T10:15:54.781Z",
-  "retry_count": 1
-}

@@ -120,6 +120,9 @@ export class FileHelper {
 }
 
 export class HelperClass {
+	paramsConditionBuilder(arg0: { conditionName: string; condition: any; value: string; orWhere: string; }[]) {
+		throw new Error('Method not implemented.');
+	}
 	/**
 	 * sort
 	 * @param array : array

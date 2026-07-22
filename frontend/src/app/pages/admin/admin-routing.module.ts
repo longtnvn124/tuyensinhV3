@@ -41,14 +41,15 @@ const routes : Routes = [
                 loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoidong-xettuyen/hoidong-xettuyen.component').then( ( m ) : any => m.HoidongXettuyenComponent ),
             },
 
-			// {
-            //     path          : 'hoso-tuyensinh' ,
-            //     loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso-tuyensinh/hoso-tuyensinh.component').then( ( m ) : any => m.HosoTuyensinhComponent ),
-            // },
+	
             {
                 path          : 'hoso-them' ,
                 loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso/hoso-them/hoso-them.component').then( ( m ) : any => m.HosoThemComponent ),
             },
+					// {
+            //     path          : 'hoso-tuyensinh' ,
+            //     loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso-tuyensinh/hoso-tuyensinh.component').then( ( m ) : any => m.HosoTuyensinhComponent ),
+            // },
 
             {
 				path          : '404' ,

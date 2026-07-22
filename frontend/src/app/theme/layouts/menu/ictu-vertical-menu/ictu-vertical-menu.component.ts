@@ -1,4 +1,4 @@
-import { Component , computed , inject , input , InputSignal , OnInit , Signal , signal , WritableSignal } from '@angular/core';
+import { Component , computed , DestroyRef , inject , input , InputSignal , OnInit , Signal , signal , WritableSignal } from '@angular/core';
 import { SharedModule } from '@shared/shared.module';
 import { CommonModule , Location , LocationStrategy , NgOptimizedImage } from '@angular/common';
 import { IctuNavigation , IctuNavigationItem } from '@theme/types/navigation';
@@ -49,6 +49,8 @@ export class IctuVerticalMenuComponent implements OnInit {
 
 	private router : Router = inject( Router );
 
+	private destroyRef : DestroyRef = inject( DestroyRef );
+
 	private timedOutCloser : any;
 
 	private _menuTrigger : MatMenuTrigger;
@@ -79,15 +81,15 @@ export class IctuVerticalMenuComponent implements OnInit {
 	}
 
 	ngOnInit() : void {
+		const _currentMenuId : string | undefined = this.activatedRoute.snapshot.children[ 0 ]?.routeConfig?.path;
+		this.tryActiveMenuByRouting( _currentMenuId );
+
 		this.router.events.pipe(
-			takeUntilDestroyed() ,
+			takeUntilDestroyed( this.destroyRef ) ,
 			filter( ( event : Event ) : boolean => event instanceof NavigationEnd )
 		).subscribe( ( router : NavigationEnd ) : void => {
 			this.tryActiveMenuByRouting( router.url ? router.url.replace( /\/?admin\/?/gmi , '' ).replace( /^\//gmi , '' ) : null );
 		} );
-
-		const _currentMenuId : string | undefined = this.activatedRoute.snapshot.children[ 0 ]?.routeConfig?.path;
-		this.tryActiveMenuByRouting( _currentMenuId );
 	}
 
 

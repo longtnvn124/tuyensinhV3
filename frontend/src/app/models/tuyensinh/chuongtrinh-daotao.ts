@@ -9,6 +9,7 @@ export interface ChuongtrinhDaotao extends IctuBaseModel {
     dieu_kien_xet_tuyen?: string;
     hoc_phi?: number;
     thoi_gian_dao_tao?: string;
+    danh_hieu_tot_nghiep?: string;
     chi_tieu?: number;
     is_active: boolean;
 }

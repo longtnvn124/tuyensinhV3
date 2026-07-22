@@ -44,7 +44,7 @@ export const formatBytes : ( bytes : number , decimals : number ) => string = ( 
 	return parseFloat( ( bytes / Math.pow( k , i ) ).toFixed( dm ) ) + ' ' + sizes[ i ];
 };
 
-const base64ToFile : ( base64 : string , fileName : string ) => File = ( base64 : string , fileName : string ) : File => {
+export const base64ToFile : ( base64 : string , fileName : string ) => File = ( base64 : string , fileName : string ) : File => {
 	const bytes = base64.split( ',' )[ 0 ].indexOf( 'base64' ) >= 0 ? atob( base64.split( ',' )[ 1 ] ) : ( <any> window ).unescape( base64.split( ',' )[ 1 ] );
 	const mime  = base64.split( ',' )[ 0 ].split( ':' )[ 1 ].split( ';' )[ 0 ];
 	const max   = bytes.length;
@@ -59,7 +59,7 @@ const blobToFile : ( blob : Blob , fileName : string ) => File = ( blob : Blob ,
 	return new File( [ blob ] , fileName , { lastModified : new Date().getTime() , type : blob.type } );
 };
 
-const blobToBase64 : ( blob : Blob | File ) => Promise<string> = ( blob : Blob | File ) : Promise<string> => {
+export const blobToBase64 : ( blob : Blob | File ) => Promise<string> = ( blob : Blob | File ) : Promise<string> => {
 	return new Promise( ( resolve : ( value : ( string | null ) ) => void ) : void => {
 		const reader   = new FileReader;
 		reader.onerror = () : void => resolve( null );
@@ -353,4 +353,29 @@ export class IctuFileService {
 			map( ( response : DtoObject<number> ) : number => response.data )
 		);
 	}
+
+
+	// -----------------------------------------------------------------
+	 getPreviewLinkLocalFile(idOrName:string): string {
+        const url = new URL(getLinkDownload(idOrName));
+        url.searchParams.append('token', localStorage.getItem(tokenGetter()) || '');
+        return url.toString();
+    }
+
+
+	  //tuyển sinh
+
+    uploadFile_tuyensinh(file: File, donvi_id: number = 0, user_id: number = 0): Observable<ICTUStandardFile> {
+        const formData = new FormData();
+        formData.append('upload', file);
+        formData.append('donvi_id', donvi_id.toString());
+        formData.append('user_id', user_id.toString());
+        return this.http.post<Dto>(this.fileHostingServiceApi, formData).pipe(
+            retry(2),
+            map((response: Dto): IctuFile => Array.isArray(response.data) ? response.data[0] : response.data),
+            map((response: IctuFile): ICTUStandardFile => response ? ({ ...response, location: DEPLOYMENT_INFO.fileHostingService }) : null)
+        );
+    }
+
+
 }

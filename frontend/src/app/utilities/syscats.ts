@@ -310,3 +310,113 @@ export const UserLanguage : UserLanguage[] = [
 	{ value : 'zh' , label : '中国人' , tran2vn : 'Tiếng Trung' }
 ]
 
+export const DanToc = [
+    { name: 'kinh', label: 'Kinh' },
+    { name: 'tay', label: 'Tày' },
+    { name: 'thai', label: 'Thái' },
+    { name: 'muong', label: 'Mường' },
+    { name: 'nung', label: 'Nùng' },
+    { name: 'dao', label: 'Dao' },
+    { name: 'h-mong', label: 'H\'mông' },
+    { name: 'khmer', label: 'Khmer' },
+    { name: 'gia-rai', label: 'Gia Rai' },
+    { name: 'ede', label: 'Ê Đê' },
+    { name: 'bana', label: 'Ba Na' },
+    { name: 'xo-dang', label: 'Xơ Đăng' },
+    { name: 'san-chay', label: 'Sán Chay' },
+    { name: 'co-ho', label: 'Cơ Ho' },
+    { name: 'hoa', label: 'Hoa' },
+    { name: 'cham', label: 'Chăm' },
+    { name: 'san-diu', label: 'Sán Dìu' },
+    { name: 'tho', label: 'Thổ' },
+    { name: 'hre', label: 'Hrê' },
+    { name: 'ra-gia', label: 'Ra Glai' },
+    { name: 'm-nong', label: 'M\'Nông' },
+    { name: 'x-tieng', label: 'X\'Tiêng' },
+    { name: 'bru-van-kieu', label: 'Bru-Vân Kiều' },
+    { name: 'kho-mu', label: 'Khơ Mú' },
+    { name: 'co-tu', label: 'Cơ Tu' },
+    { name: 'giay', label: 'Giáy' },
+    { name: 'gie-trieng', label: 'Giẻ Triêng' },
+    { name: 'ta-oi', label: 'Tà Ôi' },
+    { name: 'ma', label: 'Mạ' },
+    { name: 'co', label: 'Co' },
+    { name: 'cho-ro', label: 'Chơ Ro' },
+    { name: 'xinh-mun', label: 'Xinh Mun' },
+    { name: 'ha-nhi', label: 'Hà Nhì' },
+    { name: 'chu-ru', label: 'Chu Ru' },
+    { name: 'lao', label: 'Lào' },
+    { name: 'khang', label: 'Kháng' },
+    { name: 'la-chi', label: 'La Chí' },
+    { name: 'phu-la', label: 'Phù Lá' },
+    { name: 'la-hu', label: 'La Hủ' },
+    { name: 'la-ha', label: 'La Ha' },
+    { name: 'pa-then', label: 'Pà Thẻn' },
+    { name: 'chut', label: 'Chứt' },
+    { name: 'lu', label: 'Lự' },
+    { name: 'lo-lo', label: 'Lô Lô' },
+    { name: 'mang', label: 'Mảng' },
+    { name: 'co-lao', label: 'Cờ Lao' },
+    { name: 'bo-y', label: 'Bố Y' },
+    { name: 'cong', label: 'Cống' },
+    { name: 'ngay', label: 'Ngái' },
+    { name: 'si-la', label: 'Si La' },
+    { name: 'pu-peo', label: 'Pu Péo' },
+    { name: 'ro-mam', label: 'Rơ măm' },
+    { name: 'brau', label: 'Brâu' },
+    { name: 'o-du', label: 'Ơ Đu' }
+];
+export const VBTN = [
+    { value: 'THPT', label: 'THPT' },
+    { value: 'BTVH', label: 'BTVH' },
+];
+
+export const VBCM = [
+    { value: 'THCN', label: 'Trung cấp' },
+    { value: 'Cao đẳng', label: 'Cao đẳng' },
+    { value: 'Đại học', label: 'Đại học' },
+];
+
+export const TH_XETTUYEN = [
+    { label: 'Chờ duyệt', kyhieu: 'KHOI_TAO', value: 0, status_key: 'XET_TUYEN', content: false, admin: false, show: false },
+    { label: 'Hồ sơ chưa đủ, cần bổ sung', kyhieu: 'THIEU_HOSO', value: 1, status_key: 'XET_TUYEN', content: true, admin: false, show: true },
+    { label: 'Đã duyệt, chờ kết quả xét tuyển', kyhieu: 'CHOKQ_XET_TUYEN', value: 2, status_key: 'XET_TUYEN', content: false, admin: false, show: true },
+    { label: 'Trúng tuyển', kyhieu: 'TRUNG_TUYEN', value: 3, status_key: 'XET_TUYEN', content: false, admin: true, show: true },
+    { label: 'Không trúng tuyển', kyhieu: 'KHONG_TRUNG_TUYEN', value: -1, status_key: 'XET_TUYEN', content: true, admin: true, show: true },
+    { label: 'Chưa nhập học', kyhieu: 'CHUA_NHAP_HOC', value: 4, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
+    { label: 'Đã nhập học, chưa hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_THIEU', value: 5, status_key: 'NHAP_HOC', content: true, admin: true, show: true },
+    { label: 'Đã hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_OK', value: 6, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
+]
+export const TH_CHODUYET =[
+    { label: 'Chờ duyệt', kyhieu: 'KHOI_TAO', value: 0, status_key: 'XET_TUYEN', content: false, admin: false, show: true },
+    { label: 'Hồ sơ thiếu, cần bổ sung', kyhieu: 'THIEU_HOSO', value: 1, status_key: 'THIEU_HOSO', content: true, admin: false, show: true },
+    { label: 'Đủ điều kiện xét tuyển', kyhieu: 'DU_DK_XET_TUYEN', value: 2, status_key: 'DU_DK_XET_TUYEN', content: false, admin: false, show: true },
+    { label: 'Không đủ điều kiện xét tuyển', kyhieu: 'KHONG_DU_DK_XET_TUYEN', value: -1, status_key: 'KHONG_DU_DK_XET_TUYEN', content: true, admin: false, show: true },
+]
+
+export const TT_XETTUYEN =[
+    { label: 'Đủ điều kiện xét tuyển', kyhieu: 'DU_DK_XET_TUYEN', value: 2, status_key: 'XET_TUYEN', content: false, admin: false, show: true },
+    { label: 'Trúng tuyển', kyhieu: 'TRUNG_TUYEN', value: 3, status_key: 'XET_TUYEN', content: false, admin: true, show: true },
+    { label: 'Không trúng tuyển', kyhieu: 'KHONG_TRUNG_TUYEN', value: 4, status_key: 'XET_TUYEN', content: true, admin: true, show: true },
+]
+
+export const TITLE_ANH = {
+    anh_thpt: 'ảnh THPT',
+    anh_the: 'ảnh thẻ',
+    anh_cmnd_truoc: 'ảnh CCCD trước',
+    anh_cmnd_sau: 'ảnh CCCD sau',
+    anh_hoc_ba: 'ảnh học bạ',
+    anh_phieu_dang_ky: 'ảnh phiếu đăng ký',
+}
+
+export const GENDER = [
+    { label: 'Nam', value: 'nam', key: 'Nam' },
+    { label: 'Nữ', value: 'nu', key: 'Nữ' },
+];
+
+
+export const DANHHIEU_TOTNGHIEP = [
+    { key: 'CN', label: 'Cử nhân', disabled: false },
+    { key: 'KS', label: 'Kỹ sư', disabled: false },
+    { key: 'TS', label: 'Thạc sỹ', disabled: false }
+]

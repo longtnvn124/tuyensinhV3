@@ -9,6 +9,8 @@ export interface CtdtItem {
 	nganh_id : number;
 	ten : string;
 	madt : string | null;
+	thoigian_daotao?: string;
+	danhhieu_totnghiep?: string;
 }
 
 export interface NganhItem {

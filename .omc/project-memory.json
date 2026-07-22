@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1784194163967,
+  "lastScanned": 1784618786234,
   "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": null,
+    "buildCommand": "./node_modules/.bin/tsc --noEmit --project frontend/tsconfig.app.json 2>&1 | head -50",
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1784194163947,
+      "lastAccessed": 1784618786194,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1784194163948,
+      "lastAccessed": 1784618786195,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,322 +56,310 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 6,
-      "lastAccessed": 1784194163948,
+      "lastAccessed": 1784618786196,
       "keyFiles": [
         "api-outsite.md",
         "database.md",
         "du-an.md",
-        "FRONTEND_API_GUIDE.md",
-        "hoso-them.md"
+        "fix-ovic-avata.md",
+        "FRONTEND_API_GUIDE.md"
       ]
     },
     "frontend\\dist": {
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1784194163949,
+      "lastAccessed": 1784618786196,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
-      "path": "",
-      "accessCount": 34,
-      "lastAccessed": 1784165619534,
-      "type": "directory"
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
+      "accessCount": 63,
+      "lastAccessed": 1784686069237,
+      "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
-      "accessCount": 34,
-      "lastAccessed": 1784196902346,
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.html",
+      "accessCount": 23,
+      "lastAccessed": 1784685700612,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.md",
+      "accessCount": 19,
+      "lastAccessed": 1784685169906,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.css",
+      "accessCount": 14,
+      "lastAccessed": 1784684148058,
       "type": "file"
     },
     {
       "path": "frontend\\src",
-      "accessCount": 32,
-      "lastAccessed": 1784196154920,
+      "accessCount": 10,
+      "lastAccessed": 1784686044091,
       "type": "directory"
     },
     {
-      "path": "plan\\database.md",
-      "accessCount": 21,
-      "lastAccessed": 1784171196242,
+      "path": "frontend\\src\\app\\services\\tuyensinh\\api-outsite.service.ts",
+      "accessCount": 8,
+      "lastAccessed": 1784683936639,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.scss",
-      "accessCount": 19,
-      "lastAccessed": 1784197146320,
+      "path": "frontend\\src\\app\\models\\external-api.ts",
+      "accessCount": 7,
+      "lastAccessed": 1784686050746,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\pages\\auth\\login\\login.component.html",
-      "accessCount": 17,
-      "lastAccessed": 1783324730860,
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
+      "accessCount": 7,
+      "lastAccessed": 1784688523023,
       "type": "file"
     },
     {
-      "path": "plan\\menubar.md",
-      "accessCount": 16,
-      "lastAccessed": 1784196850997,
+      "path": "frontend\\src\\app\\services\\ictu-file.service.ts",
+      "accessCount": 6,
+      "lastAccessed": 1784519088827,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\pages\\auth\\login\\login.component.css",
-      "accessCount": 15,
-      "lastAccessed": 1783324690676,
+      "path": "",
+      "accessCount": 4,
+      "lastAccessed": 1784683966278,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\models\\tuyensinh\\chuongtrinh-daotao.ts",
+      "accessCount": 4,
+      "lastAccessed": 1784685177364,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.html",
-      "accessCount": 15,
-      "lastAccessed": 1784197002463,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\auth-form.md",
-      "accessCount": 14,
-      "lastAccessed": 1783324862807,
-      "type": "file"
+      "path": "frontend",
+      "accessCount": 4,
+      "lastAccessed": 1784685190975,
+      "type": "directory"
     },
     {
       "path": "frontend\\src\\app",
-      "accessCount": 13,
-      "lastAccessed": 1783913861996,
+      "accessCount": 4,
+      "lastAccessed": 1784686044163,
       "type": "directory"
     },
     {
-      "path": "frontend\\src\\app\\pages\\auth\\redirect-uri-call-back\\redirect-uri-call-back.ts",
-      "accessCount": 10,
-      "lastAccessed": 1783306590292,
+      "path": "frontend\\src\\app\\services\\media.service.ts",
+      "accessCount": 3,
+      "lastAccessed": 1784518465098,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.component.css",
-      "accessCount": 10,
-      "lastAccessed": 1783324690605,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\reset-password\\reset-password.component.css",
-      "accessCount": 10,
-      "lastAccessed": 1783324707107,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.html",
-      "accessCount": 10,
-      "lastAccessed": 1783914632442,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\services\\authentication.service.ts",
-      "accessCount": 10,
-      "lastAccessed": 1784165608552,
+      "path": "frontend\\src\\app\\pages",
+      "accessCount": 3,
+      "lastAccessed": 1784518844620,
       "type": "directory"
     },
     {
-      "path": "frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.component.html",
-      "accessCount": 9,
-      "lastAccessed": 1783324740511,
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
+      "accessCount": 3,
+      "lastAccessed": 1784540312691,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\pages\\auth\\reset-password\\reset-password.component.html",
-      "accessCount": 9,
-      "lastAccessed": 1783324742297,
+      "path": "plan\\database.md",
+      "accessCount": 3,
+      "lastAccessed": 1784684679324,
+      "type": "file"
+    },
+    {
+      "path": "img-crop-v2.md",
+      "accessCount": 2,
+      "lastAccessed": 1784518870837,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\utilities\\helper.ts",
+      "accessCount": 2,
+      "lastAccessed": 1784519036577,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\utilities",
+      "accessCount": 2,
+      "lastAccessed": 1784519088903,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\services\\tuyensinh\\hoso-thisinh.service.ts",
+      "accessCount": 2,
+      "lastAccessed": 1784683950205,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\environments",
+      "accessCount": 1,
+      "lastAccessed": 1784514189723,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\models\\file.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784514447601,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\environments\\deployment.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784514447701,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\environments\\index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784514447771,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-avata-type-thpt\\ovic-avata-type-thpt.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784517771174,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\parent-component\\parent-component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784517771246,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-avata-type-thpt\\ovic-avata-type-thpt.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1784517771392,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-avata-type-thpt\\ovic-avata-type-thpt.component.css",
+      "accessCount": 1,
+      "lastAccessed": 1784517771455,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ictu-image-resize\\ictu-image-resize.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784517832257,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\parent-component\\parent-component.html",
+      "accessCount": 1,
+      "lastAccessed": 1784517832332,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-avata-type-multiple\\ovic-avata-type-multiple.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784517896338,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ictu-image-resize\\ictu-image-resize.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1784518248145,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\parent-component\\parent-component.css",
+      "accessCount": 1,
+      "lastAccessed": 1784518248234,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso",
+      "accessCount": 1,
+      "lastAccessed": 1784518828746,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-avata-type-multiple\\ovic-avata-type-multiple.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1784518844348,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ictu-image-resize\\ictu-image-resize.component.css",
+      "accessCount": 1,
+      "lastAccessed": 1784519088235,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784519171222,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1784519173375,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.css",
+      "accessCount": 1,
+      "lastAccessed": 1784519175160,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them",
+      "accessCount": 1,
+      "lastAccessed": 1784537683602,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1784540271307,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\models\\tuyensinh\\hoso-thisinh.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784683950147,
+      "type": "file"
+    },
+    {
+      "path": "plan",
+      "accessCount": 1,
+      "lastAccessed": 1784683973403,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\services\\tuyensinh\\chuongtrinh-daotao.service.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784684629689,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
+      "accessCount": 1,
+      "lastAccessed": 1784684787970,
       "type": "file"
     },
     {
       "path": "frontend\\src\\app\\models",
-      "accessCount": 8,
-      "lastAccessed": 1784168813831,
+      "accessCount": 1,
+      "lastAccessed": 1784685224621,
       "type": "directory"
     },
     {
-      "path": "frontend\\src\\app\\models\\user.ts",
-      "accessCount": 7,
-      "lastAccessed": 1783947695462,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.ts",
-      "accessCount": 6,
-      "lastAccessed": 1784196008747,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\login\\login.component.ts",
-      "accessCount": 5,
-      "lastAccessed": 1783306577159,
-      "type": "directory"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\unauthorized\\unauthorized.component.css",
-      "accessCount": 5,
-      "lastAccessed": 1783307747862,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\redirect-uri-call-back\\redirect-uri-call-back.css",
-      "accessCount": 5,
-      "lastAccessed": 1783307754229,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\redirect-uri-call-back\\redirect-uri-call-back.html",
-      "accessCount": 5,
-      "lastAccessed": 1783324676107,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\unauthorized\\unauthorized.component.html",
-      "accessCount": 5,
-      "lastAccessed": 1783324676158,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth",
-      "accessCount": 5,
-      "lastAccessed": 1783324707264,
-      "type": "directory"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\admin\\admin-layout\\admin-layout.component.scss",
-      "accessCount": 5,
-      "lastAccessed": 1783499785602,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\package.json",
-      "accessCount": 5,
-      "lastAccessed": 1784195998761,
-      "type": "directory"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-menu-item\\ictu-menu-item.component.ts",
-      "accessCount": 5,
-      "lastAccessed": 1784196373330,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\models\\organization.ts",
-      "accessCount": 4,
-      "lastAccessed": 1783475579629,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\reset-password\\reset-password.component.ts",
-      "accessCount": 4,
-      "lastAccessed": 1783998407655,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\unauthorized\\unauthorized.component.ts",
-      "accessCount": 2,
-      "lastAccessed": 1783306590351,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\forgot-password\\forgot-password.component.ts",
-      "accessCount": 2,
-      "lastAccessed": 1783306964868,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\models\\sales-team.ts",
-      "accessCount": 2,
-      "lastAccessed": 1783412314602,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\models\\sale-data.ts",
-      "accessCount": 2,
-      "lastAccessed": 1783412314650,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\vertical-menu.component.ts",
-      "accessCount": 2,
-      "lastAccessed": 1783998406671,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-menu-item\\ictu-menu-item.component.html",
-      "accessCount": 2,
-      "lastAccessed": 1784196053175,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\styles.scss",
+      "path": "frontend\\src\\app\\models\\ictu-dropdown-option.ts",
       "accessCount": 1,
-      "lastAccessed": 1783306646875,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\auth\\auth-routing.module.ts",
-      "accessCount": 1,
-      "lastAccessed": 1783306646969,
-      "type": "file"
-    },
-    {
-      "path": "C:\\Users\\2311\\.claude\\plans\\t-file-database-md-hay-buzzing-moore.md",
-      "accessCount": 1,
-      "lastAccessed": 1783307660961,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\vertical-menu.component.html",
-      "accessCount": 1,
-      "lastAccessed": 1783329496900,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\menu-item\\menu-item.component.ts",
-      "accessCount": 1,
-      "lastAccessed": 1783329496963,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\vertical-menu\\menu-item\\menu-item.component.scss",
-      "accessCount": 1,
-      "lastAccessed": 1783329499945,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\guards\\admin-module.guard.ts",
-      "accessCount": 1,
-      "lastAccessed": 1783329530459,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\scss\\_variables.scss",
-      "accessCount": 1,
-      "lastAccessed": 1783329530590,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\guards\\admin-module-child.guard.ts",
-      "accessCount": 1,
-      "lastAccessed": 1783329537043,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\admin\\children\\account\\account-routing.module.ts",
-      "accessCount": 1,
-      "lastAccessed": 1783329543081,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\admin\\children\\administrator\\administrator-routing.module.ts",
-      "accessCount": 1,
-      "lastAccessed": 1783329545075,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-menu-item\\ictu-menu-item.component.css",
-      "accessCount": 1,
-      "lastAccessed": 1783330491088,
+      "lastAccessed": 1784685666873,
       "type": "file"
     }
   ],

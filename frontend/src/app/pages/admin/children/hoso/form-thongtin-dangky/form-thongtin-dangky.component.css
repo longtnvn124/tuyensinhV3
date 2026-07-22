@@ -1,32 +1,27 @@
-.thongtin-container{
-    background: #fff;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    max-width: 1024px;
-    margin: 0 auto;
+.thongtin-container {
+	background: #fff;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	max-width: 1024px;
+	margin: 0 auto;
 }
 
-.thongtin_body{
-    height:1%;
-    flex: 1 1 auto;
-    padding: 10px;
-    position: relative;
-    overflow: hidden;
-    overflow-y: auto;
-
-}
-.thongtin_bottom{
-    height: 50px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 10px;
-    border-top: 1px solid #ccc;
+.thongtin_body {
+	height: 1%;
+	flex: 1 1 auto;
+	padding: 10px;
+	position: relative;
+	overflow: hidden;
+	overflow-y: auto;
 }
 
-.thongtin_bottom-l{
-
-}.thongtin_botto-r{
+.thongtin_bottom {
+	height: 50px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 10px;
+	border-top: 1px solid #ccc;
 
 }

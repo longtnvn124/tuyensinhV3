@@ -1,0 +1,75 @@
+<input
+    type="file"
+    #fileChooser
+    hidden
+    [accept]="accept() || 'image/png,image/gif,image/jpeg,image/bmp,image/x-icon'"
+    (change)="onFileSelected($event, fileChooser)"
+/>
+
+<div class="img-crop-container" [ngStyle]="{ height: height() }">
+    <!-- Preview image -->
+    @if (previewUrl()) {
+        <img
+            class="img-crop-preview"
+            [ngClass]="footage() === 'vertical' ? 'img-vertical' : 'img-horizontal'"
+            [src]="previewUrl()"
+            alt="preview"
+        />
+    } @else {
+        <div class="img-crop-placeholder">
+            <svg class="img-crop-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span class="img-crop-placeholder-text">{{ textView() }}</span>
+        </div>
+    }
+
+    <!-- Overlay actions -->
+    <div class="img-crop-overlay">
+        @if (!disabled()) {
+            <button
+                type="button"
+                class="img-crop-btn"
+                title="Chọn ảnh"
+                (click)="fileChooser.click()"
+            >
+                <i class="fa fa-camera"></i>
+            </button>
+        }
+
+        @if (previewUrl()) {
+            <button
+                type="button"
+                class="img-crop-btn"
+                title="Xem ảnh"
+                (click)="btnViewImage()"
+            >
+                <i class="fa fa-picture-o"></i>
+            </button>
+        }
+    </div>
+</div>
+
+<!-- Fullscreen gallery preview -->
+<p-galleria
+    [value]="previewUrl() ? [previewUrl()] : []"
+    [visible]="displayBasic()"
+    (visibleChange)="displayBasic.set($event)"
+    [responsiveOptions]="responsiveOptions"
+    [containerStyle]="{ 'max-width': '50%' }"
+    [circular]="true"
+    [fullScreen]="true"
+    [showItemNavigators]="true"
+    [baseZIndex]="100000"
+>
+    <ng-template pTemplate="item" let-item>
+        <p-image [src]="item" alt="Image" width="500" [preview]="true"></p-image>
+    </ng-template>
+    <ng-template pTemplate="thumbnail" let-item>
+        <div class="grid grid-nogutter justify-content-center">
+            <img [src]="item" style="display: block" />
+        </div>
+    </ng-template>
+</p-galleria>

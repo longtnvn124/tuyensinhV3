@@ -21,6 +21,15 @@ export type HosoCheckCccdResult =
     providedIn: 'any',
 })
 export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
+	getTuyensinhByPageNew(conditions: IctuConditionParam[]): Observable<DtoObject<HosoThisinh[]>> {
+		return this.query(conditions, { limit: 1, paged: 1 });
+	}
+	updateTuyensinh(id: number, data: Partial<HosoThisinh>): Observable<any> {
+		return this.update(id, data);
+	}
+	addTuyensinh(data: Partial<HosoThisinh>): Observable<number> {
+		return this.create(data);
+	}
     constructor() {
         super('hoso-tuyensinh');
     }

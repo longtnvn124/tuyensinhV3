@@ -75,6 +75,12 @@ export interface ResetPasswordInfo {
 	providedIn : 'root'
 } )
 export class AuthenticationService {
+	userCanAdd(arg0: string): boolean {
+		throw new Error('Method not implemented.');
+	}
+	userCanEdit(arg0: string): boolean {
+		throw new Error('Method not implemented.');
+	}
 
 	private readonly http : HttpClient = inject( HttpClient );
 

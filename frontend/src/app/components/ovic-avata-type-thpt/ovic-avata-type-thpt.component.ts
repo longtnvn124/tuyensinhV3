@@ -1,14 +1,16 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges} from '@angular/core';
+import {booleanAttribute, Component, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {AbstractControl} from "@angular/forms";
-import {FileService} from "@core/services/file.service";
-import {NotificationService} from "@core/services/notification.service";
-import {AvatarMakerSetting, MediaService} from "@shared/services/media.service";
-import {TYPE_FILE_IMAGE} from "@shared/utils/syscat";
+
 import {RippleModule} from "primeng/ripple";
-import {NgClass, NgIf} from "@angular/common";
-import { Subject, takeUntil} from "rxjs";
+import {NgClass} from "@angular/common";
+import {map} from "rxjs";
 import {ImageModule} from "primeng/image";
 import {GalleriaModule} from "primeng/galleria";
+import { NotificationService } from '@app/services/notification.service';
+import { IctuFileService,base64ToFile } from '@app/services/ictu-file.service';
+import { AvatarMakerSetting, MediaService } from '@app/services/media.service';
+export const TYPE_FILE_IMAGE:string[] = ['image/png', 'image/gif','image/jpeg', 'image/bmp',' image/x-icon'];
 
 
 @Component({
@@ -18,34 +20,38 @@ import {GalleriaModule} from "primeng/galleria";
     standalone: true,
     imports: [
         RippleModule,
-        NgIf,
         NgClass,
         ImageModule,
         GalleriaModule
     ]
 })
-export class OvicAvataTypeThptComponent implements OnInit,OnChanges,OnDestroy {
+export class OvicAvataTypeThptComponent implements OnInit {
 
-    @Input() site       : boolean = false;
-    @Input() disabled   : boolean = false;
-    @Input() formField  !: AbstractControl;           // dùng ! nếu bắt buộc
-    @Input() multiple   :boolean = true;
-    @Input() accept     : string ='';
-    @Input() aspectRatio?: number;                  // ví dụ: 2/3 hoặc 3/2
-    @Input() textView   : string = 'Upload file';
-    @Input() height     ?: string = '260px';                       // ví dụ: '300px'
-    @Input() file_size  : number | null = null;       // KB
-    @Input() file_name  ?: string;
-    @Input() footage    : string = 'horizontal';
-    @Input() rotateShow : boolean = false;
-    @Input() key_upload : string = 'crop'; //normal
+    site = input(false, {transform: booleanAttribute});
+    disabled = input(false, {transform: booleanAttribute});
+    formField = input.required<AbstractControl>();
+    multiple = input(true, {transform: booleanAttribute});
+    accept = input('');
+    aspectRatio = input<number>();
+    textView = input('Upload file');
+    height = input('260px');
+    file_size = input<number | null>(null);
+    file_name = input<string>();
+    footage = input('horizontal');
+    rotateShow = input(false, {transform: booleanAttribute});
+    key_upload = input('crop');
 
-    characterAvatar     : string = '';
+    characterAvatar = signal('');
 
-    private destroy$ = new Subject<void>();
+    private destroyRef = inject(DestroyRef);
+    private fileService = inject(IctuFileService);
+    private notificationService = inject(NotificationService);
+    private mediaService = inject(MediaService) ;
+   
 
     typeFileAdd = TYPE_FILE_IMAGE;
 
+    displayBasic = signal(false);
 
     responsiveOptions: any[] = [
         {
@@ -66,50 +72,26 @@ export class OvicAvataTypeThptComponent implements OnInit,OnChanges,OnDestroy {
         }
     ];
 
-    constructor(
-        private fileService: FileService,
-        private notificationService: NotificationService,
-        private mediaService: MediaService,
-
-    ) {}
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (this.formField){
-            this.characterAvatar = this.formField.value ? this.fileService.getPreviewLinkLocalFile(this.formField.value) : '';
-        }
-
-    }
-
     ngOnInit(): void {
-        if (this.formField) {
-            // Chỉ subscribe 1 lần ở đây
-            this.formField.valueChanges
-                .pipe(takeUntil(this.destroy$))
-                .subscribe((text: string) => {
-                    this.characterAvatar = text ? this.fileService.getPreviewLinkLocalFile(text) : '';
+        const field = this.formField();
+        if (field) {
+            field.valueChanges
+                .pipe(
+                    takeUntilDestroyed(this.destroyRef),
+                    map((text: string) => text ? this.fileService.getPreviewLinkLocalFile(text) : '')
+                )
+                .subscribe(url => this.characterAvatar.set(url));
 
-                });
-
-            // Cập nhật giá trị ban đầu (nếu có)
-            if (this.formField.value) {
-                this.characterAvatar =this.fileService.getPreviewLinkLocalFile(this.formField.value);
+            if (field.value) {
+                this.characterAvatar.set(this.fileService.getPreviewLinkLocalFile(field.value));
             }
         }
-
-
-
     }
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    // ====================== TẠO AVATAR (CROP + RESIZE) ======================
     async makeCharacterAvatar(file: File): Promise<File | null> {
         try {
             const options: AvatarMakerSetting = {
-                aspectRatio: this.aspectRatio ?? 2 / 3,
+                aspectRatio: this.aspectRatio() ?? 2 / 3,
                 resizeToWidth: 300,
                 format: 'jpeg',
                 cropperMinWidth: 10,
@@ -117,52 +99,48 @@ export class OvicAvataTypeThptComponent implements OnInit,OnChanges,OnDestroy {
                     enable: true,
                     dataUrl: URL.createObjectURL(file)
                 },
-                rotateShow: this.rotateShow
+                rotateShow: this.rotateShow()
             };
 
+        
             const avatar = await this.mediaService.callAvatarMakerV2(options);
 
             if (avatar && !avatar.error && avatar.data?.base64) {
-                const fileName = this.file_name || file.name;
-                return this.fileService.base64ToFile(avatar.data.base64, fileName);
+                const fileName = this.file_name() || file.name;
+                // return this.fileService.base64ToFile(avatar.data.base64, fileName);
+                return base64ToFile(avatar.data.base64, fileName);
             }
 
             return null;
         } catch (e) {
-            console.error('Lỗi tạo avatar:', e);
             this.notificationService.toastError('Tạo avatar thất bại');
             return null;
         }
     }
 
-
-    // ====================== XỬ LÝ KHI CHỌN FILE ======================
-    async onInputAvatar(event: Event, fileChooser: HTMLInputElement): Promise<void> {
+    async onInputAvatar(_event: Event, fileChooser: HTMLInputElement): Promise<void> {
         const files = fileChooser.files;
         if (!files || files.length === 0) return;
 
         const selectedFile = files[0];
 
-        // Kiểm tra định dạng
         if (!this.typeFileAdd.includes(selectedFile.type)) {
             this.notificationService.toastWarning('Định dạng file không phù hợp');
-            fileChooser.value = ''; // reset input
+            fileChooser.value = '';
             return;
         }
-        // Kiểm tra kích thước tối đa (ví dụ: 20MB)
+
         try {
-            // 1. Tạo avatar (crop + resize)
-            let processedFile = this.key_upload == 'crop' ? await this.makeCharacterAvatar(selectedFile) : selectedFile;
-            console.log(processedFile);
-            if(!processedFile){
-                return ;
+            const processedFile = this.key_upload() == 'crop' ? await this.makeCharacterAvatar(selectedFile) : selectedFile;
+            if (!processedFile) {
+                return;
             }
             this.notificationService.isProcessing(true);
+           
             this.fileService.uploadFile_tuyensinh(processedFile).subscribe({
                 next: (fileUl: any) => {
-                    console.log(fileUl)
-                    this.formField.setValue(fileUl.name);
-                    this.characterAvatar =  this.fileService.getPreviewLinkLocalFile(fileUl.name);
+                    this.formField().setValue(fileUl.name);
+                    this.characterAvatar.set(this.fileService.getPreviewLinkLocalFile(fileUl.name));
 
                     this.notificationService.toastSuccess('Upload thành công');
                     this.notificationService.isProcessing(false);
@@ -170,22 +148,17 @@ export class OvicAvataTypeThptComponent implements OnInit,OnChanges,OnDestroy {
                 error: () => {
                     this.notificationService.toastError('Upload file không thành công');
                     this.notificationService.isProcessing(false);
-
                 },
             });
 
         } catch (err) {
-            // console.error(err);
             this.notificationService.toastError('Có lỗi xảy ra khi xử lý file');
             this.notificationService.isProcessing(false);
             fileChooser.value = '';
         }
     }
 
-
-    //---------------------------------------------------------
-    displayBasic: boolean = false;
-    btnviewImage(){
-        this.displayBasic = true;
+    btnviewImage() {
+        this.displayBasic.set(true);
     }
 }

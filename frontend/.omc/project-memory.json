@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "npm run build",
+    "buildCommand": "cd \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\" && npx tsc --noEmit 2>&1 | head -30",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -108,6 +108,12 @@
   },
   "hotPaths": [
     {
+      "path": "src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.ts",
+      "accessCount": 8,
+      "lastAccessed": 1784519354071,
+      "type": "file"
+    },
+    {
       "path": "src\\app",
       "accessCount": 6,
       "lastAccessed": 1783305854982,
@@ -117,6 +123,18 @@
       "path": "src\\app\\pages\\admin\\children\\hoso-tuyensinh\\hoso-tuyensinh.component.ts",
       "accessCount": 6,
       "lastAccessed": 1783928148780,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
+      "accessCount": 4,
+      "lastAccessed": 1784254930283,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.html",
+      "accessCount": 4,
+      "lastAccessed": 1784684885818,
       "type": "file"
     },
     {
@@ -132,16 +150,10 @@
       "type": "file"
     },
     {
-      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
+      "path": "src",
       "accessCount": 3,
-      "lastAccessed": 1784173241423,
-      "type": "file"
-    },
-    {
-      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.html",
-      "accessCount": 3,
-      "lastAccessed": 1784173257785,
-      "type": "file"
+      "lastAccessed": 1784254964424,
+      "type": "directory"
     },
     {
       "path": "src\\app\\models\\course-lesson.ts",
@@ -154,6 +166,12 @@
       "accessCount": 2,
       "lastAccessed": 1783330997471,
       "type": "file"
+    },
+    {
+      "path": "src\\app\\utilities\\helper.ts",
+      "accessCount": 2,
+      "lastAccessed": 1784519287845,
+      "type": "directory"
     },
     {
       "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-co-so-dao-tao\\qt-co-so-dao-tao.component.spec.ts",
@@ -292,6 +310,24 @@
       "accessCount": 1,
       "lastAccessed": 1783915651425,
       "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\dot-xettuyen\\dot-xettuyen.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1784252985585,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\design.md",
+      "accessCount": 1,
+      "lastAccessed": 1784253038579,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso",
+      "accessCount": 1,
+      "lastAccessed": 1784254941244,
+      "type": "directory"
     }
   ],
   "userDirectives": []

@@ -1,425 +1,190 @@
-<ng-container [ngSwitch]="ngView">
-    <ng-container *ngSwitchCase="-1">
-                <div class=" d-flex flex-column justify-content-center align-items-center"
-                     style="gap:4px;background:#f3f3f3; height: 100%">
-                    <div style="font-size:16px;"></div>
-                    <div style="font-size:16px;">Mất kết nối với máy chủ vui lòng bấm 'Tải lại'</div>
-                    <button pButton pRipple label="Tải lại" icon="pi pi-sync" (click)="reload()"></button>
+<form [formGroup]="formData" class="hoso-them__form">
+
+    <!-- Section 1: Thông tin cá nhân -->
+    <section class="hoso-form__section">
+        <h6 class="hoso-form__section-title">1. Thông tin cá nhân</h6>
+        <div class="ictu-form ictu-form--label-on-top">
+            <div class="ictu-form__row ictu-form__row--two">
+                <ovic-img-crop-v2 [formField]="formData['anh_the']"  ></ovic-img-crop-v2>
+            </div>
+            <div class="ictu-form__row">
+                <label class="ictu-form__label ictu-form__label--required">Họ và tên</label>
+                <input class="ictu-form__input-field" formControlName="full_name" pInputText type="text"
+                    placeholder="Nguyễn Văn A" />
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label ictu-form__label--required">Số điện thoại</label>
+                    <input class="ictu-form__input-field" formControlName="phone" pInputText type="text"
+                        placeholder="09xx..." />
                 </div>
-    </ng-container>
-    <ng-container *ngSwitchCase="0">
-                <div class="h-100 d-flex flex-column justify-content-center align-items-center"
-                     style="background:#f3f3f3; height: 100vh">
-                    <div class=" text-center"
-                         style="font-size: 15px;background: #d6def7;padding: 14px 20px;border-radius: 10px;border: 1px solid #ccc;">
-                        <p>Đang tải dữ liệu, vui lòng chờ</p>
-                        <div style=" width: 100%; max-width: 300px;">
-                            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-                        </div>
-                    </div>
-                </div>
-    </ng-container>
-    <ng-container *ngSwitchCase="1">
-        <div class="thongtin-container">
-            <div class="thongtin_body">
-                <div class="ovic-vertical__inputs">
-                    <form [formGroup]="formData" class="formUserProfile tuyensinh-form">
-                        <!-- New -->
-                        <div *ngIf="cccdValid" class="row form-row form-row-flex-row">
-                            <div class="col-9 flex-div tuyensinh-information">
-                                <div class="row form-row-flex-row ">
-                                    <div class="col-6 flex-div">
-                                        <label class="label-noweight" >Họ và tên:<span *ngIf="f['ho_va_ten'] | hasControlRequired" class="ovic-mark">*</span>
-                                        </label>
-                                        <input type="text" [disabled]="disable"  class="ovic-input-field" formControlName="ho_va_ten" placeholder="Nhập họ và tên thí sinh">
-                                    </div>
-                                    <div class="col-6 flex-div">
-                                        <label >Ngày sinh:<span *ngIf="f['ngay_sinh'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <p-inputMask [disabled]="disable" mask="99/99/9999" formControlName="ngay_sinh" placeholder="dd/mm/yyyy"
-                                                     slotChar="dd/mm/yyyy"></p-inputMask>
-                                    </div>
-                                </div>
-                                <div class="row form-row-flex-row mt-3">
-                                    <div class="col-6 flex-div tuyensinh-gender">
-                                        <label>Giới tính:<span *ngIf="f['gioi_tinh'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <ovic-dropdown [disabled]="disable" placeholder=" -- Chọn giới tính -- " [options]="genderOption" [showClear]="false"
-                                                       optionLabel="label" optionId="label" [defaultValue]="f['gioi_tinh'].value"
-                                                       [formField]="f['gioi_tinh']">
-                                        </ovic-dropdown>
-                                    </div>
-                                    <div class="col-6 flex-div tuyensinh-form-dropdown-top">
-                                        <label >Dân tộc:<span *ngIf="f['dan_toc'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <ovic-dropdown [disabled]="disable" [filter]="true" [options]="list_dantoc" optionLabel="label" [showClear]="false"
-                                                       optionId="label" [defaultValue]="f['dan_toc'].value" [formField]="f['dan_toc']">
-                                        </ovic-dropdown>
-                                    </div>
-                                </div>
-                                <div class="row  form-row-flex-row mt-3">
-                                    <div class="col-6 flex-div tuyensinh-form-dropdown-top">
-                                        <label >Nơi sinh:<span *ngIf="f['noi_sinh'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <ovic-dropdown [disabled]="disable" placeholder=" -- Chọn Tỉnh / Thành phố -- " [filter]="true" [showClear]="false"
-                                                       [options]="list_citys" optionLabel="name" filterBy="name" optionId="id"
-                                                       [defaultValue]="f['noi_sinh'].value" [formField]="f['noi_sinh']">
-                                        </ovic-dropdown>
-                                    </div>
-                                    <div class="col-6 flex-div">
-                                        <label >Điện thoại di động:<span *ngIf="f['dien_thoai'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <input pInputText [attr.disabled]="disable ? true : null"  (keydown)="keyupCheckFirstCode($event)" type="text"
-                                               class="ovic-input-field" formControlName="dien_thoai"
-                                               placeholder="Nhập số điện thoại">
-                                    </div>
-
-                                </div>
-                                <div class="row form-row-flex-row mt-3">
-                                    <div class="col-6 flex-div">
-                                        <label >Email:<span *ngIf="f['email'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <input pInputText [attr.disabled]="disable ? true : null" type="text" id="email"  class="ovic-input-field" formControlName="email"
-                                               autocomplete="off" placeholder="Email@gmail.com">
-                                    </div>
-                                    <div class="col-6 flex-div tuyensinh-form-dropdown-top">
-                                        <label >Ngành đăng ký:<span *ngIf="f['nganh_dangky'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <ovic-dropdown [filter]="true" filterBy="ten_nganh" [options]="list_nganh_tuyensinh"
-                                                       optionLabel="ten_nganh" optionId="ten_nganh" [disabled]="disable"
-                                                       [defaultValue]="f['nganh_dangky'].value" [formField]="f['nganh_dangky']">
-                                        </ovic-dropdown>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-3 flex-div tuyensinh-information tuyensinh-gender">
-                                <label >Ảnh thẻ:<span *ngIf="f['anh_the'] | hasControlRequired" class="ovic-mark">*</span></label>
-
-                                <ovic-avata-type-thpt [disabled]="disable" [formField]="f['anh_the']" [rotateShow]="true" [footage] ="'vertical'"
-                                                      [aspectRatio]="3 / 4" [height]="'198px'"
-                                                      [accept]="'.jpg,.png,.jpeg'"
-                                                      [textView]="'Tải ảnh CCCD(Hoặc hộ chiếu) mặt trước (*)'"
-                                ></ovic-avata-type-thpt>
-                            </div>
-                        </div>
-                        <div *ngIf="cccdValid" class="row form-row form-row-flex-row">
-                            <div class="col-12 flex-div">
-                                <div class="row form-row-flex-row ">
-                                    <div class="col-6 flex-div">
-                                        <label>Địa chỉ thường trú:<span *ngIf="f['dia_chi_tinh'] | hasControlRequired" class="ovic-mark">*</span><span
-                                            style="color: red; font-size: 14px;"></span></label>
-                                        <ovic-dropdown [disabled]="disable" (onChange)="onChangeTinh($event)"
-                                                       placeholder=" -- Chọn Tỉnh / Thành phố -- " [filter]="true" [showClear]="false"
-                                                       [options]="list_citys" optionLabel="name" filterBy="name" optionId="id"
-                                                       [defaultValue]="f['dia_chi_tinh'].value" [formField]="f['dia_chi_tinh']">
-                                        </ovic-dropdown>
-                                    </div>
-                                    <div class="col-6 flex-div" style="margin-top: 23px;">
-                                        <ovic-dropdown [disabled]="disable" filterBy="name" placeholder=" -- Chọn Xã / Phường -- " [filter]="true" [showClear]="false"
-                                                       [options]="list_wards" optionLabel="name" optionId="id"
-                                                       [defaultValue]="f['dia_chi_xa'].value" [formField]="f['dia_chi_xa']">
-                                        </ovic-dropdown>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div *ngIf="cccdValid">
-                            <div class="row form-row form-row-flex-row mt-3">
-                                <div class="col-12 flex-div">
-                                    <label>
-                                        Địa chỉ nhận giấy báo nhập học khi trúng tuyển:
-                                        <span *ngIf="f['dia_chi_nha'] | hasControlRequired" class="ovic-mark">*</span>
-                                    </label>
-                                    <textarea pInputTextarea [disabled]="disable"  placeholder="Nhập Số nhà/ Đường phố hoặc Thôn/Tổ/Xóm"
-                                              formControlName="dia_chi_nha" rows="2" class="form-control"
-                                    ></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row form-row form-row-flex-row mt-3">
-                            <div class="col-12 flex-div">
-                                <div class="row form-row-flex-row">
-                                    <div class="flex-div" [ngClass]="!cccdValid?'col-12':'col-4'">
-                                        <label >Số CCCD:<span *ngIf="f['cccd'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <input pInputText *ngIf="!cccdValid" [attr.disabled]="cccdValid || disable ? '': null"
-                                               placeholder="Vui lòng nhập cccd của thí sinh rồi nhấn enter hoặc tiếp"
-                                               (keyup.enter)="checkCccd()" type="text"
-                                               class="ovic-input-field" formControlName="cccd">
-                                        <!--                                               (keydown)="keyupCheckFirstCode($event)" -->
-
-
-                                        <input *ngIf="cccdValid" [attr.disabled]="isManager ? null : ''" [disabled]="disable"
-                                               placeholder="Vui lòng nhập cccd của thí sinh" type="text" id="cccd"
-                                               class="ovic-input-field" formControlName="cccd" autocomplete="off">
-                                    </div>
-
-                                    <div *ngIf="cccdValid" class="col-4 flex-div">
-                                        <label >Ngày cấp số CCCD:<span *ngIf="f['ngay_cap_cccd'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                        <p-inputMask mask="99/99/9999" formControlName="ngay_cap_cccd" [disabled]=" disable"
-                                                     placeholder="dd/mm/yyyy" slotChar="dd/mm/yyyy"></p-inputMask>
-                                    </div>
-                                    <div *ngIf="cccdValid" class="col-4 flex-div">
-                                        <label >Nơi cấp số CCCD:<span *ngIf="f['noi_cap_cccd'] | hasControlRequired" class="ovic-mark">*</span></label>
-
-                                        <ovic-dropdown [disabled]="disable" placeholder=" -- Chọn nơi cấp-- " [filter]="true" [showClear]="false"
-                                                       [options]="listNoiCapCCCD" optionLabel="label" filterBy="label" optionId="label"
-                                                       [defaultValue]="f['noi_cap_cccd'].value" [formField]="f['noi_cap_cccd']">
-                                        </ovic-dropdown>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div *ngIf="cccdValid">
-                            <div class="row form-row form-row-flex-row mt-3">
-                                <div class="col-12 flex-div tuyensinh-form-dropdown-top">
-                                    <label >Người sở hữu hồ sơ:<span *ngIf="f['owner_by'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-dropdown [disabled]="disable" [filter]="true" filterBy="name_email"
-                                                   [options]="list_user_doitac" optionLabel="name_email"
-                                                   optionId="id" [defaultValue]="f['owner_by'].value" [formField]="f['owner_by']">
-                                    </ovic-dropdown>
-                                </div>
-                            </div>
-                            <div class="row form-row form-row-flex-row"
-                                 style="border-bottom: 1px solid #c8c8c8; padding-bottom: 10px;">
-                                <div class="col-6 flex-div">
-                                    <label style="font-size: 16px; margin-top: 20px;">Các văn bằng đã có<span class="ovic-mark"></span></label>
-                                </div>
-                            </div>
-                            <div class="row form-row form-row-flex-row">
-                                <div class="col-3 flex-div tuyensinh-gender">
-                                    <label >Trình độ văn hóa:<span *ngIf="f['van_bang_tn'] | hasControlRequired"  class="ovic-mark">*</span></label>
-                                    <ovic-groups-radio [disabled]="disable" [options]="list_VBTN" optionLabel="label" optionId="value"
-                                                       [default]="f['van_bang_tn'].value" [formField]="f['van_bang_tn']">
-                                    </ovic-groups-radio>
-                                </div>
-                                <div class="col-3 flex-div">
-                                    <label >Nơi cấp bằng:<span *ngIf="f['noicap_tn'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <input pInputText [attr.disabled]="disable ? true : null" type="text" class="ovic-input-field" formControlName="noicap_tn" placeholder="Nơi cấp bằng">
-                                </div>
-                                <div class="col-3 flex-div">
-                                    <label >Năm tốt nghiệp:<span *ngIf="f['nam_tn'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <input pInputText [attr.disabled]="disable ? true: null" type="number" class="ovic-input-field" formControlName="nam_tn" placeholder="Nhập năm tốt nghiệp">
-                                </div>
-                                <div class="col-3 flex-div">
-                                    <label >Số hiệu:<span *ngIf="f['sohieu_vb'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <input pInputText [attr.disabled]="disable ? true: null" type="text"  class="ovic-input-field" formControlName="sohieu_vb" placeholder="Số hiệu văn bằng">
-                                </div>
-                            </div>
-                            <div class="row form-row form-row-flex-row">
-                                <div class="col-12 flex-div tuyensinh-gender">
-                                    <label >Bằng chuyên môn ĐKXT<span *ngIf="f['vb_chuyenmon'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-groups-radio [disabled]="disable" [require]="false" [options]="list_VBCM" optionLabel="label"
-                                                       optionId="value" [default]="f['vb_chuyenmon'].value" [formField]="f['vb_chuyenmon']"
-                                                       (onChange)="onChangeTypeDiem($event)">
-                                    </ovic-groups-radio>
-                                </div>
-
-                            </div>
-                            <div class="row form-row form-row-flex-row">
-
-                                <div class="col-4 flex-div">
-                                    <label>Nơi cấp bằng:<span *ngIf="f['vb_noicap'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <input pInputText [attr.disabled]="disable ? true : null" type="text" class="ovic-input-field" formControlName="vb_noicap"
-                                           placeholder="Nhập nơi cấp bằng">
-                                </div>
-                                <div class="col-4 flex-div">
-                                    <label>Chuyên ngành:<span *ngIf="f['vb_chuyenmon_nganh'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <input pInputText [attr.disabled]="disable ? true: null" type="text" class="ovic-input-field" formControlName="vb_chuyenmon_nganh"
-                                           placeholder="Nhập chuyên ngành">
-                                </div>
-                                <div class="col-4 flex-div">
-                                    <label>Năm tốt nghiệp:<span *ngIf="f['vb_chuyenmon_namtn'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <input pInputText [attr.disabled]="disable ? true: null" type="number" class="ovic-input-field" formControlName="vb_chuyenmon_namtn"
-                                           placeholder="Nhập năm tốt nghiệp">
-                                </div>
-                            </div>
-                            <div class="row form-row form-row-flex-row">
-                                <div class="col-6 flex-div tuyensinh-gender">
-                                    <label >Điểm xét tuyển:<span *ngIf="f['type_diem'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-groups-radio [disabled]="disable" [require]="false" [options]="type_diem_xettuyen"
-                                                       optionLabel="label"
-                                                       optionId="label" [default]="f['type_diem'].value"
-                                                       [formField]="f['type_diem']"
-                                                       (onChange)="onChangeVBCM($event)">
-                                    </ovic-groups-radio>
-                                </div>
-                                <div class="col-3 flex-div">
-                                    <label >Hình thức XT:<span *ngIf="f['hinhthuc_xettuyen'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-dropdown [disabled]="disable" placeholder=" -- Chọn -- " [filter]="true"
-                                                   [options]="list_hinhthuc_xt" optionLabel="label" filterBy="label" optionId="value"
-                                                   [defaultValue]="f['hinhthuc_xettuyen'].value" [formField]="f['hinhthuc_xettuyen']">
-                                    </ovic-dropdown>
-                                </div>
-                                <div class="col-3 flex-div">
-                                    <label >Điểm trung bình:<span *ngIf="f['diemtb'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <p-inputNumber [disabled]="disable" [min]="0" [max]="10" mode="decimal" [minFractionDigits]="2"
-                                                   formControlName="diemtb"></p-inputNumber>
-                                </div>
-                            </div>
-
-                            <div class="row form-row form-row-flex-row">
-                                <div class="col-4 flex-div">
-                                    <label >Phiếu đăng ký:<span *ngIf="f['anh_phieu_dang_ky'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-avata-type-thpt [disabled]="disable" [formField]="f['anh_phieu_dang_ky']" [rotateShow]="true" [footage] ="'vertical'"
-                                                          [aspectRatio]="3 / 4" [key_upload]="'normal'"
-                                                          [accept]="'.jpg,.png,.jpeg'" [height]="'198px'"
-                                                          [textView]="'Tải ảnh phiếu đăng ký (*)'"></ovic-avata-type-thpt>
-
-                                </div>
-                                <div class="col-4 flex-div">
-                                    <label >CCCD mặt trước:<span *ngIf="f['anh_cmnd_truoc'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-avata-type-thpt [disabled]="disable" [formField]="f['anh_cmnd_truoc']" [rotateShow]="true" [footage] ="'horizontal'"
-                                                          [aspectRatio]="5 / 3"
-                                                          [accept]="'.jpg,.png,.jpeg'" [height]="'198px'"
-                                                          [textView]="'Tải ảnh CCCD(Hoặc hộ chiếu) mặt trước (*)'"></ovic-avata-type-thpt>
-                                </div>
-                                <div class="col-4 flex-div">
-                                    <label >CCCD mặt sau:<span *ngIf="f['anh_cmnd_sau'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-avata-type-thpt [disabled]="disable" [formField]="f['anh_cmnd_sau']" [rotateShow]="true"  [footage] ="'horizontal'"
-                                                          [aspectRatio]="5 / 3"
-                                                          [accept]="'.jpg,.png,.jpeg'" [height]="'198px'"
-                                                          [textView]="'Tải ảnh CCCD(Hoặc hộ chiếu) mặt sau (*)'"></ovic-avata-type-thpt>
-                                </div>
-                            </div>
-                            <div class="row form-row form-row-flex-row">
-                                <div class="col-4 flex-div">
-                                    <label >Ảnh bằng tốt nghiệp (THPT/BTVH)<span *ngIf="f['anh_thpt'] | hasControlRequired" class="ovic-mark">*</span></label>
-                                    <ovic-avata-type-thpt [disabled]="disable" [formField]="f['anh_thpt']" [rotateShow]="true" [footage] ="'vertical'"
-                                                          [aspectRatio]="3 / 4" [key_upload]="'normal'"
-                                                          [accept]="'.jpg,.png,.jpeg'" [height]="'200px'"
-                                                          [textView]="'Tải ảnh phiếu đăng ký (*)'"></ovic-avata-type-thpt>
-
-                                </div>
-                                <div class="col-8 flex-div">
-                                    <label>Ảnh bằng,bảng điểm TC, CĐ, ĐH(Nếu có) và học bạ THPT,BTVH</label>
-
-                                    <ovic-avata-type-multiple [disabled]="disable"
-                                        [formField]="f['anh_hoc_ba']" [rotateShow]="true" [footage] ="'horizontal'"
-                                        [aspectRatio]="5 / 3" [key_upload]="'normal'" [multiple]="true"
-                                        [accept]="'.jpg,.png,.jpeg'" [height]="'200px'"
-                                        [textView]="'Tải ảnh CCCD(Hoặc hộ chiếu) mặt trước (*)'"
-                                    >
-                                    </ovic-avata-type-multiple>
-
-                                </div>
-                            </div>
-
-                            <div class="row form-row form-row-flex-row" *ngIf="selectedTH && selectedTH.content">
-                                <div class="col-12 flex-div tuyensinh-form-dropdown-top">
-                                    <label>Lý do: {{selectedTH.label}}</label>
-                                    <textarea pInputTextarea [attr.disabled]="disable ? true: null" formControlName="content" rows="3"
-                                              class="form-control"></textarea>
-                                </div>
-                            </div>
-                            <div class="row form-row form-row-flex-row"
-                                 *ngIf="tuyensinh_select  && tuyensinh_select['ghi_chu']">
-                                <div class="col-12 flex-div tuyensinh-form-dropdown-top">
-                                    <div style="font-size: 14px; line-height: 1.25; padding: 15px; background: var(--yellow-200); border-radius: 5px;"
-                                         [innerHTML]=" 'Lý do:' + tuyensinh_select['ghi_chu']">
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div *ngIf="cccdCheckValue && !cccdValid">
-                            <div class="row form-row form-row-flex-row" style="margin-top: 15px;">
-                                <div class="col-12 flex-div">
-                                    <table class="table-info-mc newtable-info-mc" style="margin-bottom: 20px;">
-                                        <tr>
-                                            <td class="col-left-info" colspan="4"
-                                                style="line-height: 1.5; text-align: left;">
-                                                <div style="color: red; font-weight: bold; text-align: center;">Dữ liệu
-                                                    tuyển sinh không hợp
-                                                    lệ!</div>
-                                                <div style="color: red;font-weight: bold; text-align: center;">Lý do:
-                                                    Thí sinh đã được tuyển
-                                                    sinh bởi người
-                                                    khác.
-                                                </div>
-                                                <div>Thông tin chi tiết:</div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="col-left-info">Họ và tên</td>
-                                            <td class="col-text-info">{{cccdCheckValue['ho_va_ten']}}</td>
-                                            <td class="col-left-info">Ngày đăng ký</td>
-                                            <td class="col-text-info">{{cccdCheckValue['time_add']}}</td>
-
-                                        </tr>
-                                        <tr>
-
-                                            <td class="col-left-info">Ngày sinh</td>
-                                            <td class="col-text-info">{{cccdCheckValue['ngay_sinh']}}</td>
-                                            <td class="col-left-info">Người tuyển sinh</td>
-                                            <td class="col-text-info">{{cccdCheckValue['created_name']}}</td>
-
-
-                                        </tr>
-                                        <tr>
-                                            <td class="col-left-info">Giới tính</td>
-                                            <td class="col-text-info">{{cccdCheckValue['gioi_tinh']}}</td>
-                                            <td class="col-left-info">Cập nhật từ</td>
-                                            <td class="col-text-info">{{cccdCheckValue['submit_from_name']}}</td>
-
-
-
-                                        </tr>
-                                        <tr>
-                                            <td class="col-left-info">Dân tộc</td>
-                                            <td class="col-text-info">{{cccdCheckValue['dan_toc']}}</td>
-                                            <td class="col-left-info">Đơn vị</td>
-                                            <td class="col-text-info">{{cccdCheckValue['donvi_name']}}</td>
-
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="position-sticky " style="bottom: 0;">
-                    <p class="ovic-form-notes ovic-over-right-section__foot-ovic-input-line p-0">
-                        <i class="pi pi-info-circle"></i>các trường có đánh dấu ( <span class="ovic-mark">*</span> ) là bắt
-                        buộc phải nhập
-                    </p>
+                <div>
+                    <label class="ictu-form__label">Email</label>
+                    <input class="ictu-form__input-field" formControlName="email" pInputText
+                        type="email" placeholder="email@example.com" />
                 </div>
             </div>
-            <div class="thongtin_bottom">
-
-
-                <div class="thongtin_bottom-l">
-                    <div *ngIf="showStatus && cccdValid " class="row form-row form-row-flex-row">
-                        <div class="col-12 flex-div tuyensinh-form-dropdown-top">
-                            <!-- <label for="dan_toc" style="font-size: 14px;"><span class="ovic-mark">*</span></label> -->
-                            <ovic-dropdown [disabled]="disable" (onChange)="onSelecteTHForm($event)" class="nganh-hoc-list ml-2 w-100" [showClear]="false"
-                                           placeholder="- Chọn trạng thái-" [options]="th_choduyet" optionId="value" optionLabel="label"
-                                           [filter]="true" [defaultValue]="f['status'].value" [formField]="f['status']">
-                            </ovic-dropdown>
-                        </div>
-                    </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Ngày sinh</label>
+                    <input class="ictu-form__input-field" formControlName="birthday" pInputText
+                        type="date" />
                 </div>
-                <div class="thongtin_bottom-r">
-                    <div class="ml-auto">
-                        <button *ngIf="!cccdValid" class="btn ovic-over-right-section__foot-btn btn-primary"
-                                (click)="checkCccd()">
-                            <i class="fa fa-arrow-right" aria-hidden="true"></i>Tiếp
-                        </button>
-
-                        <ng-container *ngIf="!disable">
-                            <button *ngIf="cccdValid" [disabled]="disable" class="btn ovic-over-right-section__foot-btn btn-primary"
-                                    (click)="submitData()">
-                                <i class="fa fa-floppy-o mr-2" aria-hidden="true"></i>Lưu lại
-                            </button>
-                            <button *ngIf="tuyensinh_select && tuyensinh_select.id" [disabled]="disable" class="btn ovic-over-right-section__foot-btn btn-cancel" (click)="closeForm()">
-                                <i class="fa fa-ban mr-2" aria-hidden="true"></i>Hủy thao tác
-                            </button>
-                        </ng-container>
-
-                    </div>
+                <div>
+                    <label class="ictu-form__label">Dân tộc</label>
+                    <p-select [options]="listDantoc()" appendTo="body" formControlName="dan_toc"
+                        placeholder="Chọn dân tộc" optionLabel="label" optionValue="label"
+                        [showClear]="true" />
                 </div>
-
-
-
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Tỉnh/TP</label>
+                    <p-select [options]="listTinh()" appendTo="body" formControlName="tinh_id"
+                        placeholder="Chọn tỉnh" optionLabel="name" optionValue="id"
+                        [showClear]="true" (onChange)="onTinhChange($event.value)" />
+                </div>
+                <div>
+                    <label class="ictu-form__label">Quận/Huyện</label>
+                    <p-select [options]="listHuyen()" appendTo="body" formControlName="huyen_id"
+                        placeholder="Chọn huyện" optionLabel="name" optionValue="id"
+                        [showClear]="true" (onChange)="onHuyenChange($event.value)" />
+                </div>
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Xã/Phường</label>
+                    <p-select [options]="listXa()" appendTo="body" formControlName="xa_id"
+                        placeholder="Chọn xã" optionLabel="name" optionValue="id"
+                        [showClear]="true" />
+                </div>
+                <div>
+                    <label class="ictu-form__label">Địa chỉ chi tiết</label>
+                    <textarea class="ictu-form__input-field" formControlName="address" pTextarea
+                        placeholder="Số nhà, ngõ, đường..." rows="2"></textarea>
+                </div>
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Nơi sinh</label>
+                    <input class="ictu-form__input-field" formControlName="noi_sinh" pInputText
+                        type="text" placeholder="Tỉnh/TP" />
+                </div>
+                <div>
+                    <label class="ictu-form__label">Nguồn đăng ký</label>
+                    <p-select [options]="nguonOptions" appendTo="body" formControlName="nguon_dang_ky"
+                        placeholder="Nguồn" optionLabel="label" optionValue="value" />
+                </div>
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Hình thức xét tuyển</label>
+                    <p-select [options]="hinhthucOptions" appendTo="body"
+                        formControlName="hinhthuc_xettuyen" placeholder="Hình thức" optionLabel="label"
+                        optionValue="value" />
+                </div>
+                <div></div>
             </div>
         </div>
+    </section>
 
-    </ng-container>
-</ng-container>
+    <!-- Section 2: CCCD -->
+    <section class="hoso-form__section">
+        <h6 class="hoso-form__section-title">2. CCCD</h6>
+        <div class="ictu-form ictu-form--label-on-top">
+            <div class="ictu-form__row ictu-form__row--two">
+                <app-upload-placeholder label="Ảnh CCCD mặt trước"></app-upload-placeholder>
+                <app-upload-placeholder label="Ảnh CCCD mặt sau"></app-upload-placeholder>
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Số CCCD</label>
+                    <input class="ictu-form__input-field" formControlName="cccd" pInputText type="text"
+                        readonly />
+                </div>
+                <div>
+                    <label class="ictu-form__label">Ngày cấp</label>
+                    <input class="ictu-form__input-field" formControlName="cccd_ngaycap" pInputText
+                        type="date" />
+                </div>
+            </div>
+            <div class="ictu-form__row">
+                <label class="ictu-form__label">Nơi cấp</label>
+                <input class="ictu-form__input-field" formControlName="cccd_noicap" pInputText
+                    type="text" placeholder="Cục CSĐKXC & CTTH" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Văn bằng TN THPT -->
+    <section class="hoso-form__section">
+        <h6 class="hoso-form__section-title">3. Văn bằng TN THPT</h6>
+        <div class="ictu-form ictu-form--label-on-top">
+            <div class="ictu-form__row">
+                <app-upload-placeholder label="Ảnh văn bằng tốt nghiệp"></app-upload-placeholder>
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Loại văn bằng</label>
+                    <input class="ictu-form__input-field" formControlName="van_bang_tn" pInputText
+                        type="text" />
+                </div>
+                <div>
+                    <label class="ictu-form__label">Năm tốt nghiệp</label>
+                    <input class="ictu-form__input-field" formControlName="nam_tn" pInputText
+                        type="text" />
+                </div>
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Số hiệu văn bằng</label>
+                    <input class="ictu-form__input-field" formControlName="sohieu_vb" pInputText
+                        type="text" />
+                </div>
+                <div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Văn bằng chuyên môn -->
+    <section class="hoso-form__section">
+        <h6 class="hoso-form__section-title">4. Văn bằng chuyên môn (khác)</h6>
+        <div class="ictu-form ictu-form--label-on-top">
+            <div class="ictu-form__row">
+                <label class="ictu-form__label">Tên văn bằng</label>
+                <input class="ictu-form__input-field" formControlName="vb_chuyenmon" pInputText
+                    type="text" />
+            </div>
+            <div class="ictu-form__row ictu-form__row--two">
+                <div>
+                    <label class="ictu-form__label">Ngành học</label>
+                    <input class="ictu-form__input-field" formControlName="vb_chuyenmon_nganh"
+                        pInputText type="text" />
+                </div>
+                <div>
+                    <label class="ictu-form__label">Nơi cấp</label>
+                    <input class="ictu-form__input-field" formControlName="vb_chuyenmon_noicap"
+                        pInputText type="text" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+</form>
+
+<!-- Form footer -->
+<div class="hoso-them__form-footer">
+    <button (click)="closeForm()" class="btn ictu-badge-btn--secondary" mat-flat-button>
+        <i class="ti ti-arrow-left"></i>
+        <span>Hủy</span>
+    </button>
+    <button (click)="resetForm()" class="btn ictu-badge-btn--secondary" mat-flat-button>
+        <i class="ti ti-refresh"></i>
+        <span>Reset</span>
+    </button>
+    <button (click)="submitData()" [disabled]="!formData.valid || submitting()"
+        class="btn ictu-badge-btn--success-reverse" mat-flat-button>
+        <i class="ti ti-plus"></i>
+        <span>Thêm mới</span>
+    </button>
+</div>

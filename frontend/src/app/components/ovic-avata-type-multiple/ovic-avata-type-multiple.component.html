@@ -1,54 +1,63 @@
-<input type="file" #fileChooser hidden="true" [multiple]="multiple" [accept]="accept" (change)="onInputAvatar($event , fileChooser)">
+<input type="file" #fileChooser hidden="true" [multiple]="multiple()" [accept]="accept()" (change)="onInputAvatar($event , fileChooser)">
 
 <div class="w-100 h-100 p-3" style="border: 1px dashed #ccc">
 
-    <div class="bg-container" [ngStyle]="{'height':height }">
-        <div class="btn-Add " [ngClass]="listFile && listFile.length > 0 ? 'view-list-item'  : ''">
-<!--        <div class="btn-Add overlay-buttons" >-->
+    <div class="bg-container" [ngStyle]="{'height':height() }">
+        <div class="btn-Add" [ngClass]="listFile().length > 0 ? 'view-list-item'  : ''">
 
-            <ng-container *ngIf="!disabled">
+            @if (!disabled()) {
                 <button class="button" (click)="fileChooser.click()">
                     <i class="fa fa-camera"></i>
                 </button>
-            </ng-container>
+            }
 
-            <ng-container *ngIf="disabled">
+            @if (disabled()) {
                 <button class="button">
                     <i class="fa fa-camera"></i>
                 </button>
-            </ng-container>
+            }
 
         </div>
-        <ng-container *ngIf=" listFile && listFile.length > 0">
+
+        @if (listFile().length > 0) {
             <div class="list-file">
-                <div class="list-file_item" *ngFor="let item of listFile">
-                    <img class="imgchecksize vertical"  [src]="item.url " alt="">
+                @for (item of listFile(); track trackByFile($index, item)) {
+                    <div class="list-file_item">
+                        <img class="imgchecksize"
+                             [ngClass]="footage() == 'vertical' ? 'vertical' : 'horizontal'"
+                             [src]="item.url"
+                             alt="">
 
-                    <div class="btn-delete">
-                        <button pRipple pButton icon="pi pi-trash" class="p-button-raised p-button-raised p-button-danger"
-                                (click)="btnDeleteFile(item)"></button>
-                    </div>
+                        <div class="btn-delete">
+                            <button pRipple pButton icon="pi pi-trash"
+                                    class="p-button-raised p-button-raised p-button-danger"
+                                    (click)="btnDeleteFile(item)"></button>
+                        </div>
 
-                    <div  class="view-btn overlay-buttons" >
-                        <button class="button" (click)="btnviewImage(item)">
-                            <i class="fa fa-picture-o"></i>
-                        </button>
+                        <div class="view-btn overlay-buttons">
+                            <button class="button" (click)="btnviewImage(item)">
+                                <i class="fa fa-picture-o"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
-        </ng-container>
-
+        }
 
     </div>
 
 </div>
 
-
-<p-galleria [value]="listFile"
-            class="p-galleria-class"
-            [(visible)]="displayBasic" [(activeIndex)]="activeIndex"
-            [responsiveOptions]="responsiveOptions" [containerStyle]="{'max-width': '50%'}"
-            [circular]="true" [fullScreen]="true" [showItemNavigators]="true" [baseZIndex]="100000">
+<p-galleria [value]="listFile()"
+            [visible]="displayBasic()"
+            (visibleChange)="displayBasic.set($event)"
+            [(activeIndex)]="activeIndex"
+            [responsiveOptions]="responsiveOptions"
+            [containerStyle]="{'max-width': '50%'}"
+            [circular]="true"
+            [fullScreen]="true"
+            [showItemNavigators]="true"
+            [baseZIndex]="100000">
     <ng-template pTemplate="item" let-item>
         <p-image [src]="item.url" alt="Image" width="500" [preview]="true"></p-image>
     </ng-template>
