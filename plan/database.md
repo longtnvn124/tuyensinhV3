@@ -75,8 +75,8 @@ interface Hoso_thisinh {
     phone: string; // số điện thoại
     email?: string; // email của hồ sơ
     birthday?: string; // ngày tháng năm sinh
+    gioi_tinh:string;// giới tính
     tinh_id?: number; // tỉnh id sẽ được lấy từ bảng tỉnh
-    huyen_id?: number; // quận/huyện
     xa_id?: number; // xã id sẽ được lấy từ bảng xã
     address?: string; // địa chỉ: số nhà, đường, ngõ,...
     noi_sinh?: string; // nơi sinh (tỉnh/thành phố)
@@ -100,6 +100,7 @@ interface Hoso_thisinh {
     vb_chuyenmon?: string; // bằng trung cấp, cao đẳng,...
     vb_chuyenmon_nganh?: string; // ngành học trên bằng chuyên môn
     vb_chuyenmon_noicap?: string; // nơi cấp văn bằng chuyên môn
+    vb_chuyenmon_sohieu: string: // số hiệu văn bằng chuyên môn 
 
     anh_the?: string; // ảnh thẻ của hồ sơ
     cccd_mattruoc?: string; // ảnh cccd mặt trước

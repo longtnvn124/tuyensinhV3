@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\" && npx tsc --noEmit 2>&1 | head -30",
+    "buildCommand": "npx tsc --noEmit 2>&1 | wc -l",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -126,6 +126,12 @@
       "type": "file"
     },
     {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
+      "accessCount": 6,
+      "lastAccessed": 1784823774704,
+      "type": "file"
+    },
+    {
       "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
       "accessCount": 4,
       "lastAccessed": 1784254930283,
@@ -172,6 +178,12 @@
       "accessCount": 2,
       "lastAccessed": 1784519287845,
       "type": "directory"
+    },
+    {
+      "path": "src\\app\\services\\tuyensinh\\tuyensinh-status.service.ts",
+      "accessCount": 2,
+      "lastAccessed": 1784823776329,
+      "type": "file"
     },
     {
       "path": "src\\app\\pages\\admin\\children\\administrator\\children\\qt-co-so-dao-tao\\qt-co-so-dao-tao.component.spec.ts",

@@ -356,20 +356,24 @@ export class IctuFileService {
 
 
 	// -----------------------------------------------------------------
-	 getPreviewLinkLocalFile(idOrName:string): string {
-        const url = new URL(getLinkDownload(idOrName));
-        url.searchParams.append('token', localStorage.getItem(tokenGetter()) || '');
+	getPreviewLinkLocalFile(idOrName:string): string {
+        const url = new URL(
+            DEPLOYMENT_INFO.fileHostingService === 'aws'
+                ? linkGetFileContentAws(idOrName)
+                : getLinkDownload(idOrName)
+        );
+        url.searchParams.append('token', tokenGetter() || '');
         return url.toString();
     }
 
 
 	  //tuyển sinh
 
-    uploadFile_tuyensinh(file: File, donvi_id: number = 0, user_id: number = 0): Observable<ICTUStandardFile> {
+    uploadFile_tuyensinh(file: File ): Observable<ICTUStandardFile> {
         const formData = new FormData();
         formData.append('upload', file);
-        formData.append('donvi_id', donvi_id.toString());
-        formData.append('user_id', user_id.toString());
+	
+       
         return this.http.post<Dto>(this.fileHostingServiceApi, formData).pipe(
             retry(2),
             map((response: Dto): IctuFile => Array.isArray(response.data) ? response.data[0] : response.data),

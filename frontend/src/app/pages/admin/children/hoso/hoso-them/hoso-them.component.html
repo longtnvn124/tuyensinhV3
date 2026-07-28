@@ -1,7 +1,7 @@
 <div class="hoso-them">
 
     <!-- ═══════════════════════════════════════════════════════
-    PHẦN 1: HEADER
+    HEADER
     ═══════════════════════════════════════════════════════ -->
     <div class="hoso-them__header">
         <div class="admin-wrap-table__head d-flex">
@@ -21,11 +21,11 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════
-    PHẦN 2: BODY
+    BODY
     ═══════════════════════════════════════════════════════ -->
     <div class="hoso-them__body">
 
-        <!-- ===== BÊN TRÁI: Ngành + CTĐT ===== -->
+        <!-- ===== LEFT: Ngành + CTĐT ===== -->
         <div class="hoso-them__left">
             <div class="hoso-them__left-content">
                 <div class="hoso-them__left-group">
@@ -55,9 +55,8 @@
             </div>
         </div>
 
-        <!-- ===== BÊN PHẢI: 3 states ===== -->
+        <!-- ===== RIGHT: Form component ===== -->
         <div class="hoso-them__right">
-            <!-- Info bar -->
             @if (selectedMajorId()) {
             <div class="hoso-them__info-bar">
                 <div class="hoso-them__info-bar-item">
@@ -88,82 +87,20 @@
             </div>
             }
             <div class="hoso-them__right-content">
-
-                @switch (rightState()) {
-
-                <!-- ─── STATE: CCCD CHECK ─── -->
-                @case ('cccd_check') {
-                <div class="hoso-them__cccd-check">
-                    <h5>🔍 Kiểm tra CCCD</h5>
-                    <p>
-                        Nhập số CCCD để kiểm tra. Nếu chưa có hồ sơ hoặc hồ sơ cũ đã
-                        <b>bỏ học</b>, bạn có thể tạo hồ sơ mới.
+                @if (showForm()) {
+                <app-form-thongtin-dangky class="w-100" (saved)="onReset()" (cancel)="onReset()"
+    [majorId]="selectedMajorId()" [programId]="selectedProgramId()" />
+                } @else {
+                <div class="hoso-them__waiting">
+                    <div class="hoso-them__waiting-icon">
+                        <i class="ti ti-alert-circle"></i>
+                    </div>
+                    <h5 class="hoso-them__waiting-title">Chưa chọn ngành và chương trình</h5>
+                    <p class="hoso-them__waiting-desc">
+                        Vui lòng chọn ngành học và chương trình đào tạo trước khi kiểm tra CCCD.
                     </p>
-                    <div class="hoso-them__cccd-input-row">
-                        <input #cccdInputEl pInputText [ngModel]="cccdInput" (ngModelChange)="onCccdChange($event)" placeholder="Nhập số CCCD" type="text"
-                            maxlength="12" autocomplete="off" (keyup.enter)="runCccdCheck()" />
-                        <button (click)="runCccdCheck()" [disabled]="cccdLoading || !cccdInput.trim()"
-                            class="btn ictu-badge-btn--primary-reverse" mat-flat-button>
-                            <i class="ti ti-search"></i>
-                            <span>Kiểm tra</span>
-                        </button>
-                    </div>
-                    @if (cccdLoading) {
-                    <div class="hoso-them__cccd-loading">
-                        <i class="ti ti-loader"></i> Đang kiểm tra...
-                    </div>
-                    }
                 </div>
                 }
-
-                <!-- ─── STATE: EXISTING ─── -->
-                @case ('existing') {
-                <div class="hoso-them__existing">
-                    <div class="hoso-them__existing-alert">
-                        <i class="ti ti-info-circle"></i>
-                        Đã tồn tại hồ sơ với CCCD này. Không thể tạo mới.
-                    </div>
-                    <h5 class="hoso-them__existing-title">Thông tin hồ sơ</h5>
-                    <dl class="hoso-them__existing-list">
-                        <dt>Họ tên</dt>
-                        <dd>{{ existingRecord()?.full_name }}</dd>
-                        <dt>SĐT</dt>
-                        <dd>{{ existingRecord()?.phone }}</dd>
-                        <dt>CCCD</dt>
-                        <dd>{{ existingRecord()?.cccd }}</dd>
-                        <dt>Ngành</dt>
-                        <dd>{{ majorLabel(existingRecord()?.major_id) }}</dd>
-                        <dt>CTĐT</dt>
-                        <dd>{{ programLabel(existingRecord()?.program_id) }}</dd>
-                        <dt>Đợt</dt>
-                        <dd>{{ dotLabel(existingRecord()?.dot_dangky_id) }}</dd>
-                        <dt>Trạng thái</dt>
-                        <dd>
-                            <span class="ictu-badge" [ngClass]="statusBadgeClass(existingRecord()?.status)">
-                                {{ statusLabel(existingRecord()?.status) }}
-                            </span>
-                        </dd>
-                        <dt>Ngày tạo</dt>
-                        <dd>{{ existingRecord()?.created_at }}</dd>
-                    </dl>
-                    <div class="hoso-them__existing-actions">
-                        <button (click)="backToCccdCheck()" class="btn ictu-badge-btn--secondary" mat-flat-button>
-                            <i class="ti ti-arrow-left"></i>
-                            <span>Quay lại kiểm tra CCCD</span>
-                        </button>
-                    </div>
-                </div>
-                }
-
-                <!-- ─── STATE: FORM ─── -->
-                @case ('form') {
-                    <div class="" style="max-width: 1024px;width:100%;">
-                        <app-form-thongtin-dangky [cccd]="cccdInput" (saved)="onReset()" />
-                    </div> 
-                }
-
-                }
-
             </div>
         </div>
 

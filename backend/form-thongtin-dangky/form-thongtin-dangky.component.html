@@ -1,0 +1,237 @@
+<div class="form-ctn">
+    <div class="form-ctn_h">
+
+        <div class="form-ctn_h-content">
+
+            <form [formGroup]="formData" class="hoso-them__form">
+
+                <!-- Section 1: Thông tin cá nhân -->
+                <section class="hoso-form__section">
+                    <div class="hoso-form__section-title">I. Thông tin cá nhân</div>
+                    <div class="ictu-form ictu-form--label-on-top">
+
+                        <div class="row form-row form-row-flex-row">
+                            <div class="col-3">
+                                <ovic-img-crop-v2 [formField]="f['anh_the']" [aspectRatio]=" 2 / 3" [resizeToWidth]="300" ></ovic-img-crop-v2>
+                            </div>
+                            <div class="col-9 flex-div">
+                                <div class="row form-row-flex-row">
+                                    <div class="col-6 flex-div">
+                                        <div class="ictu-form__row">
+                                            <label class="ictu-form__label ictu-form__label--required">Họ và tên</label>
+                                            <input class="ictu-form__input-field" formControlName="full_name" pInputText
+                                                type="text" placeholder="Nguyễn Văn A" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6 flex-div">
+                                        <div class="ictu-form__row">
+                                            <label class="ictu-form__label ictu-form__label--required">Ngày sinh</label>
+                                            <p-inputMask class="w-100" mask="99/99/9999" formControlName="birthday"
+                                                placeholder="dd/mm/yyyy" slotChar="dd/mm/yyyy"></p-inputMask>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row form-row-flex-row mt-3">
+                                    <div class="col-4 flex-div">
+                                        <div class="ictu-form__row">
+                                            <label class="ictu-form__label ictu-form__label--required">Giới tính</label>
+                                            <p-select class="w-100" [options]="genderOption()" appendTo="body"
+                                                formControlName="gioi-tinh" placeholder="Chọn giới tính"
+                                                optionLabel="label" optionValue="label" [showClear]="false" />
+                                        </div>
+                                    </div>
+                                    <div class="col-4 flex-div">
+                                        <div class="ictu-form__row">
+                                            <label class="ictu-form__label ictu-form__label--required">Dân tộc</label>
+                                            <p-select class="w-100" [options]="listDantoc()" appendTo="body"
+                                                [filter]="true" filterBy="label" formControlName="dan_toc"
+                                                placeholder="Chọn dân tộc" optionLabel="label" optionValue="label"
+                                                [showClear]="false" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-4 flex-div">
+                                        <div class="ictu-form__row">
+                                            <label class="ictu-form__label ictu-form__label--required">Nơi sinh</label>
+                                            <p-select class="w-100" [options]="listTinh()" appendTo="body"
+                                                [filter]="true" filterBy="name" formControlName="noi_sinh"
+                                                placeholder="Chọn nơi sinh" optionLabel="name" optionValue="id"
+                                                [showClear]="false" />
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row form-row-flex-row mt-2">
+                                    <div class="col flex-div">
+                                        <div class="form-dk">
+                                            <div class="label-ctm"> Địa chỉ thường trú <span class="ovic-mark" >(*)</span> </div>
+                                            <div class="row ">
+                                                <div class="col-6 flex-div">
+                                                    <p-select class="w-100" [options]="listTinh()"
+                                                        (onChange)="onTinhChange($event)" appendTo="body"
+                                                        [filter]="true" filterBy="name" formControlName="tinh_id"
+                                                        placeholder="Chọn Tỉnh/ Thành phố" optionLabel="name"
+                                                        optionValue="id" [showClear]="false" />
+                                                </div>
+                                                <div class="col-6 flex-div">
+                                                    <p-select class="w-100" [options]="listXa()" appendTo="body"
+                                                        [filter]="true" filterBy="name" formControlName="xa_id"
+                                                        placeholder="Chọn Xã/ Phường" optionLabel="name"
+                                                        optionValue="id" [showClear]="false" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row form-row-flex-row mt-3">
+
+                                    <div class="col flex-div">
+                                        <div class="ictu-form__row">
+                                            <label class="ictu-form__label ictu-form__label--required">Địa chỉ</label>
+                                        
+                                                <input pInputText class="ictu-form__input-field" formControlName="address"
+                                                placeholder="địa chỉ: số nhà, đường, ngõ,...">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: CCCD -->
+                <section class="hoso-form__section">
+                    <div class="hoso-form__section-title">II. CCCD</div>
+                    <div class="ictu-form ictu-form--label-on-top">
+
+                         <div class="row form-row form-row-flex-row">
+                            <div class="col flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Số CCCD</label>
+                                      <input class="ictu-form__input-field" formControlName="cccd" pInputText type="text" readonly />
+                                </div> 
+                            </div> 
+                            <div class="col flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Ngày cấp</label>
+                                      <!-- <input class="ictu-form__input-field" formControlName="cccd_ngaycap" pInputText type="text"  /> -->
+
+                                       <p-inputMask class="w-100" mask="99/99/9999" formControlName="cccd_ngaycap"
+                                                placeholder="dd/mm/yyyy" slotChar="dd/mm/yyyy"></p-inputMask>
+                                </div> 
+                            </div>
+                            <div class="col flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Nơi cấp</label>
+                                     <p-select class="w-100" [options]="noicapCCCD" appendTo="body"
+                                                        [filter]="true" filterBy="label" formControlName="cccd_noicap"
+                                                        placeholder="Chọn " optionLabel="label"
+                                                        optionValue="label" [showClear]="false" />
+                                </div> 
+
+                            </div>
+                         </div>
+
+                         <div class="row form-row form-row-flex-row">
+                            <div class="col flex-div">
+                                <div class="ictu-form__row">
+                                     <label class="ictu-form__label ictu-form__label--required">CCCD mặt trước</label>
+                                    <ovic-img-crop-v2 [formField]="f['anh_cmnd_truoc']" [aspectRatio]=" 3 / 2" [resizeToWidth]="400" ></ovic-img-crop-v2>
+
+                                </div>
+                            </div>
+                            <div class="col flex-div">
+                                <div class="ictu-form__row">
+                                     <label class="ictu-form__label ictu-form__label--required">CCCD mặt sau</label>
+                                    <ovic-img-crop-v2 [formField]="f['anh_cmnd_sau']" [aspectRatio]=" 3 / 2" [resizeToWidth]="400" ></ovic-img-crop-v2>
+
+                                </div>
+                            </div>
+                            
+                         </div>
+                        
+                    </div>
+                </section>
+
+                <!-- Section 3: Văn bằng TN THPT -->
+                <section class="hoso-form__section">
+                    <h6 class="hoso-form__section-title">III. Bằng tốt nghiệp THPT / BTVH</h6>
+                    <div class="ictu-form ictu-form--label-on-top">
+                        <div class="ictu-form__row">
+                            <app-upload-placeholder label="Ảnh văn bằng tốt nghiệp"></app-upload-placeholder>
+                        </div>
+                        <div class="ictu-form__row ictu-form__row--two">
+                            <div>
+                                <label class="ictu-form__label">Loại văn bằng</label>
+                                <input class="ictu-form__input-field" formControlName="van_bang_tn" pInputText
+                                    type="text" />
+                            </div>
+                            <div>
+                                <label class="ictu-form__label">Năm tốt nghiệp</label>
+                                <input class="ictu-form__input-field" formControlName="nam_tn" pInputText type="text" />
+                            </div>
+                        </div>
+                        <div class="ictu-form__row ictu-form__row--two">
+                            <div>
+                                <label class="ictu-form__label">Số hiệu văn bằng</label>
+                                <input class="ictu-form__input-field" formControlName="sohieu_vb" pInputText
+                                    type="text" />
+                            </div>
+                            <div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Văn bằng chuyên môn -->
+                <section class="hoso-form__section">
+                    <h6 class="hoso-form__section-title">IV. Văn bằng chuyên môn (khác)</h6>
+                    <div class="ictu-form ictu-form--label-on-top">
+                        <div class="ictu-form__row">
+                            <label class="ictu-form__label">Tên văn bằng</label>
+                            <input class="ictu-form__input-field" formControlName="vb_chuyenmon" pInputText
+                                type="text" />
+                        </div>
+                        <div class="ictu-form__row ictu-form__row--two">
+                            <div>
+                                <label class="ictu-form__label">Ngành học</label>
+                                <input class="ictu-form__input-field" formControlName="vb_chuyenmon_nganh" pInputText
+                                    type="text" />
+                            </div>
+                            <div>
+                                <label class="ictu-form__label">Nơi cấp</label>
+                                <input class="ictu-form__input-field" formControlName="vb_chuyenmon_noicap" pInputText
+                                    type="text" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </form>
+        </div>
+
+    </div>
+    <div class="form-ctn_f">
+        <button (click)="closeForm()" class="btn ictu-badge-btn--secondary" mat-flat-button>
+            <i class="ti ti-arrow-left"></i>
+            <span>Hủy</span>
+        </button>
+        <button (click)="resetForm()" class="btn ictu-badge-btn--secondary" mat-flat-button>
+            <i class="ti ti-refresh"></i>
+            <span>Reset</span>
+        </button>
+        <button (click)="submitData()" [disabled]="!formData.valid || submitting()"
+            class="btn ictu-badge-btn--success-reverse" mat-flat-button>
+            <i class="ti ti-plus"></i>
+            <span>Thêm mới</span>
+        </button>
+    </div>
+</div>

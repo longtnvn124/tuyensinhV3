@@ -41,7 +41,10 @@
     align-items: center;
     gap: 12px;
     color: #9ca3af;
-    pointer-events: none;
+}
+
+.img-crop-placeholder--clickable {
+    cursor: pointer;
 }
 
 .img-crop-placeholder-icon {
@@ -68,8 +71,7 @@
     border-radius: 12px;
 }
 
-.img-crop-container:hover .img-crop-overlay,
-.img-crop-container:has(.img-crop-placeholder) .img-crop-overlay {
+.img-crop-container:hover .img-crop-overlay {
     display: flex;
 }
 

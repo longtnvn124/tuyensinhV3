@@ -1,11 +1,3 @@
-<input
-    type="file"
-    #fileChooser
-    hidden
-    [accept]="accept() || 'image/png,image/gif,image/jpeg,image/bmp,image/x-icon'"
-    (change)="onFileSelected($event, fileChooser)"
-/>
-
 <div class="img-crop-container" [ngStyle]="{ height: height() }">
     <!-- Preview image -->
     @if (previewUrl()) {
@@ -16,7 +8,7 @@
             alt="preview"
         />
     } @else {
-        <div class="img-crop-placeholder">
+        <div class="img-crop-placeholder" [class.img-crop-placeholder--clickable]="!disabled()" (click)="triggerFilePicker()">
             <svg class="img-crop-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/>
@@ -27,29 +19,18 @@
     }
 
     <!-- Overlay actions -->
-    <div class="img-crop-overlay">
-        @if (!disabled()) {
-            <button
-                type="button"
-                class="img-crop-btn"
-                title="Chọn ảnh"
-                (click)="fileChooser.click()"
-            >
-                <i class="fa fa-camera"></i>
-            </button>
-        }
-
-        @if (previewUrl()) {
-            <button
-                type="button"
-                class="img-crop-btn"
-                title="Xem ảnh"
-                (click)="btnViewImage()"
-            >
+    @if (previewUrl()) {
+        <div class="img-crop-overlay">
+            @if (!disabled()) {
+                <button type="button" class="img-crop-btn" title="Chọn ảnh" (click)="triggerFilePicker()">
+                    <i class="fa fa-camera"></i>
+                </button>
+            }
+            <button type="button" class="img-crop-btn" title="Xem ảnh" (click)="btnViewImage()">
                 <i class="fa fa-picture-o"></i>
             </button>
-        }
-    </div>
+        </div>
+    }
 </div>
 
 <!-- Fullscreen gallery preview -->
@@ -67,9 +48,9 @@
     <ng-template pTemplate="item" let-item>
         <p-image [src]="item" alt="Image" width="500" [preview]="true"></p-image>
     </ng-template>
-    <ng-template pTemplate="thumbnail" let-item>
+    <!-- <ng-template pTemplate="thumbnail" let-item>
         <div class="grid grid-nogutter justify-content-center">
             <img [src]="item" style="display: block" />
         </div>
-    </ng-template>
+    </ng-template> -->
 </p-galleria>

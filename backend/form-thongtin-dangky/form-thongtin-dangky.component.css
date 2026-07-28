@@ -1,0 +1,82 @@
+.thongtin-container {
+	background: #fff;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	max-width: 1024px;
+	margin: 0 auto;
+}
+
+.thongtin_body {
+	height: 1%;
+	flex: 1 1 auto;
+	padding: 10px;
+	position: relative;
+	overflow: hidden;
+	overflow-y: auto;
+}
+
+.thongtin_bottom {
+	height: 50px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 10px;
+	border-top: 1px solid #ccc;
+
+}
+.form-ctn{
+	display:flex;
+	height:100%;
+	flex-direction: column;
+}
+.form-ctn_h{
+	height: 1%;
+	flex: 1 1 auto;
+	overflow: hidden;
+	overflow-y: scroll;
+	display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.form-ctn_h-content{
+	max-width: 1024px;
+	width:100%;
+}
+
+.form-ctn_f{
+	height:50px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap:10px;
+}
+
+
+.hoso-form__section-title{
+	font-weight: 600;
+    text-transform: uppercase;
+    padding: 10px 0 0;
+    font-size: 15px;
+}
+
+
+.form-dk{
+	width: 100%;
+}
+
+.form-dk .label-ctm{
+	line-height: 1.5;
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    display: block;
+	padding-left:10px;
+}
+
+.form-dk ::ng-deep .p-select-dropdown{
+	width: 20px !important;
+    justify-content: flex-start !important;
+}

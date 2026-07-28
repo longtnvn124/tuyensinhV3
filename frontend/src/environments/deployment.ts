@@ -22,7 +22,7 @@ export const DEPLOYMENTS_FOR_DEV : Record<DevelopmentServers , DeploymentEnviron
             enableTestingMode                    : true ,
             listOfRestrictedFileTypesForDownload : [ 'pdf' , 'video' , 'audio' , 'text' , 'image' ] ,
             domainName                           : 'api-dev.ictu.vn' ,
-            fileHostingService                   : 'aws'
+            fileHostingService                   : 'local'
         } ,
         socketServiceConfig : {
             port : 10092 ,

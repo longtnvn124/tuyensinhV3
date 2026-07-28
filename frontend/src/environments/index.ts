@@ -25,3 +25,4 @@ export const IDENTITY_CODE : string                                    = '12vL0?
 export const SHIFT_CODE_KEY : string                                   = '7oIu24uZ5lz9';
 export const ENVIRONMENT : Environment                                 = environment;
 export const DEPLOYMENT_INFO : DeploymentEnvironment                   = environment.deployment;
+

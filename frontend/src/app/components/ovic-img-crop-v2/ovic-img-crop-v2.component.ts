@@ -28,6 +28,7 @@ import {
 } from '@components/ictu-image-resize/ictu-image-resize.component';
 import { Helper } from '@utilities/helper';
 import { _10MB } from '@utilities/syscats';
+import { AuthenticationService } from '@app/services/authentication.service';
 
 export const TYPE_FILE_IMAGE: string[] = ['image/png', 'image/gif', 'image/jpeg', 'image/bmp', 'image/x-icon'];
 
@@ -82,6 +83,21 @@ export class OvicImgCropV2Component implements OnInit {
     private fileService = inject(IctuFileService);
     private notificationService = inject(NotificationService);
     private dialog = inject(MatDialog);
+    private auth = inject(AuthenticationService)
+
+    triggerFilePicker(): void {
+        if (this.disabled()) return;
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = this.accept() || 'image/png,image/gif,image/jpeg,image/bmp,image/x-icon';
+        input.onchange = () => {
+            const file = input.files?.[0];
+            if (file) this.onFileSelected(file);
+            input.remove();
+        };
+        input.oncancel = () => { /* no-op */ };
+        input.click();
+    }
 
     responsiveOptions: any[] = [
         { breakpoint: '1024px', numVisible: 5 },
@@ -112,15 +128,9 @@ export class OvicImgCropV2Component implements OnInit {
 
     // ─────────────────────── Public ───────────────────────
 
-    async onFileSelected(_event: Event, fileChooser: HTMLInputElement): Promise<void> {
-        const files = fileChooser.files;
-        if (!files || !files.length) return;
-
-        const file = files[0];
-
+    async onFileSelected(file: File): Promise<void> {
         if (!TYPE_FILE_IMAGE.includes(file.type)) {
             this.notificationService.toastWarning('Định dạng file không phù hợp');
-            fileChooser.value = '';
             return;
         }
 
@@ -128,7 +138,6 @@ export class OvicImgCropV2Component implements OnInit {
             this.notificationService.toastError(
                 'Dung lượng file không được vượt quá ' + Math.round(this.fileSize() / 1048576) + 'MB',
             );
-            fileChooser.value = '';
             return;
         }
 
@@ -144,12 +153,12 @@ export class OvicImgCropV2Component implements OnInit {
 
             this.fileService.uploadFile_tuyensinh(uploadFile).subscribe({
                 next: (res: any) => {
-                    const fileName = res.name;
-                    this.formField().setValue(fileName);
+
+                    this.formField().setValue(res.id);
                     this.previewUrl.set(
-                        this.fileService.getPreviewLinkLocalFile(fileName),
+                        this.fileService.getPreviewLinkLocalFile(res.id),
                     );
-                    this.onUploadSuccess.emit(fileName);
+                    this.onUploadSuccess.emit(res.id);
                     this.notificationService.toastSuccess('Upload thành công');
                     this.notificationService.isProcessing(false);
                 },
@@ -163,7 +172,6 @@ export class OvicImgCropV2Component implements OnInit {
             });
         } catch (_err) {
             this.notificationService.isProcessing(false);
-            fileChooser.value = '';
         }
     }
 

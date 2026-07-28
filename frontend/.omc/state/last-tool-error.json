@@ -1,7 +1,7 @@
 {
   "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx tsc --noEmit --pretty 2>&1 | Select-Object -First 30\",\"description\":\"TypeScript compilation check\"}",
-  "error": "Exit code 255\n\u001b[96msrc/app/components/assign-homework-component/assign-homework-component.ts\u001b[0m:\u001b[93m40\u001b[0m:\u001b[93m8\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2307: \u001b[0mCannot find module '@app/models/course-lesson-test' or its corresponding type declarations.\r\n\r\n\u001b[7m40\u001b[0m } from '@app/models/course-lesson-test';\r\n\u001b[7m  \u001b[0m \u001b[91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\u001b[0m\r\n\r\n\u001b[96msrc/app/components/assign-homework-component/assign-homework-component.ts\u001b[0m:\u001b[93m72\u001b[0m:\u001b[93m34\u001b[0m - \u001b[91merror\u001b[0m\u001b[90m TS2307...",
-  "timestamp": "2026-07-20T09:40:55.909Z",
-  "retry_count": 1
+  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx tsc --noEmit 2>&1 | Select-String \\\"ovic-avata-type-multiple|ovic-img-crop-v2\\\"\",\"timeout\":120000,\"description\":\"Check TS error...",
+  "error": "Exit code 2",
+  "timestamp": "2026-07-28T02:12:12.451Z",
+  "retry_count": 2
 }

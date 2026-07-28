@@ -1,27 +1,177 @@
-.thongtin-container {
-	background: #fff;
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	max-width: 1024px;
-	margin: 0 auto;
+/* ─────────────────────────────────────────────
+   State screens (loading / error)
+   ───────────────────────────────────────────── */
+.state-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 4rem 1rem;
+    min-height: 300px;
 }
 
-.thongtin_body {
-	height: 1%;
-	flex: 1 1 auto;
-	padding: 10px;
-	position: relative;
-	overflow: hidden;
-	overflow-y: auto;
+.state-screen__text {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
 }
 
-.thongtin_bottom {
-	height: 50px;
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	padding: 10px;
-	border-top: 1px solid #ccc;
+/* ─────────────────────────────────────────────
+   CCCD check
+   ───────────────────────────────────────────── */
+.cccd-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    min-height: 300px;
+}
 
+.cccd-check__card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+}
+
+.cccd-check__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.cccd-check__desc {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 1.5rem;
+    line-height: 1.5;
+}
+
+.cccd-check__input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+}
+
+.cccd-check__input-row input {
+    flex: 1;
+    max-width: 280px;
+}
+
+.cccd-check__loading {
+    margin-top: 1rem;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* ─────────────────────────────────────────────
+   Existing record
+   ───────────────────────────────────────────── */
+.existing {
+    padding: 2rem 1rem;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.existing__alert {
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.existing__title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+}
+
+.existing__table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.existing__table tr td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+}
+
+.existing__label {
+    font-weight: 500;
+    color: #555;
+    width: 120px;
+}
+
+/* ─────────────────────────────────────────────
+   Form container
+   ───────────────────────────────────────────── */
+.form-ctn {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+}
+
+.form-ctn_h {
+    height: 1%;
+    flex: 1 1 auto;
+    overflow: hidden;
+    overflow-y: scroll;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.form-ctn_h-content {
+    max-width: 1024px;
+    width: 100%;
+}
+
+.form-ctn_f {
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ─────────────────────────────────────────────
+   Form sections
+   ───────────────────────────────────────────── */
+.hoso-form__section-title {
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 10px 0 0;
+    font-size: 15px;
+}
+
+.form-dk {
+    width: 100%;
+}
+
+.form-dk .label-ctm {
+    line-height: 1.5;
+    font-family: var(--primary-font-family), sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    display: block;
+    padding-left: 10px;
+}
+
+.form-dk ::ng-deep .p-select-dropdown {
+    width: 20px !important;
+    justify-content: flex-start !important;
 }

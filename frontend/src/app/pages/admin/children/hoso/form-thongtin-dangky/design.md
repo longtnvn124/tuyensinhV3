@@ -1,232 +1,363 @@
-# Design: Refactor `FormThongtinDangkyComponent` — Angular 21 Standalone
+# Design: FormThongtinDangkyComponent — Approach A (CCCD check bên trong)
 
 ## 1. Mục tiêu
 
-Viết lại component theo chuẩn Angular 21 (standalone, Signals, `@if/@for/@switch`, `inject()`), giảm kích thước file (~617 → ~300 dòng), tách biệt rõ form UI với data-loading logic.
+Viết lại component với CCCD check **nằm trong form component** (giống v14), áp dụng Angular 19 patterns: Signals, `inject()`, `takeUntilDestroyed()`, `@if/@for/@switch`.
 
 ---
 
-## 2. Angular 21 Patterns (đã dùng trong project)
+## 2. Kiến trúc tổng thể
 
-Tham khảo từ các component mới (`dot-xettuyen`, `dashboard`):
+### 2.1. Phân luồng view mới
 
-| Pattern | Cũ (hiện tại) | Mới (Angular 21) |
-|---|---|---|
-| Component | `standalone: false` (NgModule) | `standalone: true` |
-| Style | `styleUrls: ['./a.css']` | `styleUrl: './a.css'` |
-| DI | `constructor(private fb: FormBuilder)` | `private readonly fb = inject(FormBuilder)` |
-| Reactivity | `property` + `ChangeDetection` | `signal()`, `computed()` |
-| Control Flow | `*ngIf`, `*ngSwitchCase`, `*ngFor` | `@if`, `@switch`, `@for` |
-| Form type | `FormBuilder.group({...})` | `FormGroup`, `FormControl` specs |
-| State enum | `ngView: 0\|1\|-1` | `viewState = signal<'loading'\|'ready'\|'error'>('loading')` |
+```
+FormThongtinDangkyComponent
+│
+├── viewState = 'loading'       ──►  progress bar + "Đang tải..."
+├── viewState = 'error'         ──►  "Mất kết nối" + nút [Tải lại]
+├── viewState = 'cccd_check'    ──►  Input CCCD + nút [Kiểm tra]
+├── viewState = 'existing'      ──►  Card thông tin thí sinh cũ + [Quay lại]
+└── viewState = 'form'          ──►  Form đăng ký + nút [Lưu] / [Hủy]
+```
+
+### 2.2. Interaction Flow
+
+```
+User nhập CCCD + [Kiểm tra]
+        │
+        ▼
+checkCccd(cccd)
+        │
+        ├── API trả về: không tìm thấy ──► viewState = 'form'
+        │                                     (tự động set CCCD vào form)
+        │
+        ├── API trả về: found, status = 'bo_hoc' ──► viewState = 'form'
+        │                                              (cho phép tạo mới)
+        │
+        └── API trả về: found, status ≠ 'bo_hoc' ──► viewState = 'existing'
+                                                       (hiện thông tin cũ)
+
+┌─ existing ─────────────────────────────────────┐
+│  [Quay lại] ──► viewState = 'cccd_check'       │
+└────────────────────────────────────────────────┘
+
+┌─ form ─────────────────────────────────────────┐
+│  [Lưu]    ──► submitData() → saved.emit()      │
+│  [Hủy]    ──► cancel.emit() → parent onReset() │
+│  [Reset]  ──► resetForm(): clear dataId,        │
+│               cccdResult + initForm()            │
+└────────────────────────────────────────────────┘
+```
+
+### 2.3. Component Tree (mới)
+
+```
+HosoThemComponent (parent — simplified)
+├── Left Panel: ngành + CTĐT (giữ nguyên)
+│
+└── Right Panel:
+    └── <app-form-thongtin-dangky
+            [data]="editData"         // Optional: edit mode
+            [majorId]="selectedMajorId()"   // Create: auto-fill ngành
+            [programId]="selectedProgramId()" // Create: auto-fill CTĐT
+            (saved)="onReset()"
+            (cancel)="onReset()" />
+
+FormThongtinDangkyComponent (self-contained)
+├── viewState = 'cccd_check' → input CCCD
+├── viewState = 'existing'   → info card
+├── viewState = 'form'       → form + actions
+├── viewState = 'loading'    → progress bar
+├── viewState = 'error'      → retry button
+│
+├── loadLookups() → forkJoin(profiles, donvi, regions, nganh, users)
+├── checkCccd(cccd) → hosoService.checkCccd() → set viewState
+├── submitData() → create/update + status
+└── formReset() → initForm() + set default values
+```
+
+### 2.4. Parent Interface (tối giản)
+
+```typescript
+// HosoThemComponent — không quản lý CCCD state gì cả
+<app-form-thongtin-dangky
+    [data]="editData()"
+    [majorId]="selectedMajorId()"
+    [programId]="selectedProgramId()"
+    (saved)="onReset()"
+    (cancel)="onReset()" />
+```
 
 ---
 
-## 3. Kiến trúc mới
-
-### 3.1. Tách file
-
-```
-form-thongtin-dangky/
-├── design.md                              # (file này)
-├── form-thongtin-dangky.component.ts      # ~300 dòng - UI + binding
-├── form-thongtin-dangky.component.html    # @if/@switch/@for syntax
-├── form-thongtin-dangky.component.scss    # SCSS thay cho CSS
-└── form-thongtin-dangky.service.ts        # ~150 dòng - data-loading + validation
-```
-
-**Tại sao tách service?**
-- `loadInit()` gọi 5 API forkJoin → che khuất form logic
-- `checkCccd()` + `submitData()` là business logic, không thuần UI
-- Service tái dùng được nếu sau này có form đăng ký từ phía sinh viên
-
-### 3.2. Component structure
-
-```
-┌──────────────────────────────────────────────┐
-│ FormThongtinDangkyComponent                  │
-├──────────────────────────────────────────────┤
-│ viewState = signal<'loading'|'ready'|'error'> │
-│ formData = FormGroup                         │
-│ cccdValid = signal<boolean>                  │
-│ list_citys / list_wards / ... = signal<T[]>   │
-│ selectedTH = signal<THOptieon|null>          │
-│ readonly tuyensinh_select = input<Tuyensinh>()│
-│ readonly disable = input<boolean>(false)      │
-│ readonly showStatus = input<boolean>(false)   │
-├──────────────────────────────────────────────┤
-│ constructor() {                               │
-│   inject-based DI                             │
-│   initForm() → tạo FormGroup                  │
-│ }                                             │
-│ ngOnInit() → eff.loadInit()                   │
-│ handleCccdCheck()                             │
-│ handleSubmit()                                │
-│ handleClose()                                 │
-│ onChangeTinh()                                │
-│ onSelectTHForm()                              │
-│ onChangeTypeDiem()                            │
-│ onChangeVBCM()                                │
-└──────────────────────────────────────────────┘
-```
-
-### 3.3. Form init — dùng `FormGroup` với `NonNullableFormBuilder`
+## 3. State Management (Signals)
 
 ```typescript
-// thay vì this.fb.group({...})
-private readonly formBuilder = inject(FormBuilder).nonNullable;
+type ViewState = 'loading' | 'error' | 'cccd_check' | 'existing' | 'form';
 
-initForm(): void {
-  this.formData = this.formBuilder.group({
-    ho_va_ten: ['', Validators.required],
-    gioi_tinh: ['', Validators.required],
-    ngay_sinh: ['', Validators.required],
-    // ... all fields
-  });
-}
-```
-
-### 3.4. Signal state pattern
-
-```typescript
-type ViewState = 'loading' | 'ready' | 'error';
-
+// View
 readonly viewState = signal<ViewState>('loading');
-readonly cccdValid = signal(false);
-readonly listCitys = signal<DiaDanh[]>([]);
-readonly listWards = signal<DiaDanh[]>([]);
-readonly listNganhTuyensinh = signal<NganhTuyensinh[]>([]);
-readonly listUserDoitac = signal<User[]>([]);
-readonly listUserSoHuu = signal<User[]>([]);
-readonly selectedTH = signal<THOption | null>(null);
-readonly cccdCheckValue = signal<Tuyensinh | null>(null);
+
+// CCCD check
+readonly cccdInput     = signal<string>('');
+readonly cccdResult    = signal<HosoCheckCccdResult | null>(null);
+readonly existingRecord = computed(() => {
+    const r = this.cccdResult();
+    return r && r.found ? r.record : null;
+});
+readonly cccdValid     = computed(() => this.viewState() === 'form');
+readonly cccdLoading   = signal(false);
+
+// Role flags
+isManager     : Signal<boolean>
+isLanhDaoKhoa : Signal<boolean>
+canEdit       : Signal<boolean>
+canAdd        : Signal<boolean>
+duyetHoso     : Signal<boolean>
+
+// Lookup data signals
+listTinh             = signal<Locations[]>([])
+listXa               = signal<Locations[]>([])
+listDonViChuyenmon   = signal<any[]>([])
+listNganhTuyensinh   = signal<any[]>([])
+listUserDoitac       = signal<User[]>([])
+
+// Form (giữ ReactiveForms)
+formData!: FormGroup
+submitting = signal(false)
 ```
 
-### 3.5. Subscription → signals + `takeUntilDestroyed`
+---
+
+## 4. Luồng khởi tạo (ngOnInit)
+
+```
+ngOnInit()
+│
+├── initForm()
+│
+├── loadLookups()
+│   ├── forkJoin(profiles, donvi, regions, nganh, users)
+│   ├── success → viewState = 'cccd_check'
+│   │              (nếu có data input) → getFormData(data) → viewState = 'form'
+│   └── error   → viewState = 'error'
+│
+├── [OPTIONAL] effect() bắt input data để load edit
+│   effect(() => {
+│       const d = this.data();
+│       if (d && this.viewState() === 'ready') {
+│           this.getFormData(d);
+│       }
+│   })
+```
+
+---
+
+## 5. Form fields (đã đồng bộ + fix)
+
+| Field | Validators | Ghi chú |
+|-------|-----------|---------|
+| `full_name` | required, minLength(2) | |
+| `birthday` | | InputMask dd/mm/yyyy |
+| `phone` | required, pattern `^(0[35789])(\d{8})$` | |
+| `email` | email | |
+| **`gioi_tinh`** | required | **Fix: `gioi-tinh` → `gioi_tinh`** |
+| `dan_toc` | | p-select |
+| `noi_sinh` | | p-select (tỉnh) |
+| `tinh_id` | | Location cascade |
+| `xa_id` | | Location cascade |
+| `address` | | textarea |
+| `cccd` | required, pattern `[0-9]{12}` | |
+| `cccd_ngaycap` | | InputMask |
+| `cccd_noicap` | | p-select |
+| `van_bang_tn` | | |
+| `nam_tn` | | |
+| `sohieu_vb` | | |
+| **`noicap_tn`** | | **Thêm mới** |
+| `vb_chuyenmon` | | |
+| `vb_chuyenmon_nganh` | | |
+| `vb_chuyenmon_namtn` | | |
+| `vb_chuyenmon_noicap` | | |
+| **`program_id`** | | **Thêm mới, auto-fill từ parent** |
+| **`nganh_dangky`** | | **Thêm mới, auto-fill từ parent** |
+| **`hinhthuc_xettuyen`** | | **Thêm mới** |
+| **`type_diem`** | | **Thêm mới** |
+| **`diemtb`** | | **Thêm mới** |
+| **`donvi_chuyenmon_id`** | | **Thêm mới** |
+| **`submit_from`** | default `'website'` | **Thêm mới** |
+| `status` | default `'cho_duyet'` | |
+| `owner_by` | default `auth.user.id` | |
+| `nguon_dang_ky` | default `'website'` | |
+| **`content`** | | **Thêm mới** |
+| Image fields (6) | | OvicImgCropV2 |
+
+---
+
+## 6. CCCD Check Flow
 
 ```typescript
-private readonly destroyRef = inject(DestroyRef);
+// Filter input — chỉ giữ số
+onCccdInputChange(value: string): void {
+    this.cccdInput.set(value.replace(/\D/g, ''));
+}
 
-loadInit(): void {
-  forkJoin([...]).pipe(
-    takeUntilDestroyed(this.destroyRef)
-  ).subscribe({
-    next: ([...]) => { ... },
-    error: () => { this.viewState.set('error'); }
-  });
+// Kiểm tra CCCD
+runCccdCheck(): void {
+    const cccd = this.cccdInput().trim();
+    if (cccd.length !== 12) { /* warning */ return; }
+
+    this.cccdLoading.set(true);
+    this.hosoService.checkCccd(cccd).subscribe({
+        next: (res) => {
+            this.cccdResult.set(res);
+            this.cccdLoading.set(false);
+
+            if (!res.found || res.record.status === 'bo_hoc') {
+                this.formData.patchValue({
+                    cccd,
+                    nganh_dangky: this.majorId(),    // auto-fill từ parent
+                    program_id: this.programId(),     // auto-fill từ parent
+                });
+                this.viewState.set('form');
+            } else {
+                this.viewState.set('existing');
+            }
+        },
+        error: () => {
+            this.cccdLoading.set(false);
+            this.notification.toastError('Kiểm tra CCCD thất bại');
+        }
+    });
+}
+
+backToCccdCheck(): void {
+    this.cccdResult.set(null);
+    this.viewState.set('cccd_check');
 }
 ```
 
-### 3.6. Template — `@if`/`@switch`
+---
+
+## 7. Submit Flow
+
+```typescript
+submitData(): void {
+    if (this.formData.invalid) {
+        // Show first error
+        for (const key of Object.keys(this.errorMessages)) {
+            if (this.formData.get(key)?.invalid) {
+                this.notification.toastError(this.errorMessages[key]);
+                break;
+            }
+        }
+        return;
+    }
+
+    this.submitting.set(true);
+    const raw = { ...this.formData.getRawValue() };
+
+    // Xử lý diem_xettuyen
+    if (raw.type_diem && raw.diemtb) {
+        raw.diem_xettuyen = `${raw.type_diem}|${raw.diemtb}`;
+    }
+    delete raw.type_diem;
+    delete raw.diemtb;
+
+    if (this.dataId) {
+        // UPDATE
+        this.hosoService.updateTuyensinh(this.dataId, raw).pipe(
+            switchMap(() => {
+                const hasStatusChange = raw.content || raw.status !== this.currentRecord.status;
+                return hasStatusChange
+                    ? this.tuyensinhStatusService.addTuyensinhStatus({...})
+                    : of(null);
+            })
+        ).subscribe({ next: () => this.onSuccess() });
+    } else {
+        // CREATE
+        this.hosoService.addTuyensinh(raw).pipe(
+            switchMap((newId) => this.tuyensinhStatusService.addTuyensinhStatus({
+                registration_id: newId,
+                status_key: 'XET_TUYEN',
+                status_value: 'KHOI_TAO',
+                status_name: 'Chờ duyệt',
+                content: '',
+            }))
+        ).subscribe({ next: () => this.onSuccess() });
+    }
+}
+
+private onSuccess(): void {
+    this.submitting.set(false);
+    this.notification.isProcessing(false);
+    this.notification.toastSuccess('Thành công');
+    this.formReset();
+    this.saved.emit();
+}
+```
+
+---
+
+## 8. Input signals (bắt sự kiện từ parent)
+
+```typescript
+readonly data      = input<HosoThisinh | null>(null);  // Edit mode → load full data
+readonly majorId   = input<number | null>(null);        // Create: auto-fill ngành_dangky
+readonly programId = input<number | null>(null);        // Create: auto-fill program_id
+```
+
+- **data() ≠ null**: `loadLookups()` gọi `getFormData()` → viewState = 'form' (edit mode)
+- **majorId + programId ≠ null**: `runCccdCheck()` patch vào form sau khi CCCD check OK
+
+---
+
+## 9. Tác động đến `HosoThemComponent`
+
+### Bỏ được từ parent:
+- `rightState`, `cccdInput`, `cccdLoading`, `cccdResult`, `existingRecord`
+- `onCccdChange()`, `runCccdCheck()`, `backToCccdCheck()`
+- `statusOptions`
+- Template `@case ('cccd_check')`, `@case ('existing')`
+
+### Giữ lại ở parent:
+- Left panel (ngành + CTĐT)
+- `loadLookups()` cho majors, programs, dots
+- `onMajorChange()`, `selectProgram()`
+- `onReset()` (reset toàn bộ về mặc định)
+
+### Parent template hiện tại:
 
 ```html
-@switch (viewState()) {
-  @case ('loading') {
-    <div class="...">loading...</div>
-  }
-  @case ('error') {
-    <div class="...">Mất kết nối... <button (click)="loadInit()">Tải lại</button></div>
-  }
-  @case ('ready') {
-    <form [formGroup]="formData">...</form>
-  }
-}
+<app-form-thongtin-dangky class="w-100" (saved)="onReset()" (cancel)="onReset()"
+    [majorId]="selectedMajorId()" [programId]="selectedProgramId()" />
 ```
 
 ---
 
-## 4. Chi tiết thay đổi
+## 10. Thứ tự thực hiện
 
-### 4.1. Component decorator
+| Phase | File(s) | Nội dung | Trạng thái |
+|-------|---------|----------|------------|
+| 0 | `tuyensinh-status.ts`, `tuyensinh-status.service.ts` | Tạo model + service | ✅ Done |
+| 1 | `.ts` | `ViewState` type, signals, role flags | ✅ Done |
+| 2 | `.ts` | `initForm()`: fix `gioi_tinh`, thêm fields | ✅ Done |
+| 3 | `.ts` | `loadLookups()`: thêm nganh, user profile | ✅ Done |
+| 4 | `.ts` | CCCD check (`runCccdCheck`, `backToCccdCheck`) | ✅ Done |
+| 5 | `.ts` | `submitData()`: update flow, status, `diem_xettuyen` | ✅ Done |
+| 6 | `.ts` | `formReset()` + `data` input | ✅ Done |
+| 7 | `.html` | `@switch(viewState())` — 5 cases | ✅ Done |
+| 8 | `.html` | Form 6 sections + images + actions | ✅ Done |
+| 9 | `.css` | Styles mới | ✅ Done |
+| 10 | Parent `.ts/.html` | Gỡ CCCD state, simplify | ✅ Done |
 
-```typescript
-@Component({
-  selector: 'app-form-thongtin-dangky',
-  standalone: true,
-  imports: [
-    InputMaskModule, InputNumberModule, InputTextModule, InputTextareaModule,
-    ButtonModule, RippleModule, MatProgressBarModule,
-    Select, SelectButton,
-    ReactiveFormsModule, SharedModule,
-    OvicAvataTypeThptComponent, OvicAvataTypeMultipleComponent,
-  ],
-  templateUrl: './form-thongtin-dangky.component.html',
-  styleUrl: './form-thongtin-dangky.component.scss',
-})
-```
-
-### 4.2. Inputs dùng `input()` signal
-
-```typescript
-readonly tuyensinhSelect = input<Tuyensinh | null>(null);
-readonly disable = input<boolean, unknown>(false, { transform: booleanAttribute });
-readonly showStatus = input<boolean, unknown>(false, { transform: booleanAttribute });
-readonly isManager = input<boolean, unknown>(false, { transform: booleanAttribute });
-readonly canAdd = input<boolean, unknown>(false, { transform: booleanAttribute });
-readonly canEdit = input<boolean, unknown>(false, { transform: booleanAttribute });
-```
-
-### 4.3. FormGroup controls accessor
-
-```typescript
-get f(): FormGroup['controls'] {
-  return this.formData.controls;
-}
-// → Giữ nguyên, vẫn là pattern tiện cho template
-```
-
-### 4.4. Submit thay đổi nhỏ
-
-```typescript
-handleSubmit(): void {
-  if (this.formData.invalid) { ... showFirstError ... return; }
-  // ...
-}
-```
-
-### 4.5. Template fields clean up
-
-- `formControlName="diemtb"` → PrimeNG `p-inputNumber` vẫn dùng được.
-- Các `hasControlRequired` pipe → giữ nguyên (là custom pipe).
-- Các bindings dropdown `[options]="listCitys()"` → signal đọc value.
+> **Status: ALL PHASES COMPLETE** — Dừng tại đây, chờ phiên tiếp theo.
 
 ---
 
-## 5. Không thay đổi (giữ nguyên)
+## 11. Risks
 
-| Thành phần | Lý do |
-|---|---|
-| **Nghiệp vụ** | Không đổi, form fields/services APIs như cũ |
-| **PrimeNG module** | Chỉ đổi cách import, không đổi component | 
-| **Ovic custom controls** | Giữ lại `ovic-avata-type-thpt` + `ovic-avata-type-multiple`. Các controls khác (`ovic-dropdown` → `p-select`, `ovic-groups-radio` → `p-selectButton`) đã thay bằng PrimeNG |
-| **CSS class names** | `.thongtin-container`, `.ovic-*`, `.tuyensinh-*` |
-| **Form field names** | `ho_va_ten`, `ngay_sinh`, ... giống DB mapping |
-| **Service layer** | `TuyensinhService`, `LocationService`, ... không đổi |
-
----
-
-## 6. Các bước thực hiện
-
-| Bước | File(s) | Nội dung |
-|---|---|---|
-| 1 | `.ts` | Đổi decorator: `standalone: true`, `styleUrl`, imports array |
-| 2 | `.ts` | Đổi DI từ constructor → `inject()` |
-| 3 | `.ts` | Đổi properties sang `signal()` |
-| 4 | `.ts` | Đổi `*ngIf/*ngSwitch` enum → `ViewState` type |
-| 5 | `.ts` | Đổi `ngOnInit` → dùng `takeUntilDestroyed` |
-| 6 | `.html` | `*ngIf` → `@if`, `*ngSwitchCase` → `@switch` |
-| 7 | `.html` | Bỏ `<ng-container>` wrapper không cần thiết |
-| 8 | `.css` → `.scss` | Rename + SCSS syntax |
-| 9 | `.service.ts` | (optional) Extract data-loading logic |
-
----
-
-## 7. Rủi ro
-
-- **Thay đổi template**: `formControlName` vẫn hoạt động trong `@if` block — OK trong Angular 21.
-- **Input Mask**: `p-inputMask` cần `InputMaskModule` — có sẵn.
-- **Dropdown**: `ovic-dropdown` binding `[formField]="f['xyz']"` — giữ nguyên.
-- **formData.setValue()**: Trong `getFormData()`, object key mapping không đổi.
-- **viewState enum**: LoadInit() bắn `ngView` → có thể miss case nếu quên mapping.
-
-> **Sẵn sàng code sau khi bạn xác nhận plan này.**
+- **TuyensinhStatusService**: chưa tồn tại trong v19 → phải tạo
+- **DonViService**: chưa tồn tại → tạo hoặc dùng `IctuBaseServiceClass`
+- **UserProfileService**: cần kiểm tra có method lấy `donvi_chuyenmon_id` không
+- **`gioi_tinh` rename**: ảnh hưởng nếu DB vẫn dùng `gioi-tinh`
+- **Parent interface thay đổi**: ảnh hưởng component khác dùng `FormThongtinDangkyComponent`

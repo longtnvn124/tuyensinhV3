@@ -440,3 +440,13 @@ body .edit-course-lesson-lecture__body--limit-height .ng-scroll-content {
 .ictu-mat-progress-bar .mdc-linear-progress__bar {
     border-radius: var(--mat-progress-bar-track-shape, 0)
 }
+
+
+
+/* ----------------------------------------------------------------- */
+
+.ovic-mark{
+    margin-left: 5px;
+    color: #c50d0d;
+    ;
+}
