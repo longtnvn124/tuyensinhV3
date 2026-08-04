@@ -89,7 +89,7 @@ interface Hoso_thisinh {
 
     major_id?: number; // ngành học muốn đào tạo
     program_id?: number; // chương trình đào tạo
-    dot_dangky_id?: number; // đợt đăng ký (chọn từ khi đăng ký)
+    dot_xet_tuyen_id?: number; // đợt đăng ký (chọn từ khi đăng ký)
 
     vb_tn?: string; // văn bằng tốt nghiệp THPT
     vb_tn_nam?: string; // năm tốt nghiệp
@@ -174,7 +174,7 @@ Hội đồng xét tuyển.
 interface Hoidong_xettuyen {
     id?: number;
     name: string; // tên hội đồng
-    dot_dangky_id: number; // đợt xét tuyển
+    dot_xet_tuyen_id: number; // đợt xét tuyển
     thoi_gian_xet_tuyen: Date;
     status: string; // "dang_mo" | "da_dong"
     created_at: Date;
@@ -227,12 +227,12 @@ interface Parents {
 - users.donvi_id
 - registration_periods.status
 - registration_periods.nganh_ids.major_id
-- admission_councils.dot_dangky_id
+- admission_councils.dot_xet_tuyen_id
 - admission_council_profiles.hoidong_id + registration_id unique
 - admission_council_profiles.registration_id
 - parents.parent_id
 - parents.user_id unique
-- applicants.dot_dangky_id
+- applicants.dot_xet_tuyen_id
 - tinh.code unique
 - huyen.tinh_id
 - xa.huyen_id
@@ -247,7 +247,7 @@ interface Parents {
 - 2026-05-29: Tạo sơ đồ collection MongoDB cho user/role/applicant/program/attachment/partner/commission/audit.
 - 2026-06-19: Tinh gọn schema: thêm majors, tuvan_assignments; bỏ partner_profiles/assignments/audit_logs/attachments; sửa partner_commissions.user_id.
 - 2026-06-25: Thêm collection donvi; bổ sung giải thích donvi_id, realms, role_ids, is_admin; sửa index applicants.assigned_user_id → applicants.nguoi_tuvan_id; bổ sung index cho donvi, role_ids, is_deleted.
-- 2026-06-30: Thêm registration_periods, admission_councils, council_results, parents; cập nhật roles (9 roles mới); thêm dot_dangky_id vào applicants.
+- 2026-06-30: Thêm registration_periods, admission_councils, council_results, parents; cập nhật roles (9 roles mới); thêm dot_xet_tuyen_id vào applicants.
 - 2026-07-01: Sửa đánh số section; đồng bộ tên interface (Registrations→Applicants, hoidong→AdmissionCouncils, hoidong_thisinh→AdmissionCouncilProfiles); sửa index sai field (profile_id→registration_id, council_results→admission_council_profiles, applicant_id→registration_id); thêm collection tinh/huyen/xa; cập nhật registration_periods.nganh_ids thành mảng object chứa major_id + program_ids; sửa hoidong_id kiểu string→number.
 - 2026-07-06: Chuyển ObjectId → number; thêm SQL CREATE TABLE scripts.
 - 2026-07-07: Đồng bộ SQL table names với interface names mục 3.
@@ -327,7 +327,7 @@ CREATE TABLE hoso_thisinh (
 
     major_id            INT,
     chuongtrinh_daotao_id INT,
-    dot_dangky_id       INT,
+    dot_xet_tuyen_id       INT,
 
     vb_tn               VARCHAR(255),
     vb_tn_nam           VARCHAR(20),
@@ -356,11 +356,11 @@ CREATE TABLE hoso_thisinh (
     INDEX idx_phone (phone),
     INDEX idx_status (status),
     INDEX idx_nguoi_tuvan_id (nguoi_tuvan_id),
-    INDEX idx_dot_dangky_id (dot_dangky_id),
+    INDEX idx_dot_xet_tuyen_id (dot_xet_tuyen_id),
     INDEX idx_owner_by (owner_by),
     FOREIGN KEY (major_id)              REFERENCES nganhhoc(id) ON DELETE SET NULL,
     FOREIGN KEY (chuongtrinh_daotao_id) REFERENCES chuongtrinh_daotao(id) ON DELETE SET NULL,
-    FOREIGN KEY (dot_dangky_id)         REFERENCES dot_xettuyen(id) ON DELETE SET NULL
+    FOREIGN KEY (dot_xet_tuyen_id)         REFERENCES dot_xettuyen(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -416,13 +416,13 @@ CREATE TABLE doitac_doanhthu (
 CREATE TABLE hoidong_xettuyen (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     name                VARCHAR(255) NOT NULL,
-    dot_dangky_id       INT NOT NULL,
+    dot_xet_tuyen_id       INT NOT NULL,
     thoi_gian_xet_tuyen DATETIME NOT NULL,
     status              ENUM('dang_mo', 'da_dong') NOT NULL DEFAULT 'dang_mo',
     created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_dot_dangky_id (dot_dangky_id),
-    FOREIGN KEY (dot_dangky_id) REFERENCES dot_xettuyen(id) ON DELETE RESTRICT
+    INDEX idx_dot_xet_tuyen_id (dot_xet_tuyen_id),
+    FOREIGN KEY (dot_xet_tuyen_id) REFERENCES dot_xettuyen(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

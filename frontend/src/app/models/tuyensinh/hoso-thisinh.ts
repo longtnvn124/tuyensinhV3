@@ -10,7 +10,7 @@ export interface HosoThisinh extends IctuBaseModel {
     huyen_id?: number;
     xa_id?: number;
     address?: string;
-    noi_sinh?: string;
+    noi_sinh?: number;
     dan_toc?: string;
     status: string;
 
@@ -18,9 +18,9 @@ export interface HosoThisinh extends IctuBaseModel {
     cccd_ngaycap?: string;
     cccd_noicap?: string;
 
-    major_id?: number;
-    program_id?: number;
-    dot_dangky_id?: number;
+    nganh_id?: number;
+    ctdt_id?: number;
+    dot_xet_tuyen_id?: number;
 
     vb_tn?: string;
     vb_tn_nam?: string;

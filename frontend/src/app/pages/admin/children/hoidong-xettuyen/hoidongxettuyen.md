@@ -2,7 +2,7 @@
 
 ## 1. Mục tiêu
 
-Module `hoidong-xettuyen` quản lý **hội đồng xét tuyển** thuộc một **đợt xét tuyển** (`dot_dangky_id`) trong hệ thống tuyển sinh. Mỗi hội đồng có thể được gán nhiều **hồ sơ thí sinh** (`hoso-thisinh`) thông qua bảng trung gian `hoidong-hoso-thisinh`. Hội đồng chịu trách nhiệm đánh giá và đưa ra kết quả **trúng tuyển / không trúng tuyển** cho từng hồ sơ được phân công.
+Module `hoidong-xettuyen` quản lý **hội đồng xét tuyển** thuộc một **đợt xét tuyển** (`dot_xet_tuyen_id`) trong hệ thống tuyển sinh. Mỗi hội đồng có thể được gán nhiều **hồ sơ thí sinh** (`hoso-thisinh`) thông qua bảng trung gian `hoidong-hoso-thisinh`. Hội đồng chịu trách nhiệm đánh giá và đưa ra kết quả **trúng tuyển / không trúng tuyển** cho từng hồ sơ được phân công.
 
 Layout tổng thể:
 - **Master view**: danh sách hội đồng (table với search + paginate + bulk-delete).
@@ -16,7 +16,7 @@ Layout tổng thể:
 interface HoidongXettuyen extends IctuBaseModel {
     id: number;
     name: string;
-    dot_dangky_id: number;
+    dot_xet_tuyen_id: number;
     thoi_gian_xet_tuyen: string;   // ISO datetime
     status: 'dang_mo' | 'da_dong';
 }
@@ -99,7 +99,7 @@ src/app/
 
 ### So với `dot-xettuyen` (single-drawer CRUD)
 - Thêm 1 drawer detail + 1 sub-component `hoso-list`.
-- Dropdown `dot_dangky_id` lazy-load qua `DotXettuyenService` chỉ khi mở form (cache trong signal).
+- Dropdown `dot_xet_tuyen_id` lazy-load qua `DotXettuyenService` chỉ khi mở form (cache trong signal).
 
 ### So với `nganh-hoc/chuongtrinh-daotao` (sub-component nhận `@Input`)
 - ChuongtrinhDaotao dùng `@Input set nganh(item)` + `ngOnChanges` để reload.

@@ -420,3 +420,15 @@ export const DANHHIEU_TOTNGHIEP = [
     { key: 'KS', label: 'Kỹ sư', disabled: false },
     { key: 'TS', label: 'Thạc sỹ', disabled: false }
 ]
+
+export const DOI_TUONG: { value: string; label: string; key: string }[] = [
+  { value: '01', label: 'Đại học đúng ngành', key: 'ĐH.Đ' },
+  { value: '02', label: 'Đại học gần ngành', key: 'ĐH.G' },
+  { value: '03', label: 'Đại học khác ngành', key: 'ĐH.K' },
+  { value: '04', label: 'Cao đẳng đúng ngành', key: 'CĐ.Đ' },
+  { value: '05', label: 'Cao đẳng gần ngành', key: 'CĐ.G' },
+  { value: '06', label: 'Cao đẳng khác ngành', key: 'CĐ.K' },
+  { value: '07', label: 'Trung cấp đúng ngành', key: 'TC.Đ' },
+  { value: '08', label: 'Trung cấp khác ngành', key: 'TC.K' },
+  { value: '09', label: 'Trung học phổ thông', key: 'THPT' },
+];

@@ -1,4 +1,5 @@
-import {Component, computed, DestroyRef, inject, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, DestroyRef, Inject, inject, input, OnInit, output, signal} from '@angular/core';
+import {DatePipe} from '@angular/common';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {forkJoin} from 'rxjs';
@@ -24,11 +25,15 @@ import {IctuDropdownOption} from '@models/ictu-dropdown-option';
 import {UserService} from '@app/services/user.service';
 import {LocationService} from '@app/services/location.service';
 import {Locations} from '@app/models/location';
-import {DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams} from '@models/dto';
+import {IctuConditionParam, IctuQueryCondition, IctuQueryParams} from '@models/dto';
 import {HosoThisinh} from '@app/models/tuyensinh/hoso-thisinh';
 import {TuyensinhStatus} from '@app/models/tuyensinh/tuyensinh-status';
+import {ParentsService} from '@services/tuyensinh/parents';
+import {Parents} from '@app/models/tuyensinh/parents';
 import {OvicImgCropV2Component} from '@app/components/ovic-img-crop-v2/ovic-img-crop-v2.component';
 import { OvicAvataTypeMultipleComponent } from "@app/components/ovic-avata-type-multiple/ovic-avata-type-multiple.component";
+import { DotXettuyenService } from '@app/services/tuyensinh/dot-xettuyen.service';
+import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
 
 type ViewState = 'loading' | 'error' | 'cccd_check' | 'existing' | 'form';
 
@@ -48,7 +53,8 @@ type ViewState = 'loading' | 'error' | 'cccd_check' | 'existing' | 'form';
     ReactiveFormsModule,
     SharedModule,
     OvicImgCropV2Component,
-    OvicAvataTypeMultipleComponent
+    OvicAvataTypeMultipleComponent,
+    DatePipe
 ],
     templateUrl: './form-thongtin-dangky.component.html',
     styleUrl: './form-thongtin-dangky.component.css',
@@ -66,7 +72,9 @@ export class FormThongtinDangkyComponent implements OnInit {
     private readonly locationSvc         = inject(LocationService);
     private readonly notification        = inject(NotificationService);
     private readonly userService         = inject(UserService);
+    private readonly parentsService      = inject(ParentsService);
     private readonly destroyRef          = inject(DestroyRef);
+    private readonly dotXettuyenService  = inject(DotXettuyenService);
 
     /* ------------------------------------------------------------------ */
     /*  Inputs / Outputs                                                   */
@@ -84,6 +92,9 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly cccdInput    = signal<string>('');
     readonly cccdLoading  = signal(false);
     readonly submitting   = signal(false);
+    readonly showDiemTb    = signal(true);
+    readonly listUserTuvan = signal<User[]>([]);
+    readonly showNguoiTuvan = computed(() => this.isAdmin() || this.isDoitac());
     dataId: number | null = null;
 
     /* ------------------------------------------------------------------ */
@@ -121,21 +132,13 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly listUser          = signal<User[]>([]);
     readonly listNganh         = signal<IctuDropdownOption<number>[]>([]);
 
+    readonly listDotXetTuyen   = signal<DotXettuyen[]>([]);
+
 
     readonly typeDiemXettuyen  = signal([
         {label: 'THPT'},
         {label: 'Trung cấp, Cao đẳng, Đại học'},
     ]);
-    readonly nguonOptions: IctuDropdownOption<string>[] = [
-        {value: 'website', label: 'Website'},
-        {value: 'doi_tac', label: 'Đối tác'},
-        {value: 'truc_tiep', label: 'Trực tiếp'},
-    ];
-    readonly hinhthucXT: IctuDropdownOption<string>[] = [
-        {value: 'hoc_ba', label: 'Học bạ'},
-        {value: 'thpt_quoc_gia', label: 'THPT Quốc gia'},
-        {value: 'xet_tuyen_som', label: 'Xét tuyển sớm'},
-    ];
     readonly noicapCCCD: {value: string, label: string}[] = [
         {label: 'CQLHCVTTXH', value: 'CQLHCVTTXH'},
         {label: 'Bộ công an', value: 'Bộ công an'},
@@ -165,8 +168,6 @@ export class FormThongtinDangkyComponent implements OnInit {
         nam_tn             : 'Vui lòng nhập năm tốt nghiệp.',
         sohieu_vb          : 'Vui lòng nhập số hiệu văn bằng tốt nghiệp.',
         nganh_dangky       : 'Vui lòng chọn ngành đăng ký.',
-        hinhthuc_xettuyen  : 'Vui lòng chọn hình thức xét tuyển.',
-        donvi_chuyenmon_id : 'Vui lòng chọn đơn vị chuyên môn.',
         anh_the            : 'Vui lòng nhập ảnh thẻ.',
         anh_phieu_dang_ky  : 'Vui lòng nhập ảnh phiếu đăng ký.',
         anh_cmnd_truoc     : 'Vui lòng nhập ảnh CCCD mặt trước.',
@@ -208,11 +209,11 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.formData = this.fb.group({
             // Section 1: Personal
             full_name        : ['', [Validators.required, Validators.minLength(2)]],
-            birthday         : [''],
+            birthday         : ['', Validators.required],
             phone            : ['', [Validators.required, Validators.pattern(/^(0[35789])(\d{8})$/)]],
             email            : ['', [Validators.email]],
             gioi_tinh        : ['', Validators.required],
-            dan_toc          : [''],
+            dan_toc          : ['', Validators.required],
             noi_sinh         : [''],
             tinh_id          : [null],
             xa_id            : [null],
@@ -222,35 +223,33 @@ export class FormThongtinDangkyComponent implements OnInit {
             cccd_ngaycap     : [''],
             cccd_noicap      : [''],
             // Section 3: Van bang TN
-            van_bang_tn      : [''],
-            nam_tn           : [''],
-            sohieu_vb        : [''],
-            noicap_tn        : [''],
+            tn_vanbang      : [''],   //thpt/btvh
+            tn_nam           : [''],
+            tn_noicap        : [''],
             // Section 4: Van bang chuyen mon
             vb_chuyenmon       : [''],
             vb_chuyenmon_nganh : [''],
-            vb_chuyenmon_namtn : [''],
+            vb_chuyenmon_nam : [''],
             vb_chuyenmon_noicap: [''],
+            vb_chuyenmon_sohieu :[''],
             // Section 5: Bo sung
-            nganh_dangky       : [''],
-            program_id         : [null],
-            hinhthuc_xettuyen  : ['hoc_ba'],
-            type_diem          : [''],
+            nganh_id       : [''],
+            ctdt_id         : [null],
+            type_diem          : ['THPT'],
             diemtb             : [''],
-            donvi_chuyenmon_id : [''],
+            content            : [''],
+            nguoi_tuvan_id     : [this.getDefaultNguoiTuvan()],
+            dot_xet_tuyen_id   :[0],
             // Hidden / system
             status             : ['cho_duyet'],
             owner_by           : [this.auth.user?.id],
-            submit_from        : ['website'],
-            nguon_dang_ky      : ['website'],
-            content            : [''],
             // Image files
             anh_the            : [''],
-            anh_cmnd_truoc     : [''],
-            anh_cmnd_sau       : [''],
+            cccd_mattruoc     : [''],
+            cccd_matsau      : [''],
             anh_phieu_dang_ky  : [''],
             anh_thpt           : [''],
-            anh_hoc_ba         : [[]],
+            anh_hoc_ba         : [null],
         });
     }
 
@@ -262,22 +261,51 @@ export class FormThongtinDangkyComponent implements OnInit {
         const userCond: IctuConditionParam[] = [
             {conditionName: 'status', condition: IctuQueryCondition.notEqual, value: '-1', orWhere: 'and'},
         ];
+        const dotCon:IctuConditionParam[] = [
+            {conditionName: 'status', condition: IctuQueryCondition.equal, value: 'dang_mo', orWhere: 'and'},
+
+        ]
 
         forkJoin({
             tinh:    this.locationSvc.queryLocation([], qp, 'regions'),
             provinces: this.locationSvc.queryLocation([], qp, 'provinces'),
             users:   this.userService.query(userCond, {limit: -1}),
             nganh:   this.apiOutsite.getNganhList(),
+            dotxet: this.dotXettuyenService.query(dotCon,{limit:1,paged:1})
         })
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-                next: ({tinh, provinces, users, nganh}) => {
+                next: ({tinh, provinces, users, nganh, dotxet}) => {
                     this.listTinh.set((tinh.data ?? []).map((l) => ({...l, name: l.name})));
                     this.rawProvinces = provinces.data ?? [];
 
                     const userList = users.data ?? [];
                     userList.forEach((u: any) => u.name_email = `${u.display_name} (${u.email})`);
                     this.listUser.set(userList);
+
+                    this.listDotXetTuyen.set(dotxet.data ?? []);
+                    const firstDot = (dotxet.data ?? [])[0];
+                    if (firstDot) {
+                        this.formData.patchValue({ dot_xet_tuyen_id: firstDot.id });
+                    }
+
+                    // Load danh sách người tư vấn theo quyền
+                    if (this.isAdmin()) {
+                        this.listUserTuvan.set(userList);
+                    } else if (this.isDoitac()) {
+                        this.parentsService.query([{
+                            conditionName: 'parent_id',
+                            condition: IctuQueryCondition.equal,
+                            value: this.auth.user!.id.toString(),
+                            orWhere: 'and',
+                        }]).subscribe({
+                            next: (res) => {
+                                const parentUserIds = (res.data ?? []).map((p: Parents) => p.user_id);
+                                this.listUserTuvan.set(userList.filter((u: User) => parentUserIds.includes(u.id)));
+                            },
+                            error: () => this.listUserTuvan.set([]),
+                        });
+                    }
 
                     const nganhList = (nganh.data ?? []).filter((n: any) => n.type === 'nganh');
                     this.listNganh.set(nganhList.map((m: any) => ({value: m.id, label: m.title})));
@@ -299,25 +327,33 @@ export class FormThongtinDangkyComponent implements OnInit {
     }
 
     /* ------------------------------------------------------------------ */
+    /*  Helpers                                                            */
+    /* ------------------------------------------------------------------ */
+    private getDefaultNguoiTuvan(): number | null {
+        return (this.isAdmin() || this.isDoitac()) ? null : (this.auth.user?.id ?? null);
+    }
+
+    /* ------------------------------------------------------------------ */
     /*  Location cascade                                                   */
     /* ------------------------------------------------------------------ */
     onTinhChange(event: any): void {
+
         this.formData.patchValue({xa_id: null});
         this.listXa.set([]);
         if (!event) return;
-
-        const id = event.id ?? event;
         const condition: IctuConditionParam[] = [{
             conditionName: 'parent_id',
             condition: IctuQueryCondition.equal,
-            value: id.toString(),
+            value: event.toString(),
             orWhere: 'and',
         }];
 
         this.locationSvc.queryLocation(condition, {limit: -1}, 'provinces')
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-                next: (res) => this.listXa.set((res.data ?? []).map((l) => ({...l, name: l.name}))),
+                next: (res) => {
+                    this.listXa.set((res.data ?? []).map((l) => ({...l, name: l.name})))
+                },
                 error: () => this.listXa.set([]),
             });
     }
@@ -347,11 +383,13 @@ export class FormThongtinDangkyComponent implements OnInit {
                 if (!res.found || res.record.status === 'bo_hoc') {
                     this.formData.patchValue({
                         cccd,
-                        nganh_dangky: this.majorId(),
-                        program_id: this.programId(),
+                        nganh_id: this.majorId(),
+                        ctdt_id: this.programId(),
                     });
                     this.viewState.set('form');
                 } else {
+
+            
                     this.cccdResult.set(res.record);
                     this.viewState.set('existing');
                 }
@@ -368,9 +406,39 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.viewState.set('cccd_check');
     }
 
+    getStatusLabel(status: string): string {
+        const statusMap: Record<string, string> = {
+            'cho_duyet': 'Chờ duyệt',
+            'da_duyet': 'Đã duyệt',
+            'bo_hoc': 'Bỏ học',
+            'thieu_hoso': 'Thiếu hồ sơ',
+            'du_dk_xet_tuyen': 'Đủ điều kiện xét tuyển',
+            'khong_du_dk_xet_tuyen': 'Không đủ điều kiện',
+            'trung_tuyen': 'Trúng tuyển',
+            'khong_trung_tuyen': 'Không trúng tuyển',
+            'chua_nhap_hoc': 'Chưa nhập học',
+            'nhap_hoc_thieu': 'Nhập học thiếu thủ tục',
+            'nhap_hoc_ok': 'Đã nhập học',
+        };
+        return statusMap[status] || status;
+    }
+
+    getNganhLabel(majorId: number | null | undefined): string {
+        if (!majorId) return 'Chưa có';
+        const found = this.listNganh().find(n => n.value === majorId);
+        return found ? found.label : `Mã ngành #${majorId}`;
+    }
+
     /* ------------------------------------------------------------------ */
     /*  Keyboard helpers                                                   */
     /* ------------------------------------------------------------------ */
+    onTypeDiemChange(event: any): void {
+        const isTHPT = event?.value === 'THPT';
+        this.showDiemTb.set(isTHPT);
+        if (!isTHPT) {
+            this.formData.patchValue({diemtb: ''});
+        }
+    }
     keyupCheckFirstCode(event: KeyboardEvent): boolean {
         if (!event) return true;
         if (event.key === 'v' && event.ctrlKey) return true;
@@ -406,37 +474,20 @@ export class FormThongtinDangkyComponent implements OnInit {
         if (this.dataId) {
             // UPDATE
             const currentStatus = this.cccdResult()?.status;
-            this.hosoService.updateTuyensinh(this.dataId, raw).pipe(
-                switchMap(() => {
-                    const hasStatusChange = !!(raw.content || currentStatus !== raw.status);
-                    if (hasStatusChange) {
-                        const dataStatus: TuyensinhStatus = {
-                            registration_id: this.dataId!,
-                            status_key: 'XET_TUYEN',
-                            status_value: raw.status,
-                            status_name: raw.status,
-                            content: raw.content || '',
-                        };
-                        return this.statusService.addTuyensinh(dataStatus);
-                    }
-                    return [null];
-                }),
-            ).subscribe({next: () => this.onSuccess(), error: () => this.onError()});
+            this.hosoService.updateTuyensinh(this.dataId, raw).subscribe({
+                next: () => this.onSuccess(), 
+                error: () => this.onError()
+            });
         } else {
             // CREATE
             delete raw.content;
-            this.hosoService.addTuyensinh(raw).pipe(
-                switchMap((newId: number) => {
-                    const dataStatus: TuyensinhStatus = {
-                        registration_id: newId,
-                        status_key: 'XET_TUYEN',
-                        status_value: 'KHOI_TAO',
-                        status_name: 'Chờ duyệt',
-                        content: '',
-                    };
-                    return this.statusService.addTuyensinh(dataStatus);
-                }),
-            ).subscribe({next: () => this.onSuccess(), error: () => this.onError()});
+            // return;
+            this.hosoService.addTuyensinh(raw).subscribe({
+                next: () => this.onSuccess(), 
+                error: () => {
+                    this.onError()
+                }
+            });
         }
     }
 
@@ -458,7 +509,13 @@ export class FormThongtinDangkyComponent implements OnInit {
     /*  Form management                                                    */
     /* ------------------------------------------------------------------ */
     closeForm(): void {
-        this.cancel.emit();
+        this.initForm();
+        this.formData.patchValue({
+            status: 'cho_duyet',
+            owner_by: this.auth.user?.id,
+            submit_from: 'website',
+        });
+        this.viewState.set('cccd_check');
     }
 
     resetForm(): void {
@@ -469,7 +526,6 @@ export class FormThongtinDangkyComponent implements OnInit {
             status: 'cho_duyet',
             owner_by: this.auth.user?.id,
             submit_from: 'website',
-            nguon_dang_ky: 'website',
         });
     }
 
@@ -500,22 +556,45 @@ export class FormThongtinDangkyComponent implements OnInit {
             cccd:                  object.cccd || '',
             cccd_ngaycap:          object.cccd_ngaycap || '',
             cccd_noicap:           object.cccd_noicap || '',
-            van_bang_tn:           (object as any).van_bang_tn || '',
-            nam_tn:                (object as any).nam_tn || '',
-            sohieu_vb:             (object as any).sohieu_vb || '',
+            tn_vanbang:            (object as any).van_bang_tn || '',
+            tn_nam:                object.vb_tn_nam || '',
+            tn_noicap:             (object as any).vb_tn_noicap || '',
             vb_chuyenmon:          object.vb_chuyenmon || '',
             vb_chuyenmon_nganh:    object.vb_chuyenmon_nganh || '',
-            vb_chuyenmon_namtn:    (object as any).vb_chuyenmon_namtn || '',
+            vb_chuyenmon_nam:     (object as any).vb_chuyenmon_nam || '',
             vb_chuyenmon_noicap:   object.vb_chuyenmon_noicap || '',
-            nganh_dangky:          (object as any).nganh_dangky || '',
-            program_id:            (object as any).program_id ?? null,
+            vb_chuyenmon_sohieu:   object.vb_tn_sohieu || '',
+            nganh_id:              object.nganh_id ?? null,
+            ctdt_id:               object.ctdt_id ?? null,
+            dot_xet_tuyen_id:      object.dot_xet_tuyen_id ?? 0,
+            nguoi_tuvan_id:        object.nguoi_tuvan_id ?? this.getDefaultNguoiTuvan(),
             status:                object.status || 'cho_duyet',
             owner_by:              object.owner_by || this.auth.user?.id,
+            content:               (object as any).content || '',
+            anh_the:               object.anh_the || '',
+            cccd_mattruoc:         object.cccd_mattruoc || '',
+            cccd_matsau:           object.cccd_matsau || '',
+            anh_phieu_dang_ky:     object.anh_phieudangky || '',
+            anh_thpt:              object.vb_tn_anh || '',
+            anh_hoc_ba:            object.anh_hoc_ba || null,
         });
+
+        // Parse diem_xettuyen back to type_diem + diemtb
+        if (object.diem_xettuyen) {
+            const parts = String(object.diem_xettuyen).split('|');
+            if (parts.length === 2) {
+                this.formData.patchValue({ type_diem: parts[0], diemtb: parts[1] });
+                this.showDiemTb.set(parts[0] === 'THPT');
+            }
+        }
 
         // Reload wards if tinh selected
         if (object.tinh_id) {
-            this.onTinhChange({id: object.tinh_id});
+            this.onTinhChange(object.tinh_id);
+        }
+        // Restore xa_id after onTinhChange resets it
+        if (object.xa_id != null) {
+            this.formData.patchValue({xa_id: object.xa_id});
         }
     }
 }

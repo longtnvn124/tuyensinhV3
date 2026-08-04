@@ -104,7 +104,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     masterSearchInfo: HosoThisinhSearchInfo = {
         search: '',
         status: undefined,
-        dot_dangky_id: undefined,
+        dot_xet_tuyen_id: undefined,
         major_id: undefined,
         nguoi_tuvan_id: undefined,
     };
@@ -176,7 +176,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 // §5.3 Xét tuyển
                 major_id: [null],
                 program_id: [null],
-                dot_dangky_id: [null],
+                dot_xet_tuyen_id: [null],
                 hinhthuc_xettuyen: ['hoc_ba'],
                 nguon_dang_ky: ['website'],
                 // §5.4 Văn bằng TN THPT
@@ -438,7 +438,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                         cccd_noicap: '',
                         major_id: null,
                         program_id: null,
-                        dot_dangky_id: null,
+                        dot_xet_tuyen_id: null,
                         hinhthuc_xettuyen: 'hoc_ba',
                         nguon_dang_ky: 'website',
                         vb_tn: '',
@@ -479,7 +479,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             cccd_noicap: row.cccd_noicap ?? '',
             major_id: row.major_id ?? null,
             program_id: row.program_id ?? null,
-            dot_dangky_id: row.dot_dangky_id ?? null,
+            dot_xet_tuyen_id: row.dot_xet_tuyen_id ?? null,
             hinhthuc_xettuyen: row.hinhthuc_xettuyen ?? 'hoc_ba',
             nguon_dang_ky: row.nguon_dang_ky ?? 'website',
             vb_tn: row.vb_tn ?? '',

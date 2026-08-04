@@ -1,0 +1,222 @@
+<section class="consultation" aria-labelledby="consultation-title">
+    @switch (viewState()) {
+        @case ('history') {
+            <div class="consultation__toolbar">
+                <div>
+                    <h3 id="consultation-title">Quá trình tư vấn</h3>
+                </div>
+                @if (!readOnly) {
+                    <button pButton pRipple icon="pi pi-plus" label="thêm mới" type="button" (click)="showForm()"></button>
+                }
+            </div>
+
+            <div class="consultation__body" aria-live="polite">
+                @switch (loadState()) {
+                    @case ('loading') {
+                        <div class="consultation-loading" role="status" aria-label="Đang tải lịch sử tư vấn">
+                            <app-loading-progress heading="Đang tải lịch sử..." backdropFilter="none" />
+                        </div>
+                    }
+                    @case ('error') {
+                        <div class="consultation-state consultation-state--error" role="alert">
+                            <span class="consultation-state__icon">
+                                <i class="ti ti-cloud-off" aria-hidden="true"></i>
+                            </span>
+                            <h3>Không thể tải lịch sử</h3>
+                            <p>Kết nối dữ liệu gặp sự cố. Vui lòng thử lại.</p>
+                            <button class="consultation-action consultation-action--secondary" type="button" (click)="retry()">
+                                <i class="ti ti-refresh" aria-hidden="true"></i>
+                                <span>Tải lại</span>
+                            </button>
+                        </div>
+                    }
+                    @case ('success') {
+                        @if (histories().length === 0) {
+                            <div class="consultation-state">
+                                <span class="consultation-state__icon consultation-state__icon--empty">
+                                    <i class="ti ti-notes" aria-hidden="true"></i>
+                                </span>
+                                <span class="consultation-state__eyebrow">Bắt đầu hành trình</span>
+                                <h3>Chưa có lần tư vấn nào</h3>
+                                <p>Ghi nhận cuộc trao đổi đầu tiên để xây dựng lịch sử chăm sóc liền mạch.</p>
+                                @if (!readOnly) {
+                                    <button class="consultation-action consultation-action--primary" type="button" (click)="showForm()">
+                                        <i class="ti ti-message-plus" aria-hidden="true"></i>
+                                        <span>Thêm lần đầu tiên</span>
+                                    </button>
+                                }
+                            </div>
+                        } @else {
+                            <div class="consultation-feed">
+                                <div class="consultation-feed__meta">
+                                    <span><i class="ti ti-clock" aria-hidden="true"></i> Mới nhất trước</span>
+                                    <span>{{ histories().length }} bản ghi</span>
+                                </div>
+
+                                <div class="consultation-list" role="list" aria-label="Lịch sử tư vấn">
+                                    @for (item of histories(); track item.id; let index = $index) {
+                                        <article class="consultation-entry" role="listitem" [style.animation-delay.ms]="index * 45">
+                                            <div class="consultation-entry__rail" aria-hidden="true">
+                                                <span class="consultation-entry__marker">
+                                                    <i class="ti ti-message-circle"></i>
+                                                </span>
+                                            </div>
+
+                                            <div class="consultation-entry__card">
+                                                <header class="consultation-entry__header">
+                                                    <div class="consultation-entry__identity">
+                                                        <span class="consultation-entry__sequence">Lần {{ histories().length - index }}</span>
+                                                        <span class="consultation-entry__method" [attr.data-method]="item.hinhthuc_tuvan">
+                                                            {{ methodLabel(item.hinhthuc_tuvan) }}
+                                                        </span>
+                                                    </div>
+
+                                                    <div class="consultation-entry__actions">
+                                                        <time class="consultation-entry__time">
+                                                            <i class="ti ti-calendar-time" aria-hidden="true"></i>
+                                                            <span>{{ item.thoigian_tuvan | date2text: 'DD/MM/YYYY HH:mm' }}</span>
+                                                        </time>
+
+                                                        @if (!readOnly && canDeleteHistory) {
+                                                            <button
+                                                                class="consultation-entry__delete"
+                                                                type="button"
+                                                                [disabled]="deletingHistoryId() !== null"
+                                                                [attr.aria-busy]="deletingHistoryId() === item.id"
+                                                                [attr.aria-label]="'Xóa lần tư vấn ngày ' + (item.thoigian_tuvan | date2text: 'DD/MM/YYYY HH:mm')"
+                                                                title="Xóa bản ghi"
+                                                                (click)="deleteHistory(item)">
+                                                                <i
+                                                                    class="ti"
+                                                                    aria-hidden="true"
+                                                                    [class.ti-trash]="deletingHistoryId() !== item.id"
+                                                                    [class.ti-loader-2]="deletingHistoryId() === item.id"
+                                                                    [class.consultation-spin]="deletingHistoryId() === item.id"></i>
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                </header>
+
+                                                <div class="consultation-entry__content">
+                                                    <section class="consultation-note">
+                                                        <div class="consultation-note__label">
+                                                            <i class="ti ti-quote" aria-hidden="true"></i>
+                                                            <h3>Nội dung trao đổi</h3>
+                                                        </div>
+                                                        <p>{{ item.content }}</p>
+                                                    </section>
+
+                                                    <section class="consultation-note consultation-note--result" [class.consultation-note--muted]="!item.ketqua_tuvan">
+                                                        <div class="consultation-note__label">
+                                                            <i class="ti ti-circle-check" aria-hidden="true"></i>
+                                                            <h3>Kết quả</h3>
+                                                        </div>
+                                                        <p>{{ item.ketqua_tuvan || 'Chưa cập nhật kết quả tư vấn.' }}</p>
+                                                    </section>
+                                                </div>
+
+                                                @if (item.next_follow_up) {
+                                                    <footer class="consultation-entry__follow-up">
+                                                        <span class="consultation-entry__follow-up-icon">
+                                                            <i class="ti ti-bell-ringing" aria-hidden="true"></i>
+                                                        </span>
+                                                        <div>
+                                                            <span>Lịch chăm sóc tiếp theo</span>
+                                                            <strong>{{ item.next_follow_up | date2text: 'DD/MM/YYYY HH:mm' }}</strong>
+                                                        </div>
+                                                    </footer>
+                                                }
+                                            </div>
+                                        </article>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+        }
+
+        @case ('form') {
+            <form class="consultation-form" [formGroup]="consultationForm" (ngSubmit)="submit()">
+                <div class="consultation-form__header">
+                    <button class="consultation-form__back" type="button" aria-label="Quay lại lịch sử tư vấn"
+                        (click)="showHistory()">
+                        <i class="ti ti-arrow-left"></i>
+                    </button>
+                    <div>
+                        <h3>Thêm lần tư vấn</h3>
+                        <span>Ghi nhận nội dung trao đổi với thí sinh</span>
+                    </div>
+                </div>
+
+                <div class="consultation-form__body">
+                    <div class="ictu-form ictu-form--label-on-top">
+                        <div class="row">
+                            <div class="col">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Hình thức tư vấn</label>
+                                    <p-select class="w-100 ictu-form__input-field" formControlName="hinhthuc_tuvan"
+                                        [options]="consultationMethods" optionLabel="label" optionValue="value"
+                                        placeholder="Chọn hình thức" appendTo="body" />
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Thời gian tư vấn
+                                        <span>*</span></label>
+                                    <p-datePicker class="ictu-form__input-field" formControlName="thoigian_tuvan"
+                                        dateFormat="dd/mm/yy" [showIcon]="true" [showTime]="true" appendTo="body"
+                                        placeholder="Chọn ngày bắt đầu" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Thời gian hẹn tư vấn tiếp theo</label>
+                                    <p-datePicker class="ictu-form__input-field" formControlName="next_follow_up"
+                                        dateFormat="dd/mm/yy" [showIcon]="true" [showTime]="true" appendTo="body"
+                                        placeholder="Chọn ngày bắt đầu" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Nội dung tư vấn <span>*</span></label>
+                                    <textarea class="ictu-form__input-field" rows="5" formControlName="content" pTextarea></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Kết quả tư vấn <span>*</span></label>
+                                    <textarea class="ictu-form__input-field" rows="5" formControlName="ketqua_tuvan"
+                                        pTextarea></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="consultation-form__footer">
+                    <button class="consultation-button consultation-button--primary" type="submit" [disabled]="submitting()">
+                        <span class="consultation-button__icon">
+                            <i class="ti" [class.ti-loader-2]="submitting()" [class.ti-device-floppy]="!submitting()"
+                                [class.consultation-spin]="submitting()"></i>
+                        </span>
+                        <span>{{ submitting() ? 'Đang lưu...' : 'Lưu lịch sử' }}</span>
+                    </button>
+                    <button class="consultation-button consultation-button--secondary" type="button" [disabled]="submitting()"
+                        (click)="showHistory()">
+                        <span class="consultation-button__icon"><i class="ti ti-x"></i></span>
+                        <span>Hủy</span>
+                    </button>
+                </div>
+            </form>
+        }
+    }
+</section>

@@ -1,7 +1,7 @@
 {
   "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx tsc --noEmit 2>&1 | Select-String \\\"ovic-avata-type-multiple|ovic-img-crop-v2\\\"\",\"timeout\":120000,\"description\":\"Check TS error...",
-  "error": "Exit code 2",
-  "timestamp": "2026-07-28T02:12:12.451Z",
+  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx ng build --configuration=development 2>&1 | Tee-Object -FilePath build2.log | Out-Null; Get-Item build2.log | Select-Object Len...",
+  "error": "Exit code 1",
+  "timestamp": "2026-07-30T03:54:02.902Z",
   "retry_count": 2
 }

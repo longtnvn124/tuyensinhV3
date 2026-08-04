@@ -44,7 +44,7 @@ Mặc định dùng key `hoso-tuyensinh`. Nếu backend chưa có, fallback `nga
 | 4 | SĐT | `phone` |
 | 5 | Ngành | join `major_id` → tên ngành |
 | 6 | Chương trình | join `chuongtrinh_daotao_id` |
-| 7 | Đợt | join `dot_dangky_id` |
+| 7 | Đợt | join `dot_xet_tuyen_id` |
 | 8 | Trạng thái | badge màu theo `status` |
 | 9 | Nguồn | `nguon_dang_ky` |
 | 10 | Người tư vấn | join `nguoi_tuvan_id` → tên user |
@@ -217,7 +217,7 @@ type HosoStatus =
 > **Cần user xác nhận base path** trước khi code.
 
 ```
-GET    /api/hoso-thisinh?limit=&paged=&search=&status=&dot_dangky_id=&major_id=&nguoi_tuvan_id=
+GET    /api/hoso-thisinh?limit=&paged=&search=&status=&dot_xet_tuyen_id=&major_id=&nguoi_tuvan_id=
 GET    /api/hoso-thisinh/:id
 POST   /api/hoso-thisinh
 PUT    /api/hoso-thisinh/:id

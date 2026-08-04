@@ -15,7 +15,7 @@
                     <input [(ngModel)]="masterSearchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm theo tên, SĐT..." type="text" (keyup.enter)="onSearch()">
                     <p-select [(ngModel)]="masterSearchInfo.status" [options]="statusOptions" appendTo="body" placeholder="Trạng thái" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
                     <p-select [(ngModel)]="masterSearchInfo.major_id" [options]="majors()" appendTo="body" placeholder="Ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
-                    <p-select [(ngModel)]="masterSearchInfo.dot_dangky_id" [options]="dots()" appendTo="body" placeholder="Đợt XT" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
+                    <p-select [(ngModel)]="masterSearchInfo.dot_xet_tuyen_id" [options]="dots()" appendTo="body" placeholder="Đợt XT" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
                     @if (permissionControl().canDelete) {
                         <button (click)="deleteSelectedHoso()" [disabled]="!masterDataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
                             <i class="ti ti-trash"></i>
@@ -54,9 +54,9 @@
                                 <td class="col-index text-center">{{ masterDataTable.paginator.startIndex() + i }}</td>
                                 <td class="text-left">{{ row.full_name }}</td>
                                 <td>{{ row.phone }}</td>
-                                <td>{{ majorLabel(row.major_id) }}</td>
-                                <td>{{ programLabel(row.program_id) }}</td>
-                                <td>{{ dotLabel(row.dot_dangky_id) }}</td>
+                                <td>{{ majorLabel(row.nganh_id) }}</td>
+                                <td>{{ programLabel(row.ctdt_id) }}</td>
+                                <td>{{ dotLabel(row.dot_xet_tuyen_id) }}</td>
                                 <td class="wid-140 text-center p-0">
                                     <div class="d-flex w-100 h-100 justify-content-center align-items-center">
                                         <span class="ictu-badge" [ngClass]="statusBadgeClass(row.status)">{{ statusLabel(row.status) }}</span>
@@ -124,9 +124,9 @@
                 <dl class="cccd-dialog__readonly-list">
                     <dt>Họ tên</dt><dd>{{ cccdResult.record.full_name }}</dd>
                     <dt>SĐT</dt><dd>{{ cccdResult.record.phone }}</dd>
-                    <dt>Ngành</dt><dd>{{ majorLabel(cccdResult.record.major_id) }}</dd>
-                    <dt>Chương trình</dt><dd>{{ programLabel(cccdResult.record.program_id) }}</dd>
-                    <dt>Đợt</dt><dd>{{ dotLabel(cccdResult.record.dot_dangky_id) }}</dd>
+                    <dt>Ngành</dt><dd>{{ majorLabel(cccdResult.record.nganh_id) }}</dd>
+                    <dt>Chương trình</dt><dd>{{ programLabel(cccdResult.record.ctdt_id) }}</dd>
+                    <dt>Đợt</dt><dd>{{ dotLabel(cccdResult.record.dot_xet_tuyen_id) }}</dd>
                     <dt>Trạng thái</dt>
                     <dd><span class="ictu-badge" [ngClass]="statusBadgeClass(cccdResult.record.status)">{{ statusLabel(cccdResult.record.status) }}</span></dd>
                     <dt>Ngày tạo</dt><dd>{{ cccdResult.record.created_at }}</dd>
@@ -234,7 +234,7 @@
                                 </div>
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Đợt xét tuyển</label>
-                                    <p-select [options]="dots()" appendTo="body" formControlName="dot_dangky_id" placeholder="Chọn đợt" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                    <p-select [options]="dots()" appendTo="body" formControlName="dot_xet_tuyen_id" placeholder="Chọn đợt" optionLabel="label" optionValue="value" [showClear]="true"/>
                                 </div>
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>

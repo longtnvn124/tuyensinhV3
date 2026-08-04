@@ -1,1 +1,301 @@
-<p>hoso-khongtrungtuyen works!</p>
+<section class="admin-section--table position-relative">
+    @if (state() === 'loading') {
+        <app-loading-progress heading="Đang tải hồ sơ..." backdropFilter="none" />
+    }
+
+    <div class="admin-wrap-table">
+        @switch (state()) {
+            @case ('forbidden') {
+                <div class="list-state" role="alert">
+                    <i class="ti ti-lock" aria-hidden="true"></i>
+                    <h3>Không có quyền truy cập</h3>
+                    <p>Bạn không có quyền xem danh sách này.</p>
+                </div>
+            }
+            @case ('error') {
+                <div class="list-state list-state--error" role="alert">
+                    <i class="ti ti-cloud-off" aria-hidden="true"></i>
+                    <h3>Không thể tải dữ liệu</h3>
+                    <p>Kết nối dữ liệu gặp sự cố. Vui lòng thử lại.</p>
+                    <button class="btn ictu-badge-btn--secondary-reverse" mat-flat-button type="button" (click)="reload($event)">
+                        <i class="ti ti-refresh"></i>
+                        Tải lại
+                    </button>
+                </div>
+            }
+            @default {
+                <div class="admin-wrap-table__head d-flex flex-wrap">
+                    <h4 class="admin-wrap-table__heading">
+                        <svg aria-hidden="true">
+                            <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+                        </svg>
+                        Danh sách hồ sơ không trúng tuyển
+                    </h4>
+
+                    <div class="admin-wrap-table__head-actions d-flex flex-wrap align-items-center gap-2">
+                        <input
+                            [(ngModel)]="searchInfo.search"
+                            class="admin-wrap-table__head-actions__search"
+                            pInputText
+                            placeholder="Họ tên hoặc số điện thoại"
+                            type="search"
+                            (keyup.enter)="onSearch()" />
+
+                        <p-select
+                            [options]="dots()"
+                            appendTo="body"
+                            [(ngModel)]="searchInfo.dot_xet_tuyen_id"
+                            placeholder="Đợt xét tuyển"
+                            class="filter-select"
+                            optionLabel="label"
+                            optionValue="value"
+                            [showClear]="true"
+                            (onChange)="onSearch()" />
+
+                        <button
+                            mat-flat-button
+                            type="button"
+                            class="btn ictu-badge-btn--secondary-reverse"
+                            aria-label="Mở bộ lọc nâng cao"
+                            (click)="filterPopover.toggle($event)">
+                            <i class="ti ti-filter"></i>
+                        </button>
+
+                        <p-popover #filterPopover>
+                            <div class="filter-panel">
+                                <div class="filter-panel__row">
+                                    <div class="filter-panel__item">
+                                        <label for="non-admitted-cccd">Số CCCD</label>
+                                        <input id="non-admitted-cccd" pInputText [(ngModel)]="searchInfo.cccd" placeholder="Số CCCD" />
+                                    </div>
+                                    <div class="filter-panel__item">
+                                        <label>Ngành</label>
+                                        <p-select
+                                            [options]="majors()"
+                                            appendTo="body"
+                                            [(ngModel)]="searchInfo.nganhhoc_id"
+                                            placeholder="Chọn ngành"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            [showClear]="true" />
+                                    </div>
+                                    <div class="filter-panel__item">
+                                        <label>Tỉnh/TP</label>
+                                        <p-select
+                                            [options]="tinhList()"
+                                            appendTo="body"
+                                            [(ngModel)]="searchInfo.tinh_id"
+                                            placeholder="Chọn tỉnh"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            [showClear]="true" />
+                                    </div>
+                                </div>
+
+                                <div class="filter-panel__row">
+                                    <div class="filter-panel__item">
+                                        <label for="non-admitted-birthplace">Nơi sinh</label>
+                                        <input id="non-admitted-birthplace" pInputText [(ngModel)]="searchInfo.noi_sinh" placeholder="Nơi sinh" />
+                                    </div>
+                                    <div class="filter-panel__item">
+                                        <label>Dân tộc</label>
+                                        <p-select
+                                            [options]="danTocOptions"
+                                            appendTo="body"
+                                            [(ngModel)]="searchInfo.dan_toc"
+                                            placeholder="Chọn dân tộc"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            [showClear]="true" />
+                                    </div>
+                                    <div class="filter-panel__item filter-panel__item--actions">
+                                        <button class="btn ictu-badge-btn--primary-reverse" mat-flat-button type="button" (click)="applyFilter(filterPopover)">
+                                            <i class="ti ti-check"></i>
+                                            Áp dụng
+                                        </button>
+                                        <button class="btn ictu-badge-btn--secondary" mat-flat-button type="button" (click)="resetFilter(filterPopover)">
+                                            <i class="ti ti-x"></i>
+                                            Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </p-popover>
+                    </div>
+                </div>
+
+                <div class="admin-wrap-table__body wrap-tb">
+                    <div class="table-scroll-wrapper">
+                        <table class="tbl admin-table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="col-index text-center col-sticky col-sticky--index">#</th>
+                                    <th class="text-left col-name col-sticky col-sticky--name">Họ tên</th>
+                                    <th class="text-left col-cccd col-sticky col-sticky--cccd">CCCD</th>
+                                    <th class="text-left col-phone col-sticky col-sticky--phone">SĐT</th>
+                                    <th class="text-center col-status">Trạng thái</th>
+                                    <th class="text-left col-email">Email</th>
+                                    <th class="text-left col-major">Ngành</th>
+                                    <th class="text-left col-program">CTĐT</th>
+                                    <th class="text-left col-dot">Đợt ĐK</th>
+                                    <th class="text-left col-tinh">Tỉnh/TP</th>
+                                    <th class="text-left col-noi-sinh">Nơi sinh</th>
+                                    <th class="text-left col-dan-toc">Dân tộc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of dataTable.data(); track row.id; let index = $index) {
+                                    <tr>
+                                        <td class="col-index text-center col-sticky col-sticky--index">{{ dataTable.paginator.startIndex() + index }}</td>
+                                        <td class="text-left col-name col-sticky col-sticky--name">
+                                            <div class="name-cell">
+                                                <span class="name-text">{{ row.full_name }}</span>
+                                                <button
+                                                    class="btn-name-action"
+                                                    type="button"
+                                                    [attr.aria-label]="'Thao tác với hồ sơ ' + row.full_name"
+                                                    (click)="rowMenu.toggle($event)">
+                                                    <i class="ti ti-dots-vertical"></i>
+                                                </button>
+                                                <p-popover #rowMenu styleClass="ictu-popover-no-padding">
+                                                    <ul class="popover-menu">
+                                                        <li class="popover-menu__item" (click)="rowMenu.hide(); openLichSu(row)">
+                                                            <i class="ti ti-history"></i>
+                                                            <span>Quá trình tư vấn</span>
+                                                        </li>
+                                                        <li class="popover-menu__divider"></li>
+                                                        <li class="popover-menu__item" (click)="rowMenu.hide(); viewDetail(row)">
+                                                            <i class="ti ti-file-text"></i>
+                                                            <span>Xem hồ sơ</span>
+                                                        </li>
+                                                    </ul>
+                                                </p-popover>
+                                            </div>
+                                        </td>
+                                        <td class="text-left col-cccd col-sticky col-sticky--cccd">{{ row.cccd || '—' }}</td>
+                                        <td class="text-left col-phone col-sticky col-sticky--phone">{{ row.phone || '—' }}</td>
+                                        <td class="text-center col-status">
+                                            <span class="ictu-badge {{ statusBadgeClass(row.status) }}">{{ statusLabel(row.status) }}</span>
+                                        </td>
+                                        <td class="text-left col-email">{{ row.email || '—' }}</td>
+                                        <td class="text-left col-major">{{ majorLabel(row.nganh_id) }}</td>
+                                        <td class="text-left col-program">{{ programLabel(row.ctdt_id) }}</td>
+                                        <td class="text-left col-dot">{{ dotLabel(row.dot_xet_tuyen_id) }}</td>
+                                        <td class="text-left col-tinh">{{ tinhLabel(row.tinh_id) }}</td>
+                                        <td class="text-left col-noi-sinh">{{ tinhLabel(row.noi_sinh) }}</td>
+                                        <td class="text-left col-dan-toc">{{ row.dan_toc || '—' }}</td>
+                                    </tr>
+                                } @empty {
+                                    <tr>
+                                        <td colspan="12" class="table-empty">Không có hồ sơ không trúng tuyển.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="admin-wrap-table__foot">
+                    <div class="d-flex justify-content-center align-items-center w-100">
+                        <ictu-paginator
+                            [control]="dataTable.paginator"
+                            (onChangePage)="onChangePage($event)"
+                            style="--ictu-paginator-gap:10px" />
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+
+<p-drawer
+    [(visible)]="consultationDrawerVisible"
+    [dismissible]="true"
+    [header]="selectedConsultationHoso()?.full_name ?? 'Quá trình tư vấn'"
+    [style]="{'width':'600px', 'max-width':'100%'}"
+    appendTo="body"
+    position="right"
+    styleClass="ictu-p-drawer"
+    (onHide)="closeConsultation()">
+    <app-tuvan-tuyensinh [hoso]="selectedConsultationHoso()" [readOnly]="true" />
+</p-drawer>
+
+<p-drawer
+    [(visible)]="viewDetailVisible"
+    [dismissible]="true"
+    [header]="viewDetailData()?.full_name ?? 'Xem hồ sơ'"
+    [style]="{'width':'600px', 'max-width':'100%'}"
+    appendTo="body"
+    position="right"
+    styleClass="ictu-p-drawer"
+    (onHide)="closeDetail()">
+    <div class="ictu-p-drawer__content position-relative">
+        <div class="ictu-p-drawer__content__body position-relative">
+            @switch (detailState()) {
+                @case ('loading') {
+                    <app-loading-progress heading="Đang tải hồ sơ..." backdropFilter="none" />
+                }
+                @case ('error') {
+                    <div class="detail-state detail-state--error" role="alert">
+                        <i class="ti ti-cloud-off" aria-hidden="true"></i>
+                        <h3>Không thể tải hồ sơ</h3>
+                        <p>Vui lòng thử tải lại thông tin chi tiết.</p>
+                        <button class="btn ictu-badge-btn--secondary-reverse" mat-flat-button type="button" (click)="retryDetail()">
+                            <i class="ti ti-refresh"></i>
+                            Tải lại
+                        </button>
+                    </div>
+                }
+                @case ('success') {
+                    @if (viewDetailData(); as hoso) {
+                        <div class="ictu-form ictu-form--label-on-top drawer-form-sections">
+                            <section class="hoso-form__section">
+                                <h3 class="hoso-form__section-title">I. Thông tin cá nhân</h3>
+                                <div class="view-field"><label>Họ tên</label><span>{{ hoso.full_name || '—' }}</span></div>
+                                <div class="view-field"><label>Ngày sinh</label><span>{{ hoso.birthday || '—' }}</span></div>
+                                <div class="view-field"><label>Nơi sinh</label><span>{{ tinhLabel(hoso.noi_sinh) }}</span></div>
+                                <div class="view-field"><label>Dân tộc</label><span>{{ hoso.dan_toc || '—' }}</span></div>
+                                <div class="view-field"><label>Địa chỉ</label><span>{{ hoso.address || '—' }}</span></div>
+                            </section>
+
+                            <section class="hoso-form__section">
+                                <h3 class="hoso-form__section-title">II. Giấy tờ tùy thân</h3>
+                                <div class="view-field"><label>Số CCCD</label><span>{{ hoso.cccd || '—' }}</span></div>
+                                <div class="view-field"><label>Ngày cấp</label><span>{{ hoso.cccd_ngaycap || '—' }}</span></div>
+                                <div class="view-field"><label>Nơi cấp</label><span>{{ hoso.cccd_noicap || '—' }}</span></div>
+                            </section>
+
+                            <section class="hoso-form__section">
+                                <h3 class="hoso-form__section-title">III. Thông tin liên hệ</h3>
+                                <div class="view-field"><label>SĐT</label><span>{{ hoso.phone || '—' }}</span></div>
+                                <div class="view-field"><label>Email</label><span>{{ hoso.email || '—' }}</span></div>
+                            </section>
+
+                            <section class="hoso-form__section">
+                                <h3 class="hoso-form__section-title">IV. Thông tin đăng ký</h3>
+                                <div class="view-field"><label>Đợt xét tuyển</label><span>{{ dotLabel(hoso.dot_xet_tuyen_id) }}</span></div>
+                                <div class="view-field"><label>Ngành học</label><span>{{ majorLabel(hoso.nganh_id) }}</span></div>
+                                <div class="view-field"><label>CTĐT</label><span>{{ programLabel(hoso.ctdt_id) }}</span></div>
+                                <div class="view-field"><label>Hình thức XT</label><span>{{ hoso.hinhthuc_xettuyen || '—' }}</span></div>
+                                <div class="view-field"><label>Điểm XT</label><span>{{ hoso.diem_xettuyen ?? '—' }}</span></div>
+                            </section>
+
+                            <section class="hoso-form__section">
+                                <h3 class="hoso-form__section-title">V. Trạng thái</h3>
+                                <div class="view-field">
+                                    <label>Trạng thái</label>
+                                    <span class="ictu-badge {{ statusBadgeClass(hoso.status) }}">{{ statusLabel(hoso.status) }}</span>
+                                </div>
+                                <div class="view-field"><label>Nguồn ĐK</label><span>{{ hoso.nguon_dang_ky || '—' }}</span></div>
+                            </section>
+                        </div>
+                    }
+                }
+            }
+        </div>
+
+        <div class="ictu-p-drawer__content__footer">
+            <button class="btn ictu-badge-btn--secondary" mat-flat-button type="button" (click)="closeDetail()">Đóng</button>
+        </div>
+    </div>
+</p-drawer>

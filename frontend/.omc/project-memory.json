@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "npx tsc --noEmit 2>&1 | wc -l",
+    "buildCommand": "rm -f \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\build.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\build2.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\build3.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\tsc-errors.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\tsc-full.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\tsc-filtered.log\"",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -132,6 +132,12 @@
       "type": "file"
     },
     {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-xettuyen\\hoso-xettuyen.component.ts",
+      "accessCount": 6,
+      "lastAccessed": 1785383594863,
+      "type": "file"
+    },
+    {
       "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
       "accessCount": 4,
       "lastAccessed": 1784254930283,
@@ -183,6 +189,24 @@
       "path": "src\\app\\services\\tuyensinh\\tuyensinh-status.service.ts",
       "accessCount": 2,
       "lastAccessed": 1784823776329,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 2,
+      "lastAccessed": 1785383668848,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1785383674519,
+      "type": "directory"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-xettuyen\\hoso-xettuyen.component.html",
+      "accessCount": 2,
+      "lastAccessed": 1785383683650,
       "type": "file"
     },
     {
@@ -306,21 +330,9 @@
       "type": "file"
     },
     {
-      "path": "",
-      "accessCount": 1,
-      "lastAccessed": 1783566928329,
-      "type": "directory"
-    },
-    {
       "path": "src\\app\\pages\\admin\\children\\nganh-hoc\\chuongtrinh-daotao\\chuongtrinh-daotao.component.html",
       "accessCount": 1,
       "lastAccessed": 1783566944976,
-      "type": "file"
-    },
-    {
-      "path": "package.json",
-      "accessCount": 1,
-      "lastAccessed": 1783915651425,
       "type": "file"
     },
     {

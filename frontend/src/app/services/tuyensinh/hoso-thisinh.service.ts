@@ -8,7 +8,7 @@ import { HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
 export interface HosoThisinhSearchInfo {
     search: string;
     status?: string;
-    dot_dangky_id?: number;
+    dot_xet_tuyen_id?: number;
     major_id?: number;
     nguoi_tuvan_id?: number;
 }
@@ -70,10 +70,10 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
                 condition: IctuQueryCondition.equal,
             });
         }
-        if (info.dot_dangky_id) {
+        if (info.dot_xet_tuyen_id) {
             conditions.push({
-                conditionName: 'dot_dangky_id',
-                value: `${info.dot_dangky_id}`,
+                conditionName: 'dot_xet_tuyen_id',
+                value: `${info.dot_xet_tuyen_id}`,
                 condition: IctuQueryCondition.equal,
             });
         }
@@ -104,6 +104,7 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
             paged: 1,
             order: 'DESC',
             orderby: 'created_at',
+            select:'id,full_name,nganh_id,created_at,status,cccd,phone,email'
         };
         const conditions: IctuConditionParam[] = [
             {

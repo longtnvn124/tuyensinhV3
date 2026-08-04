@@ -1,0 +1,297 @@
+.admin-wrap-table {
+    height: calc(100vh);
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-wrap-table__body {
+    flex: 1 1 auto;
+    height: 1%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.admin-wrap-table__body.wrap-tb {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.wrap-tb > thead {
+    display: none;
+}
+
+.admin-wrap-table__foot {
+    border-top: 1px solid var(--accent-200);
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.admin-wrap-table__head-actions {
+    gap: 8px;
+}
+
+/* ── Fixed+scroll table ── */
+
+.table-scroll-wrapper {
+    overflow: auto;
+    flex: 1;
+}
+
+.table-scroll-wrapper > table {
+    min-width: 1500px;
+    border-collapse: collapse;
+}
+
+.table-scroll-wrapper > table > thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+/* ── Column widths ── */
+
+.col-checkbox { width: 50px; min-width: 50px; }
+.col-index { width: 60px; min-width: 60px; }
+.col-name { width: 250px; min-width: 250px; }
+.col-phone { width: 160px; min-width: 160px; }
+.col-cccd { width: 160px; min-width: 160px; }
+.col-email { width: 180px; min-width: 180px; }
+.col-major { width: 150px; min-width: 150px; }
+.col-program { width: 180px; min-width: 180px; }
+.col-dot { width: 150px; min-width: 150px; }
+.col-tinh { width: 130px; min-width: 130px; }
+.col-noi-sinh { width: 130px; min-width: 130px; }
+.col-dan-toc { width: 100px; min-width: 100px; }
+.col-status { width: 150px; min-width: 150px; }
+
+/* ── Sticky columns (4 cố định bên trái) ── */
+
+.col-sticky {
+    position: sticky;
+    background: #fff;
+}
+
+.col-sticky--checkbox { left: 0; z-index: 11; }
+.col-sticky--index { left: 50px; z-index: 11; }
+.col-sticky--name { left: 110px; z-index: 11; }
+.col-sticky--cccd { left: 360px; z-index: 11; }
+.col-sticky--phone { left: 520px; z-index: 11; }
+
+thead .col-sticky {
+    z-index: 21;
+    background: rgb(247, 247, 247);
+}
+thead .col-sticky--checkbox {
+    z-index: 22;
+}
+
+/* row hover override bg cho sticky cells */
+.table-hover tbody > tr:hover .col-sticky {
+    background: #fff;
+}
+
+/* ── Filter panel ── */
+
+.filter-panel {
+    background: var(--accent-50);
+    border: 1px solid var(--accent-200);
+    border-radius: 8px;
+    margin: 8px 16px;
+    padding: 16px;
+}
+
+.filter-panel__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.filter-panel__row:last-child {
+    margin-bottom: 0;
+}
+
+.filter-panel__item {
+    flex: 1 1 180px;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.filter-panel__item label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent-700);
+    /* text-transform: uppercase; */
+    letter-spacing: 0.3px;
+}
+
+.filter-panel__item--actions {
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+/* ── Filter small select ── */
+
+:host ::ng-deep .filter-select .p-select {
+    min-width: 160px;
+}
+
+/* ── Name cell with action button ── */
+
+.name-text {
+    font-weight: 500;
+    color: var(--accent-900);
+}
+
+.btn-name-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--accent-500);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.btn-name-action:hover {
+    background: var(--accent-100);
+    color: var(--accent-800);
+}
+
+.btn-name-action i {
+    font-size: 16px;
+}
+
+/* ── Row action popover menu ── */
+
+.popover-menu {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    min-width: 180px;
+}
+
+.popover-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--accent-800);
+    transition: background 0.15s ease;
+}
+
+.popover-menu__item:hover {
+    background: var(--accent-100);
+}
+
+.popover-menu__item i {
+    font-size: 16px;
+    width: 18px;
+    text-align: center;
+}
+
+.popover-menu__item--danger {
+    color: inherit;
+}
+
+.popover-menu__item--danger:hover {
+    color: var(--danger-600, #dc3545);
+    background: var(--danger-50, #fff5f5);
+}
+
+.popover-menu__divider {
+    height: 1px;
+    margin: 4px 0;
+    background: var(--accent-200);
+}
+
+/* ── Drawer form sections ── */
+
+.drawer-form-sections .hoso-form__section {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--accent-200);
+}
+
+.drawer-form-sections .hoso-form__section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.drawer-form-sections .hoso-form__section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-900);
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--primary-500, #3b82f6);
+}
+
+.drawer-form-sections .ictu-form__input-field {
+    width: 100%;
+}
+
+/* ── Drawer layout ── */
+
+.ictu-p-drawer__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.ictu-p-drawer__content__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 0 24px;
+}
+
+.ictu-p-drawer__content__footer {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 24px;
+    border-top: 1px solid var(--accent-200);
+    background: #fff;
+}
+
+/* ── View detail drawer fields ── */
+
+.view-field {
+    display: flex;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--accent-100);
+}
+
+.view-field:last-child {
+    border-bottom: none;
+}
+
+.view-field label {
+    width: 120px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-600);
+}
+
+.view-field span {
+    font-size: 14px;
+    color: var(--accent-900);
+}
