@@ -220,8 +220,8 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         return this.lookupLabel(this.dots(), dotId);
     }
 
-    tinhLabel(tinhId: number | undefined): string {
-        return this.lookupLabel(this.tinhList(), tinhId);
+    tinhLabel(tinh: string | number | undefined): string {
+        return typeof tinh === 'number' ? this.lookupLabel(this.tinhList(), tinh) : (tinh || '—');
     }
 
     private loadLookups(): void {
@@ -324,7 +324,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         if (!id) {
             return '—';
         }
-        return options.find((item) => item.value === id)?.label ?? `#${id}`;
+        return options.find((item) => item.value == id)?.label ?? `#${id}`;
     }
 
     private emptySearchInfo(): HosoTrungTuyenSearchInfo {

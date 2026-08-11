@@ -1,163 +1,548 @@
-# Hội đồng xét tuyển — Tài liệu kỹ thuật
+# Hội đồng xét tuyển — Thiết kế giao diện master-detail
 
 ## 1. Mục tiêu
 
-Module `hoidong-xettuyen` quản lý **hội đồng xét tuyển** thuộc một **đợt xét tuyển** (`dot_xet_tuyen_id`) trong hệ thống tuyển sinh. Mỗi hội đồng có thể được gán nhiều **hồ sơ thí sinh** (`hoso-thisinh`) thông qua bảng trung gian `hoidong-hoso-thisinh`. Hội đồng chịu trách nhiệm đánh giá và đưa ra kết quả **trúng tuyển / không trúng tuyển** cho từng hồ sơ được phân công.
+Thiết kế lại màn hình `hoidong-xettuyen` theo dạng **master-detail**:
 
-Layout tổng thể:
-- **Master view**: danh sách hội đồng (table với search + paginate + bulk-delete).
-- **Master form drawer** (600px): thêm/sửa thông tin hội đồng.
-- **Detail drawer** (100vw): quản lý hồ sơ được gán cho hội đồng (assign + đánh giá `ket_qua`).
+- Phần đầu chỉ hiển thị tiêu đề **Danh sách hội đồng xét tuyển**.
+- Cột trái quản lý danh sách hội đồng: tìm kiếm, thêm, chọn, sửa, xóa, gán hồ sơ, phân trang.
+- Cột phải hiển thị trạng thái chờ khi chưa chọn hội đồng.
+- Khi chọn hội đồng, cột phải hiển thị `HoidongHosoXetduyetComponent` và truyền hội đồng qua `Input()`.
+- Luồng gán/bỏ gán hồ sơ vẫn dùng `HosoListComponent` trong drawer 100vw như hiện tại.
 
-## 2. Cấu trúc dữ liệu
+Thiết kế tham khảo bố cục tại dự án Angular v14:
 
-### `HoidongXettuyen` (`models/tuyensinh/hoidong-xettuyen.ts`)
-```ts
-interface HoidongXettuyen extends IctuBaseModel {
-    id: number;
-    name: string;
-    dot_xet_tuyen_id: number;
-    thoi_gian_xet_tuyen: string;   // ISO datetime
-    status: 'dang_mo' | 'da_dong';
-}
+```text
+D:\data\project\angular\v14\tuyensinhdttx_V2\src\app\modules\admin\features\tuyen-sinh\hoso-daduyet
 ```
 
-### `HoidongHosoThisinh` (`models/tuyensinh/hoidong-hoso-thisinh.ts`)
-```ts
-interface HoidongHosoThisinh extends IctuBaseModel {
-    id: number;
-    hoidong_id: number;
-    registration_id: number;
-    ket_qua: 'trung_tuyen' | 'khong_trung_tuyen' | '';
-    ghi_chu?: string;
-}
+Phạm vi tài liệu này chỉ chốt **bố cục màn hình cha và khung tích hợp component bên phải**. Giao diện, dữ liệu, nghiệp vụ xét duyệt bên trong `hoidong-hoso-xetduyet` sẽ được thiết kế riêng.
+
+## 2. Bố cục tổng thể
+
+```text
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Danh sách hội đồng xét tuyển                                              │
+├────────────────────────────┬───────────────────────────────────────────────┤
+│ [ Tìm kiếm... ]        [+] │                                               │
+│ Toolbar cố định 60px       │  Chưa chọn hội đồng:                          │
+├────────────────────────────┤  giao diện chờ                                │
+│                            │                                               │
+│ Hội đồng xét tuyển A  [⋮]  │  ------------------------------------------   │
+│ Đợt xét tuyển              │                                               │
+│ Ngày xét tuyển  [Đang mở]  │  Đã chọn hội đồng:                            │
+│                            │                                               │
+│ Hội đồng xét tuyển B  [⋮]  │  <app-hoidong-hoso-xetduyet                   │
+│ Đợt xét tuyển              │      [hoidong]="selectedHoidong()" />         │
+│ Ngày xét tuyển  [Đã đóng]  │                                               │
+│                            │                                               │
+│ Danh sách cuộn dọc         │                                               │
+├────────────────────────────┤                                               │
+│       Paginator 60px       │                                               │
+└────────────────────────────┴───────────────────────────────────────────────┘
+        400px trên desktop               chiếm phần chiều rộng còn lại
 ```
 
-### `HosoThisinh` (`models/tuyensinh/hoso-thisinh.ts`)
-- 44 trường mô tả hồ sơ cá nhân — xem file để biết chi tiết.
+Cấu trúc cấp cao:
 
-### `DotXettuyen` (tham chiếu)
-- `{ id, name, thoi_gian_bat_dau, thoi_gian_ket_thuc, mo_ta?, status }` — chỉ dùng `name` làm dropdown label.
+```text
+hoidong-page
+├── page-header                         Phần 1
+│   └── title
+└── master-detail                       Phần 2
+    ├── council-panel                   Cột trái
+    │   ├── council-toolbar             Phần 2.1 — 60px
+    │   ├── council-list                Phần 2.2 — flex + scroll-y
+    │   └── council-paginator           Phần 2.3 — 60px
+    └── council-detail                  Cột phải
+        ├── waiting-state               Chưa chọn hội đồng
+        └── app-hoidong-hoso-xetduyet   Đã chọn hội đồng
+```
 
-## 3. Phân quyền
+## 3. Phần 1 — tiêu đề
 
-- Permission key: **`hoidong-xettuyen`**.
-- Áp dụng cho cả master CRUD và detail (gán/xóa/đánh giá hồ sơ).
-- `IctuPermissionControl` cung cấp 4 cờ: `canView`, `canCreate`, `canUpdate`, `canDelete`.
+Chỉ hiển thị:
 
-| Hành động | canView | canCreate | canUpdate | canDelete |
-|---|---|---|---|---|
-| Xem bảng | ✓ | | | |
-| Gán hồ sơ | | | ✓ | |
-| Đổi kết quả / ghi chú | | | ✓ | |
-| Xóa hồ sơ khỏi hội đồng | | | | ✓ |
-| Thêm/sửa hội đồng | | ✓ | ✓ | |
-| Xóa hội đồng | | | | ✓ |
+```text
+Danh sách hội đồng xét tuyển
+```
 
-## 4. REST API
+Yêu cầu:
 
-| Method | Endpoint | Mục đích |
+- Giữ icon tiêu đề hiện có nếu phù hợp với design system.
+- Không đặt search, nút thêm hoặc nút xóa hàng loạt trong phần này.
+- Chiều cao cố định theo header chung của trang.
+- Không cuộn cùng danh sách hội đồng.
+
+## 4. Phần 2 — khu vực master-detail
+
+### 4.1. Cột trái
+
+Desktop:
+
+```css
+width: 400px;
+min-width: 400px;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+```
+
+Cột trái gồm ba vùng độc lập:
+
+1. Toolbar cố định 60px.
+2. Danh sách thẻ chiếm phần chiều cao còn lại và cuộn dọc.
+3. Paginator cố định 60px ở đáy.
+
+Cột trái có `border-right` để phân tách với nội dung xét duyệt.
+
+### 4.2. Cột phải
+
+```css
+flex: 1;
+min-width: 0;
+overflow: hidden;
+```
+
+Cột phải không tự cuộn toàn trang. Component con chịu trách nhiệm bố trí vùng toolbar, nội dung và paginator của chính nó ở giai đoạn thiết kế tiếp theo.
+
+### 4.3. Chiều cao
+
+Khu vực master-detail chiếm toàn bộ chiều cao còn lại sau header:
+
+```css
+flex: 1;
+min-height: 0;
+overflow: hidden;
+```
+
+`min-height: 0` là bắt buộc để danh sách thẻ cuộn đúng trong flex container và không đẩy paginator khỏi màn hình.
+
+## 5. Phần 2.1 — toolbar danh sách hội đồng
+
+Toolbar cao cố định `60px`, không cuộn:
+
+```text
+┌────────────────────────────┐
+│ [ Tìm kiếm...        ] [+] │
+└────────────────────────────┘
+```
+
+### 5.1. Search
+
+- Chiếm toàn bộ chiều rộng còn lại.
+- Placeholder: `Tìm kiếm hội đồng...`.
+- Enter gọi `onSearch()` hiện có.
+- Search tải lại trang 1 và reset paginator.
+- Có nhãn hỗ trợ screen reader.
+
+### 5.2. Nút thêm
+
+- Chỉ hiển thị icon `ti ti-plus`.
+- Không hiển thị chữ “Thêm hội đồng”.
+- Giữ phân quyền `permissionControl().canCreate`.
+- Click gọi `addItem()` và mở drawer form hiện tại.
+- Có `tooltip="Thêm hội đồng"`.
+- Có `aria-label="Thêm hội đồng"`.
+
+### 5.3. Xóa hàng loạt
+
+Không giữ chức năng xóa hàng loạt tại toolbar vì danh sách thẻ mới không sử dụng checkbox chọn nhiều. Xóa từng hội đồng được đặt trong menu của thẻ.
+
+## 6. Phần 2.2 — danh sách thẻ hội đồng
+
+Danh sách:
+
+```css
+flex: 1;
+min-height: 0;
+overflow-y: auto;
+overflow-x: hidden;
+```
+
+### 6.1. Nội dung thẻ
+
+Mỗi thẻ hiển thị:
+
+```text
+┌──────────────────────────────────┐
+│ Tên hội đồng                 [⋮] │
+│ Đợt xét tuyển                     │
+│ [icon lịch] DD/MM/YYYY  [Trạng thái] │
+└──────────────────────────────────┘
+```
+
+Thông tin:
+
+| Dòng | Nội dung | Nguồn |
 |---|---|---|
-| `GET` | `tuyensinh/api/hoidong-xettuyen?search&paged&limit&order&orderby` | List + paginate |
-| `POST` | `tuyensinh/api/hoidong-xettuyen` | Create |
-| `PUT` | `tuyensinh/api/hoidong-xettuyen/:id` | Update |
-| `DELETE` | `tuyensinh/api/hoidong-xettuyen/:id` | Delete (soft) |
-| `GET` | `tuyensinh/api/hoidong-xettuyen/hoso-thisinh?hoidong_id&paged&limit` | Danh sách hồ sơ được gán |
-| `POST` | `tuyensinh/api/hoidong-xettuyen` (`{hoidong_id, registration_id}`) | Gán hồ sơ |
-| `DELETE` | `tuyensinh/api/hoidong-xettuyen/:id` (id của row gán) | Bỏ gán hồ sơ |
-| `PUT` | `tuyensinh/api/hoidong-xettuyen/:id` (`{ket_qua?, ghi_chu?}`) | Cập nhật kết quả |
-| `GET` | `tuyensinh/api/hoso-thisinh?search&paged&limit` | Tra cứu thí sinh cho dialog gán |
-| `GET` | `tuyensinh/api/dot-xettuyen?limit=100` | Dropdown đợt xét tuyển |
+| 1 | Tên hội đồng | `row.name` |
+| 2 | Tên đợt xét tuyển | `getDotName(row.dot_xettuyen_id)` |
+| 3 trái | Ngày xét tuyển | `formatDate(row.thoigian_xettuyen)` |
+| 3 phải | Badge trạng thái | `row.status` |
 
-## 5. Cấu trúc files
+Trạng thái:
 
-```
-src/app/
-├── models/tuyensinh/
-│   ├── hoidong-xettuyen.ts          ← interface HoidongXettuyen
-│   ├── hoidong-hoso-thisinh.ts      ← interface HoidongHosoThisinh
-│   └── hoso-thisinh.ts              ← interface HosoThisinh
-├── services/tuyensinh/
-│   ├── hoidong-xettuyen.service.ts  ← master CRUD + sub-resource ops
-│   └── hoso-thisinh.service.ts      ← search candidates
-└── pages/admin/children/hoidong-xettuyen/
-    ├── hoidong-xettuyen.component.ts        ← master CRUD
-    ├── hoidong-xettuyen.component.html
-    ├── hoidong-xettuyen.component.css
-    ├── hoso-list/
-    │   ├── hoso-list.component.ts           ← detail: assign + đánh giá
-    │   ├── hoso-list.component.html
-    │   └── hoso-list.component.css
-    └── hoidongxettuyen.md                   ← file này
+- `dang_mo` → badge **Đang mở**.
+- Các trạng thái còn lại → badge **Đã đóng**.
+
+Tên dài tối đa hai dòng, sau đó ellipsis. Thông tin phụ dùng màu chữ nhẹ hơn tên hội đồng.
+
+### 6.2. Chọn hội đồng
+
+- Click vùng thẻ chọn hội đồng.
+- Chỉ chọn một hội đồng tại một thời điểm.
+- Lưu bản sao bất biến:
+
+```ts
+selectedHoidong.set({ ...item });
 ```
 
-## 6. Khác biệt so với template tham chiếu
+- Không tự chọn hội đồng đầu tiên sau khi tải trang.
+- Thẻ đang chọn có nền, viền trái hoặc outline nổi bật.
+- Khi đổi trang/search, chỉ giữ selection nếu hội đồng đang chọn vẫn còn trong danh sách hiện tại.
+- Nếu hội đồng đang chọn bị xóa hoặc không còn trong dữ liệu, reset `selectedHoidong` về `null`.
 
-### So với `nganh-hoc` (master + detail cùng cấp)
-- `nganh-hoc` có 2 drawers nặng như nhau; `hoidong-xettuyen` master chỉ có 1 drawer form nhỏ (600px), detail drawer 100vw.
-- Child component được truyền vào drawer qua property `[hoidong]` (signal getter), không phải `@Input()` đơn thuần — cho phép reset state khi drawer đóng.
+### 6.3. Keyboard và accessibility
 
-### So với `dot-xettuyen` (single-drawer CRUD)
-- Thêm 1 drawer detail + 1 sub-component `hoso-list`.
-- Dropdown `dot_xet_tuyen_id` lazy-load qua `DotXettuyenService` chỉ khi mở form (cache trong signal).
+Thẻ phải:
 
-### So với `nganh-hoc/chuongtrinh-daotao` (sub-component nhận `@Input`)
-- ChuongtrinhDaotao dùng `@Input set nganh(item)` + `ngOnChanges` để reload.
-- HosoList cũng dùng cùng pattern: `ngOnChanges` → `loadData(1, true)` khi `hoidong?.id` thay đổi.
+- Có thể focus bằng bàn phím.
+- Enter hoặc Space chọn hội đồng.
+- Có trạng thái `aria-selected`.
+- Có focus ring rõ ràng.
+- Không chỉ dùng màu sắc để biểu diễn selected state.
 
-## 7. UX Flow
+### 6.4. Menu chức năng
 
-### Master CRUD
-1. Mở trang → `ngOnInit` → `loadData(1, true)` → table fill.
-2. Search → Enter → `loadData(1, true)`.
-3. Click "Thêm" → `OPEN_FORM_ADD` → reset form → load `dotOptions` (lazy, cache) → mở master drawer 600px.
-4. Click icon `ti-edit` → `OPEN_FORM_UPDATE` → reset form với data → load `dotOptions` → mở drawer.
-5. Submit → `SUBMIT_FORM` → `formControl.canSubmit` (form valid + state READY) → `service.create/update` → reload.
-6. Click `ti-users` (icon "Quản lý hồ sơ") → mở **detail drawer 100vw** với `HosoListComponent`.
+Menu `⋮` nằm góc phải thẻ. Chỉ hiển thị các mục được cấp quyền:
 
-### Detail (assign hồ sơ)
-1. `HosoListComponent.ngOnChanges` detect `hoidong` thay đổi → `forkJoin` 2 calls song song:
-   - `getAssignedHoso(hoidongId)` → rows.
-   - `hosoService.load({search:''}, {limit:500})` → cache `Map<registrationId, HosoThisinh>` để lookup tên/SĐT.
-2. Click "Gán hồ sơ" → mở `p-dialog` 720px.
-   - Search → Enter → `loadCandidates()` filter ra thí sinh chưa được gán.
-   - Checkbox multi-select → `confirmAssign()` → loop `service.assignHoso()` song song, đếm success/failed → toast + reload.
-3. Inline edit `ket_qua` (p-select) → `changeKetQua()` → `service.updateKetQua()` → update local row.
-4. Inline edit `ghi_chu` (input blur) → `updateGhiChu()` → `service.updateKetQua()`.
-5. Click `ti-trash` trên 1 row → `removeAssigned()` → `confirmDelete` → `service.removeAssignedHoso(row.id)`.
-
-## 8. CSS
-
-- Master component CSS kế thừa verbatim từ `nganh-hoc.component.css`:
-  - `.admin-wrap-table`, `.wrap-tb > table > thead { sticky }`, `.ictu-p-drawer__content { flex column; justify-content space-between }`.
-  - `.ictu-form__row--date { grid 1fr 1fr }`, p-datepicker full-width fix.
-  - `.ictu-form__hint`, `.ictu-form__error`.
-- `hoso-list.component.css` dùng prefix `.hsl-*` (scope local) để tránh đụng master.
-- Layout tổng thể dựa trên `.ctd-page` của `chuongtrinh-daotao` (flex column, sticky scroll, toolbar).
-
-## 9. Rủi ro & lưu ý
-
-1. **Race condition khi gán nhiều hồ sơ**: `confirmAssign()` chạy song song N request, dùng counter `success+failed===total` để biết khi nào xong. Có thể fail một phần nếu 1 trong các candidate đã được gán vào hội đồng khác.
-2. **`p-dialog` lazy state**: mỗi lần mở dialog phải `loadCandidates()` lại để loại trừ thí sinh vừa được gán — tránh stale data.
-3. **`updateKetQua` partial payload**: dùng cùng endpoint PUT với payload `{ket_qua?}` hoặc `{ghi_chu?}` — backend phải hỗ trợ PATCH-like update từng phần.
-4. **Dropdown `dotOptions` cache**: chỉ load 1 lần đầu tiên khi mở form. Nếu admin thêm đợt mới phải refresh trang.
-5. **Inline edit không undo**: thay đổi `ket_qua`/`ghi_chu` tự động lưu khi blur/change — không có step "Hủy".
-
-## 10. Ghi chú cho backend
-
-- Bảng `hoidong_hoso_thisinh` cần unique constraint `(hoidong_id, registration_id)` để chặn trùng.
-- Endpoint `PUT /hoidong-xettuyen/:id` phải PATCH-like (chỉ update field có trong payload), vì frontend dùng cùng endpoint cho cả `ket_qua` và `ghi_chu`.
-- `delete` hội đồng cần cascade hoặc check `hoidong_hoso_thisinh` còn rows không — hiện tại frontend không cảnh báo trước.
-
-## 11. Độ phức tạp
-
-| Phần | Files | LOC ước tính |
+| Chức năng | Điều kiện | Hành động hiện có |
 |---|---|---|
-| Model | 2 | ~30 |
-| Service | 2 | ~120 |
-| Master component | 3 | ~400 |
-| Detail component | 3 | ~500 |
-| Routing + doc | 2 | ~80 |
-| **Tổng** | **12** | **~1130** |
+| Cập nhật | `canUpdate` | `editItem(row)` |
+| Xóa | `canDelete` | `deleteItem(row)` |
+| Gán hồ sơ | `canView` | `openHosoList(row)` |
 
-Trung bình — phù hợp 1 ngày làm việc cho dev Angular quen codebase.
+Luồng **Gán hồ sơ** giữ nguyên:
+
+```text
+Menu thẻ
+  → openHosoList(row)
+  → drawer 100vw
+  → <app-hoso-list [hoidong]="detailDrawerHoidong()" ... />
+```
+
+Menu hoặc từng menu item phải chặn event bubbling để click chức năng không vô tình chọn thẻ:
+
+```ts
+$event.stopPropagation();
+```
+
+### 6.5. Các trạng thái danh sách
+
+#### Loading
+
+- Dùng `LoadingProgressComponent` hiện có.
+- Không làm mất kích thước cột trái.
+
+#### Empty
+
+Hiển thị giữa vùng danh sách:
+
+```text
+Chưa có hội đồng xét tuyển
+```
+
+Nếu đang search:
+
+```text
+Không tìm thấy hội đồng phù hợp
+```
+
+#### Error
+
+Giữ thông báo và luồng `reload()` hiện có:
+
+```text
+Tải dữ liệu thất bại. Vui lòng tải lại.
+```
+
+## 7. Phần 2.3 — paginator hội đồng
+
+Paginator:
+
+```css
+height: 60px;
+flex-shrink: 0;
+border-top: 1px solid var(--accent-200);
+```
+
+Yêu cầu:
+
+- Tái dùng `IctuPaginatorComponent`.
+- Tái dùng `dataTable.paginator`.
+- Tái dùng `onChangePage()`.
+- Search, thêm, sửa, xóa thành công tải lại từ trang 1.
+- Đổi trang chỉ làm mới danh sách bên trái; vùng phải trở về trạng thái chờ nếu selection không còn hợp lệ.
+
+## 8. Cột phải — trạng thái chờ
+
+Khi `selectedHoidong()` là `null`, hiển thị empty state căn giữa:
+
+```text
+             [icon clipboard/users]
+
+       Chưa chọn hội đồng xét tuyển
+ Chọn một hội đồng bên trái để xem hồ sơ xét duyệt
+```
+
+Yêu cầu:
+
+- Không dùng loading spinner vì hệ thống không chờ request.
+- Không hiển thị dữ liệu của hội đồng đã chọn trước đó.
+- Có nút mở danh sách hội đồng trên màn hình hẹp nếu cột trái đang thu gọn.
+
+## 9. Cột phải — đã chọn hội đồng
+
+Khi có hội đồng được chọn:
+
+```html
+<app-hoidong-hoso-xetduyet
+    [hoidong]="selectedHoidong()">
+</app-hoidong-hoso-xetduyet>
+```
+
+Component cha cần import `HoidongHosoXetduyetComponent`.
+
+Component con cần khai báo input có kiểu rõ ràng:
+
+```ts
+readonly hoidong = input<HoidongXettuyen | null>(null);
+```
+
+Hoặc dùng `@Input()` nếu codebase yêu cầu đồng bộ với component cũ. Ưu tiên signal input vì dự án đang dùng Angular 19 và parent sử dụng signals.
+
+Lưu ý hiện trạng:
+
+- `hoidong-hoso-xetduyet.component.ts` đang là stub.
+- `ngOnInit()` đang `throw new Error('Method not implemented.')`.
+- Phải bỏ lỗi này trước khi nhúng component.
+- Giai đoạn tích hợp ban đầu chỉ cần shell nhận và hiển thị hội đồng đã chọn.
+- Nghiệp vụ xét duyệt, bảng hồ sơ, kết quả và ghi chú sẽ được thiết kế riêng.
+
+## 10. Responsive
+
+### 10.1. Desktop
+
+- Cột trái cố định `400px`.
+- Cột phải chiếm phần còn lại.
+- Không xuất hiện horizontal scroll toàn trang.
+
+### 10.2. Màn hình hẹp
+
+Cột trái cho phép thu gọn/mở lại:
+
+- Khi thu gọn, cột phải chiếm toàn bộ chiều rộng.
+- Nút toggle hiển thị ở ranh giới hoặc toolbar phù hợp với design system.
+- Toggle có `aria-expanded` và `aria-controls`.
+- Trạng thái focus phải rõ.
+
+Khi mở cột trái trên màn hình hẹp, ưu tiên một trong hai cách:
+
+1. Panel phủ lên vùng phải.
+2. Stack cột trái phía trên vùng phải.
+
+Không ép hai cột cùng hiển thị nếu làm cột trái nhỏ hơn mức đọc được. Breakpoint cụ thể sẽ dùng breakpoint đang có của layout ứng dụng khi triển khai.
+
+## 11. Drawer giữ nguyên
+
+### 11.1. Drawer thêm/sửa hội đồng
+
+Giữ nguyên:
+
+- `masterDrawer`.
+- `formControl`.
+- Các trường tên hội đồng, đợt xét tuyển, ngày xét tuyển, trạng thái.
+- Luồng `addItem()`, `editItem()`, `submitForm()`.
+
+### 11.2. Drawer gán hồ sơ
+
+Giữ nguyên:
+
+- `detailDrawer` rộng 100vw.
+- `HosoListComponent`.
+- Gán hồ sơ.
+- Bỏ gán hồ sơ.
+- Paginator hồ sơ.
+
+Thay đổi duy nhất: drawer được mở từ menu `⋮` của thẻ hội đồng thay vì nút hành động trong table.
+
+## 12. Luồng dữ liệu
+
+```text
+ngOnInit
+  → loadInit
+  → tải danh sách đợt xét tuyển
+  → loadData(1, true)
+  → fill dataTable
+
+Search
+  → onSearch
+  → loadData(1, true)
+
+Đổi trang
+  → onChangePage(page)
+  → loadData(page, false)
+
+Click thẻ
+  → selectHoidong(item)
+  → selectedHoidong.set({ ...item })
+  → vùng phải render HoidongHosoXetduyetComponent
+
+Click menu Cập nhật
+  → stopPropagation
+  → editItem(item)
+  → masterDrawer
+
+Click menu Xóa
+  → stopPropagation
+  → deleteItem(item)
+  → confirm
+  → reload danh sách
+  → reset selection nếu item đã chọn bị xóa
+
+Click menu Gán hồ sơ
+  → stopPropagation
+  → openHosoList(item)
+  → detailDrawer 100vw
+  → HosoListComponent
+```
+
+## 13. State cần duy trì
+
+| State | Kiểu | Mục đích |
+|---|---|---|
+| `selectedHoidong` | `WritableSignal<HoidongXettuyen | null>` | Hội đồng hiển thị ở cột phải |
+| `detailDrawerHoidong` | `WritableSignal<HoidongXettuyen | null>` hoặc state tương đương | Hội đồng truyền vào drawer gán hồ sơ |
+| `isCouncilPanelCollapsed` | `WritableSignal<boolean>` | Thu gọn cột trái trên màn hình hẹp |
+| `state` | `'loading' | 'success' | 'error'` | Trạng thái danh sách hội đồng |
+| `searchInfo.search` | `string` | Từ khóa tìm kiếm |
+| `dataTable` | `IctuDataTable<HoidongXettuyen>` | Danh sách + paginator |
+
+Nên tách `selectedHoidong` và hội đồng dùng cho drawer để đóng drawer gán hồ sơ không làm mất hội đồng đang được xét duyệt ở cột phải.
+
+## 14. File dự kiến thay đổi sau khi tài liệu được duyệt
+
+### Màn hình cha
+
+```text
+frontend/src/app/pages/admin/children/hoidong-xettuyen/
+├── hoidong-xettuyen.component.ts
+├── hoidong-xettuyen.component.html
+└── hoidong-xettuyen.component.css
+```
+
+Thay đổi:
+
+- Table master → danh sách thẻ.
+- Header chỉ còn tiêu đề.
+- Thêm master-detail layout.
+- Thêm selected state và responsive collapsed state.
+- Giữ CRUD, search, paginator và hai drawer.
+
+### Component xét duyệt
+
+```text
+frontend/src/app/pages/admin/children/hoidong-xettuyen/
+└── hoidong-hoso-xetduyet/
+    ├── hoidong-hoso-xetduyet.component.ts
+    ├── hoidong-hoso-xetduyet.component.html
+    └── hoidong-hoso-xetduyet.component.css
+```
+
+Thay đổi trong phạm vi tích hợp:
+
+- Xóa `throw new Error`.
+- Nhận `hoidong` qua Input.
+- Hiển thị shell/placeholder của hội đồng đã chọn.
+
+### Component gán hồ sơ
+
+```text
+frontend/src/app/pages/admin/children/hoidong-xettuyen/hoso-list/
+```
+
+Không thay đổi nghiệp vụ trong giai đoạn này.
+
+## 15. Những nội dung không thực hiện trong giai đoạn giao diện cha
+
+- Không thiết kế chi tiết bảng xét duyệt bên phải.
+- Không thay đổi API.
+- Không thay đổi model dữ liệu.
+- Không thay đổi nghiệp vụ gán/bỏ gán hồ sơ.
+- Không thêm xóa hàng loạt hội đồng.
+- Không tự động chọn hội đồng đầu tiên.
+
+## 16. Rủi ro cần kiểm soát
+
+1. `hoidong-hoso-xetduyet` đang throw error khi khởi tạo.
+2. Menu trong thẻ có thể làm thay đổi selection nếu thiếu `stopPropagation()`.
+3. Thiếu `min-height: 0` làm danh sách không scroll và paginator bị đẩy khỏi màn hình.
+4. Dùng chung một selected state cho vùng phải và drawer có thể làm mất selection khi drawer đóng.
+5. Sau xóa/search/đổi trang, selection cũ có thể trỏ đến item không còn hiển thị.
+6. Cột trái 400px có thể gây tràn trên màn hình hẹp nếu không có collapsed/overlay mode.
+7. Chỉ dùng màu cho selected state sẽ không đáp ứng accessibility.
+
+## 17. Tiêu chí nghiệm thu sau khi triển khai code
+
+### Bố cục
+
+- Phần 1 chỉ có tiêu đề.
+- Cột trái rộng 400px trên desktop.
+- Toolbar trái cao đúng 60px.
+- Paginator trái cao đúng 60px.
+- Chỉ danh sách thẻ cuộn dọc.
+- Cột phải không bị tràn ngang toàn trang.
+
+### Chức năng
+
+- Enter trong search tải lại trang 1.
+- Nút plus mở drawer thêm hội đồng.
+- Click thẻ chọn đúng một hội đồng.
+- Hội đồng được chọn truyền đúng sang `hoidong-hoso-xetduyet`.
+- Chưa chọn hiển thị waiting state.
+- Sửa, xóa, gán hồ sơ hoạt động từ menu thẻ.
+- Click menu không đổi selection ngoài ý muốn.
+- Drawer gán hồ sơ hoạt động như trước.
+- Xóa hội đồng đang chọn đưa vùng phải về waiting state.
+
+### Responsive và accessibility
+
+- Cột trái thu gọn/mở lại trên viewport hẹp.
+- Keyboard chọn được thẻ bằng Enter/Space.
+- Nút icon có tooltip và `aria-label`.
+- Focus ring hiển thị rõ.
+- Toggle có `aria-expanded`.
+
+### Kỹ thuật
+
+- Angular build/type-check thành công.
+- Test component liên quan thành công.
+- Không có lỗi console khi chọn hội đồng hoặc mở drawer.
+- Kiểm thử trực tiếp bằng browser ở desktop và viewport hẹp.
+
+## 18. Trạng thái phê duyệt
+
+- [x] Bố cục master-detail.
+- [x] Cột trái 400px + responsive thu gọn.
+- [x] Toolbar trái 60px.
+- [x] Danh sách hội đồng dạng thẻ dọc.
+- [x] Danh sách thẻ scroll-y.
+- [x] Paginator cố định đáy.
+- [x] Cột phải có waiting state.
+- [x] Cột phải dùng `HoidongHosoXetduyetComponent`.
+- [x] `hoidong` được truyền qua Input.
+- [x] Gán hồ sơ tiếp tục dùng `HosoListComponent` trong drawer.
+- [x] Menu gán hồ sơ đặt trên thẻ hội đồng.
+- [ ] Thiết kế chi tiết nghiệp vụ `hoidong-hoso-xetduyet`.
+- [ ] Phê duyệt cuối cùng để bắt đầu sửa code.

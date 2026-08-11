@@ -156,7 +156,7 @@ export class AuthenticationService {
 	}
 
 	getUserPermission( route : string ) : UserPermission {
-		console.log( 'getUserPermission' , route );
+	
 		const _pms : IctuNavigationItemPms = this.permission?.data?.menus ? this.permission.data.menus.reduce( ( reducer : IctuNavigationItemPms , menu : IctuNavigation ) : IctuNavigationItemPms => {
 			
 			if ( matchRoute( route , menu ) ) {

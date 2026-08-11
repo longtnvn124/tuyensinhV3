@@ -1,7 +1,0 @@
-{
-  "tool_name": "Read",
-  "tool_input_preview": "{\"file_path\":\"d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend\\\\src\\\\app\\\\pages\\\\admin\\\\children\\\\hoso\\\\hoso-khongtrungtuyen\\\\hoso-khongtrungtuyen.component.spec.ts\",\"offset\":0,\"limit\":350}",
-  "error": "File does not exist. Note: your current working directory is d:\\data\\project\\angular\\v19\\tuyensinh.",
-  "timestamp": "2026-08-03T18:25:18.931Z",
-  "retry_count": 1
-}

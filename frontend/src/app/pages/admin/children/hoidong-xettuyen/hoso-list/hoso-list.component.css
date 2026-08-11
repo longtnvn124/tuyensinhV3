@@ -27,7 +27,22 @@
 
 .hsl-toolbar__actions {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
+}
+
+.hsl-toolbar-button {
+    width: 112px;
+    min-width: 112px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 6px;
+    gap: 6px;
+}
+
+.hsl-toolbar-button .ti {
+    font-size: 16px;
 }
 
 /* ═══ Table area — sticky header scroll ═══ */
@@ -35,8 +50,7 @@
 .hsl-table-wrap {
     flex: 1 1 auto;
     height: 1%;
-    overflow: hidden;
-    overflow-y: auto;
+    overflow: auto;
     border: 1px solid var(--accent-200, #e2e8f0);
     border-radius: 6px;
     background: #fff;
@@ -77,9 +91,26 @@
     background: var(--accent-50, #f8fafc);
 }
 
+.hsl-table tbody tr.hsl-row--selected {
+    background: var(--accent-50, #f8fafc);
+}
+
+.hsl-col-check {
+    width: 48px;
+}
+
 .hsl-col-idx {
     width: 50px;
     color: var(--accent-500, #94a3b8);
+}
+
+.hsl-col-major {
+    min-width: 140px;
+}
+
+.hsl-col-birthday {
+    width: 110px;
+    font-variant-numeric: tabular-nums;
 }
 
 .hsl-col-phone {
@@ -87,16 +118,48 @@
     font-variant-numeric: tabular-nums;
 }
 
-.hsl-col-result {
-    width: 200px;
+.hsl-col-cccd {
+    min-width: 130px;
+    font-variant-numeric: tabular-nums;
 }
 
-.hsl-col-note {
+.hsl-col-email {
     min-width: 200px;
+}
+
+.hsl-col-birthplace {
+    min-width: 140px;
+}
+
+.hsl-col-ethnicity {
+    min-width: 100px;
+}
+
+.hsl-col-target {
+    width: 110px;
 }
 
 .hsl-col-actions {
     width: 80px;
+}
+
+.hsl-delete-row {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 6px;
+}
+
+.hsl-delete-row .ti {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.hsl-delete-selected:disabled,
+.hsl-delete-row:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
 }
 
 .hsl-empty {
@@ -104,25 +167,6 @@
     padding: 60px 16px;
     color: var(--accent-400, #94a3b8);
     font-style: italic;
-}
-
-.hsl-note-input {
-    width: 100%;
-    padding: 6px 10px;
-    border: 1px solid var(--accent-200, #e2e8f0);
-    border-radius: 4px;
-    font-size: 13px;
-}
-
-.hsl-note-input:focus {
-    outline: none;
-    border-color: var(--primary-500, #3b82f6);
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
-}
-
-/* PrimeNG select trong cell — full width */
-.hsl-result-select {
-    width: 100%;
 }
 
 /* ═══ Paginator ═══ */
@@ -157,16 +201,6 @@
     gap: 10px;
     min-height: 360px;
     max-height: 60vh;
-}
-
-.hsl-assign__search {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.hsl-assign__search-input {
-    flex: 1;
 }
 
 .hsl-assign__table-wrap {

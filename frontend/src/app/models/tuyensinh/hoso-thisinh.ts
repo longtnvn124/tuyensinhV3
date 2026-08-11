@@ -10,9 +10,11 @@ export interface HosoThisinh extends IctuBaseModel {
     huyen_id?: number;
     xa_id?: number;
     address?: string;
-    noi_sinh?: number;
+    noi_sinh?: number ;
+    doi_tuong?: string;
     dan_toc?: string;
     status: string;
+    status_connent?: number;
 
     cccd?: string;
     cccd_ngaycap?: string;

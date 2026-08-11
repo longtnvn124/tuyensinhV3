@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "rm -f \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\build.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\build2.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\build3.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\tsc-errors.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\tsc-full.log\" \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\\tsc-filtered.log\"",
+    "buildCommand": "cd frontend && npx tsc --noEmit -p tsconfig.app.json 2>&1 | head -80",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -352,6 +352,24 @@
       "accessCount": 1,
       "lastAccessed": 1784254941244,
       "type": "directory"
+    },
+    {
+      "path": "src\\app\\services\\tuyensinh\\hoidong-xettuyen.service.ts",
+      "accessCount": 1,
+      "lastAccessed": 1785832448829,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoidong-xettuyen\\hoso-list\\hoso-list.component.ts",
+      "accessCount": 1,
+      "lastAccessed": 1785832448885,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\models\\dto.ts",
+      "accessCount": 1,
+      "lastAccessed": 1785832462741,
+      "type": "file"
     }
   ],
   "userDirectives": []

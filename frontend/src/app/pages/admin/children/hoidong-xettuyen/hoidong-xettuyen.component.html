@@ -1,117 +1,175 @@
-<section class="admin-section--table position-relative">
+<section class="council-page position-relative">
     @if (state() === 'loading') {
         <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
     }
-    <div class="admin-wrap-table">
-        @if (state() !== 'error') {
-            <div class="admin-wrap-table__head d-flex">
-                <h4 class="admin-wrap-table__heading">
-                    <svg>
-                        <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
-                    </svg>
-                    Danh sách hội đồng xét tuyển
-                </h4>
-                <div class="admin-wrap-table__head-actions">
-                    <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearch()">
-                    @if (permissionControl().canDelete) {
-                        <button (click)="deleteSelected()" [disabled]="!dataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
-                            <i class="ti ti-trash"></i>
-                        </button>
-                    }
-                    @if (permissionControl().canCreate) {
-                        <button (click)="addItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
-                            <i class="ti ti-plus"></i>
-                        </button>
-                    }
-                </div>
+
+    <header class="council-page__header">
+        <h4 class="council-page__heading">
+            <svg aria-hidden="true">
+                <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
+            </svg>
+            Danh sách hội đồng xét tuyển
+        </h4>
+    </header>
+
+    <div class="council-master-detail" [class.council-master-detail--collapsed]="isCouncilPanelCollapsed()">
+        <aside
+            id="council-panel"
+            class="council-panel"
+            [attr.aria-hidden]="isCouncilPanelCollapsed()"
+            [attr.inert]="isCouncilPanelCollapsed() ? '' : null">
+            <div class="council-toolbar">
+                <label class="visually-hidden" for="council-search">Tìm kiếm hội đồng</label>
+                <input
+                    id="council-search"
+                    [(ngModel)]="searchInfo.search"
+                    class="council-toolbar__search"
+                    pInputText
+                    placeholder="Tìm kiếm hội đồng..."
+                    type="search"
+                    (keyup.enter)="onSearch()">
+                @if (permissionControl().canCreate) {
+                    <button
+                        type="button"
+                        (click)="addItem()"
+                        mat-flat-button
+                        class="btn council-toolbar__add ictu-badge-btn--success-reverse"
+                        pTooltip="Thêm hội đồng"
+                        aria-label="Thêm hội đồng">
+                        <i class="ti ti-plus" aria-hidden="true"></i>
+                    </button>
+                }
             </div>
-            <div class="admin-wrap-table__body wrap-tb">
-                <table class="tbl admin-table table-hover">
-                    <thead>
-                        <tr>
-                            <th class="col-checkbox">
-                                <mat-checkbox [checked]="dataTable.totalChecked()" [indeterminate]="dataTable.partiallyChecked()" (change)="dataTable.selectRow($event.checked)" [disabled]="!dataTable.data().length || !permissionControl().canDelete"></mat-checkbox>
-                            </th>
-                            <th class="col-index text-center">#</th>
-                            <th class="text-left">Tên hội đồng</th>
-                            <th class="text-left">Đợt xét tuyển</th>
-                            <th class="text-center">Thời gian xét tuyển</th>
-                            <th class="wid-120 text-center">Trạng thái</th>
-                            <th class="wid-130 text-center px-0">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (row of dataTable.data(); track row.id; let i = $index) {
-                            <tr>
-                                <td class="col-checkbox">
-                                    <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="dataTable.selectRow($event.checked, i)" [disabled]="!permissionControl().canDelete"></mat-checkbox>
-                                </td>
-                                <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
-                                <td class="text-left">{{ row.name }}</td>
-                                <td class="text-left">{{ getDotName(row.dot_xettuyen_id) }}</td>
-                                <td class="text-center">{{ formatDate(row.thoigian_xettuyen) }}</td>
-                                <td class="wid-120 text-center p-0">
-                                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
-                                        @if (row.status === 'dang_mo') {
-                                            <span class="ictu-badge ictu-badge--success">Đang mở</span>
-                                        } @else {
-                                            <span class="ictu-badge ictu-badge--secondary">Đã đóng</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td class="p-0 wid-130">
-                                    <div class="admin-table__btn-actions">
+
+            @if (state() !== 'error') {
+                <div class="council-list" role="list" aria-label="Danh sách hội đồng xét tuyển">
+                    @for (row of dataTable.data(); track row.id) {
+                        <article
+                            class="council-card"
+                            [class.council-card--selected]="selectedHoidong()?.id === row.id"
+                            role="listitem">
+                            <button
+                                type="button"
+                                class="council-card__selection"
+                                [attr.aria-current]="selectedHoidong()?.id === row.id ? 'true' : null"
+                                [attr.aria-label]="'Chọn ' + row.name"
+                                (click)="selectHoidong(row)">
+                                <h5 class="council-card__name">{{ row.name }}</h5>
+                                <p class="council-card__round">{{ getDotName(row.dot_xettuyen_id) }}</p>
+                                <span class="council-card__meta">
+                                    <span class="council-card__date">
+                                        <i class="ti ti-calendar" aria-hidden="true"></i>
+                                        {{ formatDate(row.thoigian_xettuyen) }}
+                                    </span>
+                                    @if (row.status === 'dang_mo') {
+                                        <span class="ictu-badge ictu-badge--success">Đang mở</span>
+                                    } @else {
+                                        <span class="ictu-badge ictu-badge--secondary">Đã đóng</span>
+                                    }
+                                </span>
+                            </button>
+                            @if (permissionControl().canView || permissionControl().canUpdate || permissionControl().canDelete) {
+                                <button
+                                    type="button"
+                                    class="council-card__menu-button"
+                                    [attr.aria-label]="'Thao tác với ' + row.name"
+                                    (click)="cardMenu.toggle($event)">
+                                    <i class="ti ti-dots-vertical" aria-hidden="true"></i>
+                                </button>
+                                <p-popover #cardMenu styleClass="ictu-popover-no-padding">
+                                    <ul class="council-menu">
                                         @if (permissionControl().canView) {
-                                            <button (click)="openHosoList(row)" class="btn ictu-button-success-light" tooltip="Quản lý hồ sơ">
-                                                <i class="ti ti-users"></i>
-                                            </button>
+                                            <li>
+                                                <button type="button" class="council-menu__item" (click)="cardMenu.hide(); openHosoList(row)">
+                                                    <i class="ti ti-user-plus" aria-hidden="true"></i>
+                                                    <span>Gán hồ sơ</span>
+                                                </button>
+                                            </li>
                                         }
                                         @if (permissionControl().canUpdate) {
-                                            <button (click)="editItem(row)" class="btn ictu-button-info-light">
-                                                <i class="ti ti-edit"></i>
-                                            </button>
+                                            <li>
+                                                <button type="button" class="council-menu__item" (click)="cardMenu.hide(); editItem(row)">
+                                                    <i class="ti ti-edit" aria-hidden="true"></i>
+                                                    <span>Cập nhật</span>
+                                                </button>
+                                            </li>
                                         }
                                         @if (permissionControl().canDelete) {
-                                            <button (click)="deleteItem(row)" class="btn ictu-button-danger-light">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
+                                            <li class="council-menu__divider" role="separator"></li>
+                                            <li>
+                                                <button type="button" class="council-menu__item council-menu__item--danger" (click)="cardMenu.hide(); deleteItem(row)">
+                                                    <i class="ti ti-trash" aria-hidden="true"></i>
+                                                    <span>Xóa</span>
+                                                </button>
+                                            </li>
                                         }
-                                    </div>
-                                </td>
-                            </tr>
-                        } @empty {
-                            <tr>
-                                <td colspan="7">Không có bản ghi nào.</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div class="admin-wrap-table__foot">
-                <div class="d-flex justify-content-center align-items-center w-100">
-                    <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)" style="--ictu-paginator-gap:10px"></ictu-paginator>
+                                    </ul>
+                                </p-popover>
+                            }
+                        </article>
+                    } @empty {
+                        <div class="council-list-state">
+                            <i class="ti ti-folders-off" aria-hidden="true"></i>
+                            <h5>{{ searchInfo.search ? 'Không tìm thấy hội đồng phù hợp' : 'Chưa có hội đồng xét tuyển' }}</h5>
+                        </div>
+                    }
                 </div>
-            </div>
-        } @else {
-            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
-                <a (click)="reload($event)" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
-            </div>
-        }
+
+                <div class="council-paginator">
+                    <ictu-paginator
+                        [control]="dataTable.paginator"
+                        (onChangePage)="onChangePage($event)"
+                        style="--ictu-paginator-gap:10px">
+                    </ictu-paginator>
+                </div>
+            } @else {
+                <div class="council-list-state council-list-state--error">
+                    <i class="ti ti-alert-circle" aria-hidden="true"></i>
+                    <h5>Tải dữ liệu thất bại</h5>
+                    <a (click)="reload($event)" href="#" class="council-list-state__reload">Tải lại</a>
+                </div>
+            }
+        </aside>
+
+        <button
+            type="button"
+            class="council-panel-toggle"
+            [attr.aria-expanded]="!isCouncilPanelCollapsed()"
+            aria-controls="council-panel"
+            [attr.aria-label]="isCouncilPanelCollapsed() ? 'Mở danh sách hội đồng' : 'Thu gọn danh sách hội đồng'"
+            (click)="toggleCouncilPanel()">
+            <i [class]="isCouncilPanelCollapsed() ? 'ti ti-chevron-right' : 'ti ti-chevron-left'" aria-hidden="true"></i>
+        </button>
+
+        <main class="council-detail">
+            @if (selectedHoidong(); as selected) {
+                <app-hoidong-hoso-xetduyet [hoidong]="selected"></app-hoidong-hoso-xetduyet>
+            } @else {
+                <div class="council-waiting-state">
+                    <i class="ti ti-clipboard-search" aria-hidden="true"></i>
+                    <h3>Chưa chọn hội đồng xét tuyển</h3>
+                    <p>Chọn một hội đồng bên trái để xem hồ sơ xét duyệt.</p>
+                    @if (isCouncilPanelCollapsed()) {
+                        <button type="button" class="btn ictu-badge-btn--primary-reverse" mat-flat-button (click)="toggleCouncilPanel()">
+                            Mở danh sách hội đồng
+                        </button>
+                    }
+                </div>
+            }
+        </main>
     </div>
 </section>
 
-<!-- Detail Drawer: Hoso List -->
 <p-drawer #detailDrawer (onHide)="onDetailDrawerHide()" [(visible)]="detailDrawerVisible" [dismissible]="false" [header]="detailDrawerHeader()" [style]="{'width':'100vw'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
     <div class="ictu-p-drawer__content position-relative">
         <div class="ictu-p-drawer__content__body position-relative w-100">
-            @if (selectedHoidong()) {
-                <app-hoso-list [hoidong]="selectedHoidong()" [permission]="permissionControl()"></app-hoso-list>
+            @if (detailDrawerHoidong()) {
+                <app-hoso-list [hoidong]="detailDrawerHoidong()" [permission]="permissionControl()"></app-hoso-list>
             }
         </div>
     </div>
 </p-drawer>
 
-<!-- Master Drawer: HoidongXettuyen -->
 <p-drawer #masterDrawer (onHide)="onMasterDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'450px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
     <div class="ictu-p-drawer__content position-relative">
         @if (formControl.enableLoading()) {
@@ -162,7 +220,7 @@
                                 <label class="ictu-form__label" for="h_status">Trạng thái</label>
                                 <p-select [options]="statusOptions" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Trạng thái" inputId="h_status" />
                             </div>
-                            <small class="ictu-form__hint">Hồ sơ thí sinh được gán và đánh giá trong drawer chi tiết (nhấn nút <i class="ti ti-users"></i>).</small>
+                            <small class="ictu-form__hint">Hồ sơ thí sinh được gán từ menu thao tác của từng hội đồng.</small>
                         </div>
                     </form>
                 }

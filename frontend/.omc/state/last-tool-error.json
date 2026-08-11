@@ -1,7 +1,7 @@
 {
-  "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"cd d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend; npx ng build --configuration=development 2>&1 | Tee-Object -FilePath build2.log | Out-Null; Get-Item build2.log | Select-Object Len...",
-  "error": "Exit code 1",
-  "timestamp": "2026-07-30T03:54:02.902Z",
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"grep -rn \\\"paramsConditionBuilder\\\" frontend/src/app/utilities/helper.ts 2>/dev/null | head; echo \\\"---\\\"; grep -rln \\\"IctuQueryCondition\\\" frontend/src/app/models/ 2>/dev/null\",\"descripti...",
+  "error": "Exit code 2\n---",
+  "timestamp": "2026-08-04T08:34:22.923Z",
   "retry_count": 2
 }

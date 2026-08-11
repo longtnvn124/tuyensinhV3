@@ -11,23 +11,26 @@ import { IctuFormControl2 } from '@models/ictu-form-control';
 import { HoidongXettuyen } from '@app/models/tuyensinh/hoidong-xettuyen';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
 import { DataTableEvent, DataTableEventName, IctuDataTable, IctuDataTablePaginatorInfo } from '@models/datatable';
-import { filter, map, Observable, Subject, switchMap, takeUntil } from 'rxjs';
+import { filter, map, Observable, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { IctuDeletingAnimationControl } from '@models/ictu-deleting-animation-control';
 import { DtoObject } from '@models/dto';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { InputText } from 'primeng/inputtext';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { MatButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { Select } from 'primeng/select';
 import { DatePicker } from 'primeng/datepicker';
+import { Popover } from 'primeng/popover';
+import { Tooltip } from 'primeng/tooltip';
 import { HosoListComponent } from './hoso-list/hoso-list.component';
+import { HoidongHosoXetduyetComponent } from './hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component';
 
 @Component({
     selector: 'app-hoidong-xettuyen',
     imports: [
-        DatePicker, Drawer, HosoListComponent, IctuPaginatorComponent, InputText,
-        LoadingProgressComponent, MatButton, MatCheckbox, ReactiveFormsModule, Select, FormsModule,
+        DatePicker, Drawer, FormsModule, HoidongHosoXetduyetComponent, HosoListComponent,
+        IctuPaginatorComponent, InputText, LoadingProgressComponent, MatButton, Popover,
+        ReactiveFormsModule, Select, Tooltip,
     ],
     templateUrl: './hoidong-xettuyen.component.html',
     styleUrl: './hoidong-xettuyen.component.css',
@@ -56,7 +59,9 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
     state: WritableSignal<'loading' | 'success' | 'error'> = signal<'loading' | 'success' | 'error'>('success');
     private temp: IctuDataTablePaginatorInfo = { paged: 1, resetPaginator: true };
 
-    selectedHoidong: WritableSignal<HoidongXettuyen | null> = signal<HoidongXettuyen | null>(null);
+    readonly selectedHoidong: WritableSignal<HoidongXettuyen | null> = signal<HoidongXettuyen | null>(null);
+    readonly detailDrawerHoidong: WritableSignal<HoidongXettuyen | null> = signal<HoidongXettuyen | null>(null);
+    readonly isCouncilPanelCollapsed: WritableSignal<boolean> = signal<boolean>(false);
 
     private auth = inject(AuthenticationService);
     private notification = inject(NotificationService);
@@ -178,8 +183,48 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
         });
     }
 
+    // private progress : Subject<number> = new Subject<number>();
+
     ngOnInit(): void {
+
+    //    this.progress.next(0);
+
+    //     this.notification.progressBarWithPercent(this.progress,'Đang tải dữ liệu hội đồng xét tuyển')      // this.loadInit();
+        
+        
+        
         this.loadData(1, true);
+
+    //    setTimeout(() => {
+    //     this.progress.next(10);
+    //    }, 1000); 
+
+    //           setTimeout(() => {
+    //     this.progress.next(25);
+    //    }, 1500);
+
+    //     setTimeout(() => {
+    //     this.progress.next(100);
+    //    }, 5000);
+    }
+
+    loadInit(): void {
+        this.dotService.query([], { limit: -1, paged: 1, order: 'DESC' }).subscribe({
+            next: (res: DtoObject<DotXettuyen[]>): void => {
+                const opts: IctuDropdownOption<number>[] = res.data.map((d: DotXettuyen): IctuDropdownOption<number> => ({
+                    value: d.id,
+                    label: d.name,
+                }));
+                this.dotOptions.set(opts);
+
+                if (res.data.length > 0) {
+                    this.loadData(1, true);
+                }
+            },
+            error: (): void => {
+                this.state.set('error');
+            },
+        });
     }
 
     loadData(paged: number = 1, resetPaginator: boolean = true): void {
@@ -197,6 +242,13 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
         ).subscribe({
             next: (data: HoidongXettuyen[]): void => {
                 this.dataTable.fillData(data);
+                const selectedId: number | undefined = this.selectedHoidong()?.id;
+                if (selectedId) {
+                    const selected: HoidongXettuyen | undefined = data.find(
+                        (item: HoidongXettuyen): boolean => item.id === selectedId,
+                    );
+                    this.selectedHoidong.set(selected ? { ...selected } : null);
+                }
                 this.state.set('success');
             },
             error: (): void => {
@@ -266,14 +318,22 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
         this.loadData(this.temp.paged, this.temp.resetPaginator);
     }
 
+    selectHoidong(item: HoidongXettuyen): void {
+        this.selectedHoidong.set({ ...item });
+    }
+
+    toggleCouncilPanel(): void {
+        this.isCouncilPanelCollapsed.update((isCollapsed: boolean): boolean => !isCollapsed);
+    }
+
     openHosoList(item: HoidongXettuyen): void {
-        this.selectedHoidong.set(item);
+        this.detailDrawerHoidong.set({ ...item });
         this.detailDrawerHeader.set(`Hồ sơ thí sinh — ${item.name}`);
         this.detailDrawerVisible = true;
     }
 
     onDetailDrawerHide(): void {
-        this.selectedHoidong.set(null);
+        this.detailDrawerHoidong.set(null);
     }
 
     formatDate(value: string | null | undefined): string {
@@ -284,7 +344,7 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
     }
 
     getDotName(dotId: number): string {
-        const found = this.dotOptions().find(o => o.value === dotId);
+        const found = this.dotOptions().find(o => o.value == dotId);
         return found ? found.label : '---';
     }
 

@@ -12,14 +12,14 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NgStyle } from '@angular/common';
 import { AbstractControl } from '@angular/forms';
-import { from, concatMap, map, EMPTY, catchError, reduce, finalize } from 'rxjs';
+import { from, concatMap, map, EMPTY, catchError, reduce, finalize, BehaviorSubject, Subject } from 'rxjs';
 
 import { RippleModule } from 'primeng/ripple';
 import { ButtonModule } from 'primeng/button';
 import { GalleriaModule } from 'primeng/galleria';
 import { ImageModule } from 'primeng/image';
 
-import { NotificationService } from '@app/services/notification.service';
+import { NotificationService, ProgressAnimationEvent } from '@app/services/notification.service';
 import { IctuFileService } from '@app/services/ictu-file.service';
 
 const TYPE_FILE_IMAGE: string[] = [
@@ -95,6 +95,8 @@ export class OvicAvataTypeMultipleComponent implements OnInit {
     private fileService = inject(IctuFileService);
     private notificationService = inject(NotificationService);
 
+    // control : BehaviorSubject<ProgressAnimationEvent> = new BehaviorSubject( { } );
+
     triggerFilePicker(): void {
         if (this.disabled()) return;
         const input = document.createElement('input');
@@ -161,12 +163,13 @@ export class OvicAvataTypeMultipleComponent implements OnInit {
             this.notificationService.isProcessing(false);
             return;
         }
-
+  
+        const controlUpload : Subject<ProgressAnimationEvent> = new Subject();
+        this.notificationService.startProgressAnimation(controlUpload, `Upload dữ liệu`);
         from(validFiles).pipe(
             concatMap((file, index) => {
-                this.notificationService.loadingAnimationV2({
-                    process: { percent: Math.round(((index + 1) / validFiles.length) * 100) },
-                });
+                controlUpload.next({ percent: Math.floor((index + 1 / validFiles.length) * 100) });
+            
                 return this.fileService.uploadFile_tuyensinh(file).pipe(
                     map((result) => ({ name: String(result.id) }) as { name: string }),
                     catchError(() => {
@@ -179,7 +182,7 @@ export class OvicAvataTypeMultipleComponent implements OnInit {
             finalize(() => {
                 this.isUploading = false;
                 this.notificationService.isProcessing(false);
-                this.notificationService.disableLoadingAnimationV2();
+                controlUpload.complete();
             }),
         ).subscribe((uploaded) => {
             if (uploaded.length > 0) {

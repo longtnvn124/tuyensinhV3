@@ -1,1 +1,11 @@
-<p>ictu-progress works!</p>
+<div class="ictu-progress p-15">
+    <div class="ictu-progress d-flex justify-content-center align-items-center flex-column gap-10" style="min-width: 300px;color: #333333;">
+        @if (heading()){
+	        <p class="f-18 f-w-700 f-roboto lh-base m-0">{{ heading() }}</p>
+        }
+        <div class="ictu-progress-bar ictu-progress-bar--animated">
+            <div [style.width.%]="percent()" class="ictu-progress-bar__pipe" style="background-color: #28a745;"></div>
+        </div>
+        <p class="f-16 f-w-500 f-roboto lh-base m-0">{{ percent() }}%</p>
+    </div>
+</div>

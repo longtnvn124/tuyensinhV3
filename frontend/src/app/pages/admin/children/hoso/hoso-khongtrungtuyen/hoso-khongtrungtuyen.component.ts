@@ -220,8 +220,8 @@ export class HosoKhongtrungtuyenComponent implements OnInit, OnDestroy, IctuBase
         return this.lookupLabel(this.dots(), dotId);
     }
 
-    tinhLabel(tinhId: number | undefined): string {
-        return this.lookupLabel(this.tinhList(), tinhId);
+    tinhLabel(tinh: string | number | undefined): string {
+        return typeof tinh === 'number' ? this.lookupLabel(this.tinhList(), tinh) : (tinh || '—');
     }
 
     private loadLookups(): void {

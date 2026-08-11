@@ -184,7 +184,6 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     ngOnInit(): void {
         this.loadLookups();
-        this.loadData(1, true);
     }
 
     ngOnDestroy(): void {
@@ -224,6 +223,9 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 this.majors.set(majors);
                 this.programs.set(programs);
                 this.tinhList.set(tinhList);
+
+                                this.loadData(1, true);
+
                 
             },
             error: (): void => this.notification.toastError('Tải danh mục thất bại'),
@@ -435,7 +437,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     // ═════════════════════════════════════════════════════════════
 
     statusLabel(status: string | undefined): string {
-        return this.statusOptions.find(s => s.value === status)?.label ?? status ?? '—';
+        return this.statusOptions.find(s => s.value == status)?.label ?? status ?? '—';
     }
 
     statusBadgeClass(status: string | undefined): string {
@@ -444,17 +446,17 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     majorLabel(majorId: number | undefined): string {
         if (!majorId) return '—';
-        return this.majors().find(m => m.value === majorId)?.label ?? `#${majorId}`;
+        return this.majors().find(m => m.value == majorId)?.label ?? `#${majorId}`;
     }
 
     programLabel(programId: number | undefined): string {
         if (!programId) return '—';
-        return this.programs().find(p => p.value === programId)?.label ?? `#${programId}`;
+        return this.programs().find(p => p.value == programId)?.label ?? `#${programId}`;
     }
 
     dotLabel(dotId: number | undefined): string {
         if (!dotId) return '—';
-        return this.dots().find(d => d.value === dotId)?.label ?? `#${dotId}`;
+        return this.dots().find(d => d.value == dotId)?.label ?? `#${dotId}`;
     }
 
     tinhLabel(tinhId: number | undefined): string {
