@@ -24,16 +24,24 @@
 @case ('cccd_check') {
 <div class="cccd-check">
     <div class="cccd-check__card">
-        <h5 class="cccd-check__title">Kiểm tra CCCD</h5>
+        <h5 class="cccd-check__title">{{ canCheckByPhone() ? 'Kiểm tra hồ sơ' : 'Kiểm tra CCCD' }}</h5>
         <p class="cccd-check__desc">
-            Nhập số CCCD để kiểm tra. Nếu chưa có hồ sơ hoặc hồ sơ cũ đã
-            <b>bỏ học</b>, bạn có thể tạo hồ sơ mới.
+            {{ canCheckByPhone()
+            ? 'Nhập số CCCD, số điện thoại hoặc cả hai để kiểm tra.'
+            : 'Nhập số CCCD để kiểm tra.' }}
+            Nếu chưa có hồ sơ hoặc hồ sơ cũ đã <b>bỏ học</b>, bạn có thể tạo hồ sơ mới.
         </p>
         <div class="cccd-check__input-row">
-            <input #cccdInputEl pInputText [ngModel]="cccdInput()" (ngModelChange)="onCccdInputChange($event)"
-                placeholder="Nhập số CCCD" type="text" maxlength="12" autocomplete="off" (keyup.enter)="runCccdCheck()"
-                (keypress)="keyupCheckFirstCode($event)" />
-            <button (click)="runCccdCheck()" [disabled]="cccdLoading() || !cccdInput()"
+            <input #cccdInputEl pInputText class="ictu-form__input-field" [ngModel]="cccdInput()"
+                (ngModelChange)="onCccdInputChange($event)" placeholder="Nhập số CCCD" type="text" maxlength="12"
+                autocomplete="off" (keyup.enter)="runCccdCheck()" (keypress)="keyupCheckFirstCode($event)" />
+            @if (canCheckByPhone()) {
+            <input pInputText class="ictu-form__input-field" [ngModel]="phoneInput()"
+                (ngModelChange)="onPhoneInputChange($event)" placeholder="Nhập số điện thoại" type="tel" maxlength="10"
+                autocomplete="off" (keyup.enter)="runCccdCheck()" (keypress)="keyupCheckFirstCode($event)" />
+            }
+            <button (click)="runCccdCheck()"
+                [disabled]="cccdLoading() || (canCheckByPhone() ? (!cccdInput() && !phoneInput()) : !cccdInput())"
                 class="btn ictu-badge-btn--primary-reverse" mat-flat-button>
                 <i class="ti ti-search"></i>
                 <span>Kiểm tra</span>
@@ -60,10 +68,10 @@
         <div class="existing__card-header">
             <div class="existing__avatar">
                 <!-- <i class="ti ti-user-circle"></i> -->
-                 <i class="ti ti-user"></i>
+                <i class="ti ti-user"></i>
             </div>
             <div class="existing__name-group">
-                <div class="existing__name">{{ record.full_name }}</div>
+                <div class="existing__name">{{ record.ho_va_ten }}</div>
                 <span class="existing__status existing__status--{{ record.status }}">
                     {{ getStatusLabel(record.status) }}
                 </span>
@@ -77,7 +85,7 @@
             </div>
             <div class="existing__info-row">
                 <span class="existing__info-label">Số điện thoại</span>
-                <span class="existing__info-value">{{ record.phone }}</span>
+                <span class="existing__info-value">{{ record.dien_thoai }}</span>
             </div>
             <div class="existing__info-row">
                 <span class="existing__info-label">Ngành đăng ký</span>
@@ -101,7 +109,7 @@
 @case ('form') {
 <div class="form-ctn">
     <div class="form-ctn_h">
-    
+
         <div class="form-ctn_h-content">
 
             <form [formGroup]="formData" class="hoso-them__form">
@@ -132,32 +140,32 @@
                                     <div class="col flex-div">
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Họ và tên</label>
-                                            <input class="ictu-form__input-field" formControlName="full_name" pInputText
+                                            <input class="ictu-form__input-field" formControlName="ho_va_ten" pInputText
                                                 type="text" placeholder="Nguyễn Văn A" />
                                         </div>
                                     </div>
                                     <div class="col flex-div">
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Ngày sinh</label>
-                                            <p-inputMask class="w-100" mask="99/99/9999" formControlName="birthday"
+                                            <p-inputMask class="w-100" mask="99/99/9999" formControlName="ngay_sinh"
                                                 placeholder="dd/mm/yyyy" slotChar="dd/mm/yyyy"></p-inputMask>
                                         </div>
                                     </div>
                                     <div class="col-2 flex-div">
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Giới tính</label>
-                                            <p-select class="w-100 ictu-form__input-field" [options]="genderOption()" appendTo="body"
-                                                formControlName="gioi_tinh" placeholder="Chọn"
+                                            <p-select class="w-100 ictu-form__input-field" [options]="genderOption()"
+                                                appendTo="body" formControlName="gioi_tinh" placeholder="Chọn"
                                                 optionLabel="label" optionValue="value" [showClear]="false" />
                                         </div>
                                     </div>
                                     <div class="col-2 flex-div">
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Dân tộc</label>
-                                            <p-select class="w-100 ictu-form__input-field" [options]="listDantoc()" appendTo="body"
-                                                [filter]="true" filterBy="label" formControlName="dan_toc"
-                                                placeholder="Chọn" optionLabel="label" optionValue="label"
-                                                [showClear]="false" />
+                                            <p-select class="w-100 ictu-form__input-field" [options]="listDantoc()"
+                                                appendTo="body" [filter]="true" filterBy="label"
+                                                formControlName="dan_toc" placeholder="Chọn" optionLabel="label"
+                                                optionValue="label" [showClear]="false" />
                                         </div>
                                     </div>
                                 </div>
@@ -167,8 +175,8 @@
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Số điện
                                                 thoại</label>
-                                            <input pInputText class="ictu-form__input-field" formControlName="phone"
-                                                placeholder="0912345678" />
+                                            <input pInputText class="ictu-form__input-field"
+                                                formControlName="dien_thoai" placeholder="0912345678" />
                                         </div>
                                     </div>
                                     <div class="col flex-div">
@@ -181,34 +189,10 @@
                                     <div class="col flex-div">
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Nơi sinh</label>
-                                            <p-select class="w-100 ictu-form__input-field" [options]="listTinh()" appendTo="body"
-                                                [filter]="true" filterBy="name" formControlName="noi_sinh"
-                                                placeholder="Chọn nơi sinh" optionLabel="name" optionValue="id"
-                                                [showClear]="false" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row form-row-flex-row mt-2">
-                                    <div class="col flex-div">
-                                        <div class="form-dk">
-                                            <div class="label-ctm">Địa chỉ thường trú <span class="ovic-mark">(*)</span>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-6 flex-div">
-                                                    <p-select class="w-100" [options]="listTinh()"
-                                                        (onChange)="onTinhChange($event.value)" appendTo="body"
-                                                        [filter]="true" filterBy="name" formControlName="tinh_id"
-                                                        placeholder="Chọn Tỉnh/ Thành phố" optionLabel="name"
-                                                        optionValue="id" [showClear]="false" />
-                                                </div>
-                                                <div class="col-6 flex-div">
-                                                    <p-select class="w-100" [options]="listXa()" appendTo="body"
-                                                        [filter]="true" filterBy="name" formControlName="xa_id"
-                                                        placeholder="Chọn Xã/ Phường" optionLabel="name"
-                                                        optionValue="id" [showClear]="false" />
-                                                </div>
-                                            </div>
+                                            <p-select class="w-100 ictu-form__input-field" [options]="listTinh()"
+                                                appendTo="body" [filter]="true" filterBy="name"
+                                                formControlName="noi_sinh" placeholder="Chọn nơi sinh"
+                                                optionLabel="name" optionValue="id" [showClear]="false" />
                                         </div>
                                     </div>
                                 </div>
@@ -217,11 +201,66 @@
                                     <div class="col flex-div">
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Địa chỉ</label>
-                                            <input pInputText class="ictu-form__input-field" formControlName="address"
-                                                placeholder="địa chỉ: số nhà, đường, ngõ,..." />
+                                            <div style="border: 1px solid #ccc;border-radius: 4px; padding:10px;">
+                                                <div class="row">
+                                                    <div class="col-6 flex-div">
+                                                        <p-select class="w-100" [options]="listTinh()"
+                                                            (onChange)="onTinhChange($event.value)" appendTo="body"
+                                                            [filter]="true" filterBy="name"
+                                                            formControlName="dia_chi_tinh"
+                                                            placeholder="Chọn Tỉnh/ Thành phố" optionLabel="name"
+                                                            optionValue="id" [showClear]="false" />
+                                                    </div>
+                                                    <div class="col-6 flex-div">
+                                                        <p-select class="w-100" [options]="listXa()" appendTo="body"
+                                                            [filter]="true" filterBy="name" formControlName="dia_chi_xa"
+                                                            placeholder="Chọn Xã/ Phường" optionLabel="name"
+                                                            optionValue="id" [showClear]="false" />
+                                                    </div>
+                                                    <div class="col-12 flex-div" style="margin-top: 10px;">
+                                                        <input pInputText class="ictu-form__input-field"
+                                                            formControlName="dia_chi_nha"
+                                                            placeholder="địa chỉ: số nhà, đường, ngõ,..." />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- <div class="row form-row-flex-row mt-2">
+                                    <div class="col flex-div">
+                                        <div class="form-dk">
+                                            <div class="label-ctm">Địa chỉ thường trú <span class="ovic-mark">(*)</span>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6 flex-div">
+                                                    <p-select class="w-100" [options]="listTinh()"
+                                                        (onChange)="onTinhChange($event.value)" appendTo="body"
+                                                        [filter]="true" filterBy="name" formControlName="dia_chi_tinh"
+                                                        placeholder="Chọn Tỉnh/ Thành phố" optionLabel="name"
+                                                        optionValue="id" [showClear]="false" />
+                                                </div>
+                                                <div class="col-6 flex-div">
+                                                    <p-select class="w-100" [options]="listXa()" appendTo="body"
+                                                        [filter]="true" filterBy="name" formControlName="dia_chi_xa"
+                                                        placeholder="Chọn Xã/ Phường" optionLabel="name"
+                                                        optionValue="id" [showClear]="false" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <!-- <div class="row form-row-flex-row mt-3">
+                                    <div class="col flex-div">
+                                        <div class="ictu-form__row">
+                                            <label class="ictu-form__label ictu-form__label--required">Địa chỉ</label>
+                                            <input pInputText class="ictu-form__input-field" formControlName="dia_chi_nha"
+                                                placeholder="địa chỉ: số nhà, đường, ngõ,..." />
+                                        </div>
+                                    </div>
+                                </div> -->
 
 
 
@@ -242,13 +281,14 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ictu-form__label--required">Số CCCD</label>
                                     <input class="ictu-form__input-field" formControlName="cccd" pInputText type="text"
+                                        placeholder="Nhập số CCCD" maxlength="12" autocomplete="off"
                                         [readonly]="!isAdmin()" />
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Ngày cấp</label>
-                                    <p-inputMask class="w-100" mask="99/99/9999" formControlName="cccd_ngaycap"
+                                    <p-inputMask class="w-100" mask="99/99/9999" formControlName="ngay_cap_cccd"
                                         placeholder="dd/mm/yyyy" slotChar="dd/mm/yyyy"></p-inputMask>
                                 </div>
                             </div>
@@ -256,7 +296,7 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Nơi cấp</label>
                                     <p-select class="w-100 ictu-form__input-field" [options]="noicapCCCD"
-                                        appendTo="body" [filter]="true" filterBy="label" formControlName="cccd_noicap"
+                                        appendTo="body" [filter]="true" filterBy="label" formControlName="noi_cap_cccd"
                                         placeholder="Chọn" optionLabel="label" optionValue="label"
                                         [showClear]="false" />
                                 </div>
@@ -267,14 +307,14 @@
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">CCCD mặt trước</label>
-                                    <ovic-img-crop-v2 [formField]="f['cccd_mattruoc']" [aspectRatio]="3 / 2"
+                                    <ovic-img-crop-v2 [formField]="f['anh_cmnd_truoc']" [aspectRatio]="3 / 2"
                                         [resizeToWidth]="600"></ovic-img-crop-v2>
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ">CCCD mặt sau</label>
-                                    <ovic-img-crop-v2 [formField]="f['cccd_matsau']" [aspectRatio]="3 / 2"
+                                    <ovic-img-crop-v2 [formField]="f['anh_cmnd_sau']" [aspectRatio]="3 / 2"
                                         [resizeToWidth]="600"></ovic-img-crop-v2>
                                 </div>
                             </div>
@@ -287,7 +327,8 @@
                     Section III: Bằng tốt nghiệp THPT / TH nghề/ GCN  Hoàn thành kiến thức văn hóa THPT
                     ════════════════════════════════════════════ -->
                 <section class="hoso-form__section">
-                    <div class="hoso-form__section-title">III. Bằng tốt nghiệp THPT / TH nghề/ GCN  Hoàn thành kiến thức văn hóa THPT</div>
+                    <div class="hoso-form__section-title">III. Bằng tốt nghiệp THPT / TH nghề/ GCN Hoàn thành kiến thức
+                        văn hóa THPT</div>
                     <div class="ictu-form ictu-form--label-on-top">
                         <!-- <div class="row form-row form-row-flex-row">
                             <div class="col flex-div">
@@ -304,23 +345,23 @@
                             <div class="col-2 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Loại văn bằng</label>
-                                    <p-select [options]="listVBTN()" appendTo="body" formControlName="tn_vanbang"
+                                    <p-select [options]="listVBTN()" appendTo="body" formControlName="van_bang_tn"
                                         placeholder="Chọn" optionLabel="label" class="w-100 ictu-form__input-field"
                                         optionValue="value" [showClear]="false" />
                                 </div>
                             </div>
-                           
+
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Năm tốt nghiệp</label>
-                                    <input class="ictu-form__input-field" formControlName="tn_nam" pInputText
+                                    <input class="ictu-form__input-field" formControlName="nam_tn" pInputText
                                         type="text" placeholder="Vd: QD..." />
                                 </div>
                             </div>
 
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Nơi cấp bằng</label>
+                                    <label class="ictu-form__label">Nơi cấp</label>
                                     <input class="ictu-form__input-field" formControlName="tn_noicap" pInputText
                                         type="text" placeholder="Vd: Trường..." />
                                 </div>
@@ -331,29 +372,27 @@
                     </div>
                 </section>
 
-                
+
                 <!-- ════════════════════════════════════════════
                     Section IV: Văn bằng chuyên môn đã tốt nghiệp 
                     ════════════════════════════════════════════ -->
                 <section class="hoso-form__section">
                     <div class="hoso-form__section-title">IV. Văn bằng chuyên môn đã tốt nghiệp</div>
                     <div class="ictu-form ictu-form--label-on-top">
-                        
-                        <div class="row form-row-flex-row mt-2">
+
+                        <div class="row form-row-flex-row mt-3">
                             <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Số hiệu văn bằng</label>
-                                    <input class="ictu-form__input-field" formControlName="vb_chuyenmon_nganh"
-                                        placeholder="vd: QD..."
-                                        pInputText type="text" />
+                                    <input class="ictu-form__input-field" formControlName="vb_chuyenmon_sohieu"
+                                        placeholder="vd: QD..." pInputText type="text" />
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Ngành tốt nghiệp</label>
                                     <input class="ictu-form__input-field" formControlName="vb_chuyenmon_nganh"
-                                        placeholder="Vd: Công nghệ thông tin"
-                                        pInputText type="text" />
+                                        placeholder="Vd: Công nghệ thông tin" pInputText type="text" />
                                 </div>
                             </div>
                             <div class="col flex-div">
@@ -366,11 +405,11 @@
                             <div class="col-2 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Năm tốt nghiệp</label>
-                                    <input class="ictu-form__input-field" formControlName="vb_chuyenmon_nam"
+                                    <input class="ictu-form__input-field" formControlName="vb_chuyenmon_namtn"
                                         placeholder="Vd: 2026" pInputText type="text" />
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </section>
@@ -382,40 +421,79 @@
                     <div class="hoso-form__section-title">V. Thông tin bổ sung</div>
                     <div class="ictu-form ictu-form--label-on-top">
                         <div class="row form-row-flex-row">
-                            <div class="col flex-div">
+                            <div class="col-3 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ictu-form__label--required">Đối tượng xét tuyển</label>
+                                    <p-select class="w-100" [options]="listDoituong()" appendTo="body"
+                                        formControlName="doituong" placeholder="Chọn đối tượng" optionLabel="label"
+                                        optionValue="value" [showClear]="false" />
+                                </div>
+                            </div>
+                            <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ictu-form__label--required">Ngành đăng ký</label>
                                     <p-select class="w-100" [options]="listNganh()" appendTo="body" [filter]="true"
                                         filterBy="label" formControlName="nganh_id" placeholder="Chọn ngành"
-                                        optionLabel="label" optionValue="value" [showClear]="false" />
+                                        optionLabel="label" optionValue="value" [showClear]="false"
+                                        (onChange)="onNganhChange($event.value)" />
                                 </div>
                             </div>
-                            <div class="col flex-div">
+                            <div class="col-3 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Chương trình đào tạo</label>
+                                    <p-select class="w-100" [options]="listChuongtrinh()" appendTo="body"
+                                        [filter]="true" filterBy="label" formControlName="ctdt_id"
+                                        placeholder="Chọn chương trình" optionLabel="label" optionValue="value"
+                                        [showClear]="false" [disabled]="!formData.get('nganh_id')?.value" />
+                                </div>
+                            </div>
+                            <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Đợt xét tuyển</label>
                                     <p-select class="w-100" [options]="listDotXetTuyen()" appendTo="body"
-                                        formControlName="dot_xet_tuyen_id" placeholder="Chọn đợt"
-                                        optionLabel="name" optionValue="id" [showClear]="false"
-                                        [disabled]="true" />
+                                        formControlName="dotxettuyen_id" placeholder="Chọn đợt" optionLabel="name"
+                                        optionValue="id" [showClear]="false" [disabled]="true" />
                                 </div>
                             </div>
-                            <div class="col flex-div">
-                                <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Loại điểm</label>
-                                    <p-select class="w-100" [options]="typeDiemXettuyen()" appendTo="body"
-                                        formControlName="type_diem" placeholder="Chọn loại điểm" optionLabel="label"
-                                        optionValue="label" [showClear]="false" (onChange)="onTypeDiemChange($event)" />
-                                </div>
-                            </div>
-                            @if (showDiemTb()) {
+                            
+                            <!-- @if (showDiemTb()) {
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Điểm TB</label>
-                                    <p-inputNumber class="w-100" formControlName="diemtb" [min]="0" [max]="10" [minFractionDigits]="1"
-                                        [maxFractionDigits]="2" placeholder="0.00"></p-inputNumber>
+                                    <p-inputNumber class="w-100" formControlName="diem_xettuyen" [min]="0" [max]="10"
+                                        [minFractionDigits]="1" [maxFractionDigits]="2"
+                                        placeholder="0.00"></p-inputNumber>
                                 </div>
                             </div>
-                            }
+                            } -->
+                        </div>
+
+                        <div class="row form-row-flex-row mt-2">
+                            <div class="col-4 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Điểm xét tuyển gốc</label>
+                                    <p-inputNumber class="w-100" formControlName="diem_xettuyen" [min]="0" [max]="30"
+                                        [minFractionDigits]="0" [maxFractionDigits]="1"
+                                        placeholder="0.00"></p-inputNumber>
+                                </div>
+                            </div>
+                            <div class="col-4 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Điểm công</label>
+                                    <p-inputNumber class="w-100" formControlName="diem_cong" [min]="0" [max]="10"
+                                        [minFractionDigits]="0" [maxFractionDigits]="1"
+                                        placeholder="0.00"></p-inputNumber>
+                                </div>
+                            </div>
+                            <div class="col-4 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Điểm ưu tiên</label>
+                                    <p-inputNumber class="w-100" formControlName="diem_uutien" [min]="0" [max]="10"
+                                        [minFractionDigits]="0" [maxFractionDigits]="1"
+                                        placeholder="0.00"></p-inputNumber>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="row form-row-flex-row mt-2">
                             <div class="col flex-div">
@@ -431,10 +509,10 @@
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Người tư vấn</label>
-                                    <p-select class="w-100" [options]="listUserTuvan()" appendTo="body"
-                                        [filter]="true" filterBy="name_email"
-                                        formControlName="nguoi_tuvan_id" placeholder="Chọn người tư vấn"
-                                        optionLabel="name_email" optionValue="id" [showClear]="true" />
+                                    <p-select class="w-100" [options]="listUserTuvan()" appendTo="body" [filter]="true"
+                                        filterBy="name_email" formControlName="nguoi_tuvan"
+                                        placeholder="Chọn người tư vấn" optionLabel="name_email" optionValue="id"
+                                        [showClear]="true" />
                                 </div>
                             </div>
                         </div>
@@ -466,13 +544,21 @@
                         </div>
 
                         <div class="row form-row form-row-flex-row">
-                            <div class="col flex-div">
+                            <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Ảnh bằng, bảng điểm TC, CĐ, ĐH (Nếu có) và học bạ THPT,BTVH</label>
-                        
-                                    <ovic-avata-type-multiple [formField]="f['anh_hoc_ba']" [multiple]="true"
-                                    [accept]="'.jpg,.png,.jpeg'"
-                                    ></ovic-avata-type-multiple>
+                                    <label class="ictu-form__label ictu-form__label--required">Ảnh sơ yếu lý
+                                        lịch</label>
+                                    <ovic-img-crop-v2 [formField]="f['anh_soyeulylich']" [keyUpload]="'direct'"
+                                        [resizeToWidth]="400"></ovic-img-crop-v2>
+                                </div>
+                            </div>
+                            <div class="col-9 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Ảnh bằng, bảng điểm TC, CĐ, ĐH (Nếu có) và học bạ
+                                        THPT,BTVH</label>
+
+                                    <ovic-avata-type-multiple [formField]="f['anh_hoc_ba_uploads']" [multiple]="true"
+                                        [accept]="'.jpg,.png,.jpeg'"></ovic-avata-type-multiple>
                                 </div>
                             </div>
 
@@ -492,7 +578,8 @@
         </button>
         }
         <button (click)="submitData()" [disabled]="!formData.valid || submitting()"
-            class="btn {{ dataId ? 'ictu-badge-btn--primary-reverse' : 'ictu-badge-btn--success-reverse' }}" mat-flat-button>
+            class="btn {{ dataId ? 'ictu-badge-btn--primary-reverse' : 'ictu-badge-btn--success-reverse' }}"
+            mat-flat-button>
             <i class="ti {{ dataId ? 'ti-pencil' : 'ti-plus' }}"></i>
             <span>{{ dataId ? 'Cập nhật' : 'Thêm mới' }}</span>
         </button>

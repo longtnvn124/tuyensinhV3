@@ -42,9 +42,14 @@ const routes : Routes = [
             },
 
 	
-            {
+            // {
+            //     path          : 'hoso-them' ,
+            //     loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso/hoso-them/hoso-them.component').then( ( m ) : any => m.HosoThemComponent ),
+            // },
+
+			{
                 path          : 'hoso-them' ,
-                loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso/hoso-them/hoso-them.component').then( ( m ) : any => m.HosoThemComponent ),
+                loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso/hoso-them-v2/hoso-them-v2.component').then( ( m ) : any => m.HosoThemV2Component ),
             },
 					// {
             //     path          : 'hoso-tuyensinh' ,

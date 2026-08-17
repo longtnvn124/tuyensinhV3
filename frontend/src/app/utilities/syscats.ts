@@ -368,7 +368,8 @@ export const DanToc = [
 ];
 export const VBTN = [
     { value: 'THPT', label: 'THPT' },
-    { value: 'BTVH', label: 'BTVH' },
+    { value: 'THN', label: 'TH nghề' },
+    { value: 'GCN', label: 'GCN HT kiến thức' },
 ];
 
 export const VBCM = [
@@ -422,13 +423,9 @@ export const DANHHIEU_TOTNGHIEP = [
 ]
 
 export const DOI_TUONG: { value: string; label: string; key: string }[] = [
-  { value: '01', label: 'Đại học đúng ngành', key: 'ĐH.Đ' },
-  { value: '02', label: 'Đại học gần ngành', key: 'ĐH.G' },
-  { value: '03', label: 'Đại học khác ngành', key: 'ĐH.K' },
-  { value: '04', label: 'Cao đẳng đúng ngành', key: 'CĐ.Đ' },
-  { value: '05', label: 'Cao đẳng gần ngành', key: 'CĐ.G' },
-  { value: '06', label: 'Cao đẳng khác ngành', key: 'CĐ.K' },
-  { value: '07', label: 'Trung cấp đúng ngành', key: 'TC.Đ' },
-  { value: '08', label: 'Trung cấp khác ngành', key: 'TC.K' },
-  { value: '09', label: 'Trung học phổ thông', key: 'THPT' },
+  { value: 'DH', label: 'Đại học ', key: 'ĐH' }, 
+  { value: 'CD', label: 'Cao đẳng', key: 'CĐ' },
+  { value: 'TC', label: 'Trung cấp', key: 'TC' },
+  { value: 'THPT', label: 'THPT', key: 'THPT' },
+
 ];

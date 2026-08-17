@@ -107,9 +107,9 @@ export class OvicImgCropV2Component implements OnInit {
     ];
 
     ngOnInit(): void {
-        const field = this.formField();
-        if (field) {
-            field.valueChanges
+       
+        
+            this.formField().valueChanges
                 .pipe(
                     takeUntilDestroyed(this.destroyRef),
                     map((text: string) =>
@@ -118,12 +118,12 @@ export class OvicImgCropV2Component implements OnInit {
                 )
                 .subscribe((url) => this.previewUrl.set(url));
 
-            if (field.value) {
+            if (this.formField().value) {
                 this.previewUrl.set(
-                    this.fileService.getPreviewLinkLocalFile(field.value),
+                    this.fileService.getPreviewLinkLocalFile(this.formField().value),
                 );
             }
-        }
+        
     }
 
     // ─────────────────────── Public ───────────────────────

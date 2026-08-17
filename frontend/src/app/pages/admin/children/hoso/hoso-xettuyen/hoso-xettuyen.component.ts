@@ -64,24 +64,24 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     searchInfo: {
         search: string;
         status?: string;
-        dot_xet_tuyen_id?: number;
-        nganhhoc_id?: number;
-        nguoi_tuvan_id?: number;
+        dotxettuyen_id?: number;
+        nganh_id?: number;
+        nguoi_tuvan?: number;
         cccd?: string;
-        tinh_id?: number;
-        xa_id?: number;
-        noi_sinh?: string;
+        dia_chi_tinh?: number;
+        dia_chi_xa?: number;
+        noi_sinh?: number;
         dan_toc?: string;
         ctdt_id?: number;
     } = {
         search: '',
         status: undefined,
-        dot_xet_tuyen_id: undefined,
-        nganhhoc_id: undefined,
-        nguoi_tuvan_id: undefined,
+        dotxettuyen_id: undefined,
+        nganh_id: undefined,
+        nguoi_tuvan: undefined,
         cccd: undefined,
-        tinh_id: undefined,
-        xa_id: undefined,
+        dia_chi_tinh: undefined,
+        dia_chi_xa: undefined,
         noi_sinh: undefined,
         dan_toc: undefined,
         ctdt_id: undefined,
@@ -242,39 +242,39 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
         if (s.search) {
             conditions.push(
-                { conditionName: 'full_name', value: `%${s.search}%`, condition: IctuQueryCondition.like, orWhere: 'or' },
-                { conditionName: 'phone', value: `%${s.search}%`, condition: IctuQueryCondition.like, orWhere: 'or' },
+                { conditionName: 'ho_va_ten', value: `%${s.search}%`, condition: IctuQueryCondition.like, orWhere: 'or' },
+                { conditionName: 'dien_thoai', value: `%${s.search}%`, condition: IctuQueryCondition.like, orWhere: 'or' },
             );
         }
         if (s.status) {
             conditions.push({ conditionName: 'status', value: s.status, condition: IctuQueryCondition.equal });
         }
-        if (s.dot_xet_tuyen_id) {
-            conditions.push({ conditionName: 'dot_xet_tuyen_id', value: `${s.dot_xet_tuyen_id}`, condition: IctuQueryCondition.equal });
+        if (s.dotxettuyen_id) {
+            conditions.push({ conditionName: 'dotxettuyen_id', value: `${s.dotxettuyen_id}`, condition: IctuQueryCondition.equal });
         }
-        if (s.nganhhoc_id) {
-            conditions.push({ conditionName: 'nganhhoc_id', value: `${s.nganhhoc_id}`, condition: IctuQueryCondition.equal });
+        if (s.nganh_id) {
+            conditions.push({ conditionName: 'nganh_id', value: `${s.nganh_id}`, condition: IctuQueryCondition.equal });
         }
-        if (s.nguoi_tuvan_id) {
-            conditions.push({ conditionName: 'nguoi_tuvan_id', value: `${s.nguoi_tuvan_id}`, condition: IctuQueryCondition.equal });
+        if (s.nguoi_tuvan) {
+            conditions.push({ conditionName: 'nguoi_tuvan', value: `${s.nguoi_tuvan}`, condition: IctuQueryCondition.equal });
         }
         if (s.cccd) {
             conditions.push({ conditionName: 'cccd', value: `%${s.cccd}%`, condition: IctuQueryCondition.like });
         }
-        if (s.tinh_id) {
-            conditions.push({ conditionName: 'tinh_id', value: `${s.tinh_id}`, condition: IctuQueryCondition.equal });
+        if (s.dia_chi_tinh) {
+            conditions.push({ conditionName: 'dia_chi_tinh', value: `${s.dia_chi_tinh}`, condition: IctuQueryCondition.equal });
         }
-        if (s.xa_id) {
-            conditions.push({ conditionName: 'xa_id', value: `${s.xa_id}`, condition: IctuQueryCondition.equal });
+        if (s.dia_chi_xa) {
+            conditions.push({ conditionName: 'dia_chi_xa', value: `${s.dia_chi_xa}`, condition: IctuQueryCondition.equal });
         }
         if (s.noi_sinh) {
-            conditions.push({ conditionName: 'noi_sinh', value: `%${s.noi_sinh}%`, condition: IctuQueryCondition.like });
+            conditions.push({ conditionName: 'noi_sinh', value: `${s.noi_sinh}`, condition: IctuQueryCondition.equal });
         }
         if (s.dan_toc) {
             conditions.push({ conditionName: 'dan_toc', value: s.dan_toc, condition: IctuQueryCondition.equal });
         }
         if (s.ctdt_id) {
-            conditions.push({ conditionName: 'program_id', value: `${s.ctdt_id}`, condition: IctuQueryCondition.equal });
+            conditions.push({ conditionName: 'ctdt_id', value: `${s.ctdt_id}`, condition: IctuQueryCondition.equal });
         }
         return conditions;
     }
@@ -328,12 +328,12 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.searchInfo = {
             search: '',
             status: undefined,
-            dot_xet_tuyen_id: undefined,
-            nganhhoc_id: undefined,
-            nguoi_tuvan_id: undefined,
+            dotxettuyen_id: undefined,
+            nganh_id: undefined,
+            nguoi_tuvan: undefined,
             cccd: undefined,
-            tinh_id: undefined,
-            xa_id: undefined,
+            dia_chi_tinh: undefined,
+            dia_chi_xa: undefined,
             noi_sinh: undefined,
             dan_toc: undefined,
             ctdt_id: undefined,

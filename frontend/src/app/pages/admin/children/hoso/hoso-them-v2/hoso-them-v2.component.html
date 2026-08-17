@@ -1,0 +1,26 @@
+<div class="hoso-them">
+    <div class="hoso-them__header">
+        <div class="admin-wrap-table__head d-flex">
+            <h4 class="admin-wrap-table__heading">
+                <svg>
+                    <use href="fonts/custom-icon.svg#custom-element-plus"></use>
+                </svg>
+                Thêm hồ sơ thí sinh
+            </h4>
+            <div class="hoso-them__header-actions">
+                <button mat-flat-button (click)="onReset()" class="btn ictu-badge-btn--secondary">
+                    <i class="ti ti-plus"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="hoso-them__body">
+        <app-form-thongtin-dangky
+            class="w-100"
+            (saved)="onReset()"
+            (cancel)="onReset()"
+        />
+    </div>
+</div>

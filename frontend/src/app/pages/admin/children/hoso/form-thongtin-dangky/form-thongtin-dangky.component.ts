@@ -16,9 +16,10 @@ import {SharedModule} from '@shared/shared.module';
 import {AuthenticationService} from '@app/services/authentication.service';
 import {HosoThisinhService} from '@app/services/tuyensinh/hoso-thisinh.service';
 import {TuyensinhStatusService} from '@app/services/tuyensinh/tuyensinh-status.service';
-import {ApiOutsiteService} from '@services/tuyensinh/api-outsite.service';
+import {NganhhocService} from '@app/services/tuyensinh/nganhhoc.service';
+import {ChuongtrinhDaotaoService} from '@app/services/tuyensinh/chuongtrinh-daotao.service';
 import {NotificationService} from '@app/services/notification.service';
-import {DanToc, GENDER, VBTN, VBCM, DANHHIEU_TOTNGHIEP} from '@app/utilities/syscats';
+import {DanToc, GENDER, VBTN, VBCM, DANHHIEU_TOTNGHIEP, DOI_TUONG} from '@app/utilities/syscats';
 import {User} from '@app/models/user';
 import {Textarea} from 'primeng/textarea';
 import {IctuDropdownOption} from '@models/ictu-dropdown-option';
@@ -68,7 +69,8 @@ export class FormThongtinDangkyComponent implements OnInit {
     private readonly auth                = inject(AuthenticationService);
     private readonly hosoService         = inject(HosoThisinhService);
     private readonly statusService       = inject(TuyensinhStatusService);
-    private readonly apiOutsite          = inject(ApiOutsiteService);
+    private readonly nganhHocService      = inject(NganhhocService);
+    private readonly ctdtService          = inject(ChuongtrinhDaotaoService);
     private readonly locationSvc         = inject(LocationService);
     private readonly notification        = inject(NotificationService);
     private readonly userService         = inject(UserService);
@@ -90,6 +92,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     /* ------------------------------------------------------------------ */
     readonly viewState    = signal<ViewState>('loading');
     readonly cccdInput    = signal<string>('');
+    readonly phoneInput   = signal<string>('');
     readonly cccdLoading  = signal(false);
     readonly submitting   = signal(false);
     readonly showDiemTb    = signal(true);
@@ -109,6 +112,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     /* ------------------------------------------------------------------ */
     readonly isManager     = computed(() => this.auth.userHasRole(['admin', 'manager']));
     readonly isLanhDaoKhoa = computed(() => this.auth.userHasRole(['direction']));
+    readonly canCheckByPhone = computed(() => this.auth.userHasRole(['admin', 'direction', 'manager']));
     readonly canEdit       = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff']));
     readonly canAdd        = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff', 'doi-tac']));
     readonly duyetHoso     = computed(() => this.auth.userHasRole(['reviewer']));
@@ -127,10 +131,12 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly genderOption      = signal(GENDER);
     readonly listVBTN          = signal(VBTN);
     readonly listVBCM          = signal(VBCM);
+    readonly listDoituong      = signal(DOI_TUONG);
     readonly listTinh          = signal<Locations[]>([]);
     readonly listXa            = signal<Locations[]>([]);
     readonly listUser          = signal<User[]>([]);
     readonly listNganh         = signal<IctuDropdownOption<number>[]>([]);
+    readonly listChuongtrinh   = signal<IctuDropdownOption<number>[]>([]);
 
     readonly listDotXetTuyen   = signal<DotXettuyen[]>([]);
 
@@ -156,23 +162,25 @@ export class FormThongtinDangkyComponent implements OnInit {
     formData!: FormGroup;
 
     readonly errorMessages: Record<string, string> = {
-        full_name          : 'Vui lòng nhập họ và tên.',
-        birthday           : 'Vui lòng nhập ngày sinh.',
-        phone              : 'Vui lòng nhập số điện thoại hợp lệ (10 chữ số).',
+        ho_va_ten          : 'Vui lòng nhập họ và tên.',
+        ngay_sinh          : 'Vui lòng nhập ngày sinh.',
+        dien_thoai         : 'Vui lòng nhập số điện thoại hợp lệ (10 chữ số).',
         email              : 'Vui lòng nhập địa chỉ email hợp lệ.',
         gioi_tinh          : 'Vui lòng chọn giới tính.',
         cccd               : 'Vui lòng nhập đúng CCCD.',
-        cccd_ngaycap       : 'Vui lòng nhập ngày cấp CCCD.',
-        cccd_noicap        : 'Vui lòng nhập nơi cấp CCCD.',
+        ngay_cap_cccd      : 'Vui lòng nhập ngày cấp CCCD.',
+        noi_cap_cccd       : 'Vui lòng nhập nơi cấp CCCD.',
         van_bang_tn        : 'Vui lòng chọn văn bằng/tốt nghiệp.',
         nam_tn             : 'Vui lòng nhập năm tốt nghiệp.',
         sohieu_vb          : 'Vui lòng nhập số hiệu văn bằng tốt nghiệp.',
-        nganh_dangky       : 'Vui lòng chọn ngành đăng ký.',
+        nganh_id           : 'Vui lòng chọn ngành đăng ký.',
+        doituong           : 'Vui lòng chọn đối tượng tuyển sinh.',
         anh_the            : 'Vui lòng nhập ảnh thẻ.',
         anh_phieu_dang_ky  : 'Vui lòng nhập ảnh phiếu đăng ký.',
         anh_cmnd_truoc     : 'Vui lòng nhập ảnh CCCD mặt trước.',
         anh_cmnd_sau       : 'Vui lòng nhập ảnh CCCD mặt sau.',
         anh_thpt           : 'Vui lòng nhập ảnh bằng THPT/BTVH.',
+        anh_soyeulylich    : 'Vui lòng nhập ảnh sơ yếu lý lịch.',
     };
 
     danhhieu_totnghiep = DANHHIEU_TOTNGHIEP;
@@ -186,11 +194,55 @@ export class FormThongtinDangkyComponent implements OnInit {
 
 
     constructor(){
+        this.formData = this.fb.group({
+            ho_va_ten: ['', [Validators.required, Validators.minLength(2)]],
+            ngay_sinh: ['', Validators.required],
+            dien_thoai: ['', [Validators.required, Validators.pattern(/^(0[35789])(\d{8})$/)]],
+            email: ['', Validators.email],
+            gioi_tinh: ['', Validators.required],
+            dan_toc: ['', Validators.required],
+            noi_sinh: [null],
+            dia_chi_tinh: [null],
+            dia_chi_xa: [null],
+            dia_chi_nha: [''],
+            cccd: ['', [Validators.required, Validators.pattern('[0-9]{12}')]],
+            ngay_cap_cccd: [''],
+            noi_cap_cccd: [''],
+            van_bang_tn: [''],
+            nam_tn: [''],
+            tn_noicap: [''],
+            sohieu_vb: [''],
+            vb_chuyenmon: [''],
+            vb_chuyenmon_nganh: [''],
+            vb_chuyenmon_namtn: [''],
+            vb_chuyenmon_noicap: [''],
+            vb_chuyenmon_sohieu: [''],
+            nganh_id: [''],
+            ctdt_id: [null],
+            doituong: [''],
+            type_diem: [null],
+            diem_xettuyen: [null],
+            content: [''],
+            nguoi_tuvan: [this.getDefaultNguoiTuvan()],
+            dotxettuyen_id: [0],
+            status: ['cho_duyet'],
+            status_connent: [0],
+            owner_by: [this.auth.user?.id],
+            submit_from: ['website'],
+            anh_the: [''],
+            anh_cmnd_truoc: [''],
+            anh_cmnd_sau: [''],
+            anh_phieu_dang_ky: [''],
+            anh_thpt: [''],
+            anh_hoc_ba_uploads: [[]],
+            anh_soyeulylich: [''],
+            diem_cong: [0],
+            diem_uutien: [0],
+        });
         this.isAdmin.set(this.auth.userHasRole(['admin','direction','manager']));
         this.isDoitac.set(this.auth.userHasRole(['doi-tac']));
         this.isNhanVien.set(this.auth.userHasRole(['staff']));
         this.isDoitacNhanvien.set(this.auth.userHasRole(['doi-tac-cv']));
-
     }
 
 
@@ -206,50 +258,50 @@ export class FormThongtinDangkyComponent implements OnInit {
     /*  Form init                                                          */
     /* ------------------------------------------------------------------ */
     private initForm(): void {
-        this.formData = this.fb.group({
-            // Section 1: Personal
-            full_name        : ['', [Validators.required, Validators.minLength(2)]],
-            birthday         : ['', Validators.required],
-            phone            : ['', [Validators.required, Validators.pattern(/^(0[35789])(\d{8})$/)]],
-            email            : ['', [Validators.email]],
-            gioi_tinh        : ['', Validators.required],
-            dan_toc          : ['', Validators.required],
-            noi_sinh         : [''],
-            tinh_id          : [null],
-            xa_id            : [null],
-            address          : [''],
-            // Section 2: CCCD
-            cccd             : ['', [Validators.required, Validators.pattern('[0-9]{12}')]],
-            cccd_ngaycap     : [''],
-            cccd_noicap      : [''],
-            // Section 3: Van bang TN
-            tn_vanbang      : [''],   //thpt/btvh
-            tn_nam           : [''],
-            tn_noicap        : [''],
-            // Section 4: Van bang chuyen mon
-            vb_chuyenmon       : [''],
-            vb_chuyenmon_nganh : [''],
-            vb_chuyenmon_nam : [''],
-            vb_chuyenmon_noicap: [''],
-            vb_chuyenmon_sohieu :[''],
-            // Section 5: Bo sung
-            nganh_id       : [''],
-            ctdt_id         : [null],
-            type_diem          : ['THPT'],
-            diemtb             : [''],
-            content            : [''],
-            nguoi_tuvan_id     : [this.getDefaultNguoiTuvan()],
-            dot_xet_tuyen_id   :[0],
-            // Hidden / system
-            status             : ['cho_duyet'],
-            owner_by           : [this.auth.user?.id],
-            // Image files
-            anh_the            : [''],
-            cccd_mattruoc     : [''],
-            cccd_matsau      : [''],
-            anh_phieu_dang_ky  : [''],
-            anh_thpt           : [''],
-            anh_hoc_ba         : [null],
+        this.formData.reset({
+            ho_va_ten: '',
+            ngay_sinh: '',
+            dien_thoai: '',
+            email: '',
+            gioi_tinh: '',
+            dan_toc: '',
+            noi_sinh: null,
+            dia_chi_tinh: null,
+            dia_chi_xa: null,
+            dia_chi_nha: '',
+            cccd: '',
+            ngay_cap_cccd: '',
+            noi_cap_cccd: '',
+            van_bang_tn: '',
+            nam_tn: '',
+            tn_noicap: '',
+            sohieu_vb: '',
+            vb_chuyenmon: '',
+            vb_chuyenmon_nganh: '',
+            vb_chuyenmon_namtn: '',
+            vb_chuyenmon_noicap: '',
+            vb_chuyenmon_sohieu: '',
+            nganh_id: '',
+            ctdt_id: null,
+            doituong: '',
+            type_diem: null,
+            diem_xettuyen: null,
+            content: '',
+            nguoi_tuvan: this.getDefaultNguoiTuvan(),
+            dotxettuyen_id: 0,
+            status: 'cho_duyet',
+            status_connent: 0,
+            owner_by: this.auth.user?.id,
+            submit_from: 'website',
+            anh_the: '',
+            anh_cmnd_truoc: '',
+            anh_cmnd_sau: '',
+            anh_phieu_dang_ky: '',
+            anh_thpt: '',
+            anh_hoc_ba_uploads: [],
+            anh_soyeulylich: '',
+            diem_cong:0,
+            diem_uutien: 0,
         });
     }
 
@@ -270,7 +322,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             tinh:    this.locationSvc.queryLocation([], qp, 'regions'),
             provinces: this.locationSvc.queryLocation([], qp, 'provinces'),
             users:   this.userService.query(userCond, {limit: -1}),
-            nganh:   this.apiOutsite.getNganhList(),
+            nganh:   this.nganhHocService.load({search: ''}, {limit: -1}),
             dotxet: this.dotXettuyenService.query(dotCon,{limit:1,paged:1})
         })
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -286,7 +338,7 @@ export class FormThongtinDangkyComponent implements OnInit {
                     this.listDotXetTuyen.set(dotxet.data ?? []);
                     const firstDot = (dotxet.data ?? [])[0];
                     if (firstDot) {
-                        this.formData.patchValue({ dot_xet_tuyen_id: firstDot.id });
+                        this.formData.patchValue({ dotxettuyen_id: firstDot.id });
                     }
 
                     // Load danh sách người tư vấn theo quyền
@@ -307,13 +359,19 @@ export class FormThongtinDangkyComponent implements OnInit {
                         });
                     }
 
-                    const nganhList = (nganh.data ?? []).filter((n: any) => n.type === 'nganh');
-                    this.listNganh.set(nganhList.map((m: any) => ({value: m.id, label: m.title})));
+                    this.listNganh.set(
+                        (nganh.data ?? [])
+                            .filter((major) => major.is_active !== false)
+                            .map((major) => ({value: major.id, label: major.name})),
+                    );
 
                     // Nếu có data input từ parent → edit mode
                     const editData = this.data();
                     if (editData) {
                         this.getFormData(editData);
+                        if (editData.nganh_id) {
+                            this.loadChuongtrinh(editData.nganh_id, editData.ctdt_id ?? null);
+                        }
                         this.viewState.set('form');
                     } else {
                         this.viewState.set('cccd_check');
@@ -333,12 +391,41 @@ export class FormThongtinDangkyComponent implements OnInit {
         return (this.isAdmin() || this.isDoitac()) ? null : (this.auth.user?.id ?? null);
     }
 
+    onNganhChange(majorId: number | null): void {
+        this.formData.patchValue({ctdt_id: null});
+        this.listChuongtrinh.set([]);
+        if (majorId) {
+            this.loadChuongtrinh(majorId);
+        }
+    }
+
+    private loadChuongtrinh(majorId: number, selectedProgramId: number | null = null): void {
+        this.ctdtService.load({search: ''}, majorId, {limit: -1})
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (res) => {
+                    this.listChuongtrinh.set(
+                        (res.data ?? [])
+                            .filter((program) => program.is_active !== false)
+                            .map((program) => ({
+                                value: program.id,
+                                label: `${program.code} — ${program.name}`,
+                            })),
+                    );
+                    if (selectedProgramId) {
+                        this.formData.patchValue({ctdt_id: selectedProgramId});
+                    }
+                },
+                error: () => this.listChuongtrinh.set([]),
+            });
+    }
+
     /* ------------------------------------------------------------------ */
     /*  Location cascade                                                   */
     /* ------------------------------------------------------------------ */
     onTinhChange(event: any): void {
 
-        this.formData.patchValue({xa_id: null});
+        this.formData.patchValue({dia_chi_xa: null});
         this.listXa.set([]);
         if (!event) return;
         const condition: IctuConditionParam[] = [{
@@ -365,40 +452,59 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.cccdInput.set(value.replace(/\D/g, ''));
     }
 
+    onPhoneInputChange(value: string): void {
+        this.phoneInput.set(value.replace(/\D/g, ''));
+    }
+
     runCccdCheck(): void {
         const cccd = this.cccdInput().trim();
-        if (!cccd) {
+        const phone = this.phoneInput().trim();
+        if (this.canCheckByPhone() && !cccd && !phone) {
+            this.notification.toastWarning('Vui lòng nhập số CCCD hoặc số điện thoại');
+            return;
+        }
+        if (!this.canCheckByPhone() && !cccd) {
             this.notification.toastWarning('Vui lòng nhập số CCCD');
             return;
         }
-        if (cccd.length !== 12) {
+        if (cccd && cccd.length !== 12) {
             this.notification.toastWarning('Số CCCD phải gồm đúng 12 chữ số');
+            return;
+        }
+        if (phone && !/^(0[35789])(\d{8})$/.test(phone)) {
+            this.notification.toastWarning('Số điện thoại không hợp lệ');
             return;
         }
 
         this.cccdLoading.set(true);
-        this.hosoService.checkCccd(cccd).subscribe({
-            next: (res) => {
-                this.cccdLoading.set(false);
-                if (!res.found || res.record.status === 'bo_hoc') {
+        this.hosoService.checkpointHoso(cccd, phone)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (res) => {
+                    this.cccdLoading.set(false);
+                    if (res) {
+                        this.cccdResult.set(res);
+                        this.viewState.set('existing');
+                        return;
+                    }
+
+                    this.cccdResult.set(null);
                     this.formData.patchValue({
                         cccd,
+                        ...(this.canCheckByPhone() && phone ? {dien_thoai: phone} : {}),
                         nganh_id: this.majorId(),
                         ctdt_id: this.programId(),
                     });
+                    if (this.majorId()) {
+                        this.loadChuongtrinh(this.majorId()!, this.programId());
+                    }
                     this.viewState.set('form');
-                } else {
-
-            
-                    this.cccdResult.set(res.record);
-                    this.viewState.set('existing');
-                }
-            },
-            error: () => {
-                this.cccdLoading.set(false);
-                this.notification.toastError('Kiểm tra CCCD thất bại');
-            },
-        });
+                },
+                error: () => {
+                    this.cccdLoading.set(false);
+                    this.notification.toastError('Kiểm tra CCCD thất bại');
+                },
+            });
     }
 
     backToCccdCheck(): void {
@@ -436,7 +542,7 @@ export class FormThongtinDangkyComponent implements OnInit {
         const isTHPT = event?.value === 'THPT';
         this.showDiemTb.set(isTHPT);
         if (!isTHPT) {
-            this.formData.patchValue({diemtb: ''});
+            this.formData.patchValue({diem_xettuyen: null});
         }
     }
     keyupCheckFirstCode(event: KeyboardEvent): boolean {
@@ -463,17 +569,15 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.notification.isProcessing(true);
 
         const raw: any = {...this.formData.getRawValue()};
-
-        // Xu ly diem_xettuyen
-        if (raw.type_diem && raw.diemtb) {
-            raw.diem_xettuyen = `${raw.type_diem}|${raw.diemtb}`;
-        }
+        raw.diem_xettuyen = raw.diem_xettuyen == null || raw.diem_xettuyen === ''
+            ? null
+            : Number(raw.diem_xettuyen);
+        raw.anh_hoc_ba = JSON.stringify(raw.anh_hoc_ba_uploads ?? []);
         delete raw.type_diem;
-        delete raw.diemtb;
+        delete raw.anh_hoc_ba_uploads;
 
         if (this.dataId) {
             // UPDATE
-            const currentStatus = this.cccdResult()?.status;
             this.hosoService.updateTuyensinh(this.dataId, raw).subscribe({
                 next: () => this.onSuccess(), 
                 error: () => this.onError()
@@ -509,7 +613,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     /*  Form management                                                    */
     /* ------------------------------------------------------------------ */
     closeForm(): void {
-        this.initForm();
+        // this.initForm();
         this.formData.patchValue({
             status: 'cho_duyet',
             owner_by: this.auth.user?.id,
@@ -543,58 +647,64 @@ export class FormThongtinDangkyComponent implements OnInit {
     getFormData(object: HosoThisinh): void {
         this.dataId = object.id;
         this.formData.patchValue({
-            full_name:             object.full_name,
-            birthday:              object.birthday || '',
-            phone:                 object.phone,
-            email:                 object.email || '',
-            gioi_tinh:             (object as any).gioi_tinh || '',
-            dan_toc:               object.dan_toc || '',
-            noi_sinh:              object.noi_sinh || '',
-            tinh_id:               object.tinh_id ?? null,
-            xa_id:                 object.xa_id ?? null,
-            address:               object.address || '',
-            cccd:                  object.cccd || '',
-            cccd_ngaycap:          object.cccd_ngaycap || '',
-            cccd_noicap:           object.cccd_noicap || '',
-            tn_vanbang:            (object as any).van_bang_tn || '',
-            tn_nam:                object.vb_tn_nam || '',
-            tn_noicap:             (object as any).vb_tn_noicap || '',
-            vb_chuyenmon:          object.vb_chuyenmon || '',
-            vb_chuyenmon_nganh:    object.vb_chuyenmon_nganh || '',
-            vb_chuyenmon_nam:     (object as any).vb_chuyenmon_nam || '',
-            vb_chuyenmon_noicap:   object.vb_chuyenmon_noicap || '',
-            vb_chuyenmon_sohieu:   object.vb_tn_sohieu || '',
-            nganh_id:              object.nganh_id ?? null,
-            ctdt_id:               object.ctdt_id ?? null,
-            dot_xet_tuyen_id:      object.dot_xet_tuyen_id ?? 0,
-            nguoi_tuvan_id:        object.nguoi_tuvan_id ?? this.getDefaultNguoiTuvan(),
-            status:                object.status || 'cho_duyet',
-            owner_by:              object.owner_by || this.auth.user?.id,
-            content:               (object as any).content || '',
-            anh_the:               object.anh_the || '',
-            cccd_mattruoc:         object.cccd_mattruoc || '',
-            cccd_matsau:           object.cccd_matsau || '',
-            anh_phieu_dang_ky:     object.anh_phieudangky || '',
-            anh_thpt:              object.vb_tn_anh || '',
-            anh_hoc_ba:            object.anh_hoc_ba || null,
+            ho_va_ten: object.ho_va_ten,
+            ngay_sinh: object.ngay_sinh || '',
+            dien_thoai: object.dien_thoai,
+            email: object.email || '',
+            gioi_tinh: object.gioi_tinh || '',
+            dan_toc: object.dan_toc || '',
+            noi_sinh: object.noi_sinh ?? null,
+            dia_chi_tinh: object.dia_chi_tinh ?? null,
+            dia_chi_xa: object.dia_chi_xa ?? null,
+            dia_chi_nha: object.dia_chi_nha || '',
+            cccd: object.cccd || '',
+            ngay_cap_cccd: object.ngay_cap_cccd || '',
+            noi_cap_cccd: object.noi_cap_cccd || '',
+            van_bang_tn: object.van_bang_tn || '',
+            nam_tn: object.nam_tn || '',
+            tn_noicap: object.tn_noicap || '',
+            sohieu_vb: object.sohieu_vb || '',
+            vb_chuyenmon: object.vb_chuyenmon || '',
+            vb_chuyenmon_nganh: object.vb_chuyenmon_nganh || '',
+            vb_chuyenmon_namtn: object.vb_chuyenmon_namtn || '',
+            vb_chuyenmon_noicap: object.vb_chuyenmon_noicap || '',
+            vb_chuyenmon_sohieu: object.vb_chuyenmon_sohieu || '',
+            nganh_id: object.nganh_id ?? null,
+            ctdt_id: object.ctdt_id ?? null,
+            doituong: object.doituong,
+            diem_xettuyen: object.diem_xettuyen ?? null,
+            dotxettuyen_id: object.dotxettuyen_id ?? 0,
+            nguoi_tuvan: object.nguoi_tuvan ?? this.getDefaultNguoiTuvan(),
+            status: object.status || 'cho_duyet',
+            status_connent: object.status_connent ?? 0,
+            owner_by: object.owner_by || this.auth.user?.id,
+            submit_from: object.submit_from || 'website',
+            content: object.content || '',
+            anh_the: object.anh_the || '',
+            anh_cmnd_truoc: object.anh_cmnd_truoc || '',
+            anh_cmnd_sau: object.anh_cmnd_sau || '',
+            anh_phieu_dang_ky: object.anh_phieu_dang_ky || '',
+            anh_thpt: object.anh_thpt || '',
+            anh_hoc_ba_uploads: this.parseAnhHocBa(object.anh_hoc_ba),
+            anh_soyeulylich: object.anh_soyeulylich || '',
         });
+        this.showDiemTb.set(true);
 
-        // Parse diem_xettuyen back to type_diem + diemtb
-        if (object.diem_xettuyen) {
-            const parts = String(object.diem_xettuyen).split('|');
-            if (parts.length === 2) {
-                this.formData.patchValue({ type_diem: parts[0], diemtb: parts[1] });
-                this.showDiemTb.set(parts[0] === 'THPT');
-            }
+        if (object.dia_chi_tinh) {
+            this.onTinhChange(object.dia_chi_tinh);
         }
+        if (object.dia_chi_xa != null) {
+            this.formData.patchValue({dia_chi_xa: object.dia_chi_xa});
+        }
+    }
 
-        // Reload wards if tinh selected
-        if (object.tinh_id) {
-            this.onTinhChange(object.tinh_id);
-        }
-        // Restore xa_id after onTinhChange resets it
-        if (object.xa_id != null) {
-            this.formData.patchValue({xa_id: object.xa_id});
+    private parseAnhHocBa(value?: string): string[] {
+        if (!value) return [];
+        try {
+            const parsed: unknown = JSON.parse(value);
+            return Array.isArray(parsed) && parsed.every((item) => typeof item === 'string') ? parsed : [];
+        } catch {
+            return [];
         }
     }
 }

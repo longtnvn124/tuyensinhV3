@@ -16,17 +16,17 @@ import {
     IctuQueryCondition,
     IctuQueryParams,
 } from '@models/dto';
-import { CtdtItem, ExternalApiResponse, NganhItem } from '@models/external-api';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { Locations } from '@models/location';
 import { HoidongHosoThisinh } from '@models/tuyensinh/hoidong-hoso-thisinh';
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
 import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService, ProgressAnimationEvent } from '@services/notification.service';
-import { ApiOutsiteService } from '@services/tuyensinh/api-outsite.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
 import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { TH_XETTUYEN } from '@utilities/syscats';
 import { Popover } from 'primeng/popover';
@@ -51,7 +51,6 @@ type ReviewDataState = 'loading' | 'data' | 'error';
 
 interface CouncilLookups {
     majorOptions: IctuDropdownOption<number>[];
-    programOptions: IctuDropdownOption<number>[];
     provinceOptions: IctuDropdownOption<number>[];
 }
 
@@ -99,7 +98,6 @@ export class HoidongHosoXetduyetComponent {
     readonly actionLoading = signal(false);
     readonly errorMessage = signal('');
     readonly majorOptions = signal<readonly IctuDropdownOption<number>[]>([]);
-    readonly programOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     readonly provinceOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     readonly records = signal<readonly HoidongHosoThisinh[]>([]);
     readonly selectedIds = signal<ReadonlySet<number>>(new Set<number>());
@@ -115,7 +113,7 @@ export class HoidongHosoXetduyetComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly assignmentService = inject(HoidongHosoThisinhService);
     private readonly hosoService = inject(HosoThisinhService);
-    private readonly apiOutsiteService = inject(ApiOutsiteService);
+    private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
     private readonly notification = inject(NotificationService);
     private readonly expHosoDaduyetService = inject(ExpHosoDaduyetService);
@@ -207,10 +205,6 @@ export class HoidongHosoXetduyetComponent {
         return this.lookupLabel(this.majorOptions(), majorId);
     }
 
-    getProgramLabel(programId: number | undefined): string {
-        return this.lookupLabel(this.programOptions(), programId);
-    }
-
     getProvinceLabel(province: string | number | undefined): string {
         if (province === undefined || province === null || province === '') {
             return '---';
@@ -242,7 +236,6 @@ export class HoidongHosoXetduyetComponent {
         this.clearSelection();
         this.records.set([]);
         this.majorOptions.set([]);
-        this.programOptions.set([]);
         this.provinceOptions.set([]);
         this.errorMessage.set('');
         this.state.set(hoidong ? 'loading' : 'data');
@@ -264,21 +257,11 @@ export class HoidongHosoXetduyetComponent {
     private loadLookups(): Observable<CouncilLookups> {
         const queryParams: IctuQueryParams = { limit: -1 };
         return forkJoin({
-            majorOptions: this.apiOutsiteService.getNganhList().pipe(
-                map((response: ExternalApiResponse<NganhItem[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? [])
-                        .filter((item: NganhItem): boolean => item.type === 'nganh')
-                        .map((item: NganhItem): IctuDropdownOption<number> => ({
-                            value: item.id,
-                            label: item.title,
-                        })),
-                ),
-            ),
-            programOptions: this.apiOutsiteService.getCtdtList().pipe(
-                map((response: ExternalApiResponse<CtdtItem[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: CtdtItem): IctuDropdownOption<number> => ({
+            majorOptions: this.nganhHocService.load({ search: '' }, queryParams).pipe(
+                map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
+                    (response.data ?? []).map((item: Nganhhoc): IctuDropdownOption<number> => ({
                         value: item.id,
-                        label: item.ten,
+                        label: item.name,
                     })),
                 ),
             ),
@@ -331,7 +314,6 @@ export class HoidongHosoXetduyetComponent {
     private applyLoadedData(data: CouncilReviewData | null): void {
         if (!data) return;
         this.majorOptions.set(data.majorOptions);
-        this.programOptions.set(data.programOptions);
         this.provinceOptions.set(data.provinceOptions);
         this.records.set(data.records);
         this.state.set('data');
@@ -461,11 +443,10 @@ export class HoidongHosoXetduyetComponent {
                 this.loopGetXa(xaPhuongIds, 50, 1, [])
             ])
         })).subscribe({
-            next: ([dtTuyensinh, dataXa]) => {
-                console.log(dtTuyensinh, dataXa);
+            next: (): void => {
                 controlLoading.next({ percent: 100, heading: 'Đã tải xong dữ liệu' });
             },
-            error: (e) => {
+            error: () => {
                 this.notification.toastError('Tải dữ liệu không thành công');
                 controlLoading.complete();
             }

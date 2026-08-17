@@ -61,19 +61,19 @@
                                         [checked]="isAssignedSelected(row.id)"
                                         [disabled]="removeLoading"
                                         (change)="toggleAssigned(row.id)"
-                                        [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.full_name || row.hoso_id)" />
+                                        [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.hoso_id)" />
                                 </td>
                             }
                             <td class="hsl-col-idx text-center">{{ dataTable.paginator.startIndex() + i }}</td>
-                            <td>{{ candidate?.full_name || ('Hồ sơ #' + row.hoso_id) }}</td>
+                            <td>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.hoso_id) }}</td>
                             <td class="hsl-col-major">{{ getMajorLabel(candidate?.nganh_id) }}</td>
-                            <td class="hsl-col-birthday">{{ formatBirthday(candidate?.birthday) }}</td>
-                            <td class="hsl-col-phone">{{ candidate?.phone || '---' }}</td>
+                            <td class="hsl-col-birthday">{{ formatBirthday(candidate?.ngay_sinh) }}</td>
+                            <td class="hsl-col-phone">{{ candidate?.dien_thoai || '---' }}</td>
                             <td class="hsl-col-cccd">{{ candidate?.cccd || '---' }}</td>
                             <td class="hsl-col-email">{{ candidate?.email || '---' }}</td>
                             <td class="hsl-col-birthplace">{{ getNoiSinhLabel(candidate?.noi_sinh) }}</td>
                             <td class="hsl-col-ethnicity">{{ candidate?.dan_toc || '---' }}</td>
-                            <td class="hsl-col-target">{{ getDoiTuongLabel(candidate?.doi_tuong) }}</td>
+                            <td class="hsl-col-target">{{ getDoiTuongLabel(candidate?.doituong) }}</td>
                             <td class="hsl-col-actions text-center">
                                 @if (permission?.canDelete) {
                                     <button
@@ -115,8 +115,26 @@
     [closable]="true"
     [draggable]="false"
     [resizable]="false"
-    header="Gán hồ sơ thí sinh vào hội đồng"
     styleClass="hsl-assign-dialog">
+    <ng-template #header>
+        <div class="hsl-assign__header">
+            <span class="hsl-assign__title">Gán hồ sơ thí sinh vào hội đồng</span>
+            <div class="hsl-assign__filters">
+                <input
+                    [(ngModel)]="assignSearch"
+                    (keyup.enter)="onAssignSearch()"
+                    class="hsl-assign__search"
+                    pInputText
+                    placeholder="Tìm theo tên..."
+                    type="text" />
+                <mat-checkbox
+                    [checked]="assignIncludeCurrentRound"
+                    (change)="onAssignRoundFilterChange($event.checked)">
+                    Thêm đợt hội đồng
+                </mat-checkbox>
+            </div>
+        </div>
+    </ng-template>
     <div class="hsl-assign">
         @if (assignLoading) {
             <app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
@@ -148,12 +166,12 @@
                                         [checked]="isCandidateSelected(c.id)"
                                         (change)="toggleCandidate(c.id)" />
                                 </td>
-                                <td class="hsl-assign__col-name">{{ c.full_name }}</td>
+                                <td class="hsl-assign__col-name">{{ c.ho_va_ten }}</td>
                                 <td class="hsl-assign__col-major">{{ getMajorLabel(c.nganh_id) }}</td>
-                                <td class="hsl-assign__col-birthday">{{ formatBirthday(c.birthday) }}</td>
-                                <td class="hsl-assign__col-phone">{{ c.phone || '---' }}</td>
+                                <td class="hsl-assign__col-birthday">{{ formatBirthday(c.ngay_sinh) }}</td>
+                                <td class="hsl-assign__col-phone">{{ c.dien_thoai || '---' }}</td>
                                 <td class="hsl-assign__col-cccd">{{ c.cccd || '---' }}</td>
-                                <td class="hsl-assign__col-target">{{ getDoiTuongLabel(c.doi_tuong) }}</td>
+                                <td class="hsl-assign__col-target">{{ getDoiTuongLabel(c.doituong) }}</td>
                                 <td class="hsl-assign__col-birthplace">{{ getNoiSinhLabel(c.noi_sinh) }}</td>
                             </tr>
                         } @empty {

@@ -2,46 +2,52 @@ import { IctuBaseModel } from '@models/ictu-base-model';
 
 export interface HosoThisinh extends IctuBaseModel {
     id: number;
-    full_name: string;
-    phone: string;
+    ho_va_ten: string;
+    dien_thoai: string;
     email?: string;
-    birthday?: string;
-    tinh_id?: number;
-    huyen_id?: number;
-    xa_id?: number;
-    address?: string;
-    noi_sinh?: number ;
-    doi_tuong?: string;
+    ngay_sinh?: string;
+    gioi_tinh: string;
+    dia_chi_tinh?: number;
+    dia_chi_xa?: number;
+    dia_chi_nha?: string;
+    noi_sinh?: number;
     dan_toc?: string;
     status: string;
-    status_connent?: number;
+    status_connent: number;
 
     cccd?: string;
-    cccd_ngaycap?: string;
-    cccd_noicap?: string;
+    ngay_cap_cccd?: string;
+    noi_cap_cccd?: string;
 
-    nganh_id?: number;
     ctdt_id?: number;
-    dot_xet_tuyen_id?: number;
+    nganh_id?: number;
+    dotxettuyen_id?: number;
 
-    vb_tn?: string;
-    vb_tn_nam?: string;
-    vb_tn_sohieu?: string;
+    van_bang_tn?: string;
+    nam_tn?: string;
+    tn_noicap?: string;
     diem_xettuyen?: number;
-    vb_tn_anh?: string;
+    anh_thpt?: string;
+    doituong: string;
 
     vb_chuyenmon?: string;
     vb_chuyenmon_nganh?: string;
     vb_chuyenmon_noicap?: string;
+    vb_chuyenmon_sohieu?: string;
+    vb_chuyenmon_namtn?: string;
 
     anh_the?: string;
-    cccd_mattruoc?: string;
-    cccd_matsau?: string;
-    anh_phieudangky?: string;
-    anh_hoc_ba?: string[];
+    anh_cmnd_truoc?: string;
+    anh_cmnd_sau?: string;
+    anh_phieu_dang_ky?: string;
+    anh_hoc_ba?: string;
+    anh_soyeulylich: string;
 
     owner_by: number;
-    nguoi_tuvan_id?: number;
+    nguoi_tuvan?: number;
     hinhthuc_xettuyen?: string;
-    nguon_dang_ky?: string;
+    submit_from?: string;
+    content?: string;
+    sohieu_vb?: string;
+    shared?: string;
 }

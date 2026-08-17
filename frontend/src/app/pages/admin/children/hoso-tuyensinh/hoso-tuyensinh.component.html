@@ -14,8 +14,8 @@
                 <div class="admin-wrap-table__head-actions">
                     <input [(ngModel)]="masterSearchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm theo tên, SĐT..." type="text" (keyup.enter)="onSearch()">
                     <p-select [(ngModel)]="masterSearchInfo.status" [options]="statusOptions" appendTo="body" placeholder="Trạng thái" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
-                    <p-select [(ngModel)]="masterSearchInfo.major_id" [options]="majors()" appendTo="body" placeholder="Ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
-                    <p-select [(ngModel)]="masterSearchInfo.dot_xet_tuyen_id" [options]="dots()" appendTo="body" placeholder="Đợt XT" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
+                    <p-select [(ngModel)]="masterSearchInfo.nganh_id" [options]="majors()" appendTo="body" placeholder="Ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
+                    <p-select [(ngModel)]="masterSearchInfo.dotxettuyen_id" [options]="dots()" appendTo="body" placeholder="Đợt XT" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
                     @if (permissionControl().canDelete) {
                         <button (click)="deleteSelectedHoso()" [disabled]="!masterDataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>
                             <i class="ti ti-trash"></i>
@@ -52,11 +52,11 @@
                                     <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="masterDataTable.selectRow($event.checked, i)" [disabled]="!permissionControl().canDelete"></mat-checkbox>
                                 </td>
                                 <td class="col-index text-center">{{ masterDataTable.paginator.startIndex() + i }}</td>
-                                <td class="text-left">{{ row.full_name }}</td>
-                                <td>{{ row.phone }}</td>
+                                <td class="text-left">{{ row.ho_va_ten }}</td>
+                                <td>{{ row.dien_thoai }}</td>
                                 <td>{{ majorLabel(row.nganh_id) }}</td>
                                 <td>{{ programLabel(row.ctdt_id) }}</td>
-                                <td>{{ dotLabel(row.dot_xet_tuyen_id) }}</td>
+                                <td>{{ dotLabel(row.dotxettuyen_id) }}</td>
                                 <td class="wid-140 text-center p-0">
                                     <div class="d-flex w-100 h-100 justify-content-center align-items-center">
                                         <span class="ictu-badge" [ngClass]="statusBadgeClass(row.status)">{{ statusLabel(row.status) }}</span>
@@ -122,11 +122,11 @@
                 </div>
                 <h5 class="cccd-dialog__readonly-title">Thông tin hồ sơ</h5>
                 <dl class="cccd-dialog__readonly-list">
-                    <dt>Họ tên</dt><dd>{{ cccdResult.record.full_name }}</dd>
-                    <dt>SĐT</dt><dd>{{ cccdResult.record.phone }}</dd>
+                    <dt>Họ tên</dt><dd>{{ cccdResult.record.ho_va_ten }}</dd>
+                    <dt>SĐT</dt><dd>{{ cccdResult.record.dien_thoai }}</dd>
                     <dt>Ngành</dt><dd>{{ majorLabel(cccdResult.record.nganh_id) }}</dd>
                     <dt>Chương trình</dt><dd>{{ programLabel(cccdResult.record.ctdt_id) }}</dd>
-                    <dt>Đợt</dt><dd>{{ dotLabel(cccdResult.record.dot_xet_tuyen_id) }}</dd>
+                    <dt>Đợt</dt><dd>{{ dotLabel(cccdResult.record.dotxettuyen_id) }}</dd>
                     <dt>Trạng thái</dt>
                     <dd><span class="ictu-badge" [ngClass]="statusBadgeClass(cccdResult.record.status)">{{ statusLabel(cccdResult.record.status) }}</span></dd>
                     <dt>Ngày tạo</dt><dd>{{ cccdResult.record.created_at }}</dd>
@@ -162,12 +162,12 @@
                             <div class="ictu-form ictu-form--label-on-top">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ictu-form__label--required">Họ và tên</label>
-                                    <input class="ictu-form__input-field" formControlName="full_name" pInputText type="text" placeholder="Nguyễn Văn A"/>
+                                    <input class="ictu-form__input-field" formControlName="ho_va_ten" pInputText type="text" placeholder="Nguyễn Văn A"/>
                                 </div>
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>
                                         <label class="ictu-form__label ictu-form__label--required">Số điện thoại</label>
-                                        <input class="ictu-form__input-field" formControlName="phone" pInputText type="text" placeholder="09xx..."/>
+                                        <input class="ictu-form__input-field" formControlName="dien_thoai" pInputText type="text" placeholder="09xx..."/>
                                     </div>
                                     <div>
                                         <label class="ictu-form__label">Email</label>
@@ -177,20 +177,36 @@
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>
                                         <label class="ictu-form__label">Ngày sinh</label>
-                                        <input class="ictu-form__input-field" formControlName="birthday" pInputText type="date"/>
+                                        <input class="ictu-form__input-field" formControlName="ngay_sinh" pInputText type="date"/>
                                     </div>
+                                    <div>
+                                        <label class="ictu-form__label ictu-form__label--required">Giới tính</label>
+                                        <p-select [options]="genderOptions" appendTo="body" formControlName="gioi_tinh" placeholder="Chọn giới tính" optionLabel="label" optionValue="value"/>
+                                    </div>
+                                </div>
+                                <div class="ictu-form__row ictu-form__row--two">
                                     <div>
                                         <label class="ictu-form__label">Dân tộc</label>
                                         <input class="ictu-form__input-field" formControlName="dan_toc" pInputText type="text" placeholder="Kinh..."/>
                                     </div>
+                                    <div>
+                                        <label class="ictu-form__label">Nơi sinh</label>
+                                        <p-select [options]="listTinh()" appendTo="body" formControlName="noi_sinh" placeholder="Chọn nơi sinh" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                    </div>
                                 </div>
-                                <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Nơi sinh</label>
-                                    <input class="ictu-form__input-field" formControlName="noi_sinh" pInputText type="text" placeholder="Tỉnh/TP"/>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Tỉnh/Thành phố</label>
+                                        <p-select [options]="listTinh()" appendTo="body" formControlName="dia_chi_tinh" placeholder="Chọn tỉnh/thành" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Xã/Phường</label>
+                                        <p-select [options]="listXa()" appendTo="body" formControlName="dia_chi_xa" placeholder="Chọn xã/phường" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                    </div>
                                 </div>
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Địa chỉ chi tiết</label>
-                                    <textarea class="ictu-form__input-field" formControlName="address" pTextarea placeholder="Số nhà, ngõ, đường..."></textarea>
+                                    <textarea class="ictu-form__input-field" formControlName="dia_chi_nha" pTextarea placeholder="Số nhà, ngõ, đường..."></textarea>
                                 </div>
                             </div>
                         </section>
@@ -205,11 +221,11 @@
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>
                                         <label class="ictu-form__label">Ngày cấp</label>
-                                        <input class="ictu-form__input-field" formControlName="cccd_ngaycap" pInputText type="date"/>
+                                        <input class="ictu-form__input-field" formControlName="ngay_cap_cccd" pInputText type="date"/>
                                     </div>
                                     <div>
                                         <label class="ictu-form__label">Nơi cấp</label>
-                                        <input class="ictu-form__input-field" formControlName="cccd_noicap" pInputText type="text"/>
+                                        <input class="ictu-form__input-field" formControlName="noi_cap_cccd" pInputText type="text"/>
                                     </div>
                                 </div>
                                 <div class="ictu-form__row ictu-form__row--two">
@@ -225,16 +241,16 @@
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>
                                         <label class="ictu-form__label">Ngành</label>
-                                        <p-select [options]="majors()" appendTo="body" formControlName="major_id" placeholder="Chọn ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onMajorChange($event.value)"/>
+                                        <p-select [options]="majors()" appendTo="body" formControlName="nganh_id" placeholder="Chọn ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onMajorChange($event.value)"/>
                                     </div>
                                     <div>
                                         <label class="ictu-form__label">Chương trình đào tạo</label>
-                                        <p-select [options]="programsByMajor(masterFormControl.formGroup.get('major_id')?.value)" appendTo="body" formControlName="program_id" placeholder="Chọn CTĐT" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                        <p-select [options]="programsByMajor(masterFormControl.formGroup.get('nganh_id')?.value)" appendTo="body" formControlName="ctdt_id" placeholder="Chọn CTĐT" optionLabel="label" optionValue="value" [showClear]="true"/>
                                     </div>
                                 </div>
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Đợt xét tuyển</label>
-                                    <p-select [options]="dots()" appendTo="body" formControlName="dot_xet_tuyen_id" placeholder="Chọn đợt" optionLabel="label" optionValue="value" [showClear]="true"/>
+                                    <p-select [options]="dots()" appendTo="body" formControlName="dotxettuyen_id" placeholder="Chọn đợt" optionLabel="label" optionValue="value" [showClear]="true"/>
                                 </div>
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>
@@ -242,9 +258,13 @@
                                         <p-select [options]="hinhthucOptions" appendTo="body" formControlName="hinhthuc_xettuyen" placeholder="Hình thức" optionLabel="label" optionValue="value"/>
                                     </div>
                                     <div>
-                                        <label class="ictu-form__label">Nguồn đăng ký</label>
-                                        <p-select [options]="nguonOptions" appendTo="body" formControlName="nguon_dang_ky" placeholder="Nguồn" optionLabel="label" optionValue="value"/>
+                                        <label class="ictu-form__label ictu-form__label--required">Đối tượng</label>
+                                        <p-select [options]="doituongOptions" appendTo="body" formControlName="doituong" placeholder="Chọn đối tượng" optionLabel="label" optionValue="value"/>
                                     </div>
+                                </div>
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Nguồn đăng ký</label>
+                                    <p-select [options]="nguonOptions" appendTo="body" formControlName="submit_from" placeholder="Nguồn" optionLabel="label" optionValue="value"/>
                                 </div>
                             </div>
                         </section>
@@ -255,17 +275,17 @@
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>
                                         <label class="ictu-form__label">Loại văn bằng</label>
-                                        <input class="ictu-form__input-field" formControlName="vb_tn" pInputText type="text"/>
+                                        <input class="ictu-form__input-field" formControlName="van_bang_tn" pInputText type="text"/>
                                     </div>
                                     <div>
                                         <label class="ictu-form__label">Năm tốt nghiệp</label>
-                                        <input class="ictu-form__input-field" formControlName="vb_tn_nam" pInputText type="text"/>
+                                        <input class="ictu-form__input-field" formControlName="nam_tn" pInputText type="text"/>
                                     </div>
                                 </div>
                                 <div class="ictu-form__row ictu-form__row--two">
                                     <div>
                                         <label class="ictu-form__label">Số hiệu</label>
-                                        <input class="ictu-form__input-field" formControlName="vb_tn_sohieu" pInputText type="text"/>
+                                        <input class="ictu-form__input-field" formControlName="sohieu_vb" pInputText type="text"/>
                                     </div>
                                     <div>
                                         <label class="ictu-form__label">Điểm xét tuyển</label>
@@ -295,6 +315,16 @@
                                         <input class="ictu-form__input-field" formControlName="vb_chuyenmon_noicap" pInputText type="text"/>
                                     </div>
                                 </div>
+                                <div class="ictu-form__row ictu-form__row--two">
+                                    <div>
+                                        <label class="ictu-form__label">Số hiệu</label>
+                                        <input class="ictu-form__input-field" formControlName="vb_chuyenmon_sohieu" pInputText type="text"/>
+                                    </div>
+                                    <div>
+                                        <label class="ictu-form__label">Năm tốt nghiệp</label>
+                                        <input class="ictu-form__input-field" formControlName="vb_chuyenmon_namtn" pInputText type="text"/>
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
@@ -306,7 +336,8 @@
                                     <app-upload-placeholder label="Ảnh phiếu đăng ký"></app-upload-placeholder>
                                 </div>
                                 <div class="ictu-form__row">
-                                    <app-upload-placeholder label="Ảnh học bạ" [maxCount]="10"></app-upload-placeholder>
+                                    <label class="ictu-form__label ictu-form__label--required">Ảnh sơ yếu lý lịch</label>
+                                    <ovic-img-crop-v2 [formField]="masterFormControl.formGroup.controls['anh_soyeulylich']" [keyUpload]="'direct'" [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
                             </div>
                         </section>
@@ -316,7 +347,7 @@
                             <div class="ictu-form ictu-form--label-on-top">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Người tư vấn</label>
-                                    <input class="ictu-form__input-field" formControlName="nguoi_tuvan_id" pInputText type="number" placeholder="ID người tư vấn"/>
+                                    <input class="ictu-form__input-field" formControlName="nguoi_tuvan" pInputText type="number" placeholder="ID người tư vấn"/>
                                 </div>
                             </div>
                         </section>

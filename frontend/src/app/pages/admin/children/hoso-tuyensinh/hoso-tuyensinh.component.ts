@@ -9,7 +9,6 @@ import {
     WritableSignal,
 } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AbstractControl } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { IctuBasePermission, IctuPermissionControl } from '@models/ictu-base-model';
 import {
@@ -46,6 +45,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { UploadPlaceholderComponent } from './upload-placeholder/upload-placeholder.component';
+import { OvicImgCropV2Component } from '@app/components/ovic-img-crop-v2/ovic-img-crop-v2.component';
+import { DOI_TUONG, GENDER } from '@app/utilities/syscats';
 import { forkJoin, Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { LocationService } from '@app/services/location.service';
@@ -72,6 +73,7 @@ interface HosoStatusOption {
         MatButton,
         MatCheckbox,
         NgClass,
+        OvicImgCropV2Component,
         ReactiveFormsModule,
         Select,
         Textarea,
@@ -104,9 +106,9 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     masterSearchInfo: HosoThisinhSearchInfo = {
         search: '',
         status: undefined,
-        dot_xet_tuyen_id: undefined,
-        major_id: undefined,
-        nguoi_tuvan_id: undefined,
+        dotxettuyen_id: undefined,
+        nganh_id: undefined,
+        nguoi_tuvan: undefined,
     };
     masterDataTable: IctuDataTable<HosoThisinh> = new IctuDataTable<HosoThisinh>();
     masterState: WritableSignal<'loading' | 'success' | 'error'> = signal<'loading' | 'success' | 'error'>('success');
@@ -157,41 +159,47 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
         { value: 'truc_tiep', label: 'Trực tiếp' },
     ];
 
+    readonly genderOptions = GENDER;
+    readonly doituongOptions = DOI_TUONG;
+
     constructor() {
         this.masterFormControl = new IctuFormControl2<HosoThisinh>({
             dropdownFields: [],
             formGroup: this.fb.group({
-                // §5.1 Personal info
-                full_name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
-                phone: ['', [Validators.required, Validators.pattern(/^(0[35789])(\d{8})$/)]],
-                email: ['', [Validators.email]],
-                birthday: [''],
+                ho_va_ten: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
+                dien_thoai: ['', [Validators.required, Validators.pattern(/^(0[35789])(\d{8})$/)]],
+                email: ['', Validators.email],
+                ngay_sinh: [''],
+                gioi_tinh: ['', Validators.required],
                 dan_toc: [''],
-                noi_sinh: [''],
-                address: [''],
-                // §5.2 CCCD
+                noi_sinh: [null],
+                dia_chi_tinh: [null],
+                dia_chi_xa: [null],
+                dia_chi_nha: [''],
                 cccd: [''],
-                cccd_ngaycap: [''],
-                cccd_noicap: [''],
-                // §5.3 Xét tuyển
-                major_id: [null],
-                program_id: [null],
-                dot_xet_tuyen_id: [null],
+                ngay_cap_cccd: [''],
+                noi_cap_cccd: [''],
+                nganh_id: [null],
+                ctdt_id: [null],
+                dotxettuyen_id: [null],
+                doituong: ['', Validators.required],
                 hinhthuc_xettuyen: ['hoc_ba'],
-                nguon_dang_ky: ['website'],
-                // §5.4 Văn bằng TN THPT
-                vb_tn: [''],
-                vb_tn_nam: [''],
-                vb_tn_sohieu: [''],
+                submit_from: ['website'],
+                van_bang_tn: [''],
+                nam_tn: [''],
+                sohieu_vb: [''],
+                tn_noicap: [''],
                 diem_xettuyen: [null],
-                // §5.5 Văn bằng chuyên môn
                 vb_chuyenmon: [''],
                 vb_chuyenmon_nganh: [''],
                 vb_chuyenmon_noicap: [''],
-                // §5.7 Phân công
-                nguoi_tuvan_id: [null],
-                // §5.8 Trạng thái
-                status: ['cho_duyet', [Validators.required]],
+                vb_chuyenmon_sohieu: [''],
+                vb_chuyenmon_namtn: [''],
+                nguoi_tuvan: [null],
+                anh_soyeulylich: ['', Validators.required],
+                status: ['cho_duyet', Validators.required],
+                status_connent: [0],
+                owner_by: [this.auth.user?.id],
             }),
             objectName: 'hồ sơ tuyển sinh',
             drawer: this.masterDrawer as Signal<Drawer>,
@@ -261,17 +269,16 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 (res.data ?? []).map((d) => ({ value: d.id, label: d.name })),
             ));
 
-
-        const tinh$: Observable<DtoObject<Locations[]>> =
-            this.locationService.queryLocation([], { paged: 1, limit: -1 }, 'regions') ;
-                // .pipe(map((res: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
-                //     (res.data ?? []).map((d) => ({ value: d.id, label: d.name })),
-                // ));
+        const tinh$: Observable<IctuDropdownOption<number>[]> =
+            this.locationService.queryLocation([], { paged: 1, limit: -1 }, 'regions')
+                .pipe(map((res: DtoObject<Locations[]>): IctuDropdownOption<number>[] =>
+                    (res.data ?? []).map((location) => ({ value: location.id, label: location.name })),
+                ));
 
         const xaphuong$: Observable<IctuDropdownOption<number>[]> =
             this.locationService.queryLocation([], { paged: 1, limit: -1 }, 'provinces')
-                .pipe(map((res: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
-                    (res.data ?? []).map((d) => ({ value: d.id, label: d.name })),
+                .pipe(map((res: DtoObject<Locations[]>): IctuDropdownOption<number>[] =>
+                    (res.data ?? []).map((location) => ({ value: location.id, label: location.name })),
                 ));
 
         forkJoin({
@@ -279,18 +286,16 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             programs: loadPrograms$,
             dots: loadDots$,
             listTinh: tinh$,
-            listXaphuong:xaphuong$
+            listXaphuong: xaphuong$,
         })
             .pipe(takeUntil(this.onDestroy$))
             .subscribe({
-                next: ({ majors, programs, dots,listTinh,listXaphuong }) => {
+                next: ({ majors, programs, dots, listTinh, listXaphuong }) => {
                     this.majors.set(majors);
                     this.programs.set(programs);
                     this.dots.set(dots);
-                    // this.listTinh.set(listTinh.data);
-
-                    console.log(listTinh.data,listXaphuong);
-                    
+                    this.listTinh.set(listTinh);
+                    this.listXa.set(listXaphuong);
                 },
                 error: () => {
                     this.notification.toastError('Tải dữ liệu danh mục thất bại');
@@ -306,7 +311,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     }
 
     onMajorChange(majorId: number | null): void {
-        this.masterFormControl.formGroup.patchValue({ program_id: null });
+        this.masterFormControl.formGroup.patchValue({ ctdt_id: null });
         if (!majorId) {
             return;
         }
@@ -426,30 +431,40 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 if (!res.found || res.record.status === 'bo_hoc') {
                     this.cccdDialogVisible = false;
                     this.masterFormControl.formGroup.reset({
-                        full_name: '',
-                        phone: '',
+                        ho_va_ten: '',
+                        dien_thoai: '',
                         email: '',
-                        birthday: '',
+                        ngay_sinh: '',
+                        gioi_tinh: '',
                         dan_toc: '',
-                        noi_sinh: '',
-                        address: '',
+                        noi_sinh: null,
+                        dia_chi_tinh: null,
+                        dia_chi_xa: null,
+                        dia_chi_nha: '',
                         cccd,
-                        cccd_ngaycap: '',
-                        cccd_noicap: '',
-                        major_id: null,
-                        program_id: null,
-                        dot_xet_tuyen_id: null,
+                        ngay_cap_cccd: '',
+                        noi_cap_cccd: '',
+                        nganh_id: null,
+                        ctdt_id: null,
+                        dotxettuyen_id: null,
+                        doituong: '',
                         hinhthuc_xettuyen: 'hoc_ba',
-                        nguon_dang_ky: 'website',
-                        vb_tn: '',
-                        vb_tn_nam: '',
-                        vb_tn_sohieu: '',
+                        submit_from: 'website',
+                        van_bang_tn: '',
+                        nam_tn: '',
+                        sohieu_vb: '',
+                        tn_noicap: '',
                         diem_xettuyen: null,
                         vb_chuyenmon: '',
                         vb_chuyenmon_nganh: '',
                         vb_chuyenmon_noicap: '',
-                        nguoi_tuvan_id: null,
+                        vb_chuyenmon_sohieu: '',
+                        vb_chuyenmon_namtn: '',
+                        nguoi_tuvan: null,
+                        anh_soyeulylich: '',
                         status: 'cho_duyet',
+                        status_connent: 0,
+                        owner_by: this.auth.user?.id,
                     });
                     this.masterFormControl.openFormAdd();
                 }
@@ -467,33 +482,43 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
 
     openEditForm(row: HosoThisinh): void {
         this.masterFormControl.formGroup.reset({
-            full_name: row.full_name ?? '',
-            phone: row.phone ?? '',
+            ho_va_ten: row.ho_va_ten ?? '',
+            dien_thoai: row.dien_thoai ?? '',
             email: row.email ?? '',
-            birthday: row.birthday ?? '',
+            ngay_sinh: row.ngay_sinh ?? '',
+            gioi_tinh: row.gioi_tinh ?? '',
             dan_toc: row.dan_toc ?? '',
-            noi_sinh: row.noi_sinh ?? '',
-            address: row.address ?? '',
+            noi_sinh: row.noi_sinh ?? null,
+            dia_chi_tinh: row.dia_chi_tinh ?? null,
+            dia_chi_xa: row.dia_chi_xa ?? null,
+            dia_chi_nha: row.dia_chi_nha ?? '',
             cccd: row.cccd ?? '',
-            cccd_ngaycap: row.cccd_ngaycap ?? '',
-            cccd_noicap: row.cccd_noicap ?? '',
-            major_id: row.major_id ?? null,
-            program_id: row.program_id ?? null,
-            dot_xet_tuyen_id: row.dot_xet_tuyen_id ?? null,
+            ngay_cap_cccd: row.ngay_cap_cccd ?? '',
+            noi_cap_cccd: row.noi_cap_cccd ?? '',
+            nganh_id: row.nganh_id ?? null,
+            ctdt_id: row.ctdt_id ?? null,
+            dotxettuyen_id: row.dotxettuyen_id ?? null,
+            doituong: row.doituong ?? '',
             hinhthuc_xettuyen: row.hinhthuc_xettuyen ?? 'hoc_ba',
-            nguon_dang_ky: row.nguon_dang_ky ?? 'website',
-            vb_tn: row.vb_tn ?? '',
-            vb_tn_nam: row.vb_tn_nam ?? '',
-            vb_tn_sohieu: row.vb_tn_sohieu ?? '',
+            submit_from: row.submit_from ?? 'website',
+            van_bang_tn: row.van_bang_tn ?? '',
+            nam_tn: row.nam_tn ?? '',
+            sohieu_vb: row.sohieu_vb ?? '',
+            tn_noicap: row.tn_noicap ?? '',
             diem_xettuyen: row.diem_xettuyen ?? null,
             vb_chuyenmon: row.vb_chuyenmon ?? '',
             vb_chuyenmon_nganh: row.vb_chuyenmon_nganh ?? '',
             vb_chuyenmon_noicap: row.vb_chuyenmon_noicap ?? '',
-            nguoi_tuvan_id: row.nguoi_tuvan_id ?? null,
+            vb_chuyenmon_sohieu: row.vb_chuyenmon_sohieu ?? '',
+            vb_chuyenmon_namtn: row.vb_chuyenmon_namtn ?? '',
+            nguoi_tuvan: row.nguoi_tuvan ?? null,
+            anh_soyeulylich: row.anh_soyeulylich ?? '',
             status: row.status ?? 'cho_duyet',
+            status_connent: row.status_connent ?? 0,
+            owner_by: row.owner_by,
         });
-        if (row.major_id) {
-            this.onMajorChange(row.major_id);
+        if (row.nganh_id) {
+            this.onMajorChange(row.nganh_id);
         }
         this.masterFormControl.openFormEdit(row);
     }
@@ -584,9 +609,6 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
         return this.dots().find((d) => d.value === dotId)?.label ?? `#${dotId}`;
     }
 
-    private masterFormField(path: keyof HosoThisinh): AbstractControl | null {
-        return this.masterFormControl.formGroup.get(path);
-    }
 
 
     // onChangeTinh(event) {

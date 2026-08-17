@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1786410712208,
+  "lastScanned": 1786929228082,
   "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1786410712189,
+      "lastAccessed": 1786929228026,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1786410712189,
+      "lastAccessed": 1786929228027,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -55,48 +55,54 @@
     "plan": {
       "path": "plan",
       "purpose": null,
-      "fileCount": 6,
-      "lastAccessed": 1786410712190,
+      "fileCount": 9,
+      "lastAccessed": 1786929228027,
       "keyFiles": [
         "api-outsite.md",
+        "chuanhoa-database.md",
         "database.md",
         "du-an.md",
-        "fix-ovic-avata.md",
-        "FRONTEND_API_GUIDE.md"
+        "fix-ovic-avata.md"
       ]
     },
     "frontend\\dist": {
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1786410712191,
+      "lastAccessed": 1786929228029,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 189,
-      "lastAccessed": 1786075355817,
+      "accessCount": 228,
+      "lastAccessed": 1786931966744,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
-      "accessCount": 135,
-      "lastAccessed": 1786094437090,
+      "accessCount": 218,
+      "lastAccessed": 1786680474605,
       "type": "file"
     },
     {
       "path": "",
-      "accessCount": 125,
-      "lastAccessed": 1786094365568,
+      "accessCount": 171,
+      "lastAccessed": 1786931475471,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app",
-      "accessCount": 118,
-      "lastAccessed": 1786094437287,
+      "accessCount": 164,
+      "lastAccessed": 1786931833912,
       "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.html",
+      "accessCount": 111,
+      "lastAccessed": 1786679701520,
+      "type": "file"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
@@ -105,15 +111,21 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.html",
-      "accessCount": 69,
-      "lastAccessed": 1785464581420,
+      "path": "frontend\\src\\app\\services\\tuyensinh\\hoso-thisinh.service.ts",
+      "accessCount": 63,
+      "lastAccessed": 1786702296811,
       "type": "file"
     },
     {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-multiple\\ovic-avata-type-multiple.component.ts",
+      "accessCount": 56,
+      "lastAccessed": 1786524512578,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\models\\tuyensinh\\hoso-thisinh.ts",
       "accessCount": 55,
-      "lastAccessed": 1785986263732,
+      "lastAccessed": 1786702296760,
       "type": "file"
     },
     {
@@ -123,21 +135,15 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\models\\tuyensinh\\hoso-thisinh.ts",
-      "accessCount": 41,
-      "lastAccessed": 1786071335252,
-      "type": "file"
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso",
+      "accessCount": 38,
+      "lastAccessed": 1786679679105,
+      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.md",
       "accessCount": 28,
       "lastAccessed": 1785780080719,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\services\\tuyensinh\\hoso-thisinh.service.ts",
-      "accessCount": 28,
-      "lastAccessed": 1786071578429,
       "type": "file"
     },
     {
@@ -147,27 +153,21 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso",
-      "accessCount": 24,
-      "lastAccessed": 1786071578482,
-      "type": "directory"
-    },
-    {
       "path": "frontend",
-      "accessCount": 23,
-      "lastAccessed": 1786073920931,
+      "accessCount": 26,
+      "lastAccessed": 1786529051211,
       "type": "directory"
-    },
-    {
-      "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.ts",
-      "accessCount": 22,
-      "lastAccessed": 1785204673862,
-      "type": "file"
     },
     {
       "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
-      "accessCount": 22,
-      "lastAccessed": 1786074383407,
+      "accessCount": 23,
+      "lastAccessed": 1786436881831,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.ts",
+      "accessCount": 23,
+      "lastAccessed": 1786527247636,
       "type": "file"
     },
     {
@@ -183,10 +183,22 @@
       "type": "file"
     },
     {
+      "path": "plan\\database.md",
+      "accessCount": 18,
+      "lastAccessed": 1786586766308,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-multiple\\ovic-avata-type-multiple.component.html",
       "accessCount": 16,
       "lastAccessed": 1785204573274,
       "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\models",
+      "accessCount": 15,
+      "lastAccessed": 1786421641573,
+      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\models\\external-api.ts",
@@ -195,21 +207,15 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\models",
-      "accessCount": 14,
-      "lastAccessed": 1786094437346,
-      "type": "directory"
-    },
-    {
       "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.html",
       "accessCount": 13,
       "lastAccessed": 1785204667282,
       "type": "file"
     },
     {
-      "path": "plan\\database.md",
+      "path": "frontend\\src\\app\\models\\dto.ts",
       "accessCount": 11,
-      "lastAccessed": 1785815463809,
+      "lastAccessed": 1786436862739,
       "type": "file"
     },
     {
@@ -219,9 +225,9 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\models\\dto.ts",
+      "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
       "accessCount": 10,
-      "lastAccessed": 1786094446407,
+      "lastAccessed": 1786522378388,
       "type": "file"
     },
     {
@@ -231,15 +237,9 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
-      "accessCount": 8,
-      "lastAccessed": 1785981166229,
-      "type": "file"
-    },
-    {
       "path": "frontend\\src\\app\\models\\tuyensinh\\chuongtrinh-daotao.ts",
-      "accessCount": 7,
-      "lastAccessed": 1785729973416,
+      "accessCount": 9,
+      "lastAccessed": 1786421308154,
       "type": "file"
     },
     {
@@ -255,6 +255,12 @@
       "type": "directory"
     },
     {
+      "path": "frontend\\src\\app\\services\\tuyensinh\\chuongtrinh-daotao.service.ts",
+      "accessCount": 6,
+      "lastAccessed": 1786698149028,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src\\app\\components\\ictu-image-resize\\ictu-image-resize.component.ts",
       "accessCount": 5,
       "lastAccessed": 1785203348612,
@@ -265,6 +271,12 @@
       "accessCount": 5,
       "lastAccessed": 1785834485390,
       "type": "file"
+    },
+    {
+      "path": "plan",
+      "accessCount": 5,
+      "lastAccessed": 1786586742940,
+      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-thpt\\ovic-avata-type-thpt.component.ts",
@@ -297,12 +309,6 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\services\\tuyensinh\\chuongtrinh-daotao.service.ts",
-      "accessCount": 3,
-      "lastAccessed": 1785729972746,
-      "type": "file"
-    },
-    {
       "path": "frontend\\src\\app\\models\\ictu-dropdown-option.ts",
       "accessCount": 3,
       "lastAccessed": 1785828466574,
@@ -315,16 +321,16 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\utilities",
+      "accessCount": 3,
+      "lastAccessed": 1786702384809,
+      "type": "directory"
+    },
+    {
       "path": "img-crop-v2.md",
       "accessCount": 2,
       "lastAccessed": 1784518870837,
       "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\utilities",
-      "accessCount": 2,
-      "lastAccessed": 1784519088903,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\environments\\index.ts",
@@ -343,12 +349,6 @@
       "accessCount": 2,
       "lastAccessed": 1785209392894,
       "type": "file"
-    },
-    {
-      "path": "plan",
-      "accessCount": 2,
-      "lastAccessed": 1785730252956,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-thpt\\ovic-avata-type-thpt.component.css",

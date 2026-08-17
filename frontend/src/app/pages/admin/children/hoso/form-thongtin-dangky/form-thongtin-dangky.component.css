@@ -53,13 +53,14 @@
 
 .cccd-check__input-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
     justify-content: center;
 }
 
 .cccd-check__input-row input {
-    flex: 1;
+    flex: 1 1 180px;
     max-width: 280px;
 }
 

@@ -8,9 +8,9 @@ import { HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
 export interface HosoThisinhSearchInfo {
     search: string;
     status?: string;
-    dot_xet_tuyen_id?: number;
-    major_id?: number;
-    nguoi_tuvan_id?: number;
+    dotxettuyen_id?: number;
+    nganh_id?: number;
+    nguoi_tuvan?: number;
 }
 
 export type HosoCheckCccdResult =
@@ -50,13 +50,13 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
         if (info.search) {
             conditions.push(
                 {
-                    conditionName: 'full_name',
+                    conditionName: 'ho_va_ten',
                     value: `%${info.search}%`,
                     condition: IctuQueryCondition.like,
                     orWhere: 'or',
                 },
                 {
-                    conditionName: 'phone',
+                    conditionName: 'dien_thoai',
                     value: `%${info.search}%`,
                     condition: IctuQueryCondition.like,
                     orWhere: 'or',
@@ -70,33 +70,34 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
                 condition: IctuQueryCondition.equal,
             });
         }
-        if (info.dot_xet_tuyen_id) {
+        if (info.dotxettuyen_id) {
             conditions.push({
-                conditionName: 'dot_xet_tuyen_id',
-                value: `${info.dot_xet_tuyen_id}`,
+                conditionName: 'dotxettuyen_id',
+                value: `${info.dotxettuyen_id}`,
                 condition: IctuQueryCondition.equal,
             });
         }
-        if (info.major_id) {
+        if (info.nganh_id) {
             conditions.push({
-                conditionName: 'major_id',
-                value: `${info.major_id}`,
+                conditionName: 'nganh_id',
+                value: `${info.nganh_id}`,
                 condition: IctuQueryCondition.equal,
             });
         }
-        if (info.nguoi_tuvan_id) {
+        if (info.nguoi_tuvan) {
             conditions.push({
-                conditionName: 'nguoi_tuvan_id',
-                value: `${info.nguoi_tuvan_id}`,
+                conditionName: 'nguoi_tuvan',
+                value: `${info.nguoi_tuvan}`,
                 condition: IctuQueryCondition.equal,
             });
         }
         return this.query(conditions, queryParams);
     }
 
-    checkCccd(cccd: string): Observable<HosoCheckCccdResult> {
-        const cleaned = (cccd || '').trim();
-        if (!cleaned) {
+    checkCccd(cccd?: string, phone?: string): Observable<HosoCheckCccdResult> {
+        const cleaned = cccd?.trim();
+        const cleanedPhone = phone?.trim();
+        if (!cleaned && !cleanedPhone) {
             return of<HosoCheckCccdResult>({ found: false });
         }
         const queryParams: IctuQueryParams = {
@@ -104,15 +105,24 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
             paged: 1,
             order: 'DESC',
             orderby: 'created_at',
-            select:'id,full_name,nganh_id,created_at,status,cccd,phone,email'
+            select: 'id,ho_va_ten,nganh_id,created_at,status,cccd,dien_thoai,email'
         };
-        const conditions: IctuConditionParam[] = [
-            {
+        const conditions: IctuConditionParam[] = [];
+        if (cleaned) {
+            conditions.push({
                 conditionName: 'cccd',
                 value: cleaned,
                 condition: IctuQueryCondition.equal,
-            },
-        ];
+            });
+        }
+        if (cleanedPhone) {
+            conditions.push({
+                conditionName: 'dien_thoai',
+                value: cleanedPhone,
+                condition: IctuQueryCondition.equal,
+                ...(cleaned ? {orWhere: 'and' as const} : {}),
+            });
+        }
         return this.query(conditions, queryParams).pipe(
             map((res: DtoObject<HosoThisinh[]>): HosoCheckCccdResult => {
                 const first: HosoThisinh | undefined =
@@ -121,5 +131,9 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
             }),
             catchError((): Observable<HosoCheckCccdResult> => of<HosoCheckCccdResult>({ found: false })),
         );
+    }
+
+    checkpointHoso(cccd?: string, phone?: string): Observable<HosoThisinh | null> {
+        return this.http.post<HosoThisinh | null>(this.api + 'check-point', {cccd, phone});
     }
 }

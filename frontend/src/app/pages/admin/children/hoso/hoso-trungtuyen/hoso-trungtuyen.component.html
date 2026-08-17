@@ -44,7 +44,7 @@
                         <p-select
                             [options]="dots()"
                             appendTo="body"
-                            [(ngModel)]="searchInfo.dot_xet_tuyen_id"
+                            [(ngModel)]="searchInfo.dotxettuyen_id"
                             placeholder="Đợt xét tuyển"
                             class="filter-select"
                             optionLabel="label"
@@ -75,7 +75,7 @@
                                     </div>
                                     <div class="filter-panel__item">
                                         <label>Tỉnh/TP</label>
-                                        <p-select [options]="tinhList()" appendTo="body" [(ngModel)]="searchInfo.tinh_id"
+                                        <p-select [options]="tinhList()" appendTo="body" [(ngModel)]="searchInfo.dia_chi_tinh"
                                             placeholder="Chọn tỉnh" optionLabel="label" optionValue="value" [showClear]="true" />
                                     </div>
                                 </div>
@@ -132,9 +132,9 @@
                                         <td class="col-index text-center col-sticky col-sticky--index">{{ dataTable.paginator.startIndex() + index }}</td>
                                         <td class="text-left col-name col-sticky col-sticky--name">
                                             <div class="name-cell">
-                                                <span class="name-text">{{ row.full_name }}</span>
+                                                <span class="name-text">{{ row.ho_va_ten }}</span>
                                                 <button class="btn-name-action" type="button"
-                                                    [attr.aria-label]="'Thao tác với hồ sơ ' + row.full_name"
+                                                    [attr.aria-label]="'Thao tác với hồ sơ ' + row.ho_va_ten"
                                                     (click)="rowMenu.toggle($event)">
                                                     <i class="ti ti-dots-vertical"></i>
                                                 </button>
@@ -154,15 +154,15 @@
                                             </div>
                                         </td>
                                         <td class="text-left col-cccd col-sticky col-sticky--cccd">{{ row.cccd || '—' }}</td>
-                                        <td class="text-left col-phone col-sticky col-sticky--phone">{{ row.phone || '—' }}</td>
+                                        <td class="text-left col-phone col-sticky col-sticky--phone">{{ row.dien_thoai || '—' }}</td>
                                         <td class="text-center col-status">
                                             <span class="ictu-badge {{ statusBadgeClass(row.status) }}">{{ statusLabel(row.status) }}</span>
                                         </td>
                                         <td class="text-left col-email">{{ row.email || '—' }}</td>
                                         <td class="text-left col-major">{{ majorLabel(row.nganh_id) }}</td>
                                         <td class="text-left col-program">{{ programLabel(row.ctdt_id) }}</td>
-                                        <td class="text-left col-dot">{{ dotLabel(row.dot_xet_tuyen_id) }}</td>
-                                        <td class="text-left col-tinh">{{ tinhLabel(row.tinh_id) }}</td>
+                                        <td class="text-left col-dot">{{ dotLabel(row.dotxettuyen_id) }}</td>
+                                        <td class="text-left col-tinh">{{ tinhLabel(row.dia_chi_tinh) }}</td>
                                         <td class="text-left col-noi-sinh">{{ tinhLabel(row.noi_sinh) }}</td>
                                         <td class="text-left col-dan-toc">{{ row.dan_toc || '—' }}</td>
                                     </tr>
@@ -188,14 +188,14 @@
 </section>
 
 <p-drawer [(visible)]="consultationDrawerVisible" [dismissible]="true"
-    [header]="selectedConsultationHoso()?.full_name ?? 'Quá trình tư vấn'"
+    [header]="selectedConsultationHoso()?.ho_va_ten ?? 'Quá trình tư vấn'"
     [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right"
     styleClass="ictu-p-drawer" (onHide)="closeConsultation()">
     <app-tuvan-tuyensinh [hoso]="selectedConsultationHoso()" [readOnly]="true" />
 </p-drawer>
 
 <p-drawer [(visible)]="viewDetailVisible" [dismissible]="true"
-    [header]="viewDetailData()?.full_name ?? 'Xem hồ sơ'"
+    [header]="viewDetailData()?.ho_va_ten ?? 'Xem hồ sơ'"
     [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right"
     styleClass="ictu-p-drawer" (onHide)="closeDetail()">
     <div class="ictu-p-drawer__content position-relative">
@@ -219,26 +219,26 @@
                         <div class="ictu-form ictu-form--label-on-top drawer-form-sections">
                             <section class="hoso-form__section">
                                 <h3 class="hoso-form__section-title">I. Thông tin cá nhân</h3>
-                                <div class="view-field"><label>Họ tên</label><span>{{ hoso.full_name || '—' }}</span></div>
-                                <div class="view-field"><label>Ngày sinh</label><span>{{ hoso.birthday || '—' }}</span></div>
+                                <div class="view-field"><label>Họ tên</label><span>{{ hoso.ho_va_ten || '—' }}</span></div>
+                                <div class="view-field"><label>Ngày sinh</label><span>{{ hoso.ngay_sinh || '—' }}</span></div>
                                 <div class="view-field"><label>Nơi sinh</label><span>{{ tinhLabel(hoso.noi_sinh) }}</span></div>
                                 <div class="view-field"><label>Dân tộc</label><span>{{ hoso.dan_toc || '—' }}</span></div>
-                                <div class="view-field"><label>Địa chỉ</label><span>{{ hoso.address || '—' }}</span></div>
+                                <div class="view-field"><label>Địa chỉ</label><span>{{ hoso.dia_chi_nha || '—' }}</span></div>
                             </section>
                             <section class="hoso-form__section">
                                 <h3 class="hoso-form__section-title">II. Giấy tờ tùy thân</h3>
                                 <div class="view-field"><label>Số CCCD</label><span>{{ hoso.cccd || '—' }}</span></div>
-                                <div class="view-field"><label>Ngày cấp</label><span>{{ hoso.cccd_ngaycap || '—' }}</span></div>
-                                <div class="view-field"><label>Nơi cấp</label><span>{{ hoso.cccd_noicap || '—' }}</span></div>
+                                <div class="view-field"><label>Ngày cấp</label><span>{{ hoso.ngay_cap_cccd || '—' }}</span></div>
+                                <div class="view-field"><label>Nơi cấp</label><span>{{ hoso.noi_cap_cccd || '—' }}</span></div>
                             </section>
                             <section class="hoso-form__section">
                                 <h3 class="hoso-form__section-title">III. Thông tin liên hệ</h3>
-                                <div class="view-field"><label>SĐT</label><span>{{ hoso.phone || '—' }}</span></div>
+                                <div class="view-field"><label>SĐT</label><span>{{ hoso.dien_thoai || '—' }}</span></div>
                                 <div class="view-field"><label>Email</label><span>{{ hoso.email || '—' }}</span></div>
                             </section>
                             <section class="hoso-form__section">
                                 <h3 class="hoso-form__section-title">IV. Thông tin đăng ký</h3>
-                                <div class="view-field"><label>Đợt xét tuyển</label><span>{{ dotLabel(hoso.dot_xet_tuyen_id) }}</span></div>
+                                <div class="view-field"><label>Đợt xét tuyển</label><span>{{ dotLabel(hoso.dotxettuyen_id) }}</span></div>
                                 <div class="view-field"><label>Ngành học</label><span>{{ majorLabel(hoso.nganh_id) }}</span></div>
                                 <div class="view-field"><label>CTĐT</label><span>{{ programLabel(hoso.ctdt_id) }}</span></div>
                                 <div class="view-field"><label>Hình thức XT</label><span>{{ hoso.hinhthuc_xettuyen || '—' }}</span></div>
@@ -250,7 +250,7 @@
                                     <label>Trạng thái</label>
                                     <span class="ictu-badge {{ statusBadgeClass(hoso.status) }}">{{ statusLabel(hoso.status) }}</span>
                                 </div>
-                                <div class="view-field"><label>Nguồn ĐK</label><span>{{ hoso.nguon_dang_ky || '—' }}</span></div>
+                                <div class="view-field"><label>Nguồn ĐK</label><span>{{ hoso.submit_from || '—' }}</span></div>
                             </section>
                         </div>
                     }

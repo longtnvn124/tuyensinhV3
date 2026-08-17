@@ -1,31 +1,33 @@
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, inject, signal, WritableSignal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { ButtonBase, BUTTON_CANCEL, BUTTON_CONFIRMED } from '@app/models/button';
 import { IctuDataTable, IctuDataTablePaginatorInfo } from '@models/datatable';
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
-import { ExternalApiResponse, NganhItem } from '@models/external-api';
 import { IctuPermissionControl } from '@models/ictu-base-model';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { Locations } from '@models/location';
 import { HoidongHosoThisinh } from '@models/tuyensinh/hoidong-hoso-thisinh';
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
 import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService } from '@services/notification.service';
-import { ApiOutsiteService } from '@services/tuyensinh/api-outsite.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
 import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { DOI_TUONG } from '@utilities/syscats';
 import { Dialog } from 'primeng/dialog';
+import { InputText } from 'primeng/inputtext';
 import { catchError, filter, finalize, forkJoin, from, last, map, mergeMap, of, scan, Subject, switchMap, takeUntil, tap } from 'rxjs';
 
 @Component({
     selector: 'app-hoso-list',
     imports: [
-        Dialog, IctuPaginatorComponent, LoadingProgressComponent, MatButton, MatCheckbox,
+        Dialog, FormsModule, IctuPaginatorComponent, InputText, LoadingProgressComponent, MatButton, MatCheckbox,
     ],
     templateUrl: './hoso-list.component.html',
     styleUrl: './hoso-list.component.css',
@@ -46,6 +48,8 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
 
     assignDialogVisible = false;
     assignLoading = false;
+    assignSearch = '';
+    assignIncludeCurrentRound = true;
     assignCandidates: HosoThisinh[] = [];
     selectedAssignIds: Set<number> = new Set<number>();
     selectedAssignedIds: ReadonlySet<number> = new Set<number>();
@@ -53,10 +57,11 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
 
     private readonly assignmentService = inject(HoidongHosoThisinhService);
     private readonly hosoService = inject(HosoThisinhService);
-    private readonly apiOutsiteService = inject(ApiOutsiteService);
+    private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
     private readonly notification = inject(NotificationService);
     private readonly dataLoad$ = new Subject<void>();
+    private readonly candidateLoad$ = new Subject<void>();
     private readonly onDestroy$ = new Subject<void>();
 
 
@@ -155,14 +160,34 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
 
     openAssignDialog(): void {
         if (!this._hoidong?.id) return;
+        this.assignSearch = '';
+        this.assignIncludeCurrentRound = true;
         this.selectedAssignIds = new Set<number>();
         this.loadCandidates();
         this.assignDialogVisible = true;
     }
 
+    onAssignSearch(): void {
+        this.selectedAssignIds = new Set<number>();
+        this.loadCandidates();
+    }
+
+    onAssignRoundFilterChange(checked: boolean): void {
+        this.assignIncludeCurrentRound = checked;
+        this.selectedAssignIds = new Set<number>();
+        this.loadCandidates();
+    }
+
     loadCandidates(): void {
+        this.candidateLoad$.next();
         this.assignLoading = true;
-        this.hosoService.load({ search: '', dot_xet_tuyen_id: this._hoidong?.dot_xettuyen_id }, { limit: 500, paged: 1 }).subscribe({
+        this.hosoService.load({
+            search: this.assignSearch.trim(),
+            dotxettuyen_id: this.assignIncludeCurrentRound ? this._hoidong?.dot_xettuyen_id : undefined,
+        }, { limit: 500, paged: 1 }).pipe(
+            takeUntil(this.candidateLoad$),
+            takeUntil(this.onDestroy$),
+        ).subscribe({
             next: (res: DtoObject<HosoThisinh[]>): void => {
                 const assigned = new Set<number>(this.dataTable.data().map((r: HoidongHosoThisinh): number => r.hoso_id));
                 this.assignCandidates = res.data.filter((c: HosoThisinh): boolean => !assigned.has(c.id));
@@ -375,11 +400,9 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     private loadLookups(): void {
         const queryParams: IctuQueryParams = { limit: -1 };
         forkJoin({
-            majors: this.apiOutsiteService.getNganhList().pipe(
-                map((response: ExternalApiResponse<NganhItem[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? [])
-                        .filter((item: NganhItem): boolean => item.type === 'nganh')
-                        .map((item: NganhItem): IctuDropdownOption<number> => ({ value: item.id, label: item.title })),
+            majors: this.nganhHocService.load({ search: '' }, queryParams).pipe(
+                map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
+                    (response.data ?? []).map((item: Nganhhoc): IctuDropdownOption<number> => ({ value: item.id, label: item.name })),
                 ),
             ),
             provinces: this.locationService.queryLocation([], queryParams, 'regions').pipe(
@@ -401,6 +424,8 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     ngOnDestroy(): void {
         this.dataLoad$.next();
         this.dataLoad$.complete();
+        this.candidateLoad$.next();
+        this.candidateLoad$.complete();
         this.onDestroy$.next();
         this.onDestroy$.complete();
         this.progress.complete();

@@ -91,7 +91,6 @@
                                         <th class="review-col-index">STT</th>
                                         <th class="review-col-name">Họ và tên</th>
                                         <th>Ngành học</th>
-                                        <th>Chương trình đào tạo</th>
                                         <th>Tỉnh</th>
                                         <th>Ngày sinh</th>
                                         <th>Số điện thoại</th>
@@ -109,18 +108,17 @@
                                                     [checked]="isSelected(row.id)"
                                                     [disabled]="actionLoading()"
                                                     (change)="toggleRow(row.id)"
-                                                    [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.full_name || row.hoso_id)" />
+                                                    [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.hoso_id)" />
                                             </td>
                                             <td class="review-col-index">{{ index + 1 }}</td>
                                             <td class="review-col-name">
-                                                <strong>{{ candidate?.full_name || ('Hồ sơ #' + row.hoso_id) }}</strong>
+                                                <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.hoso_id) }}</strong>
                                                 <small>Mã hồ sơ: {{ row.hoso_id }}</small>
                                             </td>
                                             <td>{{ getMajorLabel(candidate?.nganh_id) }}</td>
-                                            <td>{{ getProgramLabel(candidate?.ctdt_id) }}</td>
-                                            <td>{{ getProvinceLabel(candidate?.tinh_id) }}</td>
-                                            <td>{{ formatDate(candidate?.birthday) }}</td>
-                                            <td>{{ candidate?.phone || '---' }}</td>
+                                            <td>{{ getProvinceLabel(candidate?.dia_chi_tinh) }}</td>
+                                            <td>{{ formatDate(candidate?.ngay_sinh) }}</td>
+                                            <td>{{ candidate?.dien_thoai || '---' }}</td>
                                             <td>{{ candidate?.cccd || '---' }}</td>
                                             <td>
                                                 <span class="review-result" [class]="getStatusClass(candidate?.status)">

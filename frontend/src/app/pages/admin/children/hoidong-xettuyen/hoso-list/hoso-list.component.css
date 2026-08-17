@@ -195,6 +195,29 @@
 
 /* ═══ Assign dialog ═══ */
 
+.hsl-assign__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 16px;
+}
+
+.hsl-assign__title {
+    font-weight: 600;
+}
+
+.hsl-assign__filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hsl-assign__search {
+    width: 220px;
+    height: 36px;
+}
+
 .hsl-assign {
     display: flex;
     flex-direction: column;
@@ -264,4 +287,16 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+}
+
+@media (max-width: 720px) {
+    .hsl-assign__header,
+    .hsl-assign__filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .hsl-assign__search {
+        width: 100%;
+    }
 }

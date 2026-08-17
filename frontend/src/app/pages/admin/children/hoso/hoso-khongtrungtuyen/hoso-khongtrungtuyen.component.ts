@@ -30,11 +30,11 @@ type DetailState = 'idle' | 'loading' | 'success' | 'error';
 
 interface HosoKhongTrungTuyenSearchInfo {
     search: string;
-    dot_xet_tuyen_id?: number;
-    nganhhoc_id?: number;
+    dotxettuyen_id?: number;
+    nganh_id?: number;
     cccd?: string;
-    tinh_id?: number;
-    noi_sinh?: string;
+    dia_chi_tinh?: number;
+    noi_sinh?: number;
     dan_toc?: string;
 }
 
@@ -275,24 +275,24 @@ export class HosoKhongtrungtuyenComponent implements OnInit, OnDestroy, IctuBase
         if (searchInfo.search.trim()) {
             const search = `%${searchInfo.search.trim()}%`;
             conditions.push(
-                { conditionName: 'full_name', value: search, condition: IctuQueryCondition.like, orWhere: 'or' },
-                { conditionName: 'phone', value: search, condition: IctuQueryCondition.like, orWhere: 'or' },
+                { conditionName: 'ho_va_ten', value: search, condition: IctuQueryCondition.like, orWhere: 'or' },
+                { conditionName: 'dien_thoai', value: search, condition: IctuQueryCondition.like, orWhere: 'or' },
             );
         }
-        if (searchInfo.dot_xet_tuyen_id) {
-            conditions.push({ conditionName: 'dot_xet_tuyen_id', value: `${searchInfo.dot_xet_tuyen_id}`, condition: IctuQueryCondition.equal });
+        if (searchInfo.dotxettuyen_id) {
+            conditions.push({ conditionName: 'dotxettuyen_id', value: `${searchInfo.dotxettuyen_id}`, condition: IctuQueryCondition.equal });
         }
-        if (searchInfo.nganhhoc_id) {
-            conditions.push({ conditionName: 'nganhhoc_id', value: `${searchInfo.nganhhoc_id}`, condition: IctuQueryCondition.equal });
+        if (searchInfo.nganh_id) {
+            conditions.push({ conditionName: 'nganh_id', value: `${searchInfo.nganh_id}`, condition: IctuQueryCondition.equal });
         }
         if (searchInfo.cccd?.trim()) {
             conditions.push({ conditionName: 'cccd', value: `%${searchInfo.cccd.trim()}%`, condition: IctuQueryCondition.like });
         }
-        if (searchInfo.tinh_id) {
-            conditions.push({ conditionName: 'tinh_id', value: `${searchInfo.tinh_id}`, condition: IctuQueryCondition.equal });
+        if (searchInfo.dia_chi_tinh) {
+            conditions.push({ conditionName: 'dia_chi_tinh', value: `${searchInfo.dia_chi_tinh}`, condition: IctuQueryCondition.equal });
         }
-        if (searchInfo.noi_sinh?.trim()) {
-            conditions.push({ conditionName: 'noi_sinh', value: `%${searchInfo.noi_sinh.trim()}%`, condition: IctuQueryCondition.like });
+        if (searchInfo.noi_sinh) {
+            conditions.push({ conditionName: 'noi_sinh', value: `${searchInfo.noi_sinh}`, condition: IctuQueryCondition.equal });
         }
         if (searchInfo.dan_toc) {
             conditions.push({ conditionName: 'dan_toc', value: searchInfo.dan_toc, condition: IctuQueryCondition.equal });
@@ -330,10 +330,10 @@ export class HosoKhongtrungtuyenComponent implements OnInit, OnDestroy, IctuBase
     private emptySearchInfo(): HosoKhongTrungTuyenSearchInfo {
         return {
             search: '',
-            dot_xet_tuyen_id: undefined,
-            nganhhoc_id: undefined,
+            dotxettuyen_id: undefined,
+            nganh_id: undefined,
             cccd: undefined,
-            tinh_id: undefined,
+            dia_chi_tinh: undefined,
             noi_sinh: undefined,
             dan_toc: undefined,
         };

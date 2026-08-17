@@ -1,425 +1,437 @@
-# Design: FormThongtinDangkyComponent — Approach A (CCCD check bên trong)
+# Thiết kế cập nhật: FormThongtinDangkyComponent
+
+> Trạng thái: **Bản đề xuất để duyệt trước khi sửa code**. Chưa triển khai thay đổi TypeScript, HTML hoặc CSS.
 
 ## 1. Mục tiêu
 
-Component tự quản lý CCCD check, áp dụng Angular 19 patterns: Signals, `inject()`, `takeUntilDestroyed()`, `@switch/@case/@if/@for`.
+Cập nhật `FormThongtinDangkyComponent` theo ba nhóm yêu cầu:
+
+1. Phân quyền luồng kiểm tra hồ sơ theo CCCD và số điện thoại.
+2. Không dùng API ngoài cho Ngành học và Chương trình đào tạo; chuyển sang API của server hiện tại.
+3. Đồng bộ tài liệu với nội dung form đã được chỉnh sửa trong component.
 
 ---
 
-## 2. Kiến trúc tổng thể
+## 2. Phạm vi dự kiến
 
-### 2.1. Phân luồng view
+Sau khi tài liệu được duyệt, các thay đổi dự kiến nằm tại:
 
-```
-FormThongtinDangkyComponent
-│
-├── viewState = 'loading'       ──►  progress bar + "Đang tải..."
-├── viewState = 'error'         ──►  "Mất kết nối" + nút [Tải lại]
-├── viewState = 'cccd_check'    ──►  Input CCCD + nút [Kiểm tra]
-├── viewState = 'existing'      ──►  Card thông tin thí sinh cũ + [Quay lại]
-└── viewState = 'form'          ──►  Form đăng ký 6 sections + [Lưu] / [Hủy] / [Reset]
+```text
+frontend/src/app/pages/admin/children/hoso/form-thongtin-dangky/
+├── form-thongtin-dangky.component.ts
+├── form-thongtin-dangky.component.html
+├── form-thongtin-dangky.component.css
+└── design.md
 ```
 
-### 2.2. Interaction Flow
+Các service nội bộ được tái sử dụng:
 
-```
-User nhập CCCD + [Kiểm tra]
-        │
-        ▼
-runCccdCheck(cccd)
-        │
-        ├── API trả về: không tìm thấy ──► viewState = 'form'
-        │                                     (patch CCCD + majorId + programId vào form)
-        │
-        ├── API trả về: found, status = 'bo_hoc' ──► viewState = 'form'
-        │
-        └── API trả về: found, status ≠ 'bo_hoc' ──► viewState = 'existing'
-                                                       (hiện thông tin cũ)
-
-┌─ existing ────────────────────────────────────────┐
-│  [Quay lại] ──► backToCccdCheck() → viewState = 'cccd_check' │
-└───────────────────────────────────────────────────┘
-
-┌─ form ────────────────────────────────────────────┐
-│  [Lưu]    ──► submitData() → onSuccess() → saved.emit() │
-│  [Hủy]    ──► closeForm(): initForm() + viewState = 'cccd_check' │
-└───────────────────────────────────────────────────┘
+```text
+frontend/src/app/services/tuyensinh/
+├── hoso-thisinh.service.ts
+├── nganhhoc.service.ts
+└── chuongtrinh-daotao.service.ts
 ```
 
-### 2.3. Component Tree
+Không thay đổi API backend trong phần frontend này. Contract kiểm tra hồ sơ sẽ được nối vào API do backend cung cấp sau.
 
+---
+
+## 3. Phân quyền kiểm tra hồ sơ
+
+### 3.1. Nhóm đặc quyền
+
+| Tên quyền nghiệp vụ | Role key hiện có trong frontend | Dữ liệu kiểm tra | Giao diện |
+|---|---|---|---|
+| Admin | `admin` | CCCD hoặc Số điện thoại hoặc cả hai | Hiện ô CCCD và ô Số điện thoại |
+| Director | `direction` | CCCD hoặc Số điện thoại hoặc cả hai | Hiện ô CCCD và ô Số điện thoại |
+| Manager | `manager` | CCCD hoặc Số điện thoại hoặc cả hai | Hiện ô CCCD và ô Số điện thoại |
+
+> Code hiện tại dùng role key `direction`, không dùng `director`. Bản triển khai sẽ tiếp tục dùng `direction` trừ khi backend đổi role key.
+
+Cờ quyền dự kiến:
+
+```typescript
+readonly canCheckByPhone = computed(() =>
+    this.auth.userHasRole(['admin', 'direction', 'manager'])
+);
 ```
-HosoThemComponent (parent — simplified)
-├── Left Panel: ngành + CTĐT (giữ nguyên)
-│
-└── Right Panel:
-    └── <app-form-thongtin-dangky
-            [data]="editData"              // Optional: edit mode
-            [majorId]="selectedMajorId()"   // Create: auto-fill ngành
-            [programId]="selectedProgramId()" // Create: auto-fill CTĐT
-            (saved)="onReset()"
-            (cancel)="onReset()" />
 
-FormThongtinDangkyComponent (self-contained)
-├── viewState = 'loading'    → progress bar
-├── viewState = 'error'      → retry button
-├── viewState = 'cccd_check' → input CCCD
-├── viewState = 'existing'   → info card
-├── viewState = 'form'       → 6-section form + actions
-│
-├── loadLookups() → forkJoin(tinh, provinces, users, nganh)
-├── runCccdCheck(cccd) → hosoService.checkCccd() → set viewState
-├── submitData() → create/update + TuyensinhStatus
-└── resetForm() / formReset() → clear state + initForm()
+### 3.2. Các quyền còn lại
+
+Các role như `staff`, `doi-tac`, `doi-tac-cv`, `reviewer` và role khác:
+
+- Chỉ kiểm tra theo CCCD.
+- Không hiển thị ô Số điện thoại tại màn hình kiểm tra.
+- Không gửi số điện thoại trong request kiểm tra.
+- Trường Số điện thoại bên trong form đăng ký vẫn giữ nguyên vì đây là dữ liệu hồ sơ, không phải giao diện kiểm tra.
+
+### 3.3. Ma trận hành vi
+
+| Nhóm quyền | Ô CCCD | Ô SĐT tại màn kiểm tra | Request kiểm tra |
+|---|---:|---:|---|
+| `admin`, `direction`, `manager` | Hiện | Hiện | `{ cccd }`, `{ phone }` hoặc `{ cccd, phone }` |
+| Quyền khác | Hiện | Ẩn hoàn toàn | `{ cccd }` |
+
+---
+
+## 4. Giao diện kiểm tra mới
+
+### 4.1. Admin, Director, Manager
+
+```text
+┌──────────────────────────────────────────────────────┐
+│ Kiểm tra hồ sơ                                      │
+│                                                      │
+│ [ Nhập số CCCD             ]                         │
+│ [ Nhập số điện thoại       ] [ Kiểm tra ]           │
+└──────────────────────────────────────────────────────┘
+```
+
+Yêu cầu validation:
+
+- Phải nhập ít nhất một trong hai trường CCCD hoặc Số điện thoại.
+- Nếu nhập CCCD, giá trị phải đúng 12 chữ số.
+- Nếu nhập Số điện thoại, giá trị phải đúng định dạng đang dùng trong form: `^(0[35789])(\d{8})$`.
+- Nếu nhập cả hai, request dùng đồng thời CCCD và Số điện thoại để kiểm tra.
+- Nút Kiểm tra bị disable khi request đang chạy hoặc cả hai trường đều trống.
+- Enter tại một trong hai ô sẽ chạy kiểm tra nếu dữ liệu đã nhập hợp lệ.
+
+### 4.2. Các quyền khác
+
+```text
+┌──────────────────────────────────────────────────────┐
+│ Kiểm tra CCCD                                       │
+│                                                      │
+│ [ Nhập số CCCD             ] [ Kiểm tra ]           │
+└──────────────────────────────────────────────────────┘
+```
+
+Không render ô Số điện thoại, label, placeholder, lỗi validation hoặc khoảng trống layout liên quan đến SĐT.
+
+---
+
+## 5. Contract kiểm tra hồ sơ
+
+Backend API do người dùng bổ sung. Frontend không tự quyết định URL hoặc response cuối cùng trước khi có contract chính thức.
+
+Contract frontend cần hỗ trợ về mặt logic:
+
+```typescript
+interface HosoCheckRequest {
+    cccd?: string;
+    phone?: string;
+}
+
+type HosoCheckResult =
+    | { found: false }
+    | { found: true; record: HosoThisinh };
+```
+
+Quy tắc tạo request:
+
+```text
+canCheckByPhone = true
+    → gửi field đã nhập: CCCD, SĐT hoặc cả hai
+
+canCheckByPhone = false
+    → bắt buộc và chỉ gửi CCCD
+```
+
+Khi backend API hoàn thành, cần xác nhận:
+
+- Tên endpoint.
+- HTTP method.
+- Tên field request: `cccd`, `phone` hoặc tên khác.
+- Response khi không tìm thấy.
+- Response khi CCCD và SĐT thuộc hai hồ sơ khác nhau.
+- Quy tắc xử lý hồ sơ có trạng thái `bo_hoc`.
+- Mã lỗi và message cần hiển thị.
+
+Không coi lỗi mạng/API là “không tìm thấy hồ sơ”. Lỗi phải giữ màn kiểm tra và hiển thị thông báo thất bại.
+
+---
+
+## 6. Luồng kiểm tra dự kiến
+
+```text
+Mở component
+    │
+    ├── Có data edit
+    │      └── Load danh mục → mở form edit
+    │
+    └── Tạo mới
+           └── Load danh mục → mở màn kiểm tra
+                                  │
+                                  ├── Nhóm đặc quyền
+                                  │      └── nhập CCCD hoặc SĐT hoặc cả hai
+                                  │
+                                  └── Nhóm khác
+                                         └── nhập CCCD
+                                                │
+                                                ▼
+                                         Gọi API kiểm tra
+                                                │
+                   ┌────────────────────────────┼───────────────────────────┐
+                   │                            │                           │
+             Không tìm thấy             Hồ sơ `bo_hoc`              Hồ sơ đang tồn tại
+                   │                            │                           │
+                   └──────────────► Mở form tạo mới          Hiện thông tin hồ sơ cũ
+                                      │                           │
+                                      ├── patch CCCD             └── Quay lại kiểm tra
+                                      └── patch SĐT nếu có
+```
+
+Khi mở form tạo mới:
+
+- Luôn patch CCCD đã kiểm tra vào `formData.cccd`.
+- Nhóm đặc quyền: patch SĐT đã kiểm tra vào `formData.phone`.
+- Nhóm khác: trường `formData.phone` để người dùng nhập trong form.
+- Không patch `majorId`/`programId` từ parent vì `HosoThemV2Component` hiện không còn bước chọn ngành/CTĐT.
+
+---
+
+## 7. Chuyển nguồn Ngành học và Chương trình đào tạo
+
+### 7.1. Hiện trạng
+
+`FormThongtinDangkyComponent` hiện đang:
+
+- Inject `ApiOutsiteService`.
+- Gọi `apiOutsite.getNganhList()`.
+- Lọc bản ghi có `type === 'nganh'`.
+- Chỉ hiển thị select Ngành học.
+- Có form control `ctdt_id`, nhưng chưa có select Chương trình đào tạo trong HTML.
+
+### 7.2. Nguồn mới từ server
+
+| Dữ liệu | Service nội bộ | Resource hiện tại |
+|---|---|---|
+| Ngành học | `NganhhocService` | `nganh-hoc` |
+| Chương trình đào tạo | `ChuongtrinhDaotaoService` | `chuongtrinh-daotao` |
+
+Thay đổi dự kiến:
+
+- Bỏ `ApiOutsiteService` khỏi component.
+- Load ngành bằng `NganhhocService.load({ search: '' }, { limit: -1 })`.
+- Load chương trình bằng `ChuongtrinhDaotaoService.query(...)` hoặc `load(...)`.
+- Chỉ lấy bản ghi đang hoạt động nếu server/API hỗ trợ `is_active`.
+- Map dữ liệu server sang dropdown option; không phụ thuộc cấu trúc `title/type` của API ngoài.
+
+Mapping:
+
+```typescript
+Nganhhoc
+    → { value: major.id, label: major.name }
+
+ChuongtrinhDaotao
+    → { value: program.id, label: `${program.code} — ${program.name}` }
+```
+
+### 7.3. Quan hệ Ngành học — Chương trình đào tạo
+
+- Thêm signal danh sách chương trình đào tạo.
+- Hiển thị select Chương trình đào tạo với `formControlName="ctdt_id"`.
+- Khi chọn Ngành học, reset `ctdt_id` rồi lấy chương trình theo `major_id`.
+- Khi chưa chọn ngành, select CTĐT bị disable hoặc có danh sách rỗng.
+- Edit mode: load ngành, sau đó load CTĐT theo `nganh_id`, cuối cùng patch `ctdt_id`.
+- Lỗi load CTĐT không được làm mất dữ liệu các danh mục đã tải thành công; hiển thị thông báo phù hợp.
+
+Luồng:
+
+```text
+Load Ngành học từ server
+    │
+    ▼
+Chọn nganh_id
+    │
+    ├── reset ctdt_id
+    └── gọi ChuongtrinhDaotaoService.load(..., nganh_id)
+              │
+              ▼
+       Hiển thị danh sách CTĐT thuộc ngành
 ```
 
 ---
 
-## 3. State Management (Signals)
+## 8. Nội dung form hiện tại cần giữ và chuẩn hóa
+
+Tài liệu này phản ánh các field hiện đang có trong component sau các chỉnh sửa gần nhất.
+
+### I. Thông tin cá nhân
+
+| Field | Nội dung | Validation hiện tại |
+|---|---|---|
+| `anh_the` | Ảnh thẻ | Hiển thị bắt buộc |
+| `full_name` | Họ và tên | required, minLength(2) |
+| `birthday` | Ngày sinh | required |
+| `gioi_tinh` | Giới tính | required |
+| `dan_toc` | Dân tộc | required |
+| `phone` | Số điện thoại hồ sơ | required, đúng số di động 10 chữ số |
+| `email` | Email | email |
+| `noi_sinh` | Nơi sinh | UI đang hiển thị bắt buộc |
+| `tinh_id` | Tỉnh/Thành phố thường trú | UI đang hiển thị bắt buộc |
+| `xa_id` | Xã/Phường thường trú | UI đang hiển thị bắt buộc |
+| `address` | Địa chỉ chi tiết | UI đang hiển thị bắt buộc |
+
+### II. CCCD
+
+| Field | Nội dung | Ghi chú |
+|---|---|---|
+| `cccd` | Số CCCD | required, 12 chữ số; readonly với quyền ngoài nhóm đặc quyền |
+| `cccd_ngaycap` | Ngày cấp | input mask dd/mm/yyyy |
+| `cccd_noicap` | Nơi cấp | danh mục nơi cấp |
+| `cccd_mattruoc` | CCCD mặt trước | ảnh |
+| `cccd_matsau` | CCCD mặt sau | ảnh |
+
+### III. Bằng tốt nghiệp THPT / TH nghề / GCN hoàn thành kiến thức văn hóa THPT
+
+| Field | Nội dung |
+|---|---|
+| `tn_vanbang` | Loại văn bằng |
+| `tn_nam` | Năm tốt nghiệp |
+| `tn_noicap` | Nơi cấp bằng |
+
+### IV. Văn bằng chuyên môn đã tốt nghiệp
+
+| Field | Nội dung |
+|---|---|
+| `vb_chuyenmon_sohieu` | Số hiệu văn bằng |
+| `vb_chuyenmon_nganh` | Ngành tốt nghiệp |
+| `vb_chuyenmon_noicap` | Nơi cấp |
+| `vb_chuyenmon_nam` | Năm tốt nghiệp |
+| `vb_chuyenmon` | Dữ liệu văn bằng chuyên môn hiện có trong model/form |
+
+### V. Thông tin bổ sung
+
+| Field | Nội dung | Hành vi dự kiến |
+|---|---|---|
+| `nganh_id` | Ngành đăng ký | Lấy từ server nội bộ |
+| `ctdt_id` | Chương trình đào tạo | Thêm select, lọc theo `nganh_id` |
+| `dot_xet_tuyen_id` | Đợt xét tuyển | Lấy đợt đang mở, select disabled theo hiện trạng |
+| `type_diem` | Loại điểm | THPT hoặc Trung cấp/Cao đẳng/Đại học |
+| `diemtb` | Điểm trung bình | Chỉ hiện khi loại điểm là THPT |
+| `content` | Nội dung/Ghi chú | textarea |
+| `nguoi_tuvan_id` | Người tư vấn | Hiện theo quyền hiện tại |
+
+### VI. Hình ảnh hồ sơ
+
+| Field | Nội dung |
+|---|---|
+| `anh_phieu_dang_ky` | Ảnh phiếu đăng ký |
+| `anh_thpt` | Ảnh bằng tốt nghiệp THPT/BTVH |
+| `anh_hoc_ba` | Nhiều ảnh bằng, bảng điểm TC/CĐ/ĐH và học bạ THPT/BTVH |
+
+### System fields
+
+| Field | Giá trị/hành vi |
+|---|---|
+| `status` | mặc định `cho_duyet` |
+| `owner_by` | mặc định user hiện tại |
+
+---
+
+## 9. ViewState sau cập nhật
 
 ```typescript
 type ViewState = 'loading' | 'error' | 'cccd_check' | 'existing' | 'form';
-
-// View
-readonly viewState    = signal<ViewState>('loading');
-readonly cccdInput    = signal<string>('');
-readonly cccdLoading  = signal(false);
-readonly submitting   = signal(false);
-dataId: number | null = null;
-
-// CCCD result
-private readonly cccdResult = signal<HosoThisinh | null>(null);
-readonly existingRecord     = computed(() => this.cccdResult());
-readonly cccdValid          = computed(() => this.viewState() === 'form');
-
-// Role flags (computed)
-isManager     : Signal<boolean>
-isLanhDaoKhoa : Signal<boolean>
-canEdit       : Signal<boolean>
-canAdd        : Signal<boolean>
-duyetHoso     : Signal<boolean>
-
-// Role flags (signals, set in constructor)
-isAdmin           = signal(false)
-isDoitac          = signal(false)
-isNhanVien        = signal(false)
-isDoitacNhanvien  = signal(false)
-
-// Lookup data signals
-listDantoc        = signal(DanToc)
-genderOption      = signal(GENDER)
-listVBTN          = signal(VBTN)
-listVBCM          = signal(VBCM)
-listTinh          = signal<Locations[]>([])
-listXa            = signal<Locations[]>([])
-listUser          = signal<User[]>([])
-listNganh         = signal<IctuDropdownOption<number>[]>([])
-
-// Static options
-typeDiemXettuyen  = signal([...])
-noicapCCCD        = {value: string, label: string}[]
-
-// Form (ReactiveForms)
-formData!: FormGroup
 ```
+
+| State | Nội dung |
+|---|---|
+| `loading` | Đang tải danh mục ban đầu |
+| `error` | Không tải được dữ liệu bắt buộc, có nút Tải lại |
+| `cccd_check` | Màn kiểm tra theo ma trận quyền |
+| `existing` | Hiện hồ sơ đã tồn tại |
+| `form` | Form tạo mới hoặc cập nhật |
+
+Không thêm state riêng cho kiểm tra CCCD + SĐT. Giao diện trong `cccd_check` thay đổi bằng `canCheckByPhone()`.
 
 ---
 
-## 4. Luồng khởi tạo (ngOnInit)
+## 10. Input/Output và parent
 
-```
-ngOnInit()
-│
-├── initForm()
-│
-├── loadLookups()
-│   ├── forkJoin(tinh, provinces, users, nganh)
-│   ├── success →
-│   │     ├── có data input? → getFormData(data) → viewState = 'form'
-│   │     └── không → viewState = 'cccd_check'
-│   └── error → viewState = 'error'
-```
-
----
-
-## 5. Form fields
-
-| Field | Validators | Component |
-|-------|-----------|-----------|
-| **I. Thông tin cá nhân** |
-| `full_name` | required, minLength(2) | pInputText |
-| `birthday` | — | p-inputMask dd/mm/yyyy |
-| `phone` | required, pattern `^(0[35789])(\d{8})$` | pInputText |
-| `email` | email | pInputText |
-| `gioi_tinh` | required | p-select |
-| `dan_toc` | — | p-select (filter) |
-| `noi_sinh` | — | p-select (tinh) |
-| `tinh_id` | — | p-select (tinh, cascade) |
-| `xa_id` | — | p-select (xa, cascade) |
-| `address` | — | pInputText |
-| **II. CCCD** |
-| `cccd` | required, pattern `[0-9]{12}` | pInputText (readonly) |
-| `cccd_ngaycap` | — | p-inputMask dd/mm/yyyy |
-| `cccd_noicap` | — | p-select (CQLHCVTTXH / Bộ công an) |
-| anh_cmnd_truoc | — | OvicImgCropV2 |
-| anh_cmnd_sau | — | OvicImgCropV2 |
-| **III. Bằng tốt nghiệp THPT / BTVH** |
-| `van_bang_tn` | — | p-select (VBTN) |
-| `nam_tn` | — | pInputText |
-| `sohieu_vb` | — | pInputText |
-| `noicap_tn` | — | pInputText |
-| `anh_thpt` | — | OvicImgCropV2 |
-| **IV. Văn bằng chuyên môn** |
-| `vb_chuyenmon` | — | pInputText |
-| `vb_chuyenmon_nganh` | — | pInputText |
-| `vb_chuyenmon_noicap` | — | pInputText |
-| `vb_chuyenmon_namtn` | — | pInputText |
-| **V. Thông tin bổ sung** |
-| `nganh_dangky` | — | p-select (filter) |
-| `program_id` | — | (hidden, auto-fill từ parent) |
-| `type_diem` | — | p-select (THPT / Trung cấp-CĐ-ĐH) |
-| `diemtb` | — | p-inputNumber (chỉ hiện khi type_diem = THPT) |
-| `content` | — | textarea |
-| `nguoi_tuvan_id` | — | p-select (filter), chỉ hiện với admin/doitac, default = user.id với role khác |
-| **VI. Hình ảnh hồ sơ** |
-| `anh_phieu_dang_ky` | — | OvicImgCropV2 |
-| `anh_hoc_ba` | — | OvicAvataTypeMultiple (multiple files) |
-| **System** |
-| `status` | — | mặc định 'cho_duyet' |
-| `owner_by` | — | mặc định auth.user.id |
-| `showDiemTb` | signal(true) | Ẩn/hiện điểm TB theo loại điểm |
-| `listUserTuvan` | signal (từ listUser, lọc theo quyền) | User list cho người tư vấn |
-| `showNguoiTuvan` | computed = isAdmin() || isDoitac() | Hiển thị field người tư vấn |
-
----
-
-## 6. CCCD Check Flow
+Giữ API component hiện tại trong giai đoạn này:
 
 ```typescript
-// Filter input — chỉ giữ số
-onCccdInputChange(value: string): void {
-    this.cccdInput.set(value.replace(/\D/g, ''));
-}
-
-// Kiểm tra CCCD
-runCccdCheck(): void {
-    const cccd = this.cccdInput().trim();
-    if (!cccd || cccd.length !== 12) { /* warning */ return; }
-
-    this.cccdLoading.set(true);
-    this.hosoService.checkCccd(cccd).subscribe({
-        next: (res) => {
-            this.cccdLoading.set(false);
-            if (!res.found || res.record.status === 'bo_hoc') {
-                this.formData.patchValue({
-                    cccd,
-                    nganh_dangky: this.majorId(),
-                    program_id: this.programId(),
-                });
-                this.viewState.set('form');
-            } else {
-                this.cccdResult.set(res.record);
-                this.viewState.set('existing');
-            }
-        },
-        error: () => {
-            this.cccdLoading.set(false);
-            this.notification.toastError('Kiểm tra CCCD thất bại');
-        },
-    });
-}
-
-backToCccdCheck(): void {
-    this.cccdResult.set(null);
-    this.viewState.set('cccd_check');
-}
+readonly data      = input<HosoThisinh | null>(null);
+readonly majorId   = input<number | null>(null);
+readonly programId = input<number | null>(null);
+readonly saved     = output<void>();
+readonly cancel    = output<void>();
 ```
 
----
+`HosoThemV2Component` hiện render component trực tiếp, không truyền `majorId` và `programId`. Vì vậy:
 
-## 7. Submit Flow
+- Ngành và CTĐT phải được chọn ngay trong form.
+- Không phụ thuộc parent để load hoặc patch Ngành/CTĐT.
+- Nút Reset của parent tiếp tục gọi `resetForm()` của child.
 
-```typescript
-submitData(): void {
-    if (this.formData.invalid) {
-        // Show first error from errorMessages map
-        for (const key of Object.keys(this.errorMessages)) {
-            if (this.formData.get(key)?.invalid) {
-                this.notification.toastError(this.errorMessages[key]);
-                break;
-            }
-        }
-        return;
-    }
-
-    this.submitting.set(true);
-    this.notification.isProcessing(true);
-    const raw = { ...this.formData.getRawValue() };
-
-    // Xử lý diem_xettuyen
-    if (raw.type_diem && raw.diemtb) {
-        raw.diem_xettuyen = `${raw.type_diem}|${raw.diemtb}`;
-    }
-    delete raw.type_diem;
-    delete raw.diemtb;
-
-    if (this.dataId) {
-        // UPDATE → hosoService.updateTuyensinh() + optional status change
-        this.hosoService.updateTuyensinh(this.dataId, raw).pipe(
-            switchMap(() => {
-                const hasStatusChange = !!(raw.content || currentStatus !== raw.status);
-                return hasStatusChange ? this.statusService.addTuyensinh({...}) : of(null);
-            })
-        ).subscribe({ next: () => this.onSuccess(), error: () => this.onError() });
-    } else {
-        // CREATE → hosoService.addTuyensinh() + initial status
-        this.hosoService.addTuyensinh(raw).pipe(
-            switchMap((newId) => this.statusService.addTuyensinh({
-                registration_id: newId,
-                status_key: 'XET_TUYEN',
-                status_value: 'KHOI_TAO',
-                status_name: 'Chờ duyệt',
-                content: '',
-            }))
-        ).subscribe({ next: () => this.onSuccess(), error: () => this.onError() });
-    }
-}
-```
+Có thể loại bỏ `majorId`/`programId` ở một đợt refactor riêng nếu xác nhận không còn parent nào sử dụng; không nằm trong thay đổi bắt buộc lần này.
 
 ---
 
-## 8. Input signals
+## 11. Các điểm cần sửa khi triển khai
 
-```typescript
-readonly data       = input<HosoThisinh | null>(null);   // Edit mode
-readonly majorId    = input<number | null>(null);         // Auto-fill ngành
-readonly programId  = input<number | null>(null);         // Auto-fill CTĐT
-readonly saved      = output<void>();
-readonly cancel     = output<void>();
-```
+Các vấn đề quan sát được trong source hiện tại:
 
-- `data() ≠ null`: `loadLookups()` gọi `getFormData()` → viewState = 'form' (edit mode)
-- `majorId + programId ≠ null`: `runCccdCheck()` patch vào form sau khi CCCD check OK
+1. Tài liệu cũ dùng `nganh_dangky`/`program_id`, nhưng form hiện tại dùng `nganh_id`/`ctdt_id`.
+2. HTML chưa có select cho `ctdt_id`.
+3. Ô “Số hiệu văn bằng” tại Section IV đang bind nhầm `vb_chuyenmon_nganh`; cần bind `vb_chuyenmon_sohieu`.
+4. `getFormData()` đang map `tn_vanbang` từ `van_bang_tn`; cần đối chiếu đúng field model/backend trước khi sửa.
+5. `getFormData()` đang map `vb_chuyenmon_sohieu` từ `vb_tn_sohieu`; cần đối chiếu đúng field backend.
+6. Một số label có dấu bắt buộc nhưng FormControl chưa có `Validators.required`; cần xác nhận nghiệp vụ, không tự thêm validator ngoài yêu cầu.
+7. `checkCccd()` hiện dùng `catchError(...found: false)`, có thể biến lỗi API thành cho phép tạo hồ sơ mới; cần bỏ hành vi này khi nối API kiểm tra mới.
+8. `userList.forEach(...)` đang mutate object user; khi sửa nên map sang object mới.
+9. `TuyensinhStatusService` đang inject nhưng luồng submit hiện tại không sử dụng.
+10. Role nghiệp vụ gọi “director”, source hiện dùng `direction`; cần giữ thống nhất với backend.
 
----
-
-## 9. Form methods
-
-| Method | Behavior |
-|--------|----------|
-| `getFormData(object)` | Patch form từ object, reload wards nếu có `tinh_id` |
-| `resetForm()` | Clear `dataId`, `cccdResult`, reinit form với defaults |
-| `formReset()` | Reinit form + clear `cccdResult` + `dataId` (gọi sau submit success) |
-| `closeForm()` | Reset form + chuyển về viewState = 'cccd_check' (không emit cancel) |
-| `onTinhChange(event)` | Load xã/phường theo tỉnh đã chọn |
+Các điểm 3–9 chỉ triển khai sau khi được xác nhận cùng phạm vi; tài liệu ghi nhận để tránh bỏ sót hoặc tự sửa ngoài yêu cầu.
 
 ---
 
-## 10. HTML structure
+## 12. Tiêu chí nghiệm thu sau khi code được duyệt
 
-```
-@switch (viewState()) {
-  @case ('loading')     → progress spinner
-  @case ('error')       → icon + message + [Tải lại]
-  @case ('cccd_check')  → card: input + [Kiểm tra]
-  @case ('existing')    → alert + info table + [Quay lại]
-  @case ('form')        → form with 6 sections + action buttons
-}
+### Phân quyền
 
-Form sections:
-  I.   Thông tin cá nhân (ảnh thẻ, họ tên, ngày sinh, giới tính, dân tộc, SĐT, email, nơi sinh, địa chỉ)
-  II.  CCCD (số CCCD readonly, ngày cấp, nơi cấp, ảnh mặt trước/sau)
-  III. Bằng tốt nghiệp THPT/BTVH (loại VB, năm TN, số hiệu, nơi cấp)
-  IV.  Văn bằng chuyên môn (số hiệu, ngành, nơi cấp, năm TN)
-  V.   Thông tin bổ sung (ngành, loại điểm, điểm TB* (*chỉ hiện khi chọn THPT), nội dung)
-  VI.  Hình ảnh hồ sơ (phiếu ĐK, bằng TN THPT, học bạ multiple)
+- `admin`, `direction`, `manager` thấy ô CCCD và SĐT tại màn kiểm tra.
+- Nhóm đặc quyền có thể kiểm tra bằng CCCD, SĐT hoặc cả hai; không thể kiểm tra khi cả hai đều trống.
+- Trường nào được nhập phải đúng định dạng của trường đó.
+- Quyền khác chỉ thấy ô CCCD; DOM không chứa giao diện SĐT của màn kiểm tra.
+- Quyền khác không gửi field SĐT trong request kiểm tra.
 
-Actions:
-- **Create** (`!dataId`): `[Hủy]` `[Thêm mới]` (style `--success-reverse`, icon `ti-plus`)
-- **Edit** (`dataId`): chỉ `[Cập nhật]` (style `--primary-reverse`, icon `ti-pencil`) — không có nút Hủy
+### Luồng hồ sơ
 
-- `[Hủy]` → reset form + chuyển về màn CCCD check
-- `[Thêm mới / Cập nhật]` → submit
-```
+- Không tìm thấy hoặc hồ sơ `bo_hoc`: mở form tạo mới đúng dữ liệu đã kiểm tra.
+- Hồ sơ đang tồn tại: hiển thị card thông tin, không mở form tạo mới.
+- Lỗi API: giữ màn kiểm tra, không coi là hồ sơ chưa tồn tại.
 
----
+### Danh mục
 
-## 11. Dependencies & Services
+- Không còn gọi `ApiOutsiteService` trong component.
+- Ngành học lấy từ `NganhhocService`.
+- CTĐT lấy từ `ChuongtrinhDaotaoService`.
+- Chọn ngành chỉ hiển thị CTĐT thuộc ngành đó.
+- Edit mode khôi phục đúng `nganh_id` và `ctdt_id`.
 
-| Service | Usage |
-|---------|-------|
-| `HosoThisinhService` | `checkCccd()`, `addTuyensinh()`, `updateTuyensinh()` |
-| `TuyensinhStatusService` | `addTuyensinh()` (tạo status record) |
-| `ApiOutsiteService` | `getNganhList()` |
-| `LocationService` | `queryLocation()` cho regions + provinces |
-| `UserService` | `query()` lấy user list |
-| `AuthenticationService` | `user`, `userHasRole()` |
-| `NotificationService` | `toastSuccess/Warning/Error`, `isProcessing()` |
+### Form/UI
+
+- Nội dung sáu section khớp bảng field trong tài liệu.
+- Responsive không tạo khoảng trống khi ô SĐT kiểm tra bị ẩn.
+- Submit, reset, existing record và edit mode không hồi quy.
+- Unit test cho ma trận role, request payload, validation và cascade Ngành–CTĐT.
+- Build Angular thành công.
+- Kiểm tra trực tiếp trên trình duyệt với ít nhất một tài khoản đặc quyền và một tài khoản thường.
 
 ---
 
-## 12. Role flags
+## 13. Thứ tự triển khai sau khi duyệt
 
-| Flag | Roles | Purpose |
-|------|-------|---------|
-| `isAdmin` | admin, direction, manager | Full access |
-| `isDoitac` | doi-tac | Partner view |
-| `isNhanVien` | staff | Staff view |
-| `isDoitacNhanvien` | doi-tac-cv | Partner staff |
-| `isManager` | admin, manager | Quản lý |
-| `isLanhDaoKhoa` | direction | Lãnh đạo khoa |
-| `canEdit` | admin, manager, staff | Cho phép sửa |
-| `canAdd` | admin, manager, staff, doi-tac | Cho phép thêm |
-| `duyetHoso` | reviewer | Duyệt hồ sơ |
-
----
-
-## 13. Tác động đến `HosoThemComponent`
-
-### Bỏ được từ parent:
-- `rightState`, `cccdInput`, `cccdLoading`, `cccdResult`, `existingRecord`
-- `onCccdChange()`, `runCccdCheck()`, `backToCccdCheck()`
-- `statusOptions`
-- Template `@case ('cccd_check')`, `@case ('existing')`
-
-### Giữ lại ở parent:
-- Left panel (ngành + CTĐT)
-- `loadLookups()` cho majors, programs, dots
-- `onMajorChange()`, `selectProgram()`
-- `onReset()` (reset toàn bộ về mặc định)
-
-### Ở parent template:
-
-```html
-<app-form-thongtin-dangky class="w-100" (saved)="onReset()"
-    [majorId]="selectedMajorId()" [programId]="selectedProgramId()" />
-```
-
-⚠️ `cancel` output đã không dùng nữa — `closeForm()` tự chuyển về CCCD check, không emit ra parent.
-
----
-
-## 14. Implementation status
-
-| Phase | Nội dung | Trạng thái |
-|-------|----------|------------|
-| Models + services (`TuyensinhStatus`) | ✅ Done |
-| Signals, ViewState, role flags | ✅ Done |
-| `initForm()` với đầy đủ fields | ✅ Done |
-| `loadLookups()` — forkJoin 4 API | ✅ Done |
-| CCCD check (`runCccdCheck`, `backToCccdCheck`) | ✅ Done |
-| `submitData()` — create/update + status | ✅ Done |
-| `resetForm()` / `formReset()` / `getFormData()` | ✅ Done |
-| HTML template — @switch 5 cases | ✅ Done |
-| Form 6 sections + images + actions | ✅ Done |
-| CSS styles | ✅ Done |
-| Parent simplification | ✅ Done |
-
----
-
-## 15. Known issues
-
-- **HTML bug (line 318)**: "Nơi cấp bằng" trong Section III dùng `formControlName="sohieu_vb"` — cần sửa thành `noicap_tn` (copy-paste error)
-- **`noicapCCCD` label**: Giá trị `'CQLHCVTTXH'` là viết tắt, cần xác nhận display name đúng
-- **`OvicAvataTypeMultipleComponent`**: Import mới cho Section VI (upload multiple files)
-- **Section III duplicate field (lines 301-312)**: `nam_tn` và `sohieu_vb` cùng nằm trên 1 row giống nhau, `nam_tn` xuất hiện 2 lần ở col-2 và col (flex-div) — cần kiểm tra layout
+1. Bổ sung test cho phân quyền và payload kiểm tra.
+2. Chốt contract API kiểm tra do backend cung cấp.
+3. Cập nhật state và giao diện CCCD/SĐT theo quyền.
+4. Thay `ApiOutsiteService` bằng hai service nội bộ.
+5. Thêm cascade Ngành học → Chương trình đào tạo.
+6. Đồng bộ binding field đã xác nhận.
+7. Chạy unit test, build và kiểm tra UI trên trình duyệt.
+8. Code review trước khi hoàn thành.

@@ -70,51 +70,55 @@ interface Dot_xettuyen {
 Hồ sơ thí sinh.
 
 interface Hoso_thisinh {
-    id?: number;
-    full_name: string; // họ và tên
-    phone: string; // số điện thoại
-    email?: string; // email của hồ sơ
-    birthday?: string; // ngày tháng năm sinh
-    gioi_tinh:string;// giới tính
-    tinh_id?: number; // tỉnh id sẽ được lấy từ bảng tỉnh
-    xa_id?: number; // xã id sẽ được lấy từ bảng xã
-    address?: string; // địa chỉ: số nhà, đường, ngõ,...
-    noi_sinh?: string; // nơi sinh (tỉnh/thành phố)
-    dan_toc?: string; // dân tộc
-    status: string; // trạng thái hồ sơ (xem mục 7)
+    id: number;
+    ho_va_ten: string; // họ và tên
+    dien_thoai: string; // số điện thoại
+    email?: string;
+    ngay_sinh?: string; // ngày sinh
+    gioi_tinh: string;
+    dia_chi_tinh?: number; // tỉnh
+    dia_chi_xa?: number; // xã
+    dia_chi_nha?: string; // số nhà, đường, ngõ,...
+    noi_sinh?: number; // tỉnh/thành phố nơi sinh
+    dan_toc?: string;
+    status: string;
+    status_connent: number;
 
-    cccd?: string; // số căn cước công dân
-    cccd_ngaycap?: string; // ngày cấp căn cước
-    cccd_noicap?: string; // nơi cấp căn cước
+    cccd?: string;
+    ngay_cap_cccd?: string;
+    noi_cap_cccd?: string;
 
-    major_id?: number; // ngành học muốn đào tạo
-    program_id?: number; // chương trình đào tạo
-    dot_xet_tuyen_id?: number; // đợt đăng ký (chọn từ khi đăng ký)
+    ctdt_id?: number; // chương trình đào tạo
+    nganh_id?: number; // ngành đăng ký
+    dotxettuyen_id?: number; // đợt xét tuyển
 
-    vb_tn?: string; // văn bằng tốt nghiệp THPT
-    vb_tn_nam?: string; // năm tốt nghiệp
-    vb_tn_sohieu?: string; // số hiệu văn bằng
-    diem_xettuyen?: number; // điểm xét tuyển
-    vb_tn_anh?: string; // ảnh văn bằng tốt nghiệp
+    van_bang_tn?: string; // văn bằng tốt nghiệp
+    nam_tn?: string; // năm tốt nghiệp
+    tn_noicap?: string; // nơi cấp văn bằng tốt nghiệp
+    diem_xettuyen?: number;
+    anh_thpt?: string; // ảnh bằng tốt nghiệp THPT
+    doituong: string; // mã đối tượng tuyển sinh
 
-    vb_chuyenmon?: string; // bằng trung cấp, cao đẳng,...
-    vb_chuyenmon_nganh?: string; // ngành học trên bằng chuyên môn
-    vb_chuyenmon_noicap?: string; // nơi cấp văn bằng chuyên môn
-    vb_chuyenmon_sohieu: string: // số hiệu văn bằng chuyên môn 
+    vb_chuyenmon?: string;
+    vb_chuyenmon_nganh?: string;
+    vb_chuyenmon_noicap?: string;
+    vb_chuyenmon_sohieu?: string;
+    vb_chuyenmon_namtn?: string;
 
-    anh_the?: string; // ảnh thẻ của hồ sơ
-    cccd_mattruoc?: string; // ảnh cccd mặt trước
-    cccd_matsau?: string; // ảnh cccd mặt sau
-    anh_phieudangky?: string; // ảnh phiếu đăng ký
-    anh_hoc_ba?: string[]; // các ảnh bằng cấp liên quan
+    anh_the?: string;
+    anh_cmnd_truoc?: string;
+    anh_cmnd_sau?: string;
+    anh_phieu_dang_ky?: string;
+    anh_hoc_ba?: string; // JSON danh sách ảnh học bạ
+    anh_soyeulylich:string;
 
-    owner_by: number; // người sở hữu hồ sơ
-    nguoi_tuvan_id?: number; // người được phân công tư vấn
-    hinhthuc_xettuyen?: string; // hình thức xét tuyển
-    nguon_dang_ky?: string; // website, doi-tac, ...
-
-    created_at: Date;
-    updated_at: Date;
+    owner_by: number;
+    nguoi_tuvan?: number;
+    hinhthuc_xettuyen?: string;
+    submit_from?: string;
+    content?: string;
+    sohieu_vb?: string;
+    shared?: string; // JSON dữ liệu chia sẻ
 }
 
 

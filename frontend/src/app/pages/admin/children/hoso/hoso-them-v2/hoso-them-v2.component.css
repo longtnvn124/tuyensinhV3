@@ -1,0 +1,24 @@
+.hoso-them {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.hoso-them__header {
+    flex-shrink: 0;
+    background: #fff;
+    border-bottom: 1px solid #e4e4e7;
+}
+
+.hoso-them__body {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow-y: auto;
+    background: #fff;
+}
+
+.hoso-them__body app-form-thongtin-dangky {
+    display: block;
+    width: 100%;
+}
