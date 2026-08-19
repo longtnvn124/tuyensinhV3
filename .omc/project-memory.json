@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1787019045174,
-  "projectRoot": "D:\\data\\project\\angular\\v19\\tuyensinh",
+  "lastScanned": 1787107835345,
+  "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
     "frameworks": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1787019045157,
+      "lastAccessed": 1787107835292,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1787019045157,
+      "lastAccessed": 1787107835293,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,7 +56,7 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1787019045157,
+      "lastAccessed": 1787107835294,
       "keyFiles": [
         "api-outsite.md",
         "chuanhoa-database.md",
@@ -69,7 +69,7 @@
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1787019045158,
+      "lastAccessed": 1787107835295,
       "keyFiles": []
     }
   },
@@ -94,8 +94,8 @@
     },
     {
       "path": "",
-      "accessCount": 215,
-      "lastAccessed": 1787021319744,
+      "accessCount": 216,
+      "lastAccessed": 1787108883152,
       "type": "directory"
     },
     {
@@ -177,6 +177,12 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
+      "accessCount": 20,
+      "lastAccessed": 1787111086396,
+      "type": "file"
+    },
+    {
       "path": "plan\\database.md",
       "accessCount": 19,
       "lastAccessed": 1786952103301,
@@ -237,12 +243,6 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
-      "accessCount": 11,
-      "lastAccessed": 1787105931389,
-      "type": "file"
-    },
-    {
       "path": "frontend\\src\\app\\components\\parent-component\\parent-component.ts",
       "accessCount": 10,
       "lastAccessed": 1785209383462,
@@ -267,16 +267,16 @@
       "type": "file"
     },
     {
+      "path": "plan",
+      "accessCount": 6,
+      "lastAccessed": 1787109310870,
+      "type": "directory"
+    },
+    {
       "path": "frontend\\src\\app\\components\\ictu-image-resize\\ictu-image-resize.component.ts",
       "accessCount": 5,
       "lastAccessed": 1785203348612,
       "type": "file"
-    },
-    {
-      "path": "plan",
-      "accessCount": 5,
-      "lastAccessed": 1786586742940,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\models\\ictu-dropdown-option.ts",

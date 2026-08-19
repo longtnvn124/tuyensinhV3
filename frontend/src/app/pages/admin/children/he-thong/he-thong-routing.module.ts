@@ -5,7 +5,7 @@ const routes: Routes = [
 
   {
     path: 'quan-ly-tai-khoan',
-    loadComponent: (): Promise<any> => import('../he-thong/taikhoan-cbgv/taikhoan-cbgv.component')
+    loadComponent: (): Promise<any> => import('./taikhoan-cbgv/taikhoan-cbgv.component')
   },
 ];
 
