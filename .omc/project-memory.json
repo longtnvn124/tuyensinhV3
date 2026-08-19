@@ -82,8 +82,8 @@
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
-      "accessCount": 241,
-      "lastAccessed": 1786985775088,
+      "accessCount": 243,
+      "lastAccessed": 1787126060607,
       "type": "file"
     },
     {
@@ -100,8 +100,8 @@
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.html",
-      "accessCount": 120,
-      "lastAccessed": 1786984471125,
+      "accessCount": 122,
+      "lastAccessed": 1787126122715,
       "type": "file"
     },
     {
@@ -171,15 +171,15 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\services\\tuyensinh\\api-outsite.service.ts",
-      "accessCount": 22,
-      "lastAccessed": 1787045996263,
+      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
+      "accessCount": 23,
+      "lastAccessed": 1787112703588,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\theme\\layouts\\menu\\ictu-vertical-menu\\ictu-vertical-menu.component.ts",
-      "accessCount": 20,
-      "lastAccessed": 1787111086396,
+      "path": "frontend\\src\\app\\services\\tuyensinh\\api-outsite.service.ts",
+      "accessCount": 22,
+      "lastAccessed": 1787045996263,
       "type": "file"
     },
     {

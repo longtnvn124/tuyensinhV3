@@ -40,7 +40,7 @@
 .consultation__toolbar h3 {
     margin: 0;
     color: var(--accent-900);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
 }
 
@@ -48,7 +48,7 @@
     display: block;
     margin-bottom: 5px;
     color: var(--consultation-primary);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -65,7 +65,7 @@
     border: 1px solid transparent;
     border-radius: 9px;
     font: inherit;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 750;
     line-height: 1;
     cursor: pointer;
@@ -73,7 +73,7 @@
 }
 
 .consultation-action i {
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .consultation-action:hover:not(:disabled) {
@@ -206,7 +206,7 @@
     gap: 12px;
     padding: 15px 0 13px 50px;
     color: var(--consultation-muted);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -300,7 +300,7 @@
 
 .consultation-entry__sequence {
     color: var(--consultation-muted);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -316,7 +316,7 @@
     border-radius: 999px;
     background: var(--consultation-primary-soft);
     color: var(--consultation-primary-dark);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 750;
     white-space: nowrap;
 }
@@ -334,7 +334,7 @@
 .consultation-entry__time {
     gap: 5px;
     color: var(--consultation-muted);
-    font-size: 11px;
+    font-size: 13px;
     white-space: nowrap;
 }
 
@@ -401,7 +401,7 @@
 
 .consultation-note__label h3 {
     margin: 0;
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -410,7 +410,7 @@
 .consultation-note p {
     margin: 0;
     color: var(--consultation-ink);
-    font-size: 12px;
+    font-size: 13px;
     line-height: 1.65;
     overflow-wrap: anywhere;
     white-space: pre-line;
@@ -452,7 +452,7 @@
 }
 
 .consultation-entry__follow-up div span {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -460,7 +460,7 @@
 
 .consultation-entry__follow-up strong {
     color: #7c4600;
-    font-size: 12px;
+    font-size: 13px;
     overflow-wrap: anywhere;
 }
 
@@ -481,13 +481,13 @@
 .consultation-form__header h3 {
     margin: 0;
     color: var(--accent-900);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
 }
 
 .consultation-form__header span {
     color: var(--accent-500);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .consultation-form__back {
@@ -616,7 +616,7 @@
     height: 24px;
     border-radius: 8px;
     background: rgb(255 255 255 / 16%);
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .consultation-button--secondary .consultation-button__icon {

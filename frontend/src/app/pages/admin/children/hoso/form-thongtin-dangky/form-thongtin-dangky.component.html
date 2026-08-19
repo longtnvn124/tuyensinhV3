@@ -577,7 +577,7 @@
             <span>Hủy</span>
         </button>
         }
-        @if (canUpdateStatus()) {
+        @if (canUpdateStatus() && dataId) {
         <p-select class="form-status-select" [options]="statusOptions" appendTo="body"
             formControlName="status" optionLabel="label" optionValue="value"
             placeholder="Chọn trạng thái"></p-select>

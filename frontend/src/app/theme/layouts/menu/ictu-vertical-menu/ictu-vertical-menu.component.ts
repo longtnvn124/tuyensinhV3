@@ -140,8 +140,8 @@ export class IctuVerticalMenuComponent implements OnInit {
 	}
 
 	async navigateToMenu( menu : IctuNavigation ) : Promise<void> {
-		const url : string    = menu.url || menu.id;
-		const path : string[] = [ 'admin' , ...url.split( '/' ).filter( ( s : string ) : boolean => !!s ) ];
+		const parent : IctuNavigation | undefined = this.menus().find( ( m : IctuNavigation ) : boolean => !!m.child?.some( ( c : IctuNavigationItem ) : boolean => c.id === menu.id ) );
+		const path : string[]                      = parent ? [ 'admin' , parent.id , menu.id ] : [ 'admin' , ... ( menu.url || menu.id ).split( '/' ).filter( ( s : string ) : boolean => !!s ) ];
 		try {
 			await this.router.navigate( path );
 		} catch ( e ) {

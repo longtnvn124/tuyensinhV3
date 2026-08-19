@@ -153,8 +153,8 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                         } as Partial<CbgvUser>)
                         : this.userService.update(this.formControl.object.id, info);
                     const message: string = this.formControl.isFormAdd
-                        ? 'Thêm cán bộ - giảng viên thành công'
-                        : 'Cập nhật cán bộ - giảng viên thành công';
+                        ? 'Thêm mới thành công'
+                        : 'Cập nhật thành công';
                     this.formControl.submit(request).subscribe({
                         next: (): void => {
                             this.notification.toastSuccess(message, 'Thông báo');
@@ -316,12 +316,12 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
         ).subscribe({
             next: (success: boolean): void => {
                 if (success) {
-                    this.notification.toastSuccess('Xóa cán bộ - giảng viên thành công');
+                    this.notification.toastSuccess('Xóa tài khoản thành công');
                 }
                 this.loadData(1, true);
             },
             error: (): void => {
-                this.notification.toastError('Xóa cán bộ - giảng viên thất bại');
+                this.notification.toastError('Xóa tài khoản thất bại');
             },
         });
     }

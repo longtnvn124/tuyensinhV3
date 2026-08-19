@@ -219,7 +219,7 @@
     position="right" (onHide)="editData.set(null)">
 
     <ng-template #header let-headerClass="class">
-        <div>
+        <div style="font-size: 16px; font-weight: 600;">
             {{editData()?.ho_va_ten ? editData()!.ho_va_ten + ' > Cập nhật' : 'Cập nhật'}}
         </div>
     </ng-template>

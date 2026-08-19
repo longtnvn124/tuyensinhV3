@@ -595,7 +595,13 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.submitting.set(false);
         this.notification.isProcessing(false);
         this.notification.toastSuccess(this.dataId ? 'Cập nhật thành công' : 'Đã thêm hồ sơ thành công');
+        const isCreate = !this.dataId;
         this.formReset();
+        if (isCreate) {
+            this.cccdInput.set('');
+            this.phoneInput.set('');
+            this.viewState.set('cccd_check');
+        }
         this.saved.emit();
     }
 
