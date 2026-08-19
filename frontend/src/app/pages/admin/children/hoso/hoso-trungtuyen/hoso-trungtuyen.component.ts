@@ -3,17 +3,19 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { IctuDataTable, IctuDataTablePaginatorInfo } from '@models/datatable';
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
-import { CtdtItem, ExternalApiResponse, NganhItem } from '@models/external-api';
 import { IctuBasePermission, IctuPermissionControl } from '@models/ictu-base-model';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { Locations } from '@models/location';
+import { ChuongtrinhDaotao } from '@models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@models/tuyensinh/dot-xettuyen';
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { HosoStatus, HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { AuthenticationService } from '@services/authentication.service';
 import { LocationService } from '@services/location.service';
-import { ApiOutsiteService } from '@services/tuyensinh/api-outsite.service';
+import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { DanToc, TH_XETTUYEN } from '@utilities/syscats';
@@ -38,7 +40,7 @@ interface HosoTrungTuyenSearchInfo {
     dan_toc?: string;
 }
 
-const ADMITTED_STATUS = 'TRUNG_TUYEN';
+const ADMITTED_STATUS: HosoStatus = 3;
 
 @Component({
     selector: 'app-hoso-trungtuyen',
@@ -60,7 +62,8 @@ const ADMITTED_STATUS = 'TRUNG_TUYEN';
 export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermission {
     private readonly hosoService = inject(HosoThisinhService);
     private readonly dotService = inject(DotXettuyenService);
-    private readonly apiOutsiteService = inject(ApiOutsiteService);
+    private readonly nganhHocService = inject(NganhhocService);
+    private readonly ctdtService = inject(ChuongtrinhDaotaoService);
     private readonly locationService = inject(LocationService);
     private readonly authenticationService = inject(AuthenticationService);
     private readonly onDestroy$ = new Subject<void>();
@@ -85,10 +88,6 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         value: item.name,
         label: item.label,
     }));
-    readonly statusOptions: IctuDropdownOption<string>[] = TH_XETTUYEN
-        .filter((item) => item.show)
-        .map((item) => ({ value: item.kyhieu, label: item.label }));
-
     searchInfo: HosoTrungTuyenSearchInfo = this.emptySearchInfo();
     private lastRequest: IctuDataTablePaginatorInfo = { paged: 1, resetPaginator: true };
 
@@ -200,12 +199,21 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         this.detailState.set('idle');
     }
 
-    statusLabel(status: string | undefined): string {
-        return this.statusOptions.find((item) => item.value === status)?.label ?? status ?? '—';
+    statusLabel(status: HosoStatus | string | undefined): string {
+        if (status === undefined || status === '') {
+            return '—';
+        }
+        const normalizedStatus = `${status}`.trim().toUpperCase();
+        return TH_XETTUYEN.find((item) =>
+            `${item.value}` === normalizedStatus || item.kyhieu === normalizedStatus,
+        )?.label ?? `${status}`;
     }
 
-    statusBadgeClass(status: string | undefined): string {
-        return status === ADMITTED_STATUS ? 'ictu-badge--success' : 'ictu-badge--secondary';
+    statusBadgeClass(status: HosoStatus | string | undefined): string {
+        const normalizedStatus = `${status ?? ''}`.trim().toUpperCase();
+        return normalizedStatus === `${ADMITTED_STATUS}` || normalizedStatus === 'TRUNG_TUYEN'
+            ? 'ictu-badge--success'
+            : 'ictu-badge--secondary';
     }
 
     majorLabel(majorId: number | undefined): string {
@@ -221,7 +229,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
     }
 
     tinhLabel(tinh: string | number | undefined): string {
-        return typeof tinh === 'number' ? this.lookupLabel(this.tinhList(), tinh) : (tinh || '—');
+        return typeof tinh == 'number' ? this.lookupLabel(this.tinhList(), tinh) : (tinh || '—');
     }
 
     private loadLookups(): void {
@@ -232,18 +240,16 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
                     (response.data ?? []).map((item: DotXettuyen) => ({ value: item.id, label: item.name })),
                 ),
             ),
-            majors: this.apiOutsiteService.getNganhList().pipe(
-                map((response: ExternalApiResponse<NganhItem[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? [])
-                        .filter((item: NganhItem) => item.type === 'nganh')
-                        .map((item: NganhItem) => ({ value: item.id, label: item.title })),
+            majors: this.nganhHocService.load({ search: '' }, queryParams).pipe(
+                map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
+                    (response.data ?? []).map((item: Nganhhoc) => ({ value: item.id, label: item.name })),
                 ),
             ),
-            programs: this.apiOutsiteService.getCtdtList().pipe(
-                map((response: ExternalApiResponse<CtdtItem[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: CtdtItem) => ({
+            programs: this.ctdtService.query([], queryParams).pipe(
+                map((response: DtoObject<ChuongtrinhDaotao[]>): IctuDropdownOption<number>[] =>
+                    (response.data ?? []).map((item: ChuongtrinhDaotao) => ({
                         value: item.id,
-                        label: `${item.madt ?? ''} — ${item.ten}`,
+                        label: `${item.code} — ${item.name}`,
                     })),
                 ),
             ),
@@ -267,7 +273,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         const conditions: IctuConditionParam[] = [
             {
                 conditionName: 'status',
-                value: ADMITTED_STATUS,
+                value: `${ADMITTED_STATUS}`,
                 condition: IctuQueryCondition.equal,
             },
         ];

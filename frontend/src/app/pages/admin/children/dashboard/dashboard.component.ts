@@ -1,114 +1,93 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Select } from 'primeng/select';
+import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
+import { SummaryService } from '@app/services/tuyensinh/summary.service';
+import { ExternalApiResponse } from '@models/external-api';
 
 interface KpiSummary {
-  totalRegistrations: number | null;
-  totalRevenue: number | null;
-  totalAdmitted: number | null;
-  pendingRegistrations: number | null;
-  pendingCouncil: number | null;
+    hoso: number | null;
+    nganh: number | null;
+    hoso_daduyet: number | null;
+    hoso_huy: number | null;
 }
 
-interface TableItem {
-  name: string;
-  count?: number | null;
-  pct?: string | null;
-  barWidth?: number;
-  barClass?: string;
-}
-
-interface StatusItem {
-  label: string;
-  count?: number | null;
-  color: string;
-}
-
-interface PeriodItem {
-  name: string;
-  count?: number | null;
-  admitted?: number | null;
-  rate?: string | null;
-}
-
-interface RevenueItem {
-  code: string;
-  partner: string;
-  amount: string;
-  status: string;
-}
-
-interface CouncilItem {
-  name: string;
-  admitted?: number | null;
-  rejected?: number | null;
-  total?: number | null;
-}
-
-interface ConsultationItem {
-  time: string;
-  registration: string;
-  consultant: string;
-  method: string;
-  result: string;
-  followUp: string;
-}
-
-interface SystemOverview {
-  majors: number | null;
-  programs: number | null;
-  employees: number | null;
-  consultants: number | null;
+interface YearOption {
+    label: string;
+    value: number;
 }
 
 @Component({
-  selector: 'app-dashboad',
-  imports: [CommonModule, FormsModule],
-  templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
-  standalone: true,
+    selector: 'app-dashboad',
+    imports: [CommonModule, FormsModule, Select, LoadingProgressComponent],
+    templateUrl: './dashboard.component.html',
+    styleUrl: './dashboard.component.css',
+    standalone: true,
 })
 export class DashboardComponent implements OnInit {
-  lastUpdate: string = '';
-  selectedPeriod: number = 30;
+    private readonly summaryService: SummaryService = inject(SummaryService);
 
-  summary: KpiSummary = {
-    totalRegistrations: null,
-    totalRevenue: null,
-    totalAdmitted: null,
-    pendingRegistrations: null,
-    pendingCouncil: null,
-  };
+    readonly currentYear: number = new Date().getFullYear();
+    readonly selectedYear: WritableSignal<number> = signal<number>(this.currentYear);
+    readonly state: WritableSignal<'loading' | 'success' | 'error'> = signal<'loading' | 'success' | 'error'>('loading');
 
-  byMajor: TableItem[] = [];
-  byStatus: StatusItem[] = [];
-  byPeriod: PeriodItem[] = [];
-  bySource: TableItem[] = [];
-  councilResults: CouncilItem[] = [];
-  recentRevenue: RevenueItem[] = [];
-  recentConsultations: ConsultationItem[] = [];
-  systemOverview: SystemOverview = {
-    majors: null,
-    programs: null,
-    employees: null,
-    consultants: null,
-  };
+    readonly years: ReturnType<typeof computed<YearOption[]>> = computed<YearOption[]>(() => {
+        const y = this.currentYear;
+        return [
+            { label: String(y), value: y },
+            { label: String(y - 1), value: y - 1 },
+        ];
+    });
 
-  constructor() {}
+    summary: KpiSummary = {
+        hoso: null,
+        nganh: null,
+        hoso_daduyet: null,
+        hoso_huy: null,
+    };
 
-  ngOnInit(): void {
-    const now = new Date();
-    const dd = String(now.getDate()).padStart(2, '0');
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const yyyy = now.getFullYear();
-    this.lastUpdate = `${dd}/${mm}/${yyyy}`;
-  }
+    constructor() {}
 
-  onPeriodChange(): void {
-    // TODO: Gọi API với selectedPeriod
-  }
+    ngOnInit(): void {
 
-  refresh(): void {
-    // TODO: Gọi lại tất cả API dashboard
-  }
+        this.selectedYear.set(this.years()[0].value);
+        this.loadDashboard(this.selectedYear());
+    }
+
+    loadDashboard(year: number): void {
+        this.state.set('loading');
+        this.summaryService.getDashboard(year).subscribe({
+            next: (res: ExternalApiResponse<any>): void => {
+                console.log('full res:', res);
+
+                const d = res ?? {};
+                this.summary = {
+                    hoso: d['hoso'] ?? null,
+                    nganh: d['nganh'] ?? null,
+                    hoso_daduyet: d['hoso_daduyet'] ?? null,
+                    hoso_huy: d['hoso_huy'] ?? null,
+                };
+                this.state.set('success');
+            },
+            error: (): void => {
+                this.state.set('error');
+            },
+        });
+    }
+
+    onYearChange(year: number | null): void {
+        const target = year ?? this.currentYear;
+        if (target === this.selectedYear()) {
+            return;
+        }
+        this.selectedYear.set(target);
+        this.loadDashboard(target);
+    }
+
+    reload(event: MouseEvent): void {
+        event.preventDefault();
+        event.stopPropagation();
+        this.loadDashboard(this.selectedYear());
+    }
 }

@@ -3,8 +3,9 @@ import { of } from 'rxjs';
 
 import { AuthenticationService } from '@services/authentication.service';
 import { LocationService } from '@services/location.service';
-import { ApiOutsiteService } from '@services/tuyensinh/api-outsite.service';
+import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
+import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
 import { IctuQueryCondition } from '@models/dto';
 import { HosoKhongtrungtuyenComponent } from './hoso-khongtrungtuyen.component';
@@ -19,7 +20,8 @@ describe('HosoKhongtrungtuyenComponent', () => {
 
     const hosoService = jasmine.createSpyObj<HosoThisinhService>('HosoThisinhService', ['query', 'get']);
     const dotService = jasmine.createSpyObj<DotXettuyenService>('DotXettuyenService', ['load']);
-    const apiOutsiteService = jasmine.createSpyObj<ApiOutsiteService>('ApiOutsiteService', ['getNganhList', 'getCtdtList']);
+    const nganhHocService = jasmine.createSpyObj<NganhhocService>('NganhhocService', ['load']);
+    const ctdtService = jasmine.createSpyObj<ChuongtrinhDaotaoService>('ChuongtrinhDaotaoService', ['query']);
     const locationService = jasmine.createSpyObj<LocationService>('LocationService', ['queryLocation']);
     const authService = jasmine.createSpyObj<AuthenticationService>('AuthenticationService', ['getUserPermission']);
 
@@ -32,8 +34,8 @@ describe('HosoKhongtrungtuyenComponent', () => {
         });
         hosoService.query.and.returnValue(of(emptyResponse));
         dotService.load.and.returnValue(of(emptyResponse));
-        apiOutsiteService.getNganhList.and.returnValue(of({ data: [] } as never));
-        apiOutsiteService.getCtdtList.and.returnValue(of({ data: [] } as never));
+        nganhHocService.load.and.returnValue(of(emptyResponse));
+        ctdtService.query.and.returnValue(of(emptyResponse));
         locationService.queryLocation.and.returnValue(of(emptyResponse));
 
         return TestBed.runInInjectionContext(() => new HosoKhongtrungtuyenComponent());
@@ -43,8 +45,8 @@ describe('HosoKhongtrungtuyenComponent', () => {
         hosoService.query.calls.reset();
         hosoService.get.calls.reset();
         dotService.load.calls.reset();
-        apiOutsiteService.getNganhList.calls.reset();
-        apiOutsiteService.getCtdtList.calls.reset();
+        nganhHocService.load.calls.reset();
+        ctdtService.query.calls.reset();
         locationService.queryLocation.calls.reset();
         authService.getUserPermission.calls.reset();
 
@@ -52,7 +54,8 @@ describe('HosoKhongtrungtuyenComponent', () => {
             providers: [
                 { provide: HosoThisinhService, useValue: hosoService },
                 { provide: DotXettuyenService, useValue: dotService },
-                { provide: ApiOutsiteService, useValue: apiOutsiteService },
+                { provide: NganhhocService, useValue: nganhHocService },
+                { provide: ChuongtrinhDaotaoService, useValue: ctdtService },
                 { provide: LocationService, useValue: locationService },
                 { provide: AuthenticationService, useValue: authService },
             ],
@@ -67,8 +70,8 @@ describe('HosoKhongtrungtuyenComponent', () => {
         expect(component.state()).toBe('forbidden');
         expect(hosoService.query).not.toHaveBeenCalled();
         expect(dotService.load).not.toHaveBeenCalled();
-        expect(apiOutsiteService.getNganhList).not.toHaveBeenCalled();
-        expect(apiOutsiteService.getCtdtList).not.toHaveBeenCalled();
+        expect(nganhHocService.load).not.toHaveBeenCalled();
+        expect(ctdtService.query).not.toHaveBeenCalled();
         expect(locationService.queryLocation).not.toHaveBeenCalled();
     });
 

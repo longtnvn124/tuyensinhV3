@@ -1,7 +1,0 @@
-{
-  "tool_name": "Agent",
-  "tool_input_preview": "{\"description\":\"Review service ExcelJS\",\"prompt\":\"Chỉ review, không sửa code. Review file D:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh\\\\frontend\\\\src\\\\app\\\\services\\\\tuyensinh\\\\exp-hoso-daduyet.service....",
-  "error": "Failed to create worktree: Preparing worktree (new branch 'worktree-agent-a5dfc8c71cc2594e8')\nerror: unable to create file frontend/src/app/pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/components/edit-course-lesson-structure-media-upload/edit-course-lesson-structure-media-model.ts: Filename too long\nfatal: Could not reset index file to revision 'HEAD'.",
-  "timestamp": "2026-08-17T02:08:24.460Z",
-  "retry_count": 1
-}

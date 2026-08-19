@@ -137,8 +137,8 @@
                                                     [attr.aria-label]="'Thao tác với hồ sơ ' + row.ho_va_ten"
                                                     (click)="rowMenu.toggle($event)">
                                                     <i class="ti ti-dots-vertical"></i>
-                                                </button>
-                                                <p-popover #rowMenu styleClass="ictu-popover-no-padding">
+
+                                                    <p-popover #rowMenu styleClass="ictu-popover-no-padding">
                                                     <ul class="popover-menu">
                                                         <li class="popover-menu__item" (click)="rowMenu.hide(); openLichSu(row)">
                                                             <i class="ti ti-history"></i>
@@ -151,6 +151,8 @@
                                                         </li>
                                                     </ul>
                                                 </p-popover>
+                                                </button>
+                                                
                                             </div>
                                         </td>
                                         <td class="text-left col-cccd col-sticky col-sticky--cccd">{{ row.cccd || '—' }}</td>

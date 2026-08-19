@@ -55,16 +55,16 @@ const routes : Routes = [
             //     path          : 'hoso-tuyensinh' ,
             //     loadComponent : () : Promise<any> => import('@app/pages/admin/children/hoso-tuyensinh/hoso-tuyensinh.component').then( ( m ) : any => m.HosoTuyensinhComponent ),
             // },
-
+{
+				path         : 'he-thong' ,
+				loadChildren : () : Promise<any> => import('@pages/admin/children/he-thong/he-thong.module').then( ( m ) : any => m.HeThongModule )
+			} ,
             {
 				path          : '404' ,
 				loadComponent : () : Promise<any> => import('@pages/admin/children/admin-not-found-404/admin-not-found-404.component')
 			} ,
 
-			{
-				path         : 'he-thong' ,
-				loadChildren : () : Promise<any> => import('@pages/admin/children/he-thong/he-thong.module').then( ( m ) : any => m.HeThongModule )
-			} ,
+			
 
 			{
 				path       : '**' ,

@@ -164,42 +164,39 @@
     width: fit-content;
 }
 
-.existing__status--cho_duyet {
+.existing__status--0 {
     background: #fff8e1;
     color: #b8860b;
     border: 1px solid #ffe082;
 }
 
-.existing__status--da_duyet,
-.existing__status--du_dk_xet_tuyen,
-.existing__status--nhap_hoc_ok {
+.existing__status--3,
+.existing__status--6 {
     background: #e8f5e9;
     color: #2e7d32;
     border: 1px solid #a5d6a7;
 }
 
-.existing__status--bo_hoc,
-.existing__status--khong_trung_tuyen,
-.existing__status--khong_du_dk_xet_tuyen {
+.existing__status---1,
+.existing__status--1 {
     background: #fbe9e7;
     color: #c62828;
     border: 1px solid #ef9a9a;
 }
 
-.existing__status--thieu_hoso,
-.existing__status--nhap_hoc_thieu {
+.existing__status--5 {
     background: #fff3e0;
     color: #e65100;
     border: 1px solid #ffcc80;
 }
 
-.existing__status--trung_tuyen {
+.existing__status--2 {
     background: #e3f2fd;
     color: #1565c0;
     border: 1px solid #90caf9;
 }
 
-.existing__status--chua_nhap_hoc {
+.existing__status--4 {
     background: #f3e5f5;
     color: #7b1fa2;
     border: 1px solid #ce93d8;
@@ -280,6 +277,22 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
+}
+
+.form-status-select {
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    min-height: 40px;
+}
+
+.form-status-select ::ng-deep .p-select {
+    width: 100%;
+    height: 40px;
+}
+
+.form-submit-button {
+    height: 40px;
 }
 
 /* ─────────────────────────────────────────────

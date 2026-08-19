@@ -19,7 +19,7 @@ import {TuyensinhStatusService} from '@app/services/tuyensinh/tuyensinh-status.s
 import {NganhhocService} from '@app/services/tuyensinh/nganhhoc.service';
 import {ChuongtrinhDaotaoService} from '@app/services/tuyensinh/chuongtrinh-daotao.service';
 import {NotificationService} from '@app/services/notification.service';
-import {DanToc, GENDER, VBTN, VBCM, DANHHIEU_TOTNGHIEP, DOI_TUONG} from '@app/utilities/syscats';
+import {DanToc, GENDER, VBTN, VBCM, DANHHIEU_TOTNGHIEP, DOI_TUONG, TH_XETTUYEN} from '@app/utilities/syscats';
 import {User} from '@app/models/user';
 import {Textarea} from 'primeng/textarea';
 import {IctuDropdownOption} from '@models/ictu-dropdown-option';
@@ -113,6 +113,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly isManager     = computed(() => this.auth.userHasRole(['admin', 'manager']));
     readonly isLanhDaoKhoa = computed(() => this.auth.userHasRole(['direction']));
     readonly canCheckByPhone = computed(() => this.auth.userHasRole(['admin', 'direction', 'manager']));
+    readonly canUpdateStatus = computed(() => this.auth.userHasRole(['admin', 'manager', 'direction']));
     readonly canEdit       = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff']));
     readonly canAdd        = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff', 'doi-tac']));
     readonly duyetHoso     = computed(() => this.auth.userHasRole(['reviewer']));
@@ -137,6 +138,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly listUser          = signal<User[]>([]);
     readonly listNganh         = signal<IctuDropdownOption<number>[]>([]);
     readonly listChuongtrinh   = signal<IctuDropdownOption<number>[]>([]);
+    readonly statusOptions: IctuDropdownOption<number>[] = TH_XETTUYEN.map(({label, value}) => ({label, value}));
 
     readonly listDotXetTuyen   = signal<DotXettuyen[]>([]);
 
@@ -225,7 +227,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             content: [''],
             nguoi_tuvan: [this.getDefaultNguoiTuvan()],
             dotxettuyen_id: [0],
-            status: ['cho_duyet'],
+            status: [0],
             status_connent: [0],
             owner_by: [this.auth.user?.id],
             submit_from: ['website'],
@@ -289,7 +291,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             content: '',
             nguoi_tuvan: this.getDefaultNguoiTuvan(),
             dotxettuyen_id: 0,
-            status: 'cho_duyet',
+            status: 0,
             status_connent: 0,
             owner_by: this.auth.user?.id,
             submit_from: 'website',
@@ -512,21 +514,8 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.viewState.set('cccd_check');
     }
 
-    getStatusLabel(status: string): string {
-        const statusMap: Record<string, string> = {
-            'cho_duyet': 'Chờ duyệt',
-            'da_duyet': 'Đã duyệt',
-            'bo_hoc': 'Bỏ học',
-            'thieu_hoso': 'Thiếu hồ sơ',
-            'du_dk_xet_tuyen': 'Đủ điều kiện xét tuyển',
-            'khong_du_dk_xet_tuyen': 'Không đủ điều kiện',
-            'trung_tuyen': 'Trúng tuyển',
-            'khong_trung_tuyen': 'Không trúng tuyển',
-            'chua_nhap_hoc': 'Chưa nhập học',
-            'nhap_hoc_thieu': 'Nhập học thiếu thủ tục',
-            'nhap_hoc_ok': 'Đã nhập học',
-        };
-        return statusMap[status] || status;
+    getStatusLabel(status: number): string {
+        return TH_XETTUYEN.find((item) => item.value === status)?.label ?? `${status}`;
     }
 
     getNganhLabel(majorId: number | null | undefined): string {
@@ -575,6 +564,13 @@ export class FormThongtinDangkyComponent implements OnInit {
         raw.anh_hoc_ba = JSON.stringify(raw.anh_hoc_ba_uploads ?? []);
         delete raw.type_diem;
         delete raw.anh_hoc_ba_uploads;
+        if (!this.canUpdateStatus()) {
+            if (this.dataId) {
+                delete raw.status;
+            } else {
+                raw.status = 0;
+            }
+        }
 
         if (this.dataId) {
             // UPDATE
@@ -615,7 +611,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     closeForm(): void {
         // this.initForm();
         this.formData.patchValue({
-            status: 'cho_duyet',
+            status: 0,
             owner_by: this.auth.user?.id,
             submit_from: 'website',
         });
@@ -627,7 +623,7 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.cccdResult.set(null);
         this.initForm();
         this.formData.patchValue({
-            status: 'cho_duyet',
+            status: 0,
             owner_by: this.auth.user?.id,
             submit_from: 'website',
         });
@@ -637,7 +633,7 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.initForm();
         this.formData.patchValue({
             submit_from: 'website',
-            status: 'cho_duyet',
+            status: 0,
             owner_by: this.auth.user?.id,
         });
         this.cccdResult.set(null);
@@ -675,7 +671,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             diem_xettuyen: object.diem_xettuyen ?? null,
             dotxettuyen_id: object.dotxettuyen_id ?? 0,
             nguoi_tuvan: object.nguoi_tuvan ?? this.getDefaultNguoiTuvan(),
-            status: object.status || 'cho_duyet',
+            status: object.status ?? 0,
             status_connent: object.status_connent ?? 0,
             owner_by: object.owner_by || this.auth.user?.id,
             submit_from: object.submit_from || 'website',
@@ -687,6 +683,9 @@ export class FormThongtinDangkyComponent implements OnInit {
             anh_thpt: object.anh_thpt || '',
             anh_hoc_ba_uploads: this.parseAnhHocBa(object.anh_hoc_ba),
             anh_soyeulylich: object.anh_soyeulylich || '',
+            diem_cong: object.diem_cong || 0,
+            diem_uutien: object.diem_uutien || 0,
+
         });
         this.showDiemTb.set(true);
 

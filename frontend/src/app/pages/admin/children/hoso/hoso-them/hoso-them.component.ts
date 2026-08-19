@@ -9,14 +9,16 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IctuDropdownOption, IctuDropdownOption2 } from '@models/ictu-dropdown-option';
-import { ApiOutsiteService } from '@services/tuyensinh/api-outsite.service';
+import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
+import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import { NotificationService } from '@services/notification.service';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { MatButton } from '@angular/material/button';
+import { ChuongtrinhDaotao } from '@models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
-import { CtdtItem, ExternalApiResponse, NganhItem } from '@app/models/external-api';
+import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { DtoObject, IctuQueryParams } from '@models/dto';
 import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -39,7 +41,8 @@ export class HosoThemComponent implements OnInit {
     // ── Services ────────────────────────────────────────────────
 
     private dotService: DotXettuyenService = inject(DotXettuyenService);
-    private apiOutsite: ApiOutsiteService = inject(ApiOutsiteService);
+    private nganhHocService: NganhhocService = inject(NganhhocService);
+    private ctdtService: ChuongtrinhDaotaoService = inject(ChuongtrinhDaotaoService);
     private notification: NotificationService = inject(NotificationService);
 
     // ── Left panel ──────────────────────────────────────────────
@@ -49,8 +52,8 @@ export class HosoThemComponent implements OnInit {
 
     nganhOptions: WritableSignal<IctuDropdownOption<number>[]> =
         signal<IctuDropdownOption<number>[]>([]);
-    chuongTrinhOptions: WritableSignal<IctuDropdownOption2<CtdtItem, number>[]> =
-        signal<IctuDropdownOption2<CtdtItem, number>[]>([]);
+    chuongTrinhOptions: WritableSignal<IctuDropdownOption2<ChuongtrinhDaotao, number>[]> =
+        signal<IctuDropdownOption2<ChuongtrinhDaotao, number>[]>([]);
 
     selectedMajorLabel = computed<string>(() => {
         const id = this.selectedMajorId();
@@ -67,13 +70,13 @@ export class HosoThemComponent implements OnInit {
     selectedProgramDuration = computed<string>(() => {
         const id = this.selectedProgramId();
         if (!id) { return ''; }
-        return this.chuongTrinhOptions().find((o) => o.value === id)?.raw?.thoigian_daotao ?? '';
+        return this.chuongTrinhOptions().find((o) => o.value === id)?.raw?.thoi_gian_dao_tao ?? '';
     });
 
     selectedProgramDegree = computed<string>(() => {
         const id = this.selectedProgramId();
         if (!id) { return ''; }
-        return this.chuongTrinhOptions().find((o) => o.value === id)?.raw?.danhhieu_totnghiep ?? '';
+        return this.chuongTrinhOptions().find((o) => o.value === id)?.raw?.danh_hieu_tot_nghiep ?? '';
     });
 
     readonly showForm = computed(() => !!this.selectedMajorId() && !!this.selectedProgramId());
@@ -98,14 +101,14 @@ export class HosoThemComponent implements OnInit {
     private loadLookups(): void {
         const qp: IctuQueryParams = { limit: -1 };
 
-        const loadMajors$: Observable<IctuDropdownOption<number>[]> = this.apiOutsite
-            .getNganhList()
+        const loadMajors$: Observable<IctuDropdownOption<number>[]> = this.nganhHocService
+            .load({ search: '' }, qp)
             .pipe(
                 map(
-                    (res: ExternalApiResponse<NganhItem[]>): IctuDropdownOption<number>[] =>
-                        (res.data ?? []).filter(n => n.type === 'nganh').map((m) => ({
+                    (res: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
+                        (res.data ?? []).map((m) => ({
                             value: m.id,
-                            label: m.title,
+                            label: m.name,
                         })),
                 ),
             );
@@ -145,14 +148,14 @@ export class HosoThemComponent implements OnInit {
 
         if (!majorId) { return; }
 
-        this.apiOutsite.getCtdtListByIdNganh(majorId)
-            .pipe(map((res: ExternalApiResponse<CtdtItem[]>): CtdtItem[] => res.data ?? [])).subscribe({
+        this.ctdtService.load({ search: '' }, majorId, { limit: -1 })
+            .pipe(map((res: DtoObject<ChuongtrinhDaotao[]>): ChuongtrinhDaotao[] => res.data ?? [])).subscribe({
                 next: (data) => {
-                    const opts: IctuDropdownOption2<CtdtItem, number>[] = data
-                        .filter((p) => p.nganh_id === majorId)
+                    const opts: IctuDropdownOption2<ChuongtrinhDaotao, number>[] = data
+                        .filter((p) => p.major_id === majorId)
                         .map((p) => ({
                             value: p.id,
-                            label: `${p.madt ?? ''} — ${p.ten}`,
+                            label: `${p.code} — ${p.name}`,
                             raw: p,
                         }));
                     this.chuongTrinhOptions.set(opts);

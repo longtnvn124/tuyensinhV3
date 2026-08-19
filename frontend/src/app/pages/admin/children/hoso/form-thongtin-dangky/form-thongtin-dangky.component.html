@@ -570,15 +570,20 @@
         </div>
 
     </div>
-    <div class="form-ctn_f">
+    <div class="form-ctn_f" [formGroup]="formData">
         @if (!dataId) {
         <button (click)="closeForm()" class="btn ictu-badge-btn--secondary" mat-flat-button>
             <i class="ti ti-arrow-left"></i>
             <span>Hủy</span>
         </button>
         }
+        @if (canUpdateStatus()) {
+        <p-select class="form-status-select" [options]="statusOptions" appendTo="body"
+            formControlName="status" optionLabel="label" optionValue="value"
+            placeholder="Chọn trạng thái"></p-select>
+        }
         <button (click)="submitData()" [disabled]="!formData.valid || submitting()"
-            class="btn {{ dataId ? 'ictu-badge-btn--primary-reverse' : 'ictu-badge-btn--success-reverse' }}"
+            class="btn form-submit-button {{ dataId ? 'ictu-badge-btn--primary-reverse' : 'ictu-badge-btn--success-reverse' }}"
             mat-flat-button>
             <i class="ti {{ dataId ? 'ti-pencil' : 'ti-plus' }}"></i>
             <span>{{ dataId ? 'Cập nhật' : 'Thêm mới' }}</span>

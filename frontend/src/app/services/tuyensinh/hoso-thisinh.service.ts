@@ -3,11 +3,11 @@ import { IctuBaseServiceClass } from '@models/ictu-base-service.class';
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
+import { HosoStatus, HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
 
 export interface HosoThisinhSearchInfo {
     search: string;
-    status?: string;
+    status?: HosoStatus;
     dotxettuyen_id?: number;
     nganh_id?: number;
     nguoi_tuvan?: number;
@@ -63,10 +63,10 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
                 },
             );
         }
-        if (info.status) {
+        if (info.status !== undefined) {
             conditions.push({
                 conditionName: 'status',
-                value: info.status,
+                value: `${info.status}`,
                 condition: IctuQueryCondition.equal,
             });
         }

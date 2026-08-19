@@ -21,7 +21,7 @@ import { IctuFormControl2 } from '@models/ictu-form-control';
 import { IctuDeletingAnimationControl } from '@models/ictu-deleting-animation-control';
 import { DtoObject, IctuQueryParams } from '@models/dto';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
-import { HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
+import { HosoStatus, HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
 import { Nganhhoc } from '@app/models/tuyensinh/nganhhoc';
 import { ChuongtrinhDaotao } from '@app/models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
@@ -46,13 +46,11 @@ import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-pa
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { UploadPlaceholderComponent } from './upload-placeholder/upload-placeholder.component';
 import { OvicImgCropV2Component } from '@app/components/ovic-img-crop-v2/ovic-img-crop-v2.component';
-import { DOI_TUONG, GENDER } from '@app/utilities/syscats';
+import { DOI_TUONG, GENDER, TH_XETTUYEN } from '@app/utilities/syscats';
 import { forkJoin, Observable, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { LocationService } from '@app/services/location.service';
 import { Locations } from '@app/models/location';
-
-type HosoStatus = 'cho_duyet' | 'da_duyet' | 'da_nhap_hoc' | 'bo_hoc' | 'huy';
 
 interface HosoStatusOption {
     value: HosoStatus;
@@ -139,13 +137,11 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
 
     // ── Static options ──────────────────────────────────────────
 
-    readonly statusOptions: HosoStatusOption[] = [
-        { value: 'cho_duyet', label: 'Chờ duyệt', badge: 'ictu-badge--warning' },
-        { value: 'da_duyet', label: 'Đã duyệt', badge: 'ictu-badge--info' },
-        { value: 'da_nhap_hoc', label: 'Đã nhập học', badge: 'ictu-badge--success' },
-        { value: 'bo_hoc', label: 'Bỏ học', badge: 'ictu-badge--secondary' },
-        { value: 'huy', label: 'Hủy', badge: 'ictu-badge--danger' },
-    ];
+    readonly statusOptions: HosoStatusOption[] = TH_XETTUYEN.map((item) => ({
+        value: item.value as HosoStatus,
+        label: item.label,
+        badge: this.getStatusBadge(item.value as HosoStatus),
+    }));
 
     readonly hinhthucOptions: IctuDropdownOption<string>[] = [
         { value: 'hoc_ba', label: 'Học bạ' },
@@ -197,7 +193,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 vb_chuyenmon_namtn: [''],
                 nguoi_tuvan: [null],
                 anh_soyeulylich: ['', Validators.required],
-                status: ['cho_duyet', Validators.required],
+                status: [0, Validators.required],
                 status_connent: [0],
                 owner_by: [this.auth.user?.id],
             }),
@@ -428,7 +424,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 this.cccdLoading = false;
                 this.cccdResult = res;
 
-                if (!res.found || res.record.status === 'bo_hoc') {
+                if (!res.found || res.record.status === 4) {
                     this.cccdDialogVisible = false;
                     this.masterFormControl.formGroup.reset({
                         ho_va_ten: '',
@@ -462,7 +458,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                         vb_chuyenmon_namtn: '',
                         nguoi_tuvan: null,
                         anh_soyeulylich: '',
-                        status: 'cho_duyet',
+                        status: 0,
                         status_connent: 0,
                         owner_by: this.auth.user?.id,
                     });
@@ -513,7 +509,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             vb_chuyenmon_namtn: row.vb_chuyenmon_namtn ?? '',
             nguoi_tuvan: row.nguoi_tuvan ?? null,
             anh_soyeulylich: row.anh_soyeulylich ?? '',
-            status: row.status ?? 'cho_duyet',
+            status: row.status ?? 0,
             status_connent: row.status_connent ?? 0,
             owner_by: row.owner_by,
         });
@@ -580,12 +576,26 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     //  Helpers
     // ════════════════════════════════════════════════════════════
 
-    statusLabel(status: string | undefined): string {
-        return this.statusOptions.find((s) => s.value === status)?.label ?? status ?? '—';
+    statusLabel(status: HosoStatus | undefined): string {
+        return this.statusOptions.find((item) => item.value === status)?.label ?? `${status ?? '—'}`;
     }
 
-    statusBadgeClass(status: string | undefined): string {
-        return this.statusOptions.find((s) => s.value === status)?.badge ?? 'ictu-badge--secondary';
+    statusBadgeClass(status: HosoStatus | undefined): string {
+        return status === undefined ? 'ictu-badge--secondary' : this.getStatusBadge(status);
+    }
+
+    private getStatusBadge(status: HosoStatus): string {
+        const badges: Record<HosoStatus, string> = {
+            [-1]: 'ictu-badge--danger',
+            0: 'ictu-badge--warning',
+            1: 'ictu-badge--danger',
+            2: 'ictu-badge--info',
+            3: 'ictu-badge--success',
+            4: 'ictu-badge--secondary',
+            5: 'ictu-badge--warning',
+            6: 'ictu-badge--success',
+        };
+        return badges[status];
     }
 
     majorLabel(majorId: number | undefined): string {

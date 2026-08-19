@@ -92,11 +92,12 @@ Không nên sao chép:
 
 Điểm tích hợp:
 
-- `HoidongHosoXetduyetComponent.onExportData()` đã tồn tại.
-- Nút `Xuất dữ liệu` đã gọi hàm trên.
-- `loopGetHdxtDsTs()` tải toàn bộ hồ sơ theo hội đồng với relation `thi-sinh`.
-- `ExpHosoDaduyetService` đã inject nhưng service đang rỗng.
-- `exceljs`, `file-saver`, `SAVER` provider đã có.
+- `HoidongHosoXetduyetComponent.onExportData()` đã hoàn thiện luồng xuất.
+- Nút `Xuất dữ liệu` gọi trực tiếp hàm trên.
+- Component tái sử dụng `records()` đã hydrate `_hoso`, `provinceOptions()` và catalog ngành đã tải; không tải lại assignments/hồ sơ/địa chỉ khi xuất.
+- `DotXettuyenService.get()` chỉ tải thêm metadata của đợt xét tuyển.
+- `ExpHosoDaduyetService` đã dựng đủ 4 sheet và tải file qua `SAVER`.
+- `exceljs`, `file-saver`, `SAVER` provider đã được tích hợp.
 
 Dữ liệu hiện có:
 
@@ -442,4 +443,90 @@ Chỉ sửa HTML/model/backend nếu xác nhận cần dialog hoặc lưu metada
 
 `plan/mau_dl_ts.xlsx` đủ làm mẫu; chưa cần file mẫu khác.
 
-Phương án ưu tiên: template sạch + payload typed. Component tải/map dữ liệu; `ExpHosoDaduyetService` chỉ quản lý workbook và tải file. Chưa thực hiện code trước khi mục 13 được xác nhận.
+Triển khai hiện tại dùng payload typed. Component tải/map dữ liệu; `ExpHosoDaduyetService` chỉ quản lý workbook và tải file. Workbook được dựng bằng ExcelJS trong service, chưa dùng template asset.
+
+## 15. Nhật ký triển khai
+
+### 15.1. File đã thay đổi
+
+- `frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.ts`: tạo contract typed, dựng 4 sheet, style, filter, nhóm, tổng, ghi file và tải qua `SAVER`.
+- `frontend/src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.ts`: hoàn thiện `onExportData()`, map dữ liệu component sang payload và gọi `exportExcel()`.
+- `frontend/src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.spec.ts`: bổ sung test orchestration và mapping payload.
+- `plan/kh_exp_by_hoidong.md`: cập nhật trạng thái, contract thực tế và kết quả kiểm chứng.
+
+### 15.2. Dữ liệu `onExportData()` truyền vào service
+
+```typescript
+const payload: CouncilAdmissionExportPayload = {
+    council: {
+        id: hoidong.id,
+        name: hoidong.name,
+        reviewDate: hoidong.thoigian_xettuyen,
+    },
+    round: {
+        id: dotXettuyen.id,
+        name: dotXettuyen.name,
+        startDate: dotXettuyen.thoi_gian_bat_dau,
+        endDate: dotXettuyen.thoi_gian_ket_thuc,
+    },
+    documents: {
+        meetingDate: hoidong.thoigian_xettuyen,
+        preparedDate: new Date().toISOString().slice(0, 10),
+    },
+    candidates: records.map(mapExportCandidate),
+};
+
+await expHosoDaduyetService.exportExcel(payload);
+```
+
+Component dùng lại dữ liệu đã có:
+
+- `records()` chứa assignment và `_hoso` đã hydrate.
+- Catalog `Nganhhoc[]` cung cấp `registeredMajorName` và `registeredMajorCode`.
+- `provinceOptions()` cung cấp `birthPlace` từ `HosoThisinh.noi_sinh`.
+- Chỉ gọi thêm `DotXettuyenService.get(hoidong.dot_xettuyen_id)` để lấy tên và thời gian đợt.
+
+### 15.3. Mapping candidate thực tế
+
+| Payload | Nguồn component/model |
+|---|---|
+| `id` | `_hoso.id` |
+| `fullName` | `_hoso.ho_va_ten.trim()` |
+| `gender` | Tra `GENDER` bằng `_hoso.gioi_tinh` |
+| `birthDate` | `_hoso.ngay_sinh` |
+| `birthPlace` | Tra `provinceOptions()` bằng `_hoso.noi_sinh` |
+| `ethnicity` | `_hoso.dan_toc` |
+| `qualificationGroup` | Chuẩn hóa `_hoso.doituong` thành `DH/CD/TC/THPT` |
+| `qualificationName` | THPT: `van_bang_tn`; nhóm khác: `vb_chuyenmon`; thiếu thì dùng `DOI_TUONG` |
+| `graduationMajor` | `vb_chuyenmon_nganh`; THPT để rỗng |
+| `graduationInstitution` | THPT: `tn_noicap`; nhóm khác: `vb_chuyenmon_noicap` |
+| `graduationYear` | THPT: `nam_tn`; nhóm khác: `vb_chuyenmon_namtn` |
+| `registeredMajorId` | `_hoso.nganh_id` |
+| `registeredMajorName/code` | Tra catalog `Nganhhoc[]` |
+| `admissionScore` | `_hoso.diem_xettuyen` |
+| `result` | `_hoso.status`; thiếu thì dùng `HoidongHosoThisinh.ket_qua` |
+| `note` | `HoidongHosoThisinh.ghi_chu`; thiếu thì dùng `_hoso.content` |
+
+Nếu `_hoso` thiếu hoặc `doituong` ngoài `DH/CD/TC/THPT`, component dừng export và hiển thị hồ sơ gây lỗi. Component không mutate object API.
+
+### 15.4. Metadata chưa có nguồn
+
+Các trường sau vẫn để trống cho đến khi có model/API/dialog chính thức:
+
+- `decisionNumber`, `decisionDate`.
+- `proposalNumber`, `proposalDate`.
+- `preparedBy`.
+
+### 15.5. Quy tắc dữ liệu theo sheet
+
+- `DL xét tuyển`: toàn bộ hồ sơ hội đồng.
+- `KQ xét tuyển`: hồ sơ có `result`.
+- `DS đề nghị TT`: hồ sơ `TRUNG_TUYEN`.
+- `DS TT`: hồ sơ `TRUNG_TUYEN`.
+
+### 15.6. Kết quả kiểm chứng
+
+- Angular production build: đạt sau khi hoàn thiện service.
+- Smoke workbook: đạt; serialize/reload đủ 4 sheet, đúng tổng/filter, điểm giữ kiểu number với format `0.00`, payload không bị mutate.
+- Component spec đã bổ sung kiểm tra payload export và dữ liệu văn bằng không hợp lệ.
+- Test runner toàn dự án trước đó bị chặn khi bundle bởi dependency `jsqr` và đường dẫn global style `src/styles.css`; đây là lỗi cấu hình/phụ thuộc tồn tại ngoài luồng export.

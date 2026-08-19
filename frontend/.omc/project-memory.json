@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd frontend && npx tsc --noEmit -p tsconfig.app.json 2>&1 | head -80",
+    "buildCommand": "cd \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\" && npx tsc --noEmit -p tsconfig.app.json; echo \"EXIT=$?\"",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",

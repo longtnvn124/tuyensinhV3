@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, Signal, signal, viewChild, WritableSignal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, Signal, signal, viewChild, WritableSignal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IctuBasePermission, IctuPermissionControl } from '@models/ictu-base-model';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
@@ -6,14 +6,24 @@ import { DataTableEvent, DataTableEventName, IctuDataTable, IctuDataTablePaginat
 import { IctuFormControl2 } from '@models/ictu-form-control';
 import { IctuDeletingAnimationControl } from '@models/ictu-deleting-animation-control';
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
-import { HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
-import { CtdtItem, ExternalApiResponse, NganhItem } from '@models/external-api';
+import { HosoStatus, HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
+import { Locations } from '@models/location';
+import { SysRoleName } from '@models/role';
+import { User } from '@models/user';
+import { ChuongtrinhDaotao } from '@models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
+import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
+import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
-import { ApiOutsiteService } from '@services/tuyensinh/api-outsite.service';
+import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import { AuthenticationService } from '@services/authentication.service';
-import { NotificationService } from '@services/notification.service';
+import { NotificationService, ProgressAnimationEvent } from '@services/notification.service';
+import {
+    ExpHosoTuyensinhService,
+    HosoTuyensinhExportPayload,
+} from '@services/tuyensinh/exp-hoso-tuyensinh.service';
+import { UserService } from '@services/user.service';
 import { LocationService } from '@app/services/location.service';
 import { Drawer } from 'primeng/drawer';
 import { InputText } from 'primeng/inputtext';
@@ -22,8 +32,8 @@ import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
-import { forkJoin, Observable, Subject } from 'rxjs';
-import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import { EMPTY, forkJoin, from, Observable, Subject } from 'rxjs';
+import { filter, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DanToc, TH_XETTUYEN } from '@app/utilities/syscats';
 import { Popover } from "primeng/popover";
 import { FormThongtinDangkyComponent } from "../form-thongtin-dangky/form-thongtin-dangky.component";
@@ -46,8 +56,11 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     private hosoService = inject(HosoThisinhService);
     private dotService = inject(DotXettuyenService);
-    private apiOutsite = inject(ApiOutsiteService);
+    private nganhHocService = inject(NganhhocService);
+    private ctdtService = inject(ChuongtrinhDaotaoService);
     private locationService = inject(LocationService);
+    private userService = inject(UserService);
+    private exportService = inject(ExpHosoTuyensinhService);
     private auth = inject(AuthenticationService);
     private notification = inject(NotificationService);
     private fb = inject(FormBuilder);
@@ -55,15 +68,19 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     // ── Permission ──────────────────────────────────────────────
 
+    private readonly exportRoles: SysRoleName[] = ['admin', 'direction', 'manager'];
+
     permissionControl: Signal<IctuPermissionControl> = signal<IctuPermissionControl>(
         new IctuPermissionControl(this.auth.getUserPermission('hoso-tuyensinh')),
     );
+    readonly canExport = computed((): boolean => this.auth.userHasRole(this.exportRoles));
+    readonly exportLoading = signal(false);
 
     // ── Search / Filter ─────────────────────────────────────────
 
     searchInfo: {
         search: string;
-        status?: string;
+        status?: HosoStatus;
         dotxettuyen_id?: number;
         nganh_id?: number;
         nguoi_tuvan?: number;
@@ -108,19 +125,20 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     // ── Static options ──────────────────────────────────────────
 
     readonly danTocOptions: IctuDropdownOption<string>[] = DanToc.map(d => ({ value: d.name, label: d.label }));
-    readonly statusOptions: IctuDropdownOption<string>[] = TH_XETTUYEN
-        .filter(s => s.show)
-        .map(s => ({ value: s.kyhieu, label: s.label }));
+    readonly statusOptions: IctuDropdownOption<number>[] = TH_XETTUYEN.map(s => ({
+        value: s.value,
+        label: s.label,
+    }));
 
-    readonly statusBadgeMap: Record<string, string> = {
-        KHOI_TAO: 'ictu-badge--warning',
-        THIEU_HOSO: 'ictu-badge--danger',
-        CHOKQ_XET_TUYEN: 'ictu-badge--info',
-        TRUNG_TUYEN: 'ictu-badge--success',
-        KHONG_TRUNG_TUYEN: 'ictu-badge--danger',
-        CHUA_NHAP_HOC: 'ictu-badge--secondary',
-        NHAP_HOC_THIEU: 'ictu-badge--warning',
-        NHAP_HOC_OK: 'ictu-badge--success',
+    readonly statusBadgeMap: Record<HosoStatus, string> = {
+        [-1]: 'ictu-badge--danger',
+        0: 'ictu-badge--warning',
+        1: 'ictu-badge--danger',
+        2: 'ictu-badge--info',
+        3: 'ictu-badge--success',
+        4: 'ictu-badge--secondary',
+        5: 'ictu-badge--warning',
+        6: 'ictu-badge--success',
     };
 
     // ── Drawer & Event system ───────────────────────────────────
@@ -202,15 +220,13 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 map((r: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
                     (r.data ?? []).map(d => ({ value: d.id, label: d.name }))),
             ),
-            majors: this.apiOutsite.getNganhList().pipe(
-                map((r: ExternalApiResponse<NganhItem[]>): IctuDropdownOption<number>[] =>
-                    (r.data ?? [])
-                        .filter(m => m.type === 'nganh')
-                        .map(m => ({ value: m.id, label: m.title }))),
+            majors: this.nganhHocService.load({ search: '' }, qp).pipe(
+                map((r: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
+                    (r.data ?? []).map(m => ({ value: m.id, label: m.name }))),
             ),
-            programs: this.apiOutsite.getCtdtList().pipe(
-                map((r: ExternalApiResponse<CtdtItem[]>): IctuDropdownOption<number>[] =>
-                    (r.data ?? []).map(p => ({ value: p.id, label: `${p.madt ?? ''} — ${p.ten}` }))),
+            programs: this.ctdtService.query([], qp).pipe(
+                map((r: DtoObject<ChuongtrinhDaotao[]>): IctuDropdownOption<number>[] =>
+                    (r.data ?? []).map(p => ({ value: p.id, label: `${p.code} — ${p.name}` }))),
             ),
             tinhList: this.locationService.queryLocation([], qp, 'regions').pipe(
                 map((r: DtoObject<any[]>): IctuDropdownOption<number>[] =>
@@ -246,8 +262,8 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 { conditionName: 'dien_thoai', value: `%${s.search}%`, condition: IctuQueryCondition.like, orWhere: 'or' },
             );
         }
-        if (s.status) {
-            conditions.push({ conditionName: 'status', value: s.status, condition: IctuQueryCondition.equal });
+        if (s.status !== undefined) {
+            conditions.push({ conditionName: 'status', value: `${s.status}`, condition: IctuQueryCondition.equal });
         }
         if (s.dotxettuyen_id) {
             conditions.push({ conditionName: 'dotxettuyen_id', value: `${s.dotxettuyen_id}`, condition: IctuQueryCondition.equal });
@@ -381,6 +397,107 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.loadData(1, true);
     }
 
+    onExportData(): void {
+        if (!this.auth.userHasRole(this.exportRoles)) {
+            this.notification.toastError('Bạn không có quyền xuất dữ liệu hồ sơ');
+            return;
+        }
+        if (this.exportLoading()) return;
+
+        const controlLoading = new Subject<ProgressAnimationEvent>();
+        const queryParams: IctuQueryParams = {
+            limit: -1,
+            paged: 1,
+            order: 'DESC',
+            orderby: 'created_at',
+        };
+
+        this.exportLoading.set(true);
+        this.notification.startProgressAnimation(controlLoading, 'Đang xuất dữ liệu hồ sơ');
+        controlLoading.next({ percent: 10, heading: 'Đang tải danh sách hồ sơ' });
+
+        this.hosoService.query(this.buildConditions(), queryParams).pipe(
+            switchMap((response: DtoObject<HosoThisinh[]>): Observable<HosoTuyensinhExportPayload> => {
+                const records = response.data ?? [];
+                if (!records.length) {
+                    this.notification.toastWarning('Không có dữ liệu hồ sơ để xuất');
+                    return EMPTY;
+                }
+
+                controlLoading.next({ percent: 35, heading: 'Đang tải dữ liệu danh mục' });
+                return this.loadExportPayload(records);
+            }),
+            tap((): void => {
+                controlLoading.next({ percent: 70, heading: 'Đang tạo file Excel' });
+            }),
+            switchMap((payload: HosoTuyensinhExportPayload): Observable<void> =>
+                from(this.exportService.exportExcel(payload)),
+            ),
+            tap((): void => {
+                controlLoading.next({ percent: 100, heading: 'Đã xuất dữ liệu' });
+            }),
+            finalize((): void => {
+                this.exportLoading.set(false);
+                controlLoading.complete();
+            }),
+            takeUntil(this.onDestroy$),
+        ).subscribe({
+            next: (): void => {
+                this.notification.toastSuccess('Xuất dữ liệu hồ sơ thành công');
+            },
+            error: (): void => {
+                this.notification.toastError('Xuất dữ liệu hồ sơ thất bại');
+            },
+        });
+    }
+
+    private loadExportPayload(
+        records: readonly HosoThisinh[],
+    ): Observable<HosoTuyensinhExportPayload> {
+        const queryParams: IctuQueryParams = { limit: -1, paged: 1 };
+        return forkJoin({
+            majors: this.nganhHocService.load({ search: '' }, queryParams),
+            programs: this.ctdtService.query([], queryParams),
+            rounds: this.dotService.load({ search: '' }, queryParams),
+            regions: this.locationService.queryLocation([], queryParams, 'regions'),
+            provinces: this.locationService.queryLocation([], queryParams, 'provinces'),
+            users: this.userService.query([], {
+                ...queryParams,
+                select: 'id,display_name',
+            }),
+        }).pipe(
+            map((responses): HosoTuyensinhExportPayload => ({
+                records,
+                majors: (responses.majors.data ?? []).map((major: Nganhhoc) => ({
+                    id: major.id,
+                    code: major.code,
+                    name: major.name,
+                })),
+                programs: (responses.programs.data ?? []).map((program: ChuongtrinhDaotao) => ({
+                    id: program.id,
+                    code: program.code,
+                    name: program.name,
+                })),
+                rounds: (responses.rounds.data ?? []).map((round: DotXettuyen) => ({
+                    id: round.id,
+                    name: round.name,
+                })),
+                regions: (responses.regions.data ?? []).map((region: Locations) => ({
+                    id: region.id,
+                    name: region.name,
+                })),
+                provinces: (responses.provinces.data ?? []).map((province: Locations) => ({
+                    id: province.id,
+                    name: province.name,
+                })),
+                users: (responses.users.data ?? []).map((user: User) => ({
+                    id: user.id,
+                    display_name: user.display_name,
+                })),
+            })),
+        );
+    }
+
     // ═════════════════════════════════════════════════════════════
     //  Delete
     // ═════════════════════════════════════════════════════════════
@@ -436,12 +553,14 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     //  Label helpers
     // ═════════════════════════════════════════════════════════════
 
-    statusLabel(status: string | undefined): string {
-        return this.statusOptions.find(s => s.value == status)?.label ?? status ?? '—';
+    statusLabel(status: HosoStatus | undefined): string {
+        return this.statusOptions.find(s => s.value === status)?.label ?? `${status ?? '—'}`;
     }
 
-    statusBadgeClass(status: string | undefined): string {
-        return this.statusBadgeMap[status ?? ''] ?? 'ictu-badge--secondary';
+    statusBadgeClass(status: HosoStatus | undefined): string {
+        return status === undefined
+            ? 'ictu-badge--secondary'
+            : this.statusBadgeMap[status];
     }
 
     majorLabel(majorId: number | undefined): string {

@@ -80,6 +80,8 @@ interface MajorGroup {
 }
 
 const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const ADMITTED_RESULT = 'Trúng tuyển';
+const NON_ADMITTED_RESULT = 'Không trúng tuyển';
 const QUALIFICATION_ORDER: readonly QualificationGroup[] = ['DH', 'CD', 'TC', 'THPT'];
 const SHEET_CONFIGS: readonly SheetConfig[] = [
     { key: 'admitted', name: 'DS TT', title: 'DANH SÁCH THÍ SINH TRÚNG TUYỂN', columnCount: 10 },
@@ -258,6 +260,7 @@ export class ExpHosoDaduyetService {
         majorRow.getCell(1).alignment = { vertical: 'middle', wrapText: true };
         majorRow.height = 23;
 
+        let qualificationNumber = 1;
         for (const qualification of QUALIFICATION_ORDER) {
             const groupCandidates = major.candidates
                 .filter((candidate: CouncilExportCandidate): boolean => candidate.qualificationGroup === qualification)
@@ -266,27 +269,34 @@ export class ExpHosoDaduyetService {
                 );
             if (!groupCandidates.length) continue;
 
-            this.addQualificationSection(worksheet, config, qualification, groupCandidates);
+            this.addQualificationSection(
+                worksheet,
+                config,
+                qualification,
+                qualificationNumber,
+                groupCandidates,
+            );
+            qualificationNumber += 1;
         }
 
         const totalRow = worksheet.addRow([]);
-        worksheet.mergeCells(`A${totalRow.number}:B${totalRow.number}`);
-        totalRow.getCell(1).value = `Tổng ngành ${major.name}`;
-        totalRow.getCell(3).value = major.candidates.length;
-        worksheet.mergeCells(`C${totalRow.number}:${lastColumn}${totalRow.number}`);
+        worksheet.mergeCells(`A${totalRow.number}:${lastColumn}${totalRow.number}`);
+        totalRow.getCell(1).value = `Tổng số thí sinh: ${major.candidates.length} thí sinh`;
         this.styleTotalRow(totalRow, config.columnCount);
+        totalRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
     }
 
     private addQualificationSection(
         worksheet: Worksheet,
         config: SheetConfig,
         qualification: QualificationGroup,
+        qualificationNumber: number,
         candidates: readonly CouncilExportCandidate[],
     ): void {
         const lastColumn = this.columnLetter(config.columnCount);
         const sectionRow = worksheet.addRow([]);
         worksheet.mergeCells(`A${sectionRow.number}:${lastColumn}${sectionRow.number}`);
-        sectionRow.getCell(1).value = `${this.qualificationLabel(qualification)} - Mã phương thức xét tuyển: ${this.admissionMethod(qualification)}`;
+        sectionRow.getCell(1).value = `${qualificationNumber}. ${this.qualificationSectionTitle(qualification)} (Mã phương thức xét tuyển ${this.admissionMethod(qualification)})`;
         sectionRow.getCell(1).font = { ...BASE_FONT, bold: true, italic: true };
         sectionRow.getCell(1).alignment = { vertical: 'middle', wrapText: true };
         sectionRow.height = 22;
@@ -302,12 +312,11 @@ export class ExpHosoDaduyetService {
 
     private addGrandTotal(worksheet: Worksheet, columnCount: number, total: number): void {
         const lastColumn = this.columnLetter(columnCount);
-        const row = worksheet.addRow([]);
-        worksheet.mergeCells(`A${row.number}:B${row.number}`);
-        row.getCell(1).value = 'TỔNG CỘNG';
-        row.getCell(3).value = total;
-        worksheet.mergeCells(`C${row.number}:${lastColumn}${row.number}`);
-        this.styleTotalRow(row, columnCount);
+        const fixedRow = worksheet.addRow([]);
+        worksheet.mergeCells(`A${fixedRow.number}:${lastColumn}${fixedRow.number}`);
+        fixedRow.getCell(1).value = `Ấn định danh sách đủ điều kiện xét tuyển: ${total} thí sinh`;
+        this.styleTotalRow(fixedRow, columnCount);
+        fixedRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
     }
 
     private addSignature(
@@ -321,9 +330,7 @@ export class ExpHosoDaduyetService {
         const signatureColumn = this.columnNumber(signatureStart);
         const dateRow = worksheet.addRow([]);
         worksheet.mergeCells(`${signatureStart}${dateRow.number}:${lastColumn}${dateRow.number}`);
-        dateRow.getCell(signatureColumn).value = documents.preparedDate
-            ? `Thái Nguyên, ngày ${this.formatDate(documents.preparedDate)}`
-            : 'Thái Nguyên, ngày ..... tháng ..... năm ........';
+        dateRow.getCell(signatureColumn).value = `Thái Nguyên, ${this.formatAdministrativeDate(documents.preparedDate)}`;
         dateRow.getCell(signatureColumn).alignment = CENTER_ALIGNMENT;
         dateRow.getCell(signatureColumn).font = { ...BASE_FONT, italic: true };
 
@@ -418,7 +425,7 @@ export class ExpHosoDaduyetService {
             };
         }
         if (columnCount === 13) {
-            row.getCell(12).numFmt = '0.00';
+            row.getCell(12).numFmt = '0.0';
         }
     }
 
@@ -440,7 +447,7 @@ export class ExpHosoDaduyetService {
         if (key === 'result') {
             return candidates.filter((candidate: CouncilExportCandidate): boolean => candidate.result.trim().length > 0);
         }
-        return candidates.filter((candidate: CouncilExportCandidate): boolean => candidate.result === 'TRUNG_TUYEN');
+        return candidates.filter((candidate: CouncilExportCandidate): boolean => candidate.result === ADMITTED_RESULT);
     }
 
     private groupByMajor(candidates: readonly CouncilExportCandidate[]): MajorGroup[] {
@@ -483,23 +490,32 @@ export class ExpHosoDaduyetService {
             return this.documentText('Công văn đề nghị', documents.proposalNumber, documents.proposalDate);
         }
         if (key === 'result' && documents.meetingDate) {
-            return `Theo biên bản họp hội đồng ngày ${this.formatDate(documents.meetingDate)}`;
+            return `Theo biên bản họp hội đồng ${this.formatAdministrativeDate(documents.meetingDate)}`;
         }
         return '';
     }
 
     private documentText(label: string, number: string | undefined, date: string | undefined): string {
         const numberText = number ? ` số ${number}` : '';
-        const dateText = date ? ` ngày ${this.formatDate(date)}` : '';
+        const dateText = date ? ` ${this.formatAdministrativeDate(date)}` : '';
         return `Theo ${label}${numberText}${dateText}`;
     }
 
     private createCandidateNote(candidate: CouncilExportCandidate, key: SheetKey): string {
         if (candidate.note?.trim()) return candidate.note.trim();
         if (key === 'source') return 'Đủ điều kiện xét tuyển';
-        if (candidate.result === 'TRUNG_TUYEN') return 'Đủ điều kiện trúng tuyển';
-        if (candidate.result === 'KHONG_TRUNG_TUYEN') return 'Không đủ điều kiện trúng tuyển';
+        if (candidate.result === ADMITTED_RESULT) return 'Đủ điều kiện trúng tuyển';
+        if (candidate.result === NON_ADMITTED_RESULT) return 'Không đủ điều kiện trúng tuyển';
         return candidate.result;
+    }
+
+    private formatAdministrativeDate(value: string | undefined): string {
+        if (!value) return 'ngày ..... tháng ..... năm ........';
+        const datePart = value.slice(0, 10);
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+        return match
+            ? `ngày ${match[3]} tháng ${match[2]} năm ${match[1]}`
+            : 'ngày ..... tháng ..... năm ........';
     }
 
     private formatDate(value: string | undefined): string {
@@ -517,6 +533,16 @@ export class ExpHosoDaduyetService {
             THPT: 'THPT',
         };
         return labels[group];
+    }
+
+    private qualificationSectionTitle(group: QualificationGroup): string {
+        const titles: Record<QualificationGroup, string> = {
+            DH: 'THÍ SINH CÓ BẰNG ĐẠI HỌC',
+            CD: 'THÍ SINH CÓ BẰNG CAO ĐẲNG',
+            TC: 'THÍ SINH CÓ BẰNG TRUNG CẤP',
+            THPT: 'THÍ SINH CÓ BẰNG THPT',
+        };
+        return titles[group];
     }
 
     private admissionMethod(group: QualificationGroup): '200' | '500' {

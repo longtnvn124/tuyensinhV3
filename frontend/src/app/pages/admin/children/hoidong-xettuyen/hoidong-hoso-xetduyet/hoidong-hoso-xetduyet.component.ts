@@ -4,7 +4,6 @@ import {
     DestroyRef,
     inject,
     input,
-    output,
     signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
@@ -18,17 +17,26 @@ import {
 } from '@models/dto';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { Locations } from '@models/location';
+import { DotXettuyen } from '@models/tuyensinh/dot-xettuyen';
 import { HoidongHosoThisinh } from '@models/tuyensinh/hoidong-hoso-thisinh';
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { HosoStatus, HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService, ProgressAnimationEvent } from '@services/notification.service';
+import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
+import {
+    CouncilAdmissionExportPayload,
+    CouncilExportCandidate,
+    ExpHosoDaduyetService,
+    QualificationGroup,
+} from '@services/tuyensinh/exp-hoso-daduyet.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
 import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
-import { TH_XETTUYEN } from '@utilities/syscats';
+import { DOI_TUONG, GENDER, TH_XETTUYEN } from '@utilities/syscats';
+import Decimal from 'decimal.js';
 import { Popover } from 'primeng/popover';
 import {
     catchError,
@@ -45,12 +53,11 @@ import {
     switchMap,
     tap,
 } from 'rxjs';
-import { ExpHosoDaduyetService } from '@services/tuyensinh/exp-hoso-daduyet.service';
 
 type ReviewDataState = 'loading' | 'data' | 'error';
 
 interface CouncilLookups {
-    majorOptions: IctuDropdownOption<number>[];
+    majors: Nganhhoc[];
     provinceOptions: IctuDropdownOption<number>[];
 }
 
@@ -74,7 +81,7 @@ interface StatusUpdateResult {
 }
 
 interface StatusUpdateConfig {
-    status: 'TRUNG_TUYEN' | 'KHONG_TRUNG_TUYEN';
+    status: 3 | -1;
     progressHeading: string;
     successVerb: string;
 }
@@ -100,6 +107,8 @@ export class HoidongHosoXetduyetComponent {
     readonly majorOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     readonly provinceOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     readonly records = signal<readonly HoidongHosoThisinh[]>([]);
+
+    private readonly majors = signal<readonly Nganhhoc[]>([]);
     readonly selectedIds = signal<ReadonlySet<number>>(new Set<number>());
     readonly selectedCount = computed((): number => this.selectedIds().size);
     readonly hasSelection = computed((): boolean => this.selectedCount() > 0);
@@ -113,6 +122,7 @@ export class HoidongHosoXetduyetComponent {
     private readonly destroyRef = inject(DestroyRef);
     private readonly assignmentService = inject(HoidongHosoThisinhService);
     private readonly hosoService = inject(HosoThisinhService);
+    private readonly dotXettuyenService = inject(DotXettuyenService);
     private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
     private readonly notification = inject(NotificationService);
@@ -181,7 +191,7 @@ export class HoidongHosoXetduyetComponent {
 
     onApproveSelected(): void {
         this.updateSelectedStatuses({
-            status: 'TRUNG_TUYEN',
+            status: 3,
             progressHeading: 'Đang duyệt hồ sơ',
             successVerb: 'duyệt',
         });
@@ -189,7 +199,7 @@ export class HoidongHosoXetduyetComponent {
 
     onCancelApprovalSelected(): void {
         this.updateSelectedStatuses({
-            status: 'KHONG_TRUNG_TUYEN',
+            status: -1,
             progressHeading: 'Đang hủy duyệt hồ sơ',
             successVerb: 'hủy duyệt',
         });
@@ -215,13 +225,14 @@ export class HoidongHosoXetduyetComponent {
         return this.lookupLabel(this.provinceOptions(), province, `${province}`);
     }
 
-    getStatusLabel(status: string | undefined): string {
-        return TH_XETTUYEN.find((item): boolean => item.kyhieu === status)?.label ?? status ?? 'Chưa xét';
+    getStatusLabel(status: HosoStatus | undefined): string {
+        return TH_XETTUYEN.find((item): boolean => item.value === status)?.label
+            ?? `${status ?? 'Chưa xét'}`;
     }
 
-    getStatusClass(status: string | undefined): string {
-        if (status === 'TRUNG_TUYEN') return 'review-result--approved';
-        if (status === 'KHONG_TRUNG_TUYEN') return 'review-result--rejected';
+    getStatusClass(status: HosoStatus | undefined): string {
+        if (status === 3) return 'review-result--approved';
+        if (status === -1) return 'review-result--rejected';
         return 'review-result--pending';
     }
 
@@ -235,6 +246,7 @@ export class HoidongHosoXetduyetComponent {
     private prepareForLoad(hoidong: HoidongXettuyen | null): void {
         this.clearSelection();
         this.records.set([]);
+        this.majors.set([]);
         this.majorOptions.set([]);
         this.provinceOptions.set([]);
         this.errorMessage.set('');
@@ -257,13 +269,8 @@ export class HoidongHosoXetduyetComponent {
     private loadLookups(): Observable<CouncilLookups> {
         const queryParams: IctuQueryParams = { limit: -1 };
         return forkJoin({
-            majorOptions: this.nganhHocService.load({ search: '' }, queryParams).pipe(
-                map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: Nganhhoc): IctuDropdownOption<number> => ({
-                        value: item.id,
-                        label: item.name,
-                    })),
-                ),
+            majors: this.nganhHocService.load({ search: '' }, queryParams).pipe(
+                map((response: DtoObject<Nganhhoc[]>): Nganhhoc[] => response.data ?? []),
             ),
             provinceOptions: this.locationService.queryLocation([], queryParams, 'regions').pipe(
                 map((response: DtoObject<Locations[]>): IctuDropdownOption<number>[] =>
@@ -313,7 +320,11 @@ export class HoidongHosoXetduyetComponent {
 
     private applyLoadedData(data: CouncilReviewData | null): void {
         if (!data) return;
-        this.majorOptions.set(data.majorOptions);
+        this.majors.set(data.majors);
+        this.majorOptions.set(data.majors.map((item: Nganhhoc): IctuDropdownOption<number> => ({
+            value: item.id,
+            label: item.name,
+        })));
         this.provinceOptions.set(data.provinceOptions);
         this.records.set(data.records);
         this.state.set('data');
@@ -418,188 +429,166 @@ export class HoidongHosoXetduyetComponent {
             && error.message.length > 0;
     }
 
-    //----------------------------------------------------------------------------------------------
-
-    //----------- export dataa-------------------
-
     onExportData(): void {
         if (this.actionLoading()) return;
-        const hoidongId = this.hoidong()?.id;
-        if (!hoidongId) {
+
+        const council = this.hoidong();
+        if (!council?.id) {
             this.notification.toastError('Không tìm thấy hội đồng xét tuyển');
             return;
         }
+        if (!council.dot_xettuyen_id) {
+            this.notification.toastError('Hội đồng chưa có đợt xét tuyển');
+            return;
+        }
+        if (!this.records().length) {
+            this.notification.toastError('Hội đồng chưa có hồ sơ để xuất');
+            return;
+        }
 
-        const controlLoading: Subject<ProgressAnimationEvent> = new Subject();
-        this.notification.startProgressAnimation(controlLoading, `Đang tải dữ liệu`);
+        const controlLoading = new Subject<ProgressAnimationEvent>();
+        this.actionLoading.set(true);
+        this.notification.startProgressAnimation(controlLoading, 'Đang xuất dữ liệu');
+        controlLoading.next({ percent: 10, heading: 'Đang tải thông tin đợt xét tuyển' });
 
-        this.loopGetHdxtDsTs(1, 50, [], 1).pipe(switchMap(m => {
-
-            const xaPhuongIds = Array.from(new Set(m.map(a => a['thi-sinh'] && a['thi-sinh']['dia_chi_xa'] ? a['thi-sinh']['dia_chi_xa'] : 0)))
-            controlLoading.next({ percent: 50, heading: 'Đang tải dữ liệu địa chỉ' });
-
-            return forkJoin([
-                of(m),
-                this.loopGetXa(xaPhuongIds, 50, 1, [])
-            ])
-        })).subscribe({
-            next: (): void => {
-                controlLoading.next({ percent: 100, heading: 'Đã tải xong dữ liệu' });
-            },
-            error: () => {
-                this.notification.toastError('Tải dữ liệu không thành công');
+        this.dotXettuyenService.get(council.dot_xettuyen_id).pipe(
+            map((round: DotXettuyen): CouncilAdmissionExportPayload =>
+                this.createExportPayload(council, round, this.records()),
+            ),
+            tap((): void => {
+                controlLoading.next({ percent: 50, heading: 'Đang tạo file Excel' });
+            }),
+            switchMap((payload: CouncilAdmissionExportPayload): Observable<void> =>
+                from(this.expHosoDaduyetService.exportExcel(payload)),
+            ),
+            tap((): void => {
+                controlLoading.next({ percent: 100, heading: 'Đã xuất dữ liệu' });
+            }),
+            finalize((): void => {
+                this.actionLoading.set(false);
                 controlLoading.complete();
-            }
-        })
+            }),
+            takeUntilDestroyed(this.destroyRef),
+        ).subscribe({
+            next: (): void => {
+                this.notification.toastSuccess('Xuất dữ liệu xét tuyển thành công');
+            },
+            error: (error: unknown): void => {
+                this.notification.toastError(this.getErrorMessage(
+                    error,
+                    'Không thể xuất dữ liệu xét tuyển. Vui lòng thử lại.',
+                ));
+            },
+        });
     }
 
-
-    // exportExcel() {
-
-
-
-    // }
-
-    // exportExcel(){
-    //     this.notification.isProcessing(true);
-    //     this.loopGetHdxtDsTs(1,50,[],1).pipe(switchMap(m=>{
-
-    //         const xaPhuongIds = Array.from(new Set(m.map(a=>a['thi-sinh'] && a['thi-sinh']['dia_chi_xa'] ? a['thi-sinh']['dia_chi_xa'] : 0)))
-    //         return forkJoin([
-    //             of(m),
-    //             this.loopGetXa(xaPhuongIds, 50,1,[])
-    //         ])
-    //     })).subscribe({
-    //         next:([dtTuyensinh, dataXa])=>{
-    //             const data = dtTuyensinh.length > 0 ? dtTuyensinh.map((m,index)=>{
-    //                 const thisinh = m['thi-sinh'];
-
-    //                 thisinh['id'] = m.tuyensinh_id;
-    //                 thisinh['id_connect'] = m.id;
-    //                 thisinh['index_'] = index;
-
-    //                 const thXettuyen = TH_XETTUYEN.find(f=>f.value == thisinh['status'].toString())
-    //                 thisinh['name_xettuyen'] = thXettuyen ? thXettuyen.label : '';
-
-    //                 // const  cityfind = this.list_citys.find(f =>f.id  == thisinh.noi_sinh.toString());
-    //                 const  cityfind =  this.lookupLabel(this.provinceOptions(), thisinh.noi_sinh );
-
-    //                 thisinh['noi_sinh_name'] = cityfind;
-
-    //                 if (thisinh.nganh_dangky) {
-    //                     const find_nganh = this.list_nganh_tuyensinh.find((dt) => dt.ten_nganh === thisinh.nganh_dangky);
-
-    //                         thisinh['ma_nganh_dang_ky'] = find_nganh ?  find_nganh['ma_nganh'] : '';
-    //                     }
-
-    //                 const name_tinh = this.list_citys.find(m => m.id.toString() === thisinh.dia_chi_tinh.toString());
-    //                 const name_xa = dataXa.find(m => m.id.toString() === thisinh.dia_chi_xa.toString());
-
-    //                 thisinh['dia_chi_ho_khau'] = ( name_tinh ? name_tinh.name + ', ' : '')  + (name_xa ? name_xa.name : '') ;
-
-
-    //                 const nguoi_tuvan = this.list_user_doitac.find(m => m.id.toString() === thisinh.nguoi_tuvan.toString());
-    //                 thisinh['nguoi_tu_van_by_name'] =nguoi_tuvan ?  this.list_user_doitac[index].display_name.toString(): '';
-
-    //                 if (thisinh.created_by) {
-    //                     const index = this.list_user_doitac.findIndex(m => m.id.toString() === thisinh.created_by.toString());
-    //                     if (index !== -1) {
-    //                         thisinh['create_by_name'] = this.list_user_doitac[index].display_name.toString();
-    //                     }
-    //                 }
-
-    //                 return thisinh;
-    //                 }) : [];
-
-    //             if( data.length > 0 ){
-    //                 this.expHosoDaduyetService.exportExcel(data, this.selectedHoiDong);
-    //             }
-
-
-    //             this.notification.isProcessing(false);
-
-    //         },error:(e)=>{
-    //             this.notification.isProcessing(false);
-    //             this.notification.toastError('Tải dữ liệu không thành công');
-    //         }
-    //     })
-
-    // }
-
-    loopGetHdxtDsTs(
-        page: number,
-        limit: number,
-        data: HoidongHosoThisinh[],
-        recordTotal: number
-    ): Observable<HoidongHosoThisinh[]> {
-        if (data.length >= recordTotal) {
-            return of(data);
-        }
-
-        const conditions: IctuConditionParam[] = [{
-            conditionName: 'hoidong_id',
-            condition: IctuQueryCondition.equal,
-            value: this.hoidong().id.toString(),
-        }];
-        const queryParams: IctuQueryParams = {
-            limit,
-            paged: page,
-            with: 'thi-sinh',
+    private createExportPayload(
+        council: HoidongXettuyen,
+        round: DotXettuyen,
+        records: readonly HoidongHosoThisinh[],
+    ): CouncilAdmissionExportPayload {
+        return {
+            council: {
+                id: council.id,
+                name: council.name,
+                reviewDate: council.thoigian_xettuyen,
+            },
+            round: {
+                id: round.id,
+                name: round.name,
+                startDate: round.thoi_gian_bat_dau,
+                endDate: round.thoi_gian_ket_thuc,
+            },
+            documents: {
+                meetingDate: council.thoigian_xettuyen,
+                preparedDate: new Date().toISOString().slice(0, 10),
+            },
+            candidates: records.map((record: HoidongHosoThisinh): CouncilExportCandidate =>
+                this.mapExportCandidate(record),
+            ),
         };
-
-        return this.assignmentService.query(conditions, queryParams).pipe(
-            switchMap(response => {
-                const records = response.data ?? [];
-                const accumulatedData = [...data, ...records];
-
-                return records.length === 0
-                    ? of(accumulatedData)
-                    : this.loopGetHdxtDsTs(
-                        page + 1,
-                        limit,
-                        accumulatedData,
-                        response.recordsFiltered
-                    );
-            })
-        );
     }
 
-    private loopGetXa(
-        ids: number[],
-        limit: number,
-        page: number,
-        data: Locations[]
-    ): Observable<Locations[]> {
-        const start = (page - 1) * limit;
-        const selectedIds = ids.slice(start, start + limit);
-
-        if (selectedIds.length === 0) {
-            return of(data);
+    private mapExportCandidate(record: HoidongHosoThisinh): CouncilExportCandidate {
+        const candidate = record._hoso;
+        if (!candidate) {
+            throw new Error(`Không tìm thấy dữ liệu hồ sơ #${record.hoso_id}`);
         }
 
-        const conditions: IctuConditionParam[] = [{
-            conditionName: 'id',
-            condition: IctuQueryCondition.equal,
-            value: selectedIds.toString(),
-            orWhere: 'in',
-        }];
-
-        return this.locationService.queryLocation(
-            conditions,
-            { limit: selectedIds.length, paged: 1 },
-            'provinces'
-        ).pipe(
-            switchMap(response => {
-                const accumulatedData = data.concat(response.data ?? []);
-                const hasNextPage = start + limit < ids.length;
-
-                return hasNextPage
-                    ? this.loopGetXa(ids, limit, page + 1, accumulatedData)
-                    : of(accumulatedData);
-            })
+        const qualificationGroup = this.getQualificationGroup(candidate.doituong, candidate.id);
+        const qualification = DOI_TUONG.find((item): boolean => item.value === qualificationGroup);
+        const majorId = candidate.nganh_id ?? 0;
+        const major = this.majors().find((item: Nganhhoc): boolean => item.id === majorId);
+        const genderValue = candidate.gioi_tinh?.trim().toLowerCase();
+        const gender = GENDER.find((item): boolean =>
+            item.value === genderValue || item.key.toLowerCase() === genderValue,
         );
+        const isHighSchool = qualificationGroup === 'THPT';
+
+        return {
+            id: candidate.id,
+            fullName: candidate.ho_va_ten.trim(),
+            gender: gender?.label ?? candidate.gioi_tinh ?? '',
+            birthDate: candidate.ngay_sinh,
+            birthPlace: this.lookupLabel(this.provinceOptions(), candidate.noi_sinh, ''),
+            ethnicity: candidate.dan_toc ?? '',
+            qualificationGroup,
+            qualificationName: isHighSchool
+                ? candidate.van_bang_tn?.trim() || qualification?.label.trim() || ''
+                : candidate.vb_chuyenmon?.trim() || qualification?.label.trim() || '',
+            graduationMajor: candidate.vb_chuyenmon_nganh?.trim() ?? '',
+            graduationInstitution: isHighSchool
+                ? candidate.tn_noicap ?? ''
+                : candidate.vb_chuyenmon_noicap ?? '',
+            graduationYear: isHighSchool
+                ? candidate.nam_tn ?? ''
+                : candidate.vb_chuyenmon_namtn ?? '',
+            registeredMajorId: majorId,
+            registeredMajorName: major?.name ?? '',
+            registeredMajorCode: major?.code ?? '',
+            admissionScore: this.calculateAdmissionScore(candidate, qualificationGroup),
+            result: TH_XETTUYEN.find((item): boolean => item.value === candidate.status)?.label
+                ?? TH_XETTUYEN.find((item): boolean =>
+                    item.kyhieu === record.ket_qua?.trim().toUpperCase(),
+                )?.label
+                ?? record.ket_qua?.trim()
+                ?? '',
+            note: record.ghi_chu?.trim() || candidate.content?.trim(),
+        };
     }
 
+    private calculateAdmissionScore(
+        candidate: HosoThisinh,
+        qualificationGroup: QualificationGroup,
+    ): number | undefined {
+        if (candidate.diem_xettuyen === undefined || candidate.diem_xettuyen === null) {
+            return undefined;
+        }
 
+        const originalScore = new Decimal(candidate.diem_xettuyen);
+        const priorityScore = new Decimal(candidate.diem_uutien ?? 0);
+        const additionalScore = new Decimal(candidate.diem_cong ?? 0);
+        const maximumScore = qualificationGroup === 'THPT' ? new Decimal(30) : new Decimal(10);
+        const scale = qualificationGroup === 'THPT' ? new Decimal(7.5) : new Decimal(2.5);
+        const actualPriorityScore = maximumScore
+            .minus(originalScore)
+            .dividedBy(scale)
+            .times(priorityScore.plus(additionalScore));
 
+        return originalScore
+            .plus(actualPriorityScore)
+            .toDecimalPlaces(1, Decimal.ROUND_HALF_UP)
+            .toNumber();
+    }
+
+    private getQualificationGroup(value: string | undefined, candidateId: number): QualificationGroup {
+        const normalizedValue = value?.trim().toUpperCase();
+        if (normalizedValue === 'DH'
+            || normalizedValue === 'CD'
+            || normalizedValue === 'TC'
+            || normalizedValue === 'THPT') {
+            return normalizedValue;
+        }
+        throw new Error(`Hồ sơ #${candidateId} có đối tượng xét tuyển không hợp lệ`);
+    }
 }
