@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd \"d:\\data\\project\\angular\\v19\\tuyensinh\\frontend\" && npx tsc --noEmit -p tsconfig.app.json; echo \"EXIT=$?\"",
+    "buildCommand": "npx tsc --noEmit -p tsconfig.app.json",
     "testCommand": "npm test",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -108,6 +108,12 @@
   },
   "hotPaths": [
     {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-xettuyen\\hoso-xettuyen.component.ts",
+      "accessCount": 14,
+      "lastAccessed": 1787197382864,
+      "type": "file"
+    },
+    {
       "path": "src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.ts",
       "accessCount": 8,
       "lastAccessed": 1784519354071,
@@ -129,12 +135,6 @@
       "path": "src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
       "accessCount": 6,
       "lastAccessed": 1784823774704,
-      "type": "file"
-    },
-    {
-      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-xettuyen\\hoso-xettuyen.component.ts",
-      "accessCount": 6,
-      "lastAccessed": 1785383594863,
       "type": "file"
     },
     {
@@ -168,6 +168,12 @@
       "type": "directory"
     },
     {
+      "path": "",
+      "accessCount": 3,
+      "lastAccessed": 1787196977831,
+      "type": "directory"
+    },
+    {
       "path": "src\\app\\models\\course-lesson.ts",
       "accessCount": 2,
       "lastAccessed": 1783305836989,
@@ -196,12 +202,6 @@
       "accessCount": 2,
       "lastAccessed": 1785383668848,
       "type": "file"
-    },
-    {
-      "path": "",
-      "accessCount": 2,
-      "lastAccessed": 1785383674519,
-      "type": "directory"
     },
     {
       "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-xettuyen\\hoso-xettuyen.component.html",
@@ -370,6 +370,18 @@
       "accessCount": 1,
       "lastAccessed": 1785832462741,
       "type": "file"
+    },
+    {
+      "path": "angular.json",
+      "accessCount": 1,
+      "lastAccessed": 1787196977736,
+      "type": "directory"
+    },
+    {
+      "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-xettuyen",
+      "accessCount": 1,
+      "lastAccessed": 1787197271294,
+      "type": "directory"
     }
   ],
   "userDirectives": []

@@ -88,18 +88,6 @@
                         aria-hidden="true"></i>
                 </button>
                 }
-
-                @if (permissionControl().canDelete) {
-                <button (click)="deleteSelected()" [disabled]="!dataTable.someItemsChecked()"
-                    class="btn ictu-button-danger-gradient" mat-flat-button>
-                    <i class="ti ti-trash"></i>
-                </button>
-                }
-                @if (permissionControl().canCreate) {
-                <button (click)="addItem()" mat-flat-button class="btn ictu-badge-btn--success-reverse">
-                    <i class="ti ti-plus"></i>
-                </button>
-                }
             </div>
         </div>
 
@@ -158,16 +146,20 @@
                                                     <i class="ti ti-file-text"></i>
                                                     <span>Xem hồ sơ</span>
                                                 </li> -->
+                                                @if (permissionControl().canUpdate) {
                                                 <li class="popover-menu__item" (click)="btnevent.hide(); editItem(row)">
                                                     <i class="ti ti-edit"></i>
                                                     <span>Cập nhật</span>
                                                 </li>
                                                 <li class="popover-menu__divider"></li>
+                                                }
+                                                @if (permissionControl().canDelete) {
                                                 <li class="popover-menu__item popover-menu__item--danger"
                                                     (click)="btnevent.hide(); deleteItem(row)">
                                                     <i class="ti ti-trash"></i>
                                                     <span>Xóa</span>
                                                 </li>
+                                                }
                                             </ul>
                                         </p-popover>
                                     </button>

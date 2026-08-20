@@ -68,10 +68,25 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     // ── Permission ──────────────────────────────────────────────
 
+    private getPermissionMenuId(): string {
+        const routeSegment = 'hoso-xettuyen';
+        const matchesRoute = (value?: string): boolean =>
+            value === routeSegment || Boolean(value?.endsWith(`/${routeSegment}`));
+
+        for (const menu of this.auth.userMenu) {
+            if (matchesRoute(menu.id) || matchesRoute(menu.url)) return menu.id;
+
+            const child = menu.child?.find(item => matchesRoute(item.id) || matchesRoute(item.url));
+            if (child) return child.id;
+        }
+
+        return 'hoso-tuyensinh';
+    }
+
     private readonly exportRoles: SysRoleName[] = ['admin', 'direction', 'manager'];
 
     permissionControl: Signal<IctuPermissionControl> = signal<IctuPermissionControl>(
-        new IctuPermissionControl(this.auth.getUserPermission('hoso-tuyensinh')),
+        new IctuPermissionControl(this.auth.getUserPermission(this.getPermissionMenuId())),
     );
     readonly canExport = computed((): boolean => this.auth.userHasRole(this.exportRoles));
     readonly exportLoading = signal(false);
@@ -164,6 +179,9 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     readonly editData = signal<HosoThisinh | null>(null);
 
     constructor() {
+
+        console.log(this.permissionControl());
+        
         this.formControl = new IctuFormControl2<HosoThisinh>({
             dropdownFields: [],
             formGroup: this.fb.group({}),
@@ -240,9 +258,8 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 this.programs.set(programs);
                 this.tinhList.set(tinhList);
 
-                                this.loadData(1, true);
+                this.loadData(1, true);
 
-                
             },
             error: (): void => this.notification.toastError('Tải danh mục thất bại'),
         });
@@ -252,9 +269,29 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     //  Data
     // ═════════════════════════════════════════════════════════════
 
+    private readonly assignedViewRoles: SysRoleName[] = ['staff', 'doi-tac-cv'];
+    private readonly ownedViewRoles: SysRoleName[] = ['doi-tac'];
+
     private buildConditions(): IctuConditionParam[] {
         const conditions: IctuConditionParam[] = [];
         const s = this.searchInfo;
+        const userId = this.auth.user?.id;
+
+        // Staff / nhân viên đối tác chỉ xem hồ sơ được phân công cho chính mình
+        if (this.auth.userHasRole(this.assignedViewRoles)) {
+            conditions.push({
+                conditionName: 'nguoi_tuvan',
+                value: `${userId ?? ''}`,
+                condition: IctuQueryCondition.equal,
+            });
+        } else if (this.auth.userHasRole(this.ownedViewRoles)) {
+            // Đối tác chỉ xem hồ sơ do chính mình tạo
+            conditions.push({
+                conditionName: 'created_by',
+                value: `${userId ?? ''}`,
+                condition: IctuQueryCondition.equal,
+            });
+        }
 
         if (s.search) {
             conditions.push(
@@ -362,18 +399,34 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     // ═════════════════════════════════════════════════════════════
 
     addItem(): void {
+        if (!this.permissionControl().canCreate) {
+            this.notification.toastError('Bạn không có quyền tạo hồ sơ xét tuyển');
+            return;
+        }
         this.eventObserver$.next({ name: 'OPEN_FORM_ADD', data: null as unknown as HosoThisinh });
     }
 
     editItem(data: HosoThisinh): void {
+        if (!this.permissionControl().canUpdate) {
+            this.notification.toastError('Bạn không có quyền cập nhật hồ sơ xét tuyển');
+            return;
+        }
         this.eventObserver$.next({ name: 'OPEN_FORM_UPDATE', data });
     }
 
     deleteItem(data: HosoThisinh): void {
+        if (!this.permissionControl().canDelete) {
+            this.notification.toastError('Bạn không có quyền xóa hồ sơ xét tuyển');
+            return;
+        }
         this.eventObserver$.next({ name: 'DELETE_SINGLE_ROW', data });
     }
 
     deleteSelected(): void {
+        if (!this.permissionControl().canDelete) {
+            this.notification.toastError('Bạn không có quyền xóa hồ sơ xét tuyển');
+            return;
+        }
         this.eventObserver$.next({ name: 'DELETE_SELECTED_ROWS', data: null as unknown as HosoThisinh });
     }
 
