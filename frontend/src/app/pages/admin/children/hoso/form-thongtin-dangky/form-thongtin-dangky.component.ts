@@ -84,6 +84,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly data       = input<HosoThisinh | null>(null);
     readonly majorId    = input<number | null>(null);
     readonly programId  = input<number | null>(null);
+    readonly readOnly   = input<boolean>(false);
     readonly saved      = output<void>();
     readonly cancel     = output<void>();
 
@@ -117,6 +118,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly canEdit       = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff']));
     readonly canAdd        = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff', 'doi-tac']));
     readonly duyetHoso     = computed(() => this.auth.userHasRole(['reviewer']));
+    readonly isReadOnly    = computed(() => this.readOnly() || this.duyetHoso());
 
     /* ------------------------------------------------------------------ */
     /*  Lookup data – signals                                              */
@@ -245,6 +247,9 @@ export class FormThongtinDangkyComponent implements OnInit {
         this.isDoitac.set(this.auth.userHasRole(['doi-tac']));
         this.isNhanVien.set(this.auth.userHasRole(['staff']));
         this.isDoitacNhanvien.set(this.auth.userHasRole(['doi-tac-cv']));
+        if (this.duyetHoso()) {
+            this.formData.disable({emitEvent: false});
+        }
     }
 
 
@@ -253,6 +258,9 @@ export class FormThongtinDangkyComponent implements OnInit {
     /* ------------------------------------------------------------------ */
     ngOnInit(): void {
         this.initForm();
+        if (this.isReadOnly()) {
+            this.formData.disable({emitEvent: false});
+        }
         this.loadLookups();
     }
 
@@ -544,6 +552,8 @@ export class FormThongtinDangkyComponent implements OnInit {
     /*  Submit                                                             */
     /* ------------------------------------------------------------------ */
     submitData(): void {
+        if (this.isReadOnly()) return;
+
         if (this.formData.invalid) {
             for (const key of Object.keys(this.errorMessages)) {
                 if (this.formData.get(key)?.invalid) {

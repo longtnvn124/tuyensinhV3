@@ -256,6 +256,23 @@
     flex-direction: column;
 }
 
+.form-readonly-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: #1557b0;
+    background: #eaf3ff;
+    border-bottom: 1px solid #bfd8ff;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.form-readonly-banner i {
+    font-size: 16px;
+}
+
 .form-ctn_h {
     height: 1%;
     flex: 1 1 auto;

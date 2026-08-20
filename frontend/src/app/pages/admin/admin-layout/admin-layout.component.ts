@@ -47,7 +47,7 @@ export class AdminLayoutComponent implements OnInit , OnDestroy {
 
 	private layoutService : LayoutService = inject( LayoutService );
 
-	logo : Signal<string> = staticResource( `images/client/${ ENVIRONMENT.deployment.client }/admin-logo.png` );
+	logo : Signal<string> = staticResource( `images/client/${ ENVIRONMENT.deployment.client }/logo_ictu_menu.png` );
 
 	hostname : Signal<string> = signal<string>( location.hostname );
 

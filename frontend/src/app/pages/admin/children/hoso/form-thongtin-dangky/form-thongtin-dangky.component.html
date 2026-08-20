@@ -108,6 +108,12 @@
 
 @case ('form') {
 <div class="form-ctn">
+    @if (isReadOnly()) {
+    <div class="form-readonly-banner">
+        <i class="ti ti-eye"></i>
+        <span>Chế độ chỉ xem — Không thể chỉnh sửa hồ sơ</span>
+    </div>
+    }
     <div class="form-ctn_h">
 
         <div class="form-ctn_h-content">
@@ -128,7 +134,7 @@
                                     <div class="col flex-div">
                                         <div class="ictu-form__row">
                                             <label class="ictu-form__label ictu-form__label--required">Ảnh thẻ</label>
-                                            <ovic-img-crop-v2 [formField]="f['anh_the']" [aspectRatio]="2 / 3"
+                                            <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_the']" [aspectRatio]="2 / 3"
                                                 [resizeToWidth]="300"></ovic-img-crop-v2>
                                         </div>
                                     </div>
@@ -307,14 +313,14 @@
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">CCCD mặt trước</label>
-                                    <ovic-img-crop-v2 [formField]="f['anh_cmnd_truoc']" [aspectRatio]="3 / 2"
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_cmnd_truoc']" [aspectRatio]="3 / 2"
                                         [resizeToWidth]="600"></ovic-img-crop-v2>
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ">CCCD mặt sau</label>
-                                    <ovic-img-crop-v2 [formField]="f['anh_cmnd_sau']" [aspectRatio]="3 / 2"
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_cmnd_sau']" [aspectRatio]="3 / 2"
                                         [resizeToWidth]="600"></ovic-img-crop-v2>
                                 </div>
                             </div>
@@ -530,14 +536,14 @@
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Ảnh phiếu đăng ký</label>
-                                    <ovic-img-crop-v2 [formField]="f['anh_phieu_dang_ky']" [keyUpload]="'direct'"
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_phieu_dang_ky']" [keyUpload]="'direct'"
                                         [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ">Ảnh bằng tốt nghiệp THPT(BTVH)</label>
-                                    <ovic-img-crop-v2 [formField]="f['anh_thpt']" [keyUpload]="'direct'"
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_thpt']" [keyUpload]="'direct'"
                                         [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
                             </div>
@@ -548,7 +554,7 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ictu-form__label--required">Ảnh sơ yếu lý
                                         lịch</label>
-                                    <ovic-img-crop-v2 [formField]="f['anh_soyeulylich']" [keyUpload]="'direct'"
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_soyeulylich']" [keyUpload]="'direct'"
                                         [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
                             </div>
@@ -557,7 +563,7 @@
                                     <label class="ictu-form__label">Ảnh bằng, bảng điểm TC, CĐ, ĐH (Nếu có) và học bạ
                                         THPT,BTVH</label>
 
-                                    <ovic-avata-type-multiple [formField]="f['anh_hoc_ba_uploads']" [multiple]="true"
+                                    <ovic-avata-type-multiple [disabled]="isReadOnly()" [formField]="f['anh_hoc_ba_uploads']" [multiple]="true"
                                         [accept]="'.jpg,.png,.jpeg'"></ovic-avata-type-multiple>
                                 </div>
                             </div>
@@ -570,6 +576,7 @@
         </div>
 
     </div>
+    @if (!isReadOnly()) {
     <div class="form-ctn_f" [formGroup]="formData">
         @if (!dataId) {
         <button (click)="closeForm()" class="btn ictu-badge-btn--secondary" mat-flat-button>
@@ -589,6 +596,7 @@
             <span>{{ dataId ? 'Cập nhật' : 'Thêm mới' }}</span>
         </button>
     </div>
+    }
 </div>
 }
 

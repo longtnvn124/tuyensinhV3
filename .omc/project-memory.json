@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1787107835345,
-  "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
+  "lastScanned": 1787216976849,
+  "projectRoot": "D:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
     "frameworks": [],
@@ -9,7 +9,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd frontend && npx tsc --noEmit -p tsconfig.app.json 2>&1 | grep -c \"error TS\"; echo \"---DONE---\"",
+    "buildCommand": null,
     "testCommand": null,
     "lintCommand": null,
     "devCommand": null,
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1787107835292,
+      "lastAccessed": 1787216976821,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1787107835293,
+      "lastAccessed": 1787216976821,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,7 +56,7 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1787107835294,
+      "lastAccessed": 1787216976822,
       "keyFiles": [
         "api-outsite.md",
         "chuanhoa-database.md",
@@ -69,39 +69,39 @@
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1787107835295,
+      "lastAccessed": 1787216976823,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 259,
-      "lastAccessed": 1787215677617,
+      "accessCount": 265,
+      "lastAccessed": 1787237516476,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
-      "accessCount": 243,
-      "lastAccessed": 1787126060607,
+      "accessCount": 252,
+      "lastAccessed": 1787219827664,
       "type": "file"
     },
     {
       "path": "frontend\\src\\app",
-      "accessCount": 225,
-      "lastAccessed": 1787193824192,
+      "accessCount": 235,
+      "lastAccessed": 1787238616142,
       "type": "directory"
     },
     {
       "path": "",
-      "accessCount": 221,
-      "lastAccessed": 1787211699619,
+      "accessCount": 234,
+      "lastAccessed": 1787238923039,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.html",
-      "accessCount": 122,
-      "lastAccessed": 1787126122715,
+      "accessCount": 130,
+      "lastAccessed": 1787220109822,
       "type": "file"
     },
     {
@@ -112,14 +112,14 @@
     },
     {
       "path": "frontend\\src\\app\\services\\tuyensinh\\hoso-thisinh.service.ts",
-      "accessCount": 78,
-      "lastAccessed": 1787133531530,
+      "accessCount": 79,
+      "lastAccessed": 1787238564175,
       "type": "file"
     },
     {
       "path": "frontend\\src\\app\\models\\tuyensinh\\hoso-thisinh.ts",
-      "accessCount": 72,
-      "lastAccessed": 1787133591639,
+      "accessCount": 73,
+      "lastAccessed": 1787238596242,
       "type": "file"
     },
     {
@@ -130,8 +130,8 @@
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso",
-      "accessCount": 51,
-      "lastAccessed": 1787022325090,
+      "accessCount": 54,
+      "lastAccessed": 1787219807872,
       "type": "directory"
     },
     {
@@ -142,8 +142,8 @@
     },
     {
       "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
-      "accessCount": 29,
-      "lastAccessed": 1787133767833,
+      "accessCount": 30,
+      "lastAccessed": 1787238563171,
       "type": "file"
     },
     {
@@ -178,8 +178,8 @@
     },
     {
       "path": "frontend\\src\\app\\services\\tuyensinh\\api-outsite.service.ts",
-      "accessCount": 22,
-      "lastAccessed": 1787045996263,
+      "accessCount": 23,
+      "lastAccessed": 1787238562802,
       "type": "file"
     },
     {
@@ -202,8 +202,8 @@
     },
     {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-multiple\\ovic-avata-type-multiple.component.html",
-      "accessCount": 16,
-      "lastAccessed": 1785204573274,
+      "accessCount": 17,
+      "lastAccessed": 1787219398423,
       "type": "file"
     },
     {
@@ -226,8 +226,8 @@
     },
     {
       "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.html",
-      "accessCount": 13,
-      "lastAccessed": 1785204667282,
+      "accessCount": 14,
+      "lastAccessed": 1787219398255,
       "type": "file"
     },
     {
@@ -243,16 +243,16 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\pages",
+      "accessCount": 11,
+      "lastAccessed": 1787238596553,
+      "type": "directory"
+    },
+    {
       "path": "frontend\\src\\app\\components\\parent-component\\parent-component.ts",
       "accessCount": 10,
       "lastAccessed": 1785209383462,
       "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages",
-      "accessCount": 10,
-      "lastAccessed": 1786987301612,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\utilities\\helper.ts",
@@ -309,6 +309,12 @@
       "type": "directory"
     },
     {
+      "path": "frontend\\src\\environments\\deployment.ts",
+      "accessCount": 4,
+      "lastAccessed": 1787238596449,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src\\app\\services\\media.service.ts",
       "accessCount": 3,
       "lastAccessed": 1784518465098,
@@ -318,12 +324,6 @@
       "path": "frontend\\src\\app\\components\\parent-component\\parent-component.html",
       "accessCount": 3,
       "lastAccessed": 1785203392280,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\environments\\deployment.ts",
-      "accessCount": 3,
-      "lastAccessed": 1786074437456,
       "type": "file"
     },
     {

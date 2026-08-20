@@ -73,6 +73,22 @@ describe('FormThongtinDangkyComponent status access', () => {
         expect(createComponent('staff').canUpdateStatus()).toBeFalse();
     });
 
+    it('disables the entire form for reviewer', () => {
+        const component = createComponent('reviewer');
+
+        expect(component.formData.disabled).toBeTrue();
+    });
+
+    it('does not submit updates for reviewer', () => {
+        const component = createComponent('reviewer');
+        component.dataId = 12;
+
+        component.submitData();
+
+        expect(hosoService.updateTuyensinh).not.toHaveBeenCalled();
+        expect(hosoService.addTuyensinh).not.toHaveBeenCalled();
+    });
+
     it('builds status options from TH_XETTUYEN', () => {
         const component = createComponent('admin');
 

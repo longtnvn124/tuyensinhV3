@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"npx tsc --noEmit -p \\\"frontend/tsconfig.app.json\\\"\",\"timeout\":600000,\"description\":\"Type-check frontend with project config\",\"run_in_background\":false,\"dangerouslyDisableSandbox\":false}",
-  "error": "Exit code 1\n\n\u001b[41m                                                                               \u001b[0m\n\u001b[41m\u001b[37m                This is not the tsc command you are looking for                \u001b[0m\n\u001b[41m                                                                               \u001b[0m\n\nTo get access to the TypeScript compiler, \u001b[34mtsc\u001b[0m, from the command line either:\n\n- Use \u001b[1mnpm install typescript\u001b[0m to first add TypeScript to your project \u001b[1mbefore\u001b[0m using npx\n- Use \u001b[1myarn\u001b[0m to avo...",
-  "timestamp": "2026-08-20T07:41:13.737Z",
+  "tool_name": "Agent",
+  "tool_input_preview": "{\"description\":\"Khảo sát router service\",\"prompt\":\"Chỉ nghiên cứu, không sửa file. Trong repo hiện tại D:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh, khảo sát cấu trúc frontend Angular liên quan đến việc...",
+  "error": "Failed to create worktree: Preparing worktree (new branch 'worktree-agent-ad22e64258c80b746')\nerror: unable to create file frontend/src/app/pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/components/edit-course-lesson-structure-media-upload/edit-course-lesson-structure-media-model.ts: Filename too long\nfatal: Could not reset index file to revision 'HEAD'.",
+  "timestamp": "2026-08-20T14:51:34.731Z",
   "retry_count": 1
 }

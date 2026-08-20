@@ -85,10 +85,29 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     private readonly exportRoles: SysRoleName[] = ['admin', 'direction', 'manager'];
 
+    private isReviewer(): boolean {
+        return this.auth.userHasRole(['reviewer']);
+    }
+
+    private createPermissionControl(): IctuPermissionControl {
+        const menuPermission = this.auth.getUserPermission(this.getPermissionMenuId());
+        if (!this.isReviewer()) return new IctuPermissionControl(menuPermission);
+
+        return new IctuPermissionControl({
+            view: true,
+            create: false,
+            update: false,
+            delete: false,
+        });
+    }
+
     permissionControl: Signal<IctuPermissionControl> = signal<IctuPermissionControl>(
-        new IctuPermissionControl(this.auth.getUserPermission(this.getPermissionMenuId())),
+        this.createPermissionControl(),
     );
-    readonly canExport = computed((): boolean => this.auth.userHasRole(this.exportRoles));
+    readonly canExport = computed((): boolean =>
+        !this.isReviewer() && this.auth.userHasRole(this.exportRoles),
+    );
+    readonly canViewApplication = computed((): boolean => this.isReviewer());
     readonly exportLoading = signal(false);
 
     // ── Search / Filter ─────────────────────────────────────────
@@ -172,6 +191,11 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     viewDetailVisible: WritableSignal<boolean> = signal<boolean>(false);
     viewDetailData: WritableSignal<HosoThisinh | null> = signal<HosoThisinh | null>(null);
+
+    // ── View application drawer ─────────────────────────────────
+
+    readonly viewDrawerVisible = signal<boolean>(false);
+    readonly viewData = signal<HosoThisinh | null>(null);
 
     // ── Edit drawer ────────────────────────────────────────────
 
@@ -278,13 +302,13 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         const userId = this.auth.user?.id;
 
         // Staff / nhân viên đối tác chỉ xem hồ sơ được phân công cho chính mình
-        if (this.auth.userHasRole(this.assignedViewRoles)) {
+        if (!this.isReviewer() && this.auth.userHasRole(this.assignedViewRoles)) {
             conditions.push({
                 conditionName: 'nguoi_tuvan',
                 value: `${userId ?? ''}`,
                 condition: IctuQueryCondition.equal,
             });
-        } else if (this.auth.userHasRole(this.ownedViewRoles)) {
+        } else if (!this.isReviewer() && this.auth.userHasRole(this.ownedViewRoles)) {
             // Đối tác chỉ xem hồ sơ do chính mình tạo
             conditions.push({
                 conditionName: 'created_by',
@@ -414,6 +438,15 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.eventObserver$.next({ name: 'OPEN_FORM_UPDATE', data });
     }
 
+    viewApplication(data: HosoThisinh): void {
+        if (!this.canViewApplication()) {
+            this.notification.toastError('Bạn không có quyền xem hồ sơ xét tuyển');
+            return;
+        }
+        this.viewData.set({ ...data });
+        this.viewDrawerVisible.set(true);
+    }
+
     deleteItem(data: HosoThisinh): void {
         if (!this.permissionControl().canDelete) {
             this.notification.toastError('Bạn không có quyền xóa hồ sơ xét tuyển');
@@ -451,7 +484,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     }
 
     onExportData(): void {
-        if (!this.auth.userHasRole(this.exportRoles)) {
+        if (!this.canExport()) {
             this.notification.toastError('Bạn không có quyền xuất dữ liệu hồ sơ');
             return;
         }

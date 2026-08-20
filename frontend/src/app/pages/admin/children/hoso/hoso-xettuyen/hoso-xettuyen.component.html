@@ -141,11 +141,14 @@
                                                     <span>Quá trình tư vấn</span>
                                                 </li>
                                                 <li class="popover-menu__divider"></li>
-                                                <!-- <li class="popover-menu__item"
-                                                    (click)="btnevent.hide(); viewDetail(row)">
+                                                @if (canViewApplication()) {
+                                                <li class="popover-menu__item"
+                                                    (click)="btnevent.hide(); viewApplication(row)">
                                                     <i class="ti ti-file-text"></i>
                                                     <span>Xem hồ sơ</span>
-                                                </li> -->
+                                                </li>
+                                                <li class="popover-menu__divider"></li>
+                                                }
                                                 @if (permissionControl().canUpdate) {
                                                 <li class="popover-menu__item" (click)="btnevent.hide(); editItem(row)">
                                                     <i class="ti ti-edit"></i>
@@ -218,6 +221,19 @@
     @if (editData(); as record) {
     <app-form-thongtin-dangky [data]="record" (saved)="onEditSaved()"
         (cancel)="onEditSaved()"></app-form-thongtin-dangky>
+    }
+</p-drawer>
+
+<p-drawer #formView [(visible)]="viewDrawerVisible" [style]="{'width':'1024px', 'max-width':'100%'}" appendTo="body"
+    position="right" (onHide)="viewData.set(null)">
+
+    <ng-template #header let-headerClass="class">
+        <div style="font-size: 16px; font-weight: 600;">
+            {{viewData()?.ho_va_ten ? viewData()!.ho_va_ten + ' > Xem hồ sơ' : 'Xem hồ sơ'}}
+        </div>
+    </ng-template>
+    @if (viewData(); as record) {
+    <app-form-thongtin-dangky [data]="record" [readOnly]="true"></app-form-thongtin-dangky>
     }
 </p-drawer>
 
@@ -386,7 +402,8 @@
 <p-drawer [(visible)]="consultationDrawerVisible" [dismissible]="true"
     [header]="selectedConsultationHoso()?.ho_va_ten ?? 'Quá trình tư vấn'"
     [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
-    <app-tuvan-tuyensinh [hoso]="selectedConsultationHoso()" />
+    <app-tuvan-tuyensinh [hoso]="selectedConsultationHoso()"
+        [readOnly]="!permissionControl().canUpdate" />
 </p-drawer>
 
 <!-- ── Drawer: Xem hồ sơ ── -->
