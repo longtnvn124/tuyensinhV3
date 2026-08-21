@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1787216976849,
-  "projectRoot": "D:\\data\\project\\angular\\v19\\tuyensinh",
+  "lastScanned": 1787319378232,
+  "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
     "frameworks": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1787216976821,
+      "lastAccessed": 1787319378210,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1787216976821,
+      "lastAccessed": 1787319378211,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,7 +56,7 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1787216976822,
+      "lastAccessed": 1787319378211,
       "keyFiles": [
         "api-outsite.md",
         "chuanhoa-database.md",
@@ -69,21 +69,27 @@
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1787216976823,
+      "lastAccessed": 1787319378212,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 288,
-      "lastAccessed": 1787278038485,
+      "accessCount": 291,
+      "lastAccessed": 1787299387861,
+      "type": "directory"
+    },
+    {
+      "path": "frontend\\src\\app",
+      "accessCount": 255,
+      "lastAccessed": 1787299889233,
       "type": "directory"
     },
     {
       "path": "",
-      "accessCount": 253,
-      "lastAccessed": 1787298965969,
+      "accessCount": 255,
+      "lastAccessed": 1787299889378,
       "type": "directory"
     },
     {
@@ -91,12 +97,6 @@
       "accessCount": 252,
       "lastAccessed": 1787219827664,
       "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app",
-      "accessCount": 251,
-      "lastAccessed": 1787298995426,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.html",
@@ -118,8 +118,8 @@
     },
     {
       "path": "frontend\\src\\app\\models\\tuyensinh\\hoso-thisinh.ts",
-      "accessCount": 74,
-      "lastAccessed": 1787299012382,
+      "accessCount": 75,
+      "lastAccessed": 1787299421567,
       "type": "file"
     },
     {
@@ -189,6 +189,12 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
+      "accessCount": 19,
+      "lastAccessed": 1787299057697,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.css",
       "accessCount": 18,
       "lastAccessed": 1784864031375,
@@ -198,12 +204,6 @@
       "path": "frontend\\src\\app\\models\\external-api.ts",
       "accessCount": 18,
       "lastAccessed": 1787103198678,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
-      "accessCount": 18,
-      "lastAccessed": 1787245126100,
       "type": "file"
     },
     {

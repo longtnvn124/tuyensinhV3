@@ -1,9 +1,9 @@
 import packageInfo from '../../package.json';
 import { Environment } from '@environmentModel';
-import { DEPLOYMENTS_FOR_PRODUCTION } from './deployment';
+import { DEPLOYMENTS_FOR_DEV } from './deployment';
 
 export const environment : Environment = {
     appVersion : packageInfo.version ,
     production : true ,
-    deployment : DEPLOYMENTS_FOR_PRODUCTION[ 'ams.ictu.vn' ]
+    deployment : DEPLOYMENTS_FOR_DEV[ 'server_online' ]
 };

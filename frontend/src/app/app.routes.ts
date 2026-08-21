@@ -10,7 +10,6 @@ export const routes : Routes = [
 	// } ,
 	{
 		path          : 'home' ,
-		pathMatch  : 'full',
 		loadComponent : () => import('@pages/dang-ky-xet-tuyen/dang-ky-xet-tuyen.component')
 			.then( component => component.DangKyXetTuyenComponent )
 	} ,

@@ -382,6 +382,18 @@
       "accessCount": 1,
       "lastAccessed": 1787197271294,
       "type": "directory"
+    },
+    {
+      "path": "src\\app\\pages\\dang-ky-xet-tuyen\\dang-ky-xet-tuyen.component.css",
+      "accessCount": 1,
+      "lastAccessed": 1787324979415,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\dang-ky-xet-tuyen\\dang-ky-xet-tuyen.component.html",
+      "accessCount": 1,
+      "lastAccessed": 1787324979480,
+      "type": "file"
     }
   ],
   "userDirectives": []

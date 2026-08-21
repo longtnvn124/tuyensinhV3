@@ -38,6 +38,7 @@ describe('HoidongHosoXetduyetComponent', () => {
     beforeEach(() => {
         assignmentService.query.calls.reset();
         hosoService.query.calls.reset();
+        hosoService.update.calls.reset();
         dotXettuyenService.get.calls.reset();
         exportService.exportExcel.calls.reset();
         notificationService.toastError.calls.reset();
@@ -96,6 +97,41 @@ describe('HoidongHosoXetduyetComponent', () => {
         fixture.detectChanges();
 
         expect(fixture.nativeElement.textContent).not.toContain('Chương trình đào tạo');
+    });
+
+    it('sends approval status with the review time', () => {
+        hosoService.update.and.returnValue(of(undefined));
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.detectChanges();
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            hoso_id: 21,
+        } as never]);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+        fixture.componentInstance.onApproveSelected();
+
+        const payload = hosoService.update.calls.mostRecent().args[1];
+        expect(hosoService.update).toHaveBeenCalledOnceWith(21, jasmine.objectContaining({ status: 3 }));
+        expect(payload.ngay_duyet).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    });
+
+    it('sends cancellation status with the review time', () => {
+        hosoService.update.and.returnValue(of(undefined));
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.detectChanges();
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            hoso_id: 21,
+        } as never]);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+
+        fixture.componentInstance.onCancelApprovalSelected();
+
+        const payload = hosoService.update.calls.mostRecent().args[1];
+        expect(hosoService.update).toHaveBeenCalledOnceWith(21, jasmine.objectContaining({ status: -1 }));
+        expect(payload.ngay_duyet).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
     });
 
     it('maps the loaded council data and exports the workbook payload', fakeAsync(() => {

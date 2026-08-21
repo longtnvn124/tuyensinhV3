@@ -1,0 +1,31 @@
+export const url_servers = {
+    key_server: 'dev',
+    realm: 'tuyensinh',
+    port: '10091',
+    port_socket: '10092',
+    host: ['h', 't', 't', 'p', 's', ':', '/', '/', 'a', 'p', 'i', '-', 'd', 'e', 'v', '.', 'i', 'c', 't', 'u', '.', 'v', 'n'],
+    ws_url: ['w', 's', 's', ':', '/', '/', 'a', 'p', 'i', '-', 'd', 'e', 'v', '.', 'i', 'c', 't', 'u', '.', 'v', 'n'],
+    pageTitle: 'Hệ thống quản lý dữ liệu tuyển sinh đào tạo từ xa',
+    X_APP_ID: '0645451e-3396-41eb-8d02-ae39cb030cdd',
+    localhost: '0645451e-3396-41eb-8d02-ae39cb030cdd',
+    google_client_id: '973389896263-11sa03rtspsn2fap5uo160l3opa7n62t.apps.googleusercontent.com',
+    ketServer_api: `https://apps.ictu.vn:9081/tracnghiem_ket/api/v1/`,
+    thikhacServer_api: `https://apps.ictu.vn:9081/thikhac/api/v1/`,
+    driveFolders_id: '1LT5vL0AAVy3NxLGkNB7-OAX4cSiNcjSA',
+    lectureData_id: '1pZnWJlW4C3WQsKq4B90gmCL8ORsCf3yj',
+    studentData_id: '1ziFcZenGCf_qQDHkjwA7aLyPBde0od0N',
+    driveImage_id: '1KaWFZTpECwlanpYovIapqWFIinsnTUVw',
+    driveVideo_id: '1qzXI3D0OEnelcgOjbEtHQYJ6KTv0EM92',
+    video_marker: true,
+    donviquanly: 'Đại Học Thái Nguyên',
+    donvitructhuoc: 'Trường Đại Học CNTT & TT',
+    class_main: '',
+    file_server: 'serverDttx',
+    title: 'DTKH-ICTU',
+    domain: 'dtkh.ictu.edu.vn',
+    codeByLvl: true,
+    unlimitLesson: false,
+    appVersion: '2.0.00'
+}
+
+

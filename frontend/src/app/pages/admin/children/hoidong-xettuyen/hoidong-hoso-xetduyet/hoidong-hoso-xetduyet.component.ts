@@ -36,6 +36,7 @@ import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { DOI_TUONG, GENDER, TH_XETTUYEN } from '@utilities/syscats';
+import dayjs from 'dayjs';
 import Decimal from 'decimal.js';
 import { Popover } from 'primeng/popover';
 import {
@@ -348,6 +349,7 @@ export class HoidongHosoXetduyetComponent {
         if (!selectedRecords.length) return;
 
         const total = selectedRecords.length;
+        const reviewTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
         this.actionLoading.set(true);
         this.notification.progressBarWithPercent(this.progress$.asObservable(), config.progressHeading);
         this.progress$.next(0);
@@ -355,7 +357,10 @@ export class HoidongHosoXetduyetComponent {
         from(selectedRecords).pipe(
             mergeMap(
                 (record: HoidongHosoThisinh): Observable<StatusUpdateItemResult> =>
-                    this.hosoService.update(record.hoso_id, { status: config.status }).pipe(
+                    this.hosoService.update(record.hoso_id, {
+                        status: config.status,
+                        ngay_duyet: reviewTime,
+                    }).pipe(
                         map((): StatusUpdateItemResult => ({ success: true })),
                         catchError((error: unknown): Observable<StatusUpdateItemResult> => of({
                             success: false,

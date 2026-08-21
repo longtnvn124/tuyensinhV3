@@ -16,6 +16,7 @@ export interface HosoThisinh extends IctuBaseModel {
     dan_toc?: string;
     status: HosoStatus;
     status_connent: number;
+    ngay_duyet?: string;
 
     cccd?: string;
     ngay_cap_cccd?: string;

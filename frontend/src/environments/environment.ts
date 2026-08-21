@@ -6,4 +6,5 @@ export const environment : Environment = {
     appVersion : packageInfo.version ,
     production : false ,
     deployment : DEPLOYMENTS_FOR_DEV[ 'server_dev' ]
+    // deployment : DEPLOYMENTS_FOR_DEV[ 'server_online' ]
 };
