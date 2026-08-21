@@ -1,3 +1,4 @@
+import { HttpContext } from '@angular/common/http';
 import { Observable } from "rxjs";
 import { DtoObject , IctuConditionParam , IctuQueryParams } from "@models/dto";
 import { IctuPermissionInfo , UserPermission } from "@models/auth";
@@ -15,10 +16,10 @@ export interface IctuBaseModel {
 }
 
 export interface IctuBaseService<T> {
-	create : ( info : Partial<T> ) => Observable<number>;
+	create : ( info : Partial<T> , context? : HttpContext ) => Observable<number>;
 	update : ( id : number , info : Partial<T> ) => Observable<any>;
 	delete : ( id : number ) => Observable<any>;
-	query : ( conditions : IctuConditionParam[] , queryParams? : IctuQueryParams ) => Observable<DtoObject<T[]>>
+	query : ( conditions : IctuConditionParam[] , queryParams? : IctuQueryParams , subpath? : string , context? : HttpContext ) => Observable<DtoObject<T[]>>
 }
 
 export class IctuPermissionControl implements IctuPermissionInfo {

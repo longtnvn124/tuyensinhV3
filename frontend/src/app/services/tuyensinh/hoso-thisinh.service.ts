@@ -1,3 +1,4 @@
+import { HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IctuBaseServiceClass } from '@models/ictu-base-service.class';
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
@@ -27,8 +28,8 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
 	updateTuyensinh(id: number, data: Partial<HosoThisinh>): Observable<any> {
 		return this.update(id, data);
 	}
-	addTuyensinh(data: Partial<HosoThisinh>): Observable<number> {
-		return this.create(data);
+	addTuyensinh(data: Partial<HosoThisinh>, context?: HttpContext): Observable<number> {
+		return this.create(data, context);
 	}
     constructor() {
         super('hoso-tuyensinh');

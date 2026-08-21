@@ -76,8 +76,14 @@
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 265,
-      "lastAccessed": 1787237516476,
+      "accessCount": 288,
+      "lastAccessed": 1787278038485,
+      "type": "directory"
+    },
+    {
+      "path": "",
+      "accessCount": 253,
+      "lastAccessed": 1787298965969,
       "type": "directory"
     },
     {
@@ -88,14 +94,8 @@
     },
     {
       "path": "frontend\\src\\app",
-      "accessCount": 235,
-      "lastAccessed": 1787238616142,
-      "type": "directory"
-    },
-    {
-      "path": "",
-      "accessCount": 234,
-      "lastAccessed": 1787238923039,
+      "accessCount": 251,
+      "lastAccessed": 1787298995426,
       "type": "directory"
     },
     {
@@ -112,14 +112,14 @@
     },
     {
       "path": "frontend\\src\\app\\services\\tuyensinh\\hoso-thisinh.service.ts",
-      "accessCount": 79,
-      "lastAccessed": 1787238564175,
+      "accessCount": 85,
+      "lastAccessed": 1787299012408,
       "type": "file"
     },
     {
       "path": "frontend\\src\\app\\models\\tuyensinh\\hoso-thisinh.ts",
-      "accessCount": 73,
-      "lastAccessed": 1787238596242,
+      "accessCount": 74,
+      "lastAccessed": 1787299012382,
       "type": "file"
     },
     {
@@ -142,21 +142,21 @@
     },
     {
       "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
-      "accessCount": 30,
-      "lastAccessed": 1787238563171,
+      "accessCount": 34,
+      "lastAccessed": 1787243861784,
       "type": "file"
+    },
+    {
+      "path": "frontend",
+      "accessCount": 32,
+      "lastAccessed": 1787246875951,
+      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.md",
       "accessCount": 28,
       "lastAccessed": 1785780080719,
       "type": "file"
-    },
-    {
-      "path": "frontend",
-      "accessCount": 28,
-      "lastAccessed": 1787021660346,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\services\\ictu-file.service.ts",
@@ -201,6 +201,12 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
+      "accessCount": 18,
+      "lastAccessed": 1787245126100,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-multiple\\ovic-avata-type-multiple.component.html",
       "accessCount": 17,
       "lastAccessed": 1787219398423,
@@ -214,14 +220,8 @@
     },
     {
       "path": "frontend\\src\\app\\models\\dto.ts",
-      "accessCount": 14,
-      "lastAccessed": 1787133767773,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
-      "accessCount": 14,
-      "lastAccessed": 1787193035307,
+      "accessCount": 15,
+      "lastAccessed": 1787239413051,
       "type": "file"
     },
     {
@@ -285,6 +285,18 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\environments\\deployment.ts",
+      "accessCount": 5,
+      "lastAccessed": 1787243002950,
+      "type": "file"
+    },
+    {
+      "path": "frontend\\src\\environments",
+      "accessCount": 5,
+      "lastAccessed": 1787243029183,
+      "type": "directory"
+    },
+    {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-thpt\\ovic-avata-type-thpt.component.ts",
       "accessCount": 4,
       "lastAccessed": 1785125714242,
@@ -297,22 +309,10 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\environments",
-      "accessCount": 4,
-      "lastAccessed": 1786074481092,
-      "type": "directory"
-    },
-    {
       "path": "frontend\\src\\app\\utilities",
       "accessCount": 4,
       "lastAccessed": 1787133885303,
       "type": "directory"
-    },
-    {
-      "path": "frontend\\src\\environments\\deployment.ts",
-      "accessCount": 4,
-      "lastAccessed": 1787238596449,
-      "type": "file"
     },
     {
       "path": "frontend\\src\\app\\services\\media.service.ts",

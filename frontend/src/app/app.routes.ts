@@ -3,6 +3,17 @@ import { PreviewComponent , previewRoutes } from '@pages/preview';
 import { adminGuard } from '@guards/admin.guard';
 
 export const routes : Routes = [
+	// {
+	// 	path       : '' ,
+	// 	redirectTo : 'dang-ky-xet-tuyen' ,
+	// 	pathMatch  : 'full'
+	// } ,
+	{
+		path          : 'home' ,
+		pathMatch  : 'full',
+		loadComponent : () => import('@pages/dang-ky-xet-tuyen/dang-ky-xet-tuyen.component')
+			.then( component => component.DangKyXetTuyenComponent )
+	} ,
 	{
 		path         : 'admin' ,
 		canActivate  : [ adminGuard ] ,
@@ -29,7 +40,7 @@ export const routes : Routes = [
 	} ,
 	{
 		path       : '**' ,
-		redirectTo : '/auth/login' ,
+		redirectTo : 'home' ,
 		pathMatch  : 'full'
 	}
 ];

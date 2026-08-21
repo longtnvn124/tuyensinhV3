@@ -1,3 +1,4 @@
+import { HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { IctuBaseServiceClass } from '@models/ictu-base-service.class';
 import {
@@ -26,6 +27,7 @@ export class NganhhocService extends IctuBaseServiceClass<Nganhhoc> {
     load(
         info: NganhhocSearchInfo,
         _queryParams?: Partial<IctuQueryParams>,
+        context?: HttpContext,
     ): Observable<DtoObject<Nganhhoc[]>> {
         const queryParams: IctuQueryParams = {
             limit: 20,
@@ -52,7 +54,7 @@ export class NganhhocService extends IctuBaseServiceClass<Nganhhoc> {
                 },
             );
         }
-        return this.query(conditions, queryParams);
+        return this.query(conditions, queryParams, '', context);
     }
 
 }

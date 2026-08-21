@@ -17,6 +17,7 @@ import { deleteToken , refreshTokenGetter } from "@app/app.config";
 import { Helper } from "@utilities/helper";
 import { NotificationService } from "@services//notification.service";
 import { RefreshTokenService } from "@services//refresh-token.service";
+import { PUBLIC_HTTP_REQUEST } from '@app/interceptor/public-http-request';
 
 type IctuHttpHandler = ( request : HttpRequest<unknown> , next : HttpHandlerFn , notification : NotificationService , refreshTokenService : RefreshTokenService , router : Router , httpSignatureGenerator : HttpSignatureGeneratorFn ) => Observable<HttpEvent<any>>
 
@@ -152,6 +153,9 @@ const sendHttpRequest : IctuHttpHandler = ( request : HttpRequest<unknown> , nex
 			return of( res );
 		} ) ,
 		catchError( ( res : HttpErrorResponse ) : Observable<never> | Observable<HttpEvent<any>> => {
+			if ( request.context.get( PUBLIC_HTTP_REQUEST ) ) {
+				return throwError( () : HttpErrorResponse => res );
+			}
 			if ( res.error instanceof ErrorEvent ) {
 				return throwError( () : HttpErrorResponse => res );
 			}

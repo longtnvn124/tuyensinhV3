@@ -1,4 +1,5 @@
-import { HttpRequest } from "@angular/common/http";
+import { HttpRequest } from '@angular/common/http';
+import { PUBLIC_HTTP_REQUEST } from '@app/interceptor/public-http-request';
 import { inject , InjectionToken } from "@angular/core";
 import { tokenGetter } from "@app/app.config";
 import { ENVIRONMENT , getHostDomain } from "@env";
@@ -30,12 +31,17 @@ export const httpSignatureGenerator : HttpSignatureGeneratorFn = ( request : Htt
 	const IctuHttpHeaderParamHandler : IctuHttpHeaderParamHandlerType = inject<IctuHttpHeaderParamHandlerType>( ICTU_HTTP_HEADER_PARAM_HANDLER );
 	const _d : string                                                 = inject<string>( APP_SIGNING_DATE );
 	if ( request && request.url.startsWith( getHostDomain() ) && ! ( request.method === 'GET' && ( new URL( request.url ).pathname.replace( /\//g , '' ) === 'datetime' ) ) ) {
+		if ( request.context.get( PUBLIC_HTTP_REQUEST ) ) {
+			request = request.clone( { headers : request.headers.delete( 'Authorization' ) } );
+		}
 		const setHeaders : {
 			[ name : string ] : string
 		} = Object.keys( IctuHttpHeaderParamHandler ).reduce( ( reducer : {
 			[ name : string ] : string
 		} , key : string ) : { [ name : string ] : string } => {
-			reducer[ key ] = IctuHttpHeaderParamHandler[ key as IctuHttpHeaderParams ]( request , crc32 , _d )
+			if ( key !== 'Authorization' || ! request.context.get( PUBLIC_HTTP_REQUEST ) ) {
+					reducer[ key ] = IctuHttpHeaderParamHandler[ key as IctuHttpHeaderParams ]( request , crc32 , _d )
+				}
 			return reducer;
 		} , {} );
 		if ( request.params.has( 'limit' ) && request.params.get( 'limit' )?.toString() === '-1' ) {

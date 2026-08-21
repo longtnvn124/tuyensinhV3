@@ -1,0 +1,240 @@
+<main class="registration-page" aria-labelledby="registration-title">
+    <div class="ambient-shape ambient-shape-one" aria-hidden="true"></div>
+    <div class="ambient-shape ambient-shape-two" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <a class="brand" href="/home" aria-label="Trang đăng ký xét tuyển ICTU">
+            <img src="/images/logo-ictu.png" alt="Logo ICTU">
+            <span class="brand-copy">
+                <strong>ICTU</strong>
+                <span>Trường đại học Công nghệ Thông tin<br>và Truyền thông</span>
+            </span>
+        </a>
+        <button type="button" class="login-link" (click)="openLogin()">
+            <i class="pi pi-user" aria-hidden="true"></i>
+            <span>Đăng nhập cán bộ</span>
+        </button>
+    </header>
+
+    <section class="registration-layout">
+        <div class="hero-content">
+            <p class="eyebrow"><span></span>Tuyển sinh ICTU</p>
+            <h1 id="registration-title">
+                Khởi đầu hành trình<br>
+                <em>công nghệ của bạn.</em>
+            </h1>
+            <p class="hero-description">
+                Để lại thông tin, đội ngũ tư vấn tuyển sinh ICTU sẽ đồng hành cùng bạn chọn ngành học phù hợp và giải đáp mọi thắc mắc.
+            </p>
+
+            <div class="benefit-list" aria-label="Lợi ích đăng ký tư vấn">
+                <div class="benefit-item">
+                    <span class="benefit-number">01</span>
+                    <span>Tư vấn đúng ngành<br>theo năng lực</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-number">02</span>
+                    <span>Thông tin chính xác<br>từ nhà trường</span>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-number">03</span>
+                    <span>Hỗ trợ nhanh chóng<br>và bảo mật</span>
+                </div>
+            </div>
+        </div>
+
+        <article class="form-card" aria-labelledby="form-title">
+            <div class="card-accent" aria-hidden="true"></div>
+            <div class="form-heading">
+                <div>
+                    <p class="form-kicker">Thông tin đăng ký</p>
+                    <h2 id="form-title">Nhận tư vấn xét tuyển</h2>
+                </div>
+                <span class="admission-year">2026</span>
+            </div>
+            <p class="required-note"><span>*</span> Thông tin bắt buộc</p>
+
+            @if (loadState() === 'loading') {
+                <div class="state-panel" role="status" aria-live="polite">
+                    <p-progress-spinner ariaLabel="Đang tải dữ liệu đăng ký" strokeWidth="4" />
+                    <p>Đang chuẩn bị biểu mẫu...</p>
+                </div>
+            } @else if (loadState() === 'error') {
+                <div class="state-panel error-panel" role="alert">
+                    <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+                    <h3>Chưa thể tải biểu mẫu</h3>
+                    <p>Vui lòng kiểm tra kết nối và thử lại.</p>
+                    <button type="button" class="retry-button" (click)="loadLookups()">
+                        <i class="pi pi-refresh" aria-hidden="true"></i>
+                        Thử lại
+                    </button>
+                </div>
+            } @else {
+                @if (submitState() === 'success') {
+                    <div class="success-note" role="status" aria-live="polite">
+                        <i class="pi pi-check-circle" aria-hidden="true"></i>
+                        <span>Thông tin đã được ghi nhận. Nhà trường sẽ sớm liên hệ với bạn.</span>
+                    </div>
+                }
+
+                <form [formGroup]="registrationForm" (ngSubmit)="submit()" novalidate>
+                    <div class="field field-full">
+                        <label for="nganh_id">Ngành bạn quan tâm <span>*</span></label>
+                        <div class="select-wrap">
+                            <select
+                                id="nganh_id"
+                                formControlName="nganh_id"
+                                [attr.aria-invalid]="registrationForm.controls.nganh_id.invalid && registrationForm.controls.nganh_id.touched"
+                                [attr.aria-describedby]="registrationForm.controls.nganh_id.invalid && registrationForm.controls.nganh_id.touched ? 'nganh_id-error' : null"
+                            >
+                                <option [ngValue]="null" disabled>Chọn ngành đăng ký</option>
+                                @for (major of majors(); track major.id) {
+                                    <option [ngValue]="major.id">{{ major.name }}</option>
+                                }
+                            </select>
+                            <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                        </div>
+                        @if (registrationForm.controls.nganh_id.invalid && registrationForm.controls.nganh_id.touched) {
+                            <small id="nganh_id-error" class="field-error">Vui lòng chọn ngành đăng ký.</small>
+                        }
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="doituong">Bằng cấp cao nhất <span>*</span></label>
+                            <div class="select-wrap">
+                                <select
+                                    id="vb_chuyenmon"
+                                    formControlName="doituong"
+                                    [attr.aria-invalid]="registrationForm.controls.doituong.invalid && registrationForm.controls.doituong.touched"
+                                    [attr.aria-describedby]="registrationForm.controls.doituong.invalid && registrationForm.controls.doituong.touched ? 'doituong-error' : null"
+                                >
+                                    <option value="" disabled>Chọn bằng cấp</option>
+                                    @for (option of educationOptions; track option.value) {
+                                        <option [value]="option.value">{{ option.label }}</option>
+                                    }
+                                </select>
+                                <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                            </div>
+                            @if (registrationForm.controls.doituong.invalid && registrationForm.controls.doituong.touched) {
+                                <small id="doituong-error" class="field-error">Vui lòng chọn bằng cấp.</small>
+                            }
+                        </div>
+
+                        <div class="field">
+                            <label for="ho_va_ten">Họ và tên <span>*</span></label>
+                            <input
+                                pInputText
+                                id="ho_va_ten"
+                                type="text"
+                                formControlName="ho_va_ten"
+                                autocomplete="name"
+                                placeholder="Nguyễn Văn An"
+                                [attr.aria-invalid]="registrationForm.controls.ho_va_ten.invalid && registrationForm.controls.ho_va_ten.touched"
+                                [attr.aria-describedby]="registrationForm.controls.ho_va_ten.invalid && registrationForm.controls.ho_va_ten.touched ? 'ho_va_ten-error' : null"
+                            >
+                            @if (registrationForm.controls.ho_va_ten.invalid && registrationForm.controls.ho_va_ten.touched) {
+                                <small id="ho_va_ten-error" class="field-error">Vui lòng nhập họ và tên.</small>
+                            }
+                        </div>
+
+                        <div class="field">
+                            <label for="dia_chi_tinh">Tỉnh/Thành phố <span>*</span></label>
+                            <div class="select-wrap">
+                                <select
+                                    id="dia_chi_tinh"
+                                    formControlName="dia_chi_tinh"
+                                    [attr.aria-invalid]="registrationForm.controls.dia_chi_tinh.invalid && registrationForm.controls.dia_chi_tinh.touched"
+                                    [attr.aria-describedby]="registrationForm.controls.dia_chi_tinh.invalid && registrationForm.controls.dia_chi_tinh.touched ? 'dia_chi_tinh-error' : null"
+                                >
+                                    <option [ngValue]="null" disabled>Chọn tỉnh/thành phố</option>
+                                    @for (region of regions(); track region.id) {
+                                        <option [ngValue]="region.id">{{ region.name }}</option>
+                                    }
+                                </select>
+                                <i class="pi pi-chevron-down" aria-hidden="true"></i>
+                            </div>
+                            @if (registrationForm.controls.dia_chi_tinh.invalid && registrationForm.controls.dia_chi_tinh.touched) {
+                                <small id="dia_chi_tinh-error" class="field-error">Vui lòng chọn tỉnh/thành phố.</small>
+                            }
+                        </div>
+
+                        <div class="field">
+                            <label for="dien_thoai">Số điện thoại <span>*</span></label>
+                            <input
+                                pInputText
+                                id="dien_thoai"
+                                type="tel"
+                                inputmode="numeric"
+                                formControlName="dien_thoai"
+                                autocomplete="tel"
+                                placeholder="0912 345 678"
+                                [attr.aria-invalid]="registrationForm.controls.dien_thoai.invalid && registrationForm.controls.dien_thoai.touched"
+                                [attr.aria-describedby]="registrationForm.controls.dien_thoai.invalid && registrationForm.controls.dien_thoai.touched ? 'dien_thoai-error' : null"
+                            >
+                            @if (registrationForm.controls.dien_thoai.invalid && registrationForm.controls.dien_thoai.touched) {
+                                <small id="dien_thoai-error" class="field-error">Nhập 10 chữ số, bắt đầu bằng 0.</small>
+                            }
+                        </div>
+
+                        <div class="field field-full">
+                            <label for="email">Email <span>*</span></label>
+                            <input
+                                pInputText
+                                id="email"
+                                type="email"
+                                formControlName="email"
+                                autocomplete="email"
+                                placeholder="ban@example.com"
+                                required
+                                [attr.aria-invalid]="registrationForm.controls.email.invalid && registrationForm.controls.email.touched"
+                                [attr.aria-describedby]="registrationForm.controls.email.invalid && registrationForm.controls.email.touched ? 'email-error' : null"
+                            >
+                            @if (registrationForm.controls.email.invalid && registrationForm.controls.email.touched) {
+                                <small id="email-error" class="field-error">
+                                    {{ registrationForm.controls.email.hasError('required') ? 'Email là thông tin bắt buộc.' : 'Email chưa đúng định dạng.' }}
+                                </small>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="commitment-row">
+                        <p-checkbox inputId="cam_ket" formControlName="cam_ket" [binary]="true" />
+                        <label for="cam_ket">
+                            Tôi xác nhận thông tin trên là chính xác.
+                        </label>
+                    </div>
+                    @if (registrationForm.controls.cam_ket.invalid && registrationForm.controls.cam_ket.touched) {
+                        <small class="field-error commitment-error" role="alert">Bạn cần xác nhận trước khi gửi.</small>
+                    }
+
+                    <button
+                        pButton
+                        type="submit"
+                        class="submit-button"
+                        [disabled]="submitState() === 'submitting'"
+                    >
+                        @if (submitState() === 'submitting') {
+                            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+                            <span>Đang gửi thông tin...</span>
+                        } @else {
+                            <span>Gửi đăng ký tư vấn</span>
+                            <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+                        }
+                    </button>
+
+                    <p class="privacy-note">
+                        <i class="pi pi-lock" aria-hidden="true"></i>
+                        Thông tin của bạn được bảo mật và chỉ dùng cho mục đích tư vấn tuyển sinh.
+                    </p>
+                </form>
+            }
+        </article>
+    </section>
+
+    <footer class="site-footer">
+        <span>© 2026 ICTU</span>
+        <span class="footer-separator"></span>
+        <span>Trung tâm phần mềm</span>
+    </footer>
+</main>

@@ -31,7 +31,7 @@ describe('TuvanTuyensinhComponent readOnly', () => {
         doituong: '00',
         anh_soyeulylich: 'so-yeu-ly-lich.jpg',
         owner_by: 7,
-    } as HosoThisinh;
+    } as unknown as HosoThisinh;
     const history = { id: 3, hoso_id: 12, user_id: 7 } as LichsuTuvan;
 
     beforeEach(() => {

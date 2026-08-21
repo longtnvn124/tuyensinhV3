@@ -1,4 +1,4 @@
-import { HttpClient , HttpParams } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { ENVIRONMENT } from '@env';
 import { map , Observable } from 'rxjs';
@@ -21,8 +21,8 @@ export class IctuBaseServiceClass<T> implements IctuBaseService<T> {
         return this.http.get<DtoObject<T>>( ''.concat( this.api , id.toString( 10 ) ) , { params } ).pipe( map( ( r : DtoObject<T> ) : T => r.data ) );
     }
 
-    public create ( info : Partial<T> ) : Observable<number> {
-        return this.http.post<DtoObject<number>>( this.api , info ).pipe( map( ( r : Dto ) : number => r.data ) );
+    public create ( info : Partial<T> , context? : HttpContext ) : Observable<number> {
+        return this.http.post<DtoObject<number>>( this.api , info , { context } ).pipe( map( ( r : Dto ) : number => r.data ) );
     }
 
     public update ( id : number , info : Partial<T> ) : Observable<any> {
@@ -33,9 +33,9 @@ export class IctuBaseServiceClass<T> implements IctuBaseService<T> {
         return this.http.delete<DtoObject<any>>( ''.concat( this.api , id.toString( 10 ) ) ).pipe( map( ( r : Dto ) : any => r.data ) );
     }
 
-    public query ( conditions : IctuConditionParam[] , queryParams? : IctuQueryParams , subpath : string = '' ) : Observable<DtoObject<T[]>> {
+    public query ( conditions : IctuConditionParam[] , queryParams? : IctuQueryParams , subpath : string = '' , context? : HttpContext ) : Observable<DtoObject<T[]>> {
         const params : HttpParams = paramsConditionBuilder( conditions , new HttpParams( { fromObject : queryParams || {} } ) );
         const route : string      = subpath ? [ this.api , subpath ].join( '' ) : this.api;
-        return this.http.get<DtoObject<T[]>>( Helper.removeLastSlashes( route ) , { params } );
+        return this.http.get<DtoObject<T[]>>( Helper.removeLastSlashes( route ) , { params , context } );
     }
 }
