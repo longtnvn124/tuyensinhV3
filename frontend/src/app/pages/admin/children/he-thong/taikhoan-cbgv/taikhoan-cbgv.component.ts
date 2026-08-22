@@ -3,6 +3,7 @@ import { IctuBasePermission, IctuPermissionControl } from '@models/ictu-base-mod
 import { UserService } from '@services/user.service';
 import { PickRole, RoleService } from '@services/role.service';
 import { User } from '@models/user';
+import { SysRoleName } from '@models/role';
 import { AuthenticationService } from '@services/authentication.service';
 import { NotificationService } from '@services/notification.service';
 import { AbstractControl, FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -20,7 +21,6 @@ import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-pa
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { Parents, ParentsService } from '@app/services/tuyensinh/parents';
 import { IctuPaginatorControl } from '@app/theme/components/ictu-paginator/ictu-paginator-control';
 
 type CbgvUser = User;
@@ -52,7 +52,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
     private userService = inject(UserService);
     private roleService = inject(RoleService);
-    private parentsService = inject(ParentsService);
+  
     private auth = inject(AuthenticationService);
     private notification = inject(NotificationService);
     private fb = inject(FormBuilder);
@@ -68,7 +68,8 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
 
     isAdmin: Signal<boolean> = computed((): boolean => this.auth.userHasRole(['admin']) || this.auth.userHasRole(['direction']));
-    isDoitac: Signal<boolean> = computed((): boolean => this.auth.userHasRole(['doi-tac']));
+    isDoitac: Signal<boolean> = computed((): boolean => this.auth.userHasRole(this.doiTacRoleIds));
+    readonly doiTacRoleIds: SysRoleName[] = ['doi-tac', 'doi-tac-cv'];
 
     constructor() {
         this.formControl = new IctuFormControl2<CbgvUser>({
@@ -80,7 +81,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                 phone: ['', [Validators.required]],
                 password: ['', [Validators.minLength(8)]],
                 role_ids: [[] as number[], [Validators.required]],
-                parent_id: [null as number | null],
+              
             }),
             objectName: 'cán bộ - giảng viên',
             drawer: this.drawer,
@@ -88,14 +89,16 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
         this.handelEvent = {
             OPEN_FORM_ADD: (): void => {
+                const roleIds = this.isDoitac()
+                    ? [this.dataRoles.find(r => r.name === 'doi-tac-cv')?.id].filter((id): id is number => id !== undefined)
+                    : [];
                 this.formControl.formGroup.reset({
                     username: '',
                     display_name: '',
                     email: '',
                     phone: '',
                     password: '',
-                    role_ids: [],
-                    parent_id: null,
+                    role_ids: roleIds,
                 });
                 this.formControl.formGroup.get('username')?.enable();
                 this.formControl.formGroup.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
@@ -113,7 +116,6 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                     phone: data.phone,
                     password: '',
                     role_ids: roleIds,
-                    parent_id: (data as CbgvUser & { parent_id?: number | null }).parent_id ?? null,
                 });
                 this.formControl.formGroup.get('username')?.disable();
                 this.formControl.formGroup.get('password')?.setValidators([Validators.minLength(8)]);
@@ -137,10 +139,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                         phone: this.formField('phone').value,
                         role_ids: (this.formField('role_ids').value as number[]).map(id => id.toString()),
                     };
-                    const parentId: number | null = this.formField('parent_id' as keyof CbgvUser).value;
-                    if (parentId) {
-                        (info as CbgvUser & { parent_id: number | null }).parent_id = parentId;
-                    }
+
                     const password: string = this.formField('password').value;
                     if (password) {
                         info.password = password;
@@ -253,11 +252,9 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
             });
         }
 
-        this.userService.query(conditions, queryParams).pipe(switchMap((res: DtoObject<CbgvUser[]>) => {
-            const ids: number[] = res.data.map((r: CbgvUser): number => r.id);
-            return forkJoin([of(res), this.getParentsByUserIds(ids)]);
-        })).subscribe({
-            next: ([res, parents]) => {
+        this.userService.query(conditions, queryParams)
+        .subscribe({
+            next: (res) => {
 
                 if ( resetPaginator ) {
                     this.paginatorControl().setupPaginator( res )
@@ -271,8 +268,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                         const role = this.dataRoles.find(r => r.id === Number(id));
                         return role ? role.title : `#${id}`;
                     }).join(', ');
-                    const parent = parents.data.find(p => p.user_id === m.id);
-                    m['_parent'] = parent ? parent['user']['display_name'] : null;
+                
                     return m;
                 }) : [];
 
@@ -281,8 +277,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
             
                 this.state.set('success');
 
-                console.log('res', res)
-                console.log('parents', parents)
+    
             }, error: () => {
                 this.state.set('error');
 
@@ -292,18 +287,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
     }
 
-    private getParentsByUserIds(userIds: number[]): Observable<DtoObject<Parents[]>> {
 
-        const condtion: IctuConditionParam[] = [
-            { conditionName: 'user_id', condition: IctuQueryCondition.equal, value: userIds.toString(), orWhere: 'in' }
-        ];
-        const params: IctuQueryParams = {
-            limit: userIds.length,
-            paged: 1,
-        }
-
-        return userIds.length > 0 ? this.parentsService.query(condtion, params) : of({ data: [] } as DtoObject<Parents[]>);
-    }
 
     private requestDeletingData(ids: number[]): void {
         this.notification.confirmDelete(ids.length).pipe(
