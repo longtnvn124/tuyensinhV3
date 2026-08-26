@@ -382,6 +382,57 @@
     flex-shrink: 0;
 }
 
+.council-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-block: 18px;
+}
+
+.council-form__section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--accent-200);
+    border-radius: 10px;
+    background: var(--accent-50, #f8fafc);
+}
+
+.council-form__section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--accent-200);
+}
+
+.council-form__section-heading > i {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--primary-600, #2563eb);
+    font-size: 21px;
+}
+
+.council-form__section-heading h5 {
+    margin: 0;
+    color: var(--accent-800, #1e293b);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.council-form__section-heading p {
+    margin: 4px 0 0;
+    color: var(--accent-500, #64748b);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.council-form__textarea {
+    min-height: 104px;
+    resize: vertical;
+}
+
 .ictu-form__hint,
 .ictu-form__error {
     display: block;

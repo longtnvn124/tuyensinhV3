@@ -52,6 +52,7 @@ export interface CouncilExportCandidate {
     registeredMajorName: string;
     registeredMajorCode: string;
     admissionScore?: number;
+    calculatedAdmissionScore?: number;
     result: string;
     note?: string;
 }
@@ -69,7 +70,7 @@ interface SheetConfig {
     key: SheetKey;
     name: string;
     title: string;
-    columnCount: 10 | 13;
+    columnCount: 10 | 14;
 }
 
 interface MajorGroup {
@@ -86,8 +87,8 @@ const QUALIFICATION_ORDER: readonly QualificationGroup[] = ['DH', 'CD', 'TC', 'T
 const SHEET_CONFIGS: readonly SheetConfig[] = [
     { key: 'admitted', name: 'DS TT', title: 'DANH SÁCH THÍ SINH TRÚNG TUYỂN', columnCount: 10 },
     { key: 'proposed', name: 'DS đề nghị TT', title: 'DANH SÁCH ĐỀ NGHỊ CÔNG NHẬN TRÚNG TUYỂN', columnCount: 10 },
-    { key: 'result', name: 'KQ xét tuyển', title: 'KẾT QUẢ XÉT TUYỂN', columnCount: 13 },
-    { key: 'source', name: 'DL xét tuyển', title: 'DỮ LIỆU XÉT TUYỂN', columnCount: 13 },
+    { key: 'result', name: 'KQ xét tuyển', title: 'KẾT QUẢ XÉT TUYỂN', columnCount: 14 },
+    { key: 'source', name: 'DL xét tuyển', title: 'DỮ LIỆU XÉT TUYỂN', columnCount: 14 },
 ];
 
 const BASE_FONT: Partial<Font> = {
@@ -176,7 +177,7 @@ export class ExpHosoDaduyetService {
     }
 
     private configureWorksheet(worksheet: Worksheet, columnCount: number): void {
-        const widths = [7, 27, 11, 14, 20, 13, 18, 27, 25, 11, 14, 16, 31];
+        const widths = [7, 27, 11, 14, 20, 13, 18, 27, 25, 11, 14, 16, 31, 22];
         worksheet.columns = widths.slice(0, columnCount).map((width: number) => ({ width }));
         worksheet.pageSetup = {
             paperSize: 9,
@@ -203,8 +204,8 @@ export class ExpHosoDaduyetService {
         payload: CouncilAdmissionExportPayload,
     ): void {
         const lastColumn = this.columnLetter(config.columnCount);
-        const leftEndColumn = config.columnCount === 10 ? 'E' : 'F';
-        const rightStartColumn = config.columnCount === 10 ? 'F' : 'G';
+        const leftEndColumn = config.columnCount === 10 ? 'E' : 'G';
+        const rightStartColumn = config.columnCount === 10 ? 'F' : 'H';
 
         worksheet.mergeCells(`A1:${leftEndColumn}1`);
         worksheet.mergeCells(`${rightStartColumn}1:${lastColumn}1`);
@@ -326,7 +327,7 @@ export class ExpHosoDaduyetService {
     ): void {
         worksheet.addRow([]);
         const lastColumn = this.columnLetter(columnCount);
-        const signatureStart = columnCount === 13 ? 'I' : 'G';
+        const signatureStart = columnCount === 14 ? 'J' : 'G';
         const signatureColumn = this.columnNumber(signatureStart);
         const dateRow = worksheet.addRow([]);
         worksheet.mergeCells(`${signatureStart}${dateRow.number}:${lastColumn}${dateRow.number}`);
@@ -362,13 +363,14 @@ export class ExpHosoDaduyetService {
             'Nơi cấp bằng',
             'Năm TN',
         ];
-        if (columnCount === 13) {
+        if (columnCount === 14) {
             headers.push(
                 'Mã ngành',
                 qualification === 'THPT'
                     ? 'Điểm xét tuyển (thang điểm 30)'
                     : 'Điểm xét tuyển (thang điểm 10)',
                 'Ghi chú',
+                'Điểm xét tuyển sau công thức',
             );
         }
         return headers;
@@ -391,11 +393,12 @@ export class ExpHosoDaduyetService {
             candidate.graduationInstitution,
             candidate.graduationYear,
         ];
-        if (config.columnCount === 13) {
+        if (config.columnCount === 14) {
             values.push(
                 candidate.registeredMajorCode,
-                candidate.admissionScore ?? '',
+                this.formatScore(candidate.admissionScore),
                 this.createCandidateNote(candidate, config.key),
+                this.formatScore(candidate.calculatedAdmissionScore),
             );
         }
         return values;
@@ -419,14 +422,17 @@ export class ExpHosoDaduyetService {
             cell.font = BASE_FONT;
             cell.border = DATA_BORDER;
             cell.alignment = {
-                horizontal: [1, 3, 4, 6, 10, 11, 12].includes(column) ? 'center' : 'left',
+                horizontal: [1, 3, 4, 6, 10, 11, 12, 14].includes(column) ? 'center' : 'left',
                 vertical: 'middle',
                 wrapText: true,
             };
         }
-        if (columnCount === 13) {
-            row.getCell(12).numFmt = '0.0';
-        }
+    }
+
+    private formatScore(score?: number): string {
+        return score === undefined || score === null
+            ? ''
+            : score.toString().replace('.', ',');
     }
 
     private styleTotalRow(row: Row, columnCount: number): void {

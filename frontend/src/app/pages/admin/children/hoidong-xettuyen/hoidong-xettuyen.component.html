@@ -1,6 +1,6 @@
 <section class="council-page position-relative">
     @if (state() === 'loading') {
-        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
     }
 
     <header class="council-page__header">
@@ -13,227 +13,212 @@
     </header>
 
     <div class="council-master-detail" [class.council-master-detail--collapsed]="isCouncilPanelCollapsed()">
-        <aside
-            id="council-panel"
-            class="council-panel"
-            [attr.aria-hidden]="isCouncilPanelCollapsed()"
+        <aside id="council-panel" class="council-panel" [attr.aria-hidden]="isCouncilPanelCollapsed()"
             [attr.inert]="isCouncilPanelCollapsed() ? '' : null">
             <div class="council-toolbar">
                 <label class="visually-hidden" for="council-search">Tìm kiếm hội đồng</label>
-                <input
-                    id="council-search"
-                    [(ngModel)]="searchInfo.search"
-                    class="council-toolbar__search"
-                    pInputText
-                    placeholder="Tìm kiếm hội đồng..."
-                    type="search"
-                    (keyup.enter)="onSearch()">
+                <input id="council-search" [(ngModel)]="searchInfo.search" class="council-toolbar__search" pInputText
+                    placeholder="Tìm kiếm hội đồng..." type="search" (keyup.enter)="onSearch()">
                 @if (permissionControl().canCreate) {
-                    <button
-                        type="button"
-                        (click)="addItem()"
-                        mat-flat-button
-                        class="btn council-toolbar__add ictu-badge-btn--success-reverse"
-                        pTooltip="Thêm hội đồng"
-                        aria-label="Thêm hội đồng">
-                        <i class="ti ti-plus" aria-hidden="true"></i>
-                    </button>
+                <button type="button" (click)="addItem()" mat-flat-button
+                    class="btn council-toolbar__add ictu-badge-btn--success-reverse" pTooltip="Thêm hội đồng"
+                    aria-label="Thêm hội đồng">
+                    <i class="ti ti-plus" aria-hidden="true"></i>
+                </button>
                 }
             </div>
 
             @if (state() !== 'error') {
-                <div class="council-list" role="list" aria-label="Danh sách hội đồng xét tuyển">
-                    @for (row of dataTable.data(); track row.id) {
-                        <article
-                            class="council-card"
-                            [class.council-card--selected]="selectedHoidong()?.id === row.id"
-                            role="listitem">
-                            <button
-                                type="button"
-                                class="council-card__selection"
-                                [attr.aria-current]="selectedHoidong()?.id === row.id ? 'true' : null"
-                                [attr.aria-label]="'Chọn ' + row.name"
-                                (click)="selectHoidong(row)">
-                                <h5 class="council-card__name">{{ row.name }}</h5>
-                                <p class="council-card__round">{{ getDotName(row.dot_xettuyen_id) }}</p>
-                                <span class="council-card__meta">
-                                    <span class="council-card__date">
-                                        <i class="ti ti-calendar" aria-hidden="true"></i>
-                                        {{ formatDate(row.thoigian_xettuyen) }}
-                                    </span>
-                                    @if (row.status === 'dang_mo') {
-                                        <span class="ictu-badge ictu-badge--success">Đang mở</span>
-                                    } @else {
-                                        <span class="ictu-badge ictu-badge--secondary">Đã đóng</span>
-                                    }
-                                </span>
-                            </button>
-                            @if (permissionControl().canView || permissionControl().canUpdate || permissionControl().canDelete) {
-                                <button
-                                    type="button"
-                                    class="council-card__menu-button"
-                                    [attr.aria-label]="'Thao tác với ' + row.name"
-                                    (click)="cardMenu.toggle($event)">
-                                    <i class="ti ti-dots-vertical" aria-hidden="true"></i>
-                                </button>
-                                <p-popover #cardMenu styleClass="ictu-popover-no-padding">
-                                    <ul class="council-menu">
-                                        @if (permissionControl().canView) {
-                                            <li>
-                                                <button type="button" class="council-menu__item" (click)="cardMenu.hide(); openHosoList(row)">
-                                                    <i class="ti ti-user-plus" aria-hidden="true"></i>
-                                                    <span>Gán hồ sơ</span>
-                                                </button>
-                                            </li>
-                                        }
-                                        @if (permissionControl().canUpdate) {
-                                            <li>
-                                                <button type="button" class="council-menu__item" (click)="cardMenu.hide(); editItem(row)">
-                                                    <i class="ti ti-edit" aria-hidden="true"></i>
-                                                    <span>Cập nhật</span>
-                                                </button>
-                                            </li>
-                                        }
-                                        @if (permissionControl().canDelete) {
-                                            <li class="council-menu__divider" role="separator"></li>
-                                            <li>
-                                                <button type="button" class="council-menu__item council-menu__item--danger" (click)="cardMenu.hide(); deleteItem(row)">
-                                                    <i class="ti ti-trash" aria-hidden="true"></i>
-                                                    <span>Xóa</span>
-                                                </button>
-                                            </li>
-                                        }
-                                    </ul>
-                                </p-popover>
+            <div class="council-list" role="list" aria-label="Danh sách hội đồng xét tuyển">
+                @for (row of dataTable.data(); track row.id) {
+                <article class="council-card" [class.council-card--selected]="selectedHoidong()?.id === row.id"
+                    role="listitem">
+                    <button type="button" class="council-card__selection"
+                        [attr.aria-current]="selectedHoidong()?.id === row.id ? 'true' : null"
+                        [attr.aria-label]="'Chọn ' + row.tieu_de_hoi_dong" (click)="selectHoidong(row)">
+                        <h5 class="council-card__name">{{ row.tieu_de_hoi_dong }}</h5>
+                        <p class="council-card__round">{{ getDotName(row.dot_xettuyen_id) }}</p>
+                        <span class="council-card__meta">
+                            <span class="council-card__date">
+                                <i class="ti ti-calendar" aria-hidden="true"></i>
+                                {{ formatDate(row.ngay_xetduyet) }}
+                            </span>
+                            @if (row.status == '1') {
+                            <span class="ictu-badge ictu-badge--success">Đang mở</span>
+                            } @else {
+                            <span class="ictu-badge ictu-badge--secondary">Đã đóng</span>
                             }
-                        </article>
-                    } @empty {
-                        <div class="council-list-state">
-                            <i class="ti ti-folders-off" aria-hidden="true"></i>
-                            <h5>{{ searchInfo.search ? 'Không tìm thấy hội đồng phù hợp' : 'Chưa có hội đồng xét tuyển' }}</h5>
-                        </div>
+                        </span>
+                    </button>
+                    @if (permissionControl().canView || permissionControl().canUpdate || permissionControl().canDelete)
+                    {
+                    <button type="button" class="council-card__menu-button"
+                        [attr.aria-label]="'Thao tác với ' + row.tieu_de_hoi_dong" (click)="cardMenu.toggle($event)">
+                        <i class="ti ti-dots-vertical" aria-hidden="true"></i>
+                    </button>
+                    <p-popover #cardMenu styleClass="ictu-popover-no-padding">
+                        <ul class="council-menu">
+                            @if (permissionControl().canView) {
+                            <li>
+                                <button type="button" class="council-menu__item"
+                                    (click)="cardMenu.hide(); openHosoList(row)">
+                                    <i class="ti ti-user-plus" aria-hidden="true"></i>
+                                    <span>Gán hồ sơ</span>
+                                </button>
+                            </li>
+                            }
+                            @if (permissionControl().canUpdate) {
+                            <li>
+                                <button type="button" class="council-menu__item"
+                                    (click)="cardMenu.hide(); editItem(row)">
+                                    <i class="ti ti-edit" aria-hidden="true"></i>
+                                    <span>Cập nhật</span>
+                                </button>
+                            </li>
+                            }
+                            @if (permissionControl().canDelete) {
+                            <li class="council-menu__divider" role="separator"></li>
+                            <li>
+                                <button type="button" class="council-menu__item council-menu__item--danger"
+                                    (click)="cardMenu.hide(); deleteItem(row)">
+                                    <i class="ti ti-trash" aria-hidden="true"></i>
+                                    <span>Xóa</span>
+                                </button>
+                            </li>
+                            }
+                        </ul>
+                    </p-popover>
                     }
+                </article>
+                } @empty {
+                <div class="council-list-state">
+                    <i class="ti ti-folders-off" aria-hidden="true"></i>
+                    <h5>{{ searchInfo.search ? 'Không tìm thấy hội đồng phù hợp' : 'Chưa có hội đồng xét tuyển' }}</h5>
                 </div>
+                }
+            </div>
 
-                <div class="council-paginator">
-                    <ictu-paginator
-                        [control]="dataTable.paginator"
-                        (onChangePage)="onChangePage($event)"
-                        style="--ictu-paginator-gap:10px">
-                    </ictu-paginator>
-                </div>
+            <div class="council-paginator">
+                <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"
+                    style="--ictu-paginator-gap:10px">
+                </ictu-paginator>
+            </div>
             } @else {
-                <div class="council-list-state council-list-state--error">
-                    <i class="ti ti-alert-circle" aria-hidden="true"></i>
-                    <h5>Tải dữ liệu thất bại</h5>
-                    <a (click)="reload($event)" href="#" class="council-list-state__reload">Tải lại</a>
-                </div>
+            <div class="council-list-state council-list-state--error">
+                <i class="ti ti-alert-circle" aria-hidden="true"></i>
+                <h5>Tải dữ liệu thất bại</h5>
+                <a (click)="reload($event)" href="#" class="council-list-state__reload">Tải lại</a>
+            </div>
             }
         </aside>
 
-        <button
-            type="button"
-            class="council-panel-toggle"
-            [attr.aria-expanded]="!isCouncilPanelCollapsed()"
+        <button type="button" class="council-panel-toggle" [attr.aria-expanded]="!isCouncilPanelCollapsed()"
             aria-controls="council-panel"
             [attr.aria-label]="isCouncilPanelCollapsed() ? 'Mở danh sách hội đồng' : 'Thu gọn danh sách hội đồng'"
             (click)="toggleCouncilPanel()">
-            <i [class]="isCouncilPanelCollapsed() ? 'ti ti-chevron-right' : 'ti ti-chevron-left'" aria-hidden="true"></i>
+            <i [class]="isCouncilPanelCollapsed() ? 'ti ti-chevron-right' : 'ti ti-chevron-left'"
+                aria-hidden="true"></i>
         </button>
 
         <main class="council-detail">
             @if (selectedHoidong(); as selected) {
-                <app-hoidong-hoso-xetduyet [hoidong]="selected"></app-hoidong-hoso-xetduyet>
+            <app-hoidong-hoso-xetduyet [hoidong]="selected"></app-hoidong-hoso-xetduyet>
             } @else {
-                <div class="council-waiting-state">
-                    <i class="ti ti-clipboard-search" aria-hidden="true"></i>
-                    <h3>Chưa chọn hội đồng xét tuyển</h3>
-                    <p>Chọn một hội đồng bên trái để xem hồ sơ xét duyệt.</p>
-                    @if (isCouncilPanelCollapsed()) {
-                        <button type="button" class="btn ictu-badge-btn--primary-reverse" mat-flat-button (click)="toggleCouncilPanel()">
-                            Mở danh sách hội đồng
-                        </button>
-                    }
-                </div>
+            <div class="council-waiting-state">
+                <i class="ti ti-clipboard-search" aria-hidden="true"></i>
+                <h3>Chưa chọn hội đồng xét tuyển</h3>
+                <p>Chọn một hội đồng bên trái để xem hồ sơ xét duyệt.</p>
+                @if (isCouncilPanelCollapsed()) {
+                <button type="button" class="btn ictu-badge-btn--primary-reverse" mat-flat-button
+                    (click)="toggleCouncilPanel()">
+                    Mở danh sách hội đồng
+                </button>
+                }
+            </div>
             }
         </main>
     </div>
 </section>
 
-<p-drawer #detailDrawer (onHide)="onDetailDrawerHide()" [(visible)]="detailDrawerVisible" [dismissible]="false" [header]="detailDrawerHeader()" [style]="{'width':'100vw'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+<p-drawer #detailDrawer (onHide)="onDetailDrawerHide()" [(visible)]="detailDrawerVisible" [dismissible]="false"
+    [header]="detailDrawerHeader()" [style]="{'width':'100vw'}" appendTo="body" position="right"
+    styleClass="ictu-p-drawer">
     <div class="ictu-p-drawer__content position-relative">
         <div class="ictu-p-drawer__content__body position-relative w-100">
             @if (detailDrawerHoidong()) {
-                <app-hoso-list [hoidong]="detailDrawerHoidong()" [permission]="permissionControl()"></app-hoso-list>
+            <app-hoso-list [hoidong]="detailDrawerHoidong()" [permission]="permissionControl()"></app-hoso-list>
             }
         </div>
     </div>
 </p-drawer>
 
-<p-drawer #masterDrawer (onHide)="onMasterDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false" [header]="formControl.heading()" [style]="{'width':'450px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
+<p-drawer #masterDrawer (onHide)="onMasterDrawerHide()" [(visible)]="formControl.visible" [dismissible]="false"
+    [header]="formControl.heading()" [style]="{'width':'450px', 'max-width':'100%'}" appendTo="body" position="right"
+    styleClass="ictu-p-drawer">
     <div class="ictu-p-drawer__content position-relative">
         @if (formControl.enableLoading()) {
-            <app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
+        <app-loading-progress [heading]="formControl.loadingLabel()" backdropFilter="none"></app-loading-progress>
         }
         <div class="ictu-p-drawer__content__body position-relative">
             @switch (formControl.state()) {
-                @case ('READY') {
-                    <form [formGroup]="formControl.formGroup">
-                        <div class="ictu-form ictu-form--label-on-top">
-                            <div class="ictu-form__row">
-                                <label class="ictu-form__label ictu-form__label--required" for="h_name">Tên hội đồng</label>
-                                <input class="ictu-form__input-field" formControlName="name" id="h_name" pInputText placeholder="VD: Hội đồng xét tuyển 1" type="text">
-                                @if (formControl.formGroup.get('name')?.invalid && formControl.formGroup.get('name')?.touched) {
-                                    <small class="ictu-form__error">Vui lòng nhập tên hội đồng (tối thiểu 2 ký tự)</small>
-                                }
-                            </div>
-                            <div class="ictu-form__row">
-                                <label class="ictu-form__label ictu-form__label--required" for="h_dot">Đợt xét tuyển</label>
-                                <p-select
-                                    [options]="dotOptions()"
-                                    appendTo="body"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    class="ictu-form__input-field"
-                                    formControlName="dot_xettuyen_id"
-                                    placeholder="Chọn đợt xét tuyển"
-                                    inputId="h_dot" />
-                                @if (formControl.formGroup.get('dot_xettuyen_id')?.invalid && formControl.formGroup.get('dot_xettuyen_id')?.touched) {
-                                    <small class="ictu-form__error">Vui lòng chọn đợt xét tuyển</small>
-                                }
-                            </div>
-                            <div class="ictu-form__row">
-                                <label class="ictu-form__label ictu-form__label--required" for="h_time">Thời gian xét tuyển</label>
-                                <p-datepicker
-                                    formControlName="thoigian_xettuyen"
-                                    inputId="h_time"
-                                    dateFormat="dd/mm/yy"
-                                    appendTo="body"
-                                    [showIcon]="true"
-                                    styleClass="ictu-form__input-field"
-                                    placeholder="Chọn ngày xét tuyển" />
-                                @if (formControl.formGroup.get('thoigian_xettuyen')?.invalid && formControl.formGroup.get('thoigian_xettuyen')?.touched) {
-                                    <small class="ictu-form__error">Vui lòng chọn thời gian xét tuyển</small>
-                                }
-                            </div>
-                            <div class="ictu-form__row">
-                                <label class="ictu-form__label" for="h_status">Trạng thái</label>
-                                <p-select [options]="statusOptions" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Trạng thái" inputId="h_status" />
-                            </div>
-                            <small class="ictu-form__hint">Hồ sơ thí sinh được gán từ menu thao tác của từng hội đồng.</small>
-                        </div>
-                    </form>
-                }
-                @case ('PREPARATION_FAILED') {
-                    <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
-                        <a (click)="formControl.preparation()" href="javascript:" class="admin-table__alert-danger__btn-reload">tải lại</a>
+            @case ('READY') {
+            <form [formGroup]="formControl.formGroup">
+                <div class="ictu-form ictu-form--label-on-top council-form">
+
+
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label ictu-form__label--required" for="d_name">Tên hội đồng</label>
+                        <input class="ictu-form__input-field" formControlName="tieu_de_hoi_dong" pInputText
+                            placeholder="VD: hội đồng 2026" type="text">
+
                     </div>
-                }
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label " for="d_name">Mô tả </label>
+                        <textarea class="ictu-form__input-field council-form__textarea" formControlName="mo_ta_hoi_dong"
+                            id="h_description" maxlength="1000" pTextarea
+                            placeholder="Nhập mục tiêu, phạm vi hoặc ghi chú cho hội đồng" rows="4"></textarea>
+                    </div>
+
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label ictu-form__label--required" for="h_dot">Đợt xét tuyển</label>
+                        <p-select [options]="dotOptions()" appendTo="body" optionLabel="label" optionValue="value"
+                            class="ictu-form__input-field" formControlName="dot_xettuyen_id"
+                            placeholder="Chọn đợt xét tuyển" inputId="h_dot" />
+
+                    </div>
+
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label ictu-form__label--required" for="h_date">Ngày xét
+                            tuyển</label>
+                        <p-datepicker formControlName="ngay_xetduyet" inputId="h_date" dateFormat="dd/mm/yy"
+                            appendTo="body" [showIcon]="true" styleClass="ictu-form__input-field"
+                            placeholder="Chọn ngày xét tuyển" />
+
+                    </div>
+
+                    <div class="ictu-form__row">
+                        <label class="ictu-form__label ictu-form__label--required" for="h_status">Trạng thái</label>
+                        <p-select [options]="statusOptions" appendTo="body" class="ictu-form__input-field"
+                            formControlName="status" placeholder="Chọn trạng thái" inputId="h_status" />
+                    </div>
+
+
+                </div>
+            </form>
+            }
+            @case ('PREPARATION_FAILED') {
+            <div class="admin-table__alert-danger text-center w-100">Tải dữ liệu thất bại. Vui lòng chọn
+                <a (click)="formControl.preparation()" href="javascript:"
+                    class="admin-table__alert-danger__btn-reload">tải lại</a>
+            </div>
+            }
             }
         </div>
         <div class="ictu-p-drawer__content__footer">
-            <button (click)="masterDrawer.close($event)" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
-            <button (click)="submitForm()" [disabled]="!formControl.formFilledAndValid" class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
+            <button (click)="masterDrawer.close($event)" class="btn ictu-badge-btn--secondary"
+                mat-flat-button>Hủy</button>
+            <button (click)="submitForm()"
+                class="btn ictu-badge-btn--primary-reverse" mat-flat-button>Lưu lại</button>
         </div>
     </div>
 </p-drawer>

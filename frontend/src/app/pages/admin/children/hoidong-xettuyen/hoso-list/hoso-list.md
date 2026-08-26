@@ -11,7 +11,7 @@ hoidong-xettuyen.component (master)  ──drawer 100vw──▶  HosoListCompon
                                                             │ @Input hoidong, permission
                                                             ▼
                                           HoidongHosoThisinhService  (bảng trung gian)
-                                          HosoThisinhService         (tra cứu thí sinh)
+                                          RegistrationsService         (tra cứu thí sinh)
                                           ApiOutsiteService          (ngành học — API ngoài)
                                           LocationService            (nơi sinh)
 ```
@@ -37,7 +37,7 @@ hoidong-xettuyen.component (master)  ──drawer 100vw──▶  HosoListCompon
 |---|---|---|
 | `assignDialogVisible` | `boolean` | Đóng/mở `p-dialog`. |
 | `assignLoading` | `boolean` | Khóa thao tác trong lúc tải candidate hoặc chạy batch gán. |
-| `assignCandidates` | `HosoThisinh[]` | Danh sách thí sinh chưa được gán (đã loại trừ trùng). |
+| `assignCandidates` | `Registrations[]` | Danh sách thí sinh chưa được gán (đã loại trừ trùng). |
 | `selectedAssignIds` | `Set<number>` | ID hồ sơ được chọn trong dialog gán. |
 | `selectedAssignedIds` | `ReadonlySet<number>` | ID bản ghi phân công được chọn trên trang hiện tại để xóa hàng loạt. |
 | `removeLoading` | `boolean` | Khóa checkbox và nút xóa trong lúc batch xóa chạy. |
@@ -56,7 +56,7 @@ Dùng `switchMap` **2 bước tuần tự**, không còn `forkJoin` như bản c
 
 1. `assignmentService.loadByHoidong(hoidongId, {limit, paged})` →
    lấy rows `HoidongHosoThisinh` theo `hoidong_id` (service query condition `hoidong_id = hoidongId`, order `created_at DESC`, default limit 50).
-2. Nếu có rows → build condition `id IN (hoso_id1,hoso_id2,...)` → `hosoService.query(conditions, {limit: rows.length, paged:1})` → `map` thành `hosoMap` → gắn `_hoso` (HosoThisinh) vào từng row.
+2. Nếu có rows → build condition `id IN (hoso_id1,hoso_id2,...)` → `hosoService.query(conditions, {limit: rows.length, paged:1})` → `map` thành `hosoMap` → gắn `_hoso` (Registrations) vào từng row.
 3. `subscribe` → `dataTable.fillData(rows)` + `state=success`. Error → `state=error`.
 
 > `_hoso` được khai báo optional trong `HoidongHosoThisinh` và được gắn khi tải để bảng hiển thị thông tin thí sinh qua `getCandidate(row)`.

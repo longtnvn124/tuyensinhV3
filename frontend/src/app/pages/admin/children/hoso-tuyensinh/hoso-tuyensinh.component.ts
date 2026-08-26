@@ -21,15 +21,15 @@ import { IctuFormControl2 } from '@models/ictu-form-control';
 import { IctuDeletingAnimationControl } from '@models/ictu-deleting-animation-control';
 import { DtoObject, IctuQueryParams } from '@models/dto';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
-import { HosoStatus, HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
+import { RegistrationStatus, Registrations } from '@app/models/tuyensinh/registrations';
 import { Nganhhoc } from '@app/models/tuyensinh/nganhhoc';
 import { ChuongtrinhDaotao } from '@app/models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
 import {
     HosoCheckCccdResult,
     HosoThisinhSearchInfo,
-    HosoThisinhService,
-} from '@services/tuyensinh/hoso-thisinh.service';
+    RegistrationsService,
+} from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
@@ -53,7 +53,7 @@ import { LocationService } from '@app/services/location.service';
 import { Locations } from '@app/models/location';
 
 interface HosoStatusOption {
-    value: HosoStatus;
+    value: RegistrationStatus;
     label: string;
     badge: string;
 }
@@ -84,7 +84,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
 
     // ── Services ────────────────────────────────────────────────
     private locationService: LocationService = inject(LocationService);
-    private hosoService: HosoThisinhService = inject(HosoThisinhService);
+    private registrationsService: RegistrationsService = inject(RegistrationsService);
     private nganhHocService: NganhhocService = inject(NganhhocService);
     private ctdtService: ChuongtrinhDaotaoService = inject(ChuongtrinhDaotaoService);
     private dotService: DotXettuyenService = inject(DotXettuyenService);
@@ -108,7 +108,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
         nganh_id: undefined,
         nguoi_tuvan: undefined,
     };
-    masterDataTable: IctuDataTable<HosoThisinh> = new IctuDataTable<HosoThisinh>();
+    masterDataTable: IctuDataTable<Registrations> = new IctuDataTable<Registrations>();
     masterState: WritableSignal<'loading' | 'success' | 'error'> = signal<'loading' | 'success' | 'error'>('success');
     private masterTemp: IctuDataTablePaginatorInfo = { paged: 1, resetPaginator: true };
 
@@ -131,16 +131,16 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     // ── Drawer form ────────────────────────────────────────────
 
     readonly masterDrawer = viewChild<Drawer>('masterDrawer');
-    masterFormControl!: IctuFormControl2<HosoThisinh>;
-    masterEventObserver$: Subject<DataTableEvent<HosoThisinh>> = new Subject<DataTableEvent<HosoThisinh>>();
-    masterHandelEvent!: Record<DataTableEventName, (data?: HosoThisinh | HosoThisinh[]) => void>;
+    masterFormControl!: IctuFormControl2<Registrations>;
+    masterEventObserver$: Subject<DataTableEvent<Registrations>> = new Subject<DataTableEvent<Registrations>>();
+    masterHandelEvent!: Record<DataTableEventName, (data?: Registrations | Registrations[]) => void>;
 
     // ── Static options ──────────────────────────────────────────
 
     readonly statusOptions: HosoStatusOption[] = TH_XETTUYEN.map((item) => ({
-        value: item.value as HosoStatus,
+        value: item.value as RegistrationStatus,
         label: item.label,
-        badge: this.getStatusBadge(item.value as HosoStatus),
+        badge: this.getStatusBadge(item.value as RegistrationStatus),
     }));
 
     readonly hinhthucOptions: IctuDropdownOption<string>[] = [
@@ -159,7 +159,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     readonly doituongOptions = DOI_TUONG;
 
     constructor() {
-        this.masterFormControl = new IctuFormControl2<HosoThisinh>({
+        this.masterFormControl = new IctuFormControl2<Registrations>({
             dropdownFields: [],
             formGroup: this.fb.group({
                 ho_va_ten: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
@@ -194,7 +194,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 nguoi_tuvan: [null],
                 anh_soyeulylich: ['', Validators.required],
                 status: [0, Validators.required],
-                status_connent: [0],
+                status_connect: [0],
                 owner_by: [this.auth.user?.id],
             }),
             objectName: 'hồ sơ tuyển sinh',
@@ -205,16 +205,16 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             OPEN_FORM_ADD: (): void => {
                 this.openCccdDialog();
             },
-            OPEN_FORM_UPDATE: (data: HosoThisinh): void => {
+            OPEN_FORM_UPDATE: (data: Registrations): void => {
                 this.openEditForm(data);
             },
-            DELETE_SINGLE_ROW: ({ id }: HosoThisinh): void => {
+            DELETE_SINGLE_ROW: ({ id }: Registrations): void => {
                 this.requestMasterDeletingData([id]);
             },
             DELETE_SELECTED_ROWS: (): void => {
                 const ids: number[] = this.masterDataTable
                     .getSelectedData()
-                    .map(({ id }: HosoThisinh): number => id);
+                    .map(({ id }: Registrations): number => id);
                 if (ids.length) {
                     this.requestMasterDeletingData(ids);
                 }
@@ -225,7 +225,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
         };
 
         this.masterEventObserver$.pipe(takeUntil(this.onDestroy$)).subscribe(
-            ({ name, data }: DataTableEvent<HosoThisinh>): void => this.masterHandelEvent[name](data),
+            ({ name, data }: DataTableEvent<Registrations>): void => this.masterHandelEvent[name](data),
         );
     }
 
@@ -252,7 +252,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
         const loadMajors$: Observable<IctuDropdownOption<number>[]> = this.nganhHocService
             .load({ search: '' }, qp)
             .pipe(map((res: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
-                (res.data ?? []).map((m) => ({ value: m.id, label: m.name })),
+                (res.data ?? []).map((m) => ({ value: m.id, label: m.ten_nganh })),
             ));
         const loadPrograms$: Observable<IctuDropdownOption<number>[]> = this.ctdtService
             .query([], qp)
@@ -336,9 +336,9 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             paged,
             limit: this.masterDataTable.paginator.rows(),
         };
-        this.hosoService.load(this.masterSearchInfo, queryParams)
+        this.registrationsService.load(this.masterSearchInfo, queryParams)
             .pipe(
-                map((res: DtoObject<HosoThisinh[]>): HosoThisinh[] => {
+                map((res: DtoObject<Registrations[]>): Registrations[] => {
                     if (resetPaginator) {
                         return this.masterDataTable.paginator.setupPaginator(res);
                     }
@@ -347,7 +347,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                 }),
             )
             .subscribe({
-                next: (data: HosoThisinh[]) => {
+                next: (data: Registrations[]) => {
                     this.masterDataTable.fillData(data);
                     this.masterState.set('success');
                 },
@@ -372,23 +372,23 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     }
 
     addHoso(): void {
-        this.masterEventObserver$.next({ name: 'OPEN_FORM_ADD', data: null as unknown as HosoThisinh });
+        this.masterEventObserver$.next({ name: 'OPEN_FORM_ADD', data: null as unknown as Registrations });
     }
 
-    editHoso(row: HosoThisinh): void {
+    editHoso(row: Registrations): void {
         this.masterEventObserver$.next({ name: 'OPEN_FORM_UPDATE', data: row });
     }
 
-    deleteHoso(row: HosoThisinh): void {
+    deleteHoso(row: Registrations): void {
         this.masterEventObserver$.next({ name: 'DELETE_SINGLE_ROW', data: row });
     }
 
     deleteSelectedHoso(): void {
-        this.masterEventObserver$.next({ name: 'DELETE_SELECTED_ROWS', data: null as unknown as HosoThisinh });
+        this.masterEventObserver$.next({ name: 'DELETE_SELECTED_ROWS', data: null as unknown as Registrations });
     }
 
     submitMasterForm(): void {
-        this.masterEventObserver$.next({ name: 'SUBMIT_FORM', data: null as unknown as HosoThisinh });
+        this.masterEventObserver$.next({ name: 'SUBMIT_FORM', data: null as unknown as Registrations });
     }
 
     reloadMaster(event: MouseEvent): void {
@@ -419,7 +419,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             return;
         }
         this.cccdLoading = true;
-        this.hosoService.checkCccd(cccd).subscribe({
+        this.registrationsService.checkCccd(cccd).subscribe({
             next: (res: HosoCheckCccdResult) => {
                 this.cccdLoading = false;
                 this.cccdResult = res;
@@ -459,7 +459,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
                         nguoi_tuvan: null,
                         anh_soyeulylich: '',
                         status: 0,
-                        status_connent: 0,
+                        status_connect: 0,
                         owner_by: this.auth.user?.id,
                     });
                     this.masterFormControl.openFormAdd();
@@ -476,7 +476,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     //  Edit form
     // ════════════════════════════════════════════════════════════
 
-    openEditForm(row: HosoThisinh): void {
+    openEditForm(row: Registrations): void {
         this.masterFormControl.formGroup.reset({
             ho_va_ten: row.ho_va_ten ?? '',
             dien_thoai: row.dien_thoai ?? '',
@@ -510,7 +510,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             nguoi_tuvan: row.nguoi_tuvan ?? null,
             anh_soyeulylich: row.anh_soyeulylich ?? '',
             status: row.status ?? 0,
-            status_connent: row.status_connent ?? 0,
+            status_connect: row.status_connect ?? 0,
             owner_by: row.owner_by,
         });
         if (row.nganh_id) {
@@ -524,11 +524,11 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             this.masterFormControl.formGroup.markAllAsTouched();
             return;
         }
-        const raw: Partial<HosoThisinh> = this.masterFormControl.formGroup.value;
-        const info: Partial<HosoThisinh> = { ...raw };
+        const raw: Partial<Registrations> = this.masterFormControl.formGroup.value;
+        const info: Partial<Registrations> = { ...raw };
         const request: Observable<any> = this.masterFormControl.isFormAdd
-            ? this.hosoService.create(info)
-            : this.hosoService.update(this.masterFormControl.object.id, info);
+            ? this.registrationsService.create(info)
+            : this.registrationsService.update(this.masterFormControl.object.id, info);
         const message: string = this.masterFormControl.isFormAdd
             ? 'Thêm hồ sơ thành công'
             : 'Cập nhật hồ sơ thành công';
@@ -551,10 +551,10 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     private requestMasterDeletingData(ids: number[]): void {
         this.notification.confirmDelete(ids.length).pipe(
             filter((confirm: boolean): boolean => confirm),
-            map((): IctuDeletingAnimationControl<HosoThisinh> =>
-                new IctuDeletingAnimationControl<HosoThisinh>(ids, this.hosoService),
+            map((): IctuDeletingAnimationControl<Registrations> =>
+                new IctuDeletingAnimationControl<Registrations>(ids, this.registrationsService),
             ),
-            switchMap((deleteController: IctuDeletingAnimationControl<HosoThisinh>): Observable<boolean> => {
+            switchMap((deleteController: IctuDeletingAnimationControl<Registrations>): Observable<boolean> => {
                 deleteController.run();
                 return this.notification.startDeleting(deleteController.progress);
             }),
@@ -576,16 +576,16 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     //  Helpers
     // ════════════════════════════════════════════════════════════
 
-    statusLabel(status: HosoStatus | undefined): string {
+    statusLabel(status: RegistrationStatus | undefined): string {
         return this.statusOptions.find((item) => item.value === status)?.label ?? `${status ?? '—'}`;
     }
 
-    statusBadgeClass(status: HosoStatus | undefined): string {
+    statusBadgeClass(status: RegistrationStatus | undefined): string {
         return status === undefined ? 'ictu-badge--secondary' : this.getStatusBadge(status);
     }
 
-    private getStatusBadge(status: HosoStatus): string {
-        const badges: Record<HosoStatus, string> = {
+    private getStatusBadge(status: RegistrationStatus): string {
+        const badges: Record<RegistrationStatus, string> = {
             [-1]: 'ictu-badge--danger',
             0: 'ictu-badge--warning',
             1: 'ictu-badge--danger',

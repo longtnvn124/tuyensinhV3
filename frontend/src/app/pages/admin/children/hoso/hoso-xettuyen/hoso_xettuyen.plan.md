@@ -27,7 +27,7 @@ Tạo component `hoso-xettuyen` hiển thị danh sách hồ sơ thí sinh theo 
 ### Services / Models cần dùng
 | Service | Model | Endpoint | Mục đích |
 |---------|-------|----------|----------|
-| `HosoThisinhService` | `HosoThisinh` | `hoso-tuyensinh` | Load ds hồ sơ |
+| `RegistrationsService` | `Registrations` | `hoso-tuyensinh` | Load ds hồ sơ |
 | `DotXettuyenService` | `DotXettuyen` | `dot-xettuyen` | Load đợt xét tuyển (filter) |
 | `NganhhocService` | `Nganhhoc` | `nganh-hoc` | Load ngành học (filter + hiển thị) |
 | `ChuongtrinhDaotaoService` | `ChuongtrinhDaotao` | `chuongtrinh-daotao` | CTĐT (hiển thị) |
@@ -67,7 +67,7 @@ searchInfo: HosoThisinhSearchInfo = {
 - `programs: WritableSignal<IctuDropdownOption<number>[]>` — CTĐT
 
 #### 4. Master table (read-only list)
-- `dataTable: IctuDataTable<HosoThisinh>`
+- `dataTable: IctuDataTable<Registrations>`
 - `loadData(paged, resetPaginator)` — gọi `hosoService.load(searchInfo, queryParams)`
 - `state: 'loading' | 'success' | 'error'`
 

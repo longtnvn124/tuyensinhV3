@@ -11,7 +11,7 @@
 
 Tạo `TuvanTuyensinhComponent` cho từng hồ sơ thí sinh:
 
-- Nhận `HosoThisinh` qua `@Input`.
+- Nhận `Registrations` qua `@Input`.
 - Tải lịch sử theo `hoso_id`.
 - Mặc định hiển thị lịch sử.
 - Chuyển giữa lịch sử và form thêm bằng `@switch`.
@@ -71,7 +71,7 @@ Component standalone; parent import trực tiếp. Không sửa route hoặc mod
 ## 5. Contract component
 
 ```typescript
-@Input() set hoso(value: HosoThisinh | null)
+@Input() set hoso(value: Registrations | null)
 ```
 
 Quy tắc:
@@ -88,7 +88,7 @@ Quy tắc:
 type ConsultationView = 'history' | 'form';
 type ConsultationLoadState = 'idle' | 'loading' | 'success' | 'error';
 
-readonly currentHoso = signal<HosoThisinh | null>(null);
+readonly currentHoso = signal<Registrations | null>(null);
 readonly viewState = signal<ConsultationView>('history');
 readonly loadState = signal<ConsultationLoadState>('idle');
 readonly histories = signal<LichsuTuvan[]>([]);
@@ -163,13 +163,13 @@ State:
 
 ```typescript
 readonly consultationDrawerVisible = signal(false);
-readonly selectedConsultationHoso = signal<HosoThisinh | null>(null);
+readonly selectedConsultationHoso = signal<Registrations | null>(null);
 ```
 
 Mở drawer:
 
 ```typescript
-openLichSu(row: HosoThisinh): void {
+openLichSu(row: Registrations): void {
     this.selectedConsultationHoso.set({ ...row });
     this.consultationDrawerVisible.set(true);
 }

@@ -93,7 +93,7 @@ Nhận hoidong
 `loadRecords(hoidongId)` tải song song:
 
 1. `HoidongHosoThisinhService.query()` với điều kiện `hoidong_id = hoidongId`, `limit = -1`, sắp xếp `created_at DESC`.
-2. `HosoThisinhService.query()` với `limit = -1`.
+2. `RegistrationsService.query()` với `limit = -1`.
 
 `hydrateRecords()` tạo `Map` hồ sơ theo `id`, sau đó trả về bản sao mỗi quan hệ với `_hoso` tương ứng. Không mutate dữ liệu response.
 
@@ -156,7 +156,7 @@ Hai thao tác bị disable khi selection rỗng hoặc đang xử lý.
 
 ### Mapping trạng thái
 
-| Thao tác | Giá trị cập nhật vào `HosoThisinh.status` |
+| Thao tác | Giá trị cập nhật vào `Registrations.status` |
 |---|---|
 | Duyệt | `TRUNG_TUYEN` |
 | Hủy duyệt | `KHONG_TRUNG_TUYEN` |
@@ -165,7 +165,7 @@ Hai thao tác bị disable khi selection rỗng hoặc đang xử lý.
 
 1. Lọc `records()` theo `selectedIds`.
 2. Bật `actionLoading` và mở progress bar.
-3. Gọi `HosoThisinhService.update(record.hoso_id, { status })` cho từng hồ sơ.
+3. Gọi `RegistrationsService.update(record.hoso_id, { status })` cho từng hồ sơ.
 4. `mergeMap(..., 5)` giới hạn tối đa 5 request đồng thời.
 5. Mỗi request tự bắt lỗi để các hồ sơ còn lại tiếp tục xử lý.
 6. `scan()` tổng hợp số thành công, thất bại và lỗi đầu tiên.

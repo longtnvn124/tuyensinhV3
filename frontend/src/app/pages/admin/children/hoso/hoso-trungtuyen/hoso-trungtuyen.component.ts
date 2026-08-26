@@ -6,15 +6,13 @@ import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } fr
 import { IctuBasePermission, IctuPermissionControl } from '@models/ictu-base-model';
 import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { Locations } from '@models/location';
-import { ChuongtrinhDaotao } from '@models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@models/tuyensinh/dot-xettuyen';
-import { HosoStatus, HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { RegistrationStatus, Registrations } from '@models/tuyensinh/registrations';
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { AuthenticationService } from '@services/authentication.service';
 import { LocationService } from '@services/location.service';
-import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
@@ -40,7 +38,7 @@ interface HosoTrungTuyenSearchInfo {
     dan_toc?: string;
 }
 
-const ADMITTED_STATUS: HosoStatus = 3;
+const ADMITTED_STATUS: RegistrationStatus = 3;
 
 @Component({
     selector: 'app-hoso-trungtuyen',
@@ -60,10 +58,10 @@ const ADMITTED_STATUS: HosoStatus = 3;
     styleUrl: './hoso-trungtuyen.component.css',
 })
 export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermission {
-    private readonly hosoService = inject(HosoThisinhService);
+    private readonly registrationsService = inject(RegistrationsService);
     private readonly dotService = inject(DotXettuyenService);
     private readonly nganhHocService = inject(NganhhocService);
-    private readonly ctdtService = inject(ChuongtrinhDaotaoService);
+
     private readonly locationService = inject(LocationService);
     private readonly authenticationService = inject(AuthenticationService);
     private readonly onDestroy$ = new Subject<void>();
@@ -73,15 +71,15 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
     );
     readonly state = signal<ViewState>('idle');
     readonly detailState = signal<DetailState>('idle');
-    readonly dataTable = new IctuDataTable<HosoThisinh>();
+    readonly dataTable = new IctuDataTable<Registrations>();
     readonly dots = signal<IctuDropdownOption<number>[]>([]);
     readonly majors = signal<IctuDropdownOption<number>[]>([]);
     readonly programs = signal<IctuDropdownOption<number>[]>([]);
     readonly tinhList = signal<IctuDropdownOption<number>[]>([]);
     readonly consultationDrawerVisible = signal(false);
-    readonly selectedConsultationHoso = signal<HosoThisinh | null>(null);
+    readonly selectedConsultationHoso = signal<Registrations | null>(null);
     readonly viewDetailVisible = signal(false);
-    readonly viewDetailData = signal<HosoThisinh | null>(null);
+    readonly viewDetailData = signal<Registrations | null>(null);
     readonly selectedDetailId = signal<number | null>(null);
 
     readonly danTocOptions: IctuDropdownOption<string>[] = DanToc.map((item) => ({
@@ -121,9 +119,9 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
             orderby: 'created_at',
         };
 
-        this.hosoService.query(this.buildConditions(), queryParams).pipe(
+        this.registrationsService.query(this.buildConditions(), queryParams).pipe(
             takeUntil(this.onDestroy$),
-            map((response: DtoObject<HosoThisinh[]>): HosoThisinh[] => {
+            map((response: DtoObject<Registrations[]>): Registrations[] => {
                 if (resetPaginator) {
                     this.dataTable.paginator.setupPaginator(response);
                 } else {
@@ -132,7 +130,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
                 return response.data ?? [];
             }),
         ).subscribe({
-            next: (data: HosoThisinh[]): void => {
+            next: (data: Registrations[]): void => {
                 this.dataTable.fillData(data);
                 this.state.set('success');
             },
@@ -167,7 +165,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         this.loadData(this.lastRequest.paged, this.lastRequest.resetPaginator);
     }
 
-    openLichSu(row: HosoThisinh): void {
+    openLichSu(row: Registrations): void {
         this.selectedConsultationHoso.set({ ...row });
         this.consultationDrawerVisible.set(true);
     }
@@ -177,7 +175,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         this.selectedConsultationHoso.set(null);
     }
 
-    viewDetail(row: HosoThisinh): void {
+    viewDetail(row: Registrations): void {
         this.selectedDetailId.set(row.id);
         this.viewDetailData.set(null);
         this.detailState.set('loading');
@@ -199,7 +197,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         this.detailState.set('idle');
     }
 
-    statusLabel(status: HosoStatus | string | undefined): string {
+    statusLabel(status: RegistrationStatus | string | undefined): string {
         if (status === undefined || status === '') {
             return '—';
         }
@@ -209,7 +207,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         )?.label ?? `${status}`;
     }
 
-    statusBadgeClass(status: HosoStatus | string | undefined): string {
+    statusBadgeClass(status: RegistrationStatus | string | undefined): string {
         const normalizedStatus = `${status ?? ''}`.trim().toUpperCase();
         return normalizedStatus === `${ADMITTED_STATUS}` || normalizedStatus === 'TRUNG_TUYEN'
             ? 'ictu-badge--success'
@@ -237,32 +235,25 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         forkJoin({
             dots: this.dotService.load({ search: '' }, queryParams).pipe(
                 map((response: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: DotXettuyen) => ({ value: item.id, label: item.name })),
+                    (response.data ?? []).map((item: DotXettuyen) => ({ value: item.id, label: item.tieude })),
                 ),
             ),
             majors: this.nganhHocService.load({ search: '' }, queryParams).pipe(
                 map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: Nganhhoc) => ({ value: item.id, label: item.name })),
+                    (response.data ?? []).map((item: Nganhhoc) => ({ value: item.id, label: item.ten_nganh })),
                 ),
             ),
-            programs: this.ctdtService.query([], queryParams).pipe(
-                map((response: DtoObject<ChuongtrinhDaotao[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: ChuongtrinhDaotao) => ({
-                        value: item.id,
-                        label: `${item.code} — ${item.name}`,
-                    })),
-                ),
-            ),
+          
             provinces: this.locationService.queryLocation([], queryParams, 'regions').pipe(
                 map((response: DtoObject<Locations[]>): IctuDropdownOption<number>[] =>
                     (response.data ?? []).map((item: Locations) => ({ value: item.id, label: item.name })),
                 ),
             ),
         }).pipe(takeUntil(this.onDestroy$)).subscribe({
-            next: ({ dots, majors, programs, provinces }): void => {
+            next: ({ dots, majors, provinces }): void => {
                 this.dots.set(dots);
                 this.majors.set(majors);
-                this.programs.set(programs);
+         
                 this.tinhList.set(provinces);
             },
         });
@@ -308,8 +299,8 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
 
     private loadDetail(id: number): void {
         this.detailState.set('loading');
-        this.hosoService.get(id).pipe(takeUntil(this.onDestroy$)).subscribe({
-            next: (data: HosoThisinh): void => {
+        this.registrationsService.get(id).pipe(takeUntil(this.onDestroy$)).subscribe({
+            next: (data: Registrations): void => {
                 if (this.selectedDetailId() !== id) {
                     return;
                 }

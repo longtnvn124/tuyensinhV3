@@ -171,7 +171,7 @@ export class OvicAvataTypeMultipleComponent implements OnInit {
                 controlUpload.next({ percent: Math.floor((index + 1 / validFiles.length) * 100) });
             
                 return this.fileService.uploadFile_tuyensinh(file).pipe(
-                    map((result) => ({ name: String(result.id) }) as { name: string }),
+                    map((result) => ({ name: String(result.name) }) as { name: string }),
                     catchError(() => {
                         this.notificationService.toastWarning(`Upload file "${file.name}" thất bại`);
                         return EMPTY;
@@ -185,6 +185,8 @@ export class OvicAvataTypeMultipleComponent implements OnInit {
                 controlUpload.complete();
             }),
         ).subscribe((uploaded) => {
+            console.log(uploaded);
+            
             if (uploaded.length > 0) {
                 const dataOld: string[] = this.formField().value
                     ? [...this.formField().value]

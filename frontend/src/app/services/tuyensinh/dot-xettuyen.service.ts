@@ -18,7 +18,7 @@ export interface DotXettuyenSearchInfo {
 })
 export class DotXettuyenService extends IctuBaseServiceClass<DotXettuyen> {
     constructor() {
-        super('dot-xettuyen');
+        super('dotxettuyen');
     }
 
     load(

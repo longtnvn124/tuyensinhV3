@@ -81,6 +81,9 @@ export class IctuVerticalMenuComponent implements OnInit {
 	}
 
 	ngOnInit() : void {
+
+	
+		
 		const _currentMenuId : string | undefined = this.activatedRoute.snapshot.children[ 0 ]?.routeConfig?.path;
 		this.tryActiveMenuByRouting( _currentMenuId );
 

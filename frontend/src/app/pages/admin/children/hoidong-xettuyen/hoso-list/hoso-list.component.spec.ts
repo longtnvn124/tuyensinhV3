@@ -4,7 +4,7 @@ import { of, Subject } from 'rxjs';
 import { LocationService } from '@services/location.service';
 import { NotificationService } from '@services/notification.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
 import { HosoListComponent } from './hoso-list.component';
@@ -22,17 +22,17 @@ describe('HosoListComponent', () => {
     } as HoidongXettuyen;
 
     const assignmentService = jasmine.createSpyObj<HoidongHosoThisinhService>('HoidongHosoThisinhService', ['loadByHoidong']);
-    const hosoService = jasmine.createSpyObj<HosoThisinhService>('HosoThisinhService', ['load']);
+    const registrationsService = jasmine.createSpyObj<RegistrationsService>('RegistrationsService', ['load']);
     const nganhHocService = jasmine.createSpyObj<NganhhocService>('NganhhocService', ['load']);
     const locationService = jasmine.createSpyObj<LocationService>('LocationService', ['queryLocation']);
     const notificationService = jasmine.createSpyObj<NotificationService>('NotificationService', ['toastError']);
 
     function createComponent(): HosoListComponent {
         assignmentService.loadByHoidong.and.returnValue(of(emptyResponse));
-        hosoService.load.and.returnValue(of(emptyResponse));
+        registrationsService.load.and.returnValue(of(emptyResponse));
         nganhHocService.load.and.returnValue(of({
             ...emptyResponse,
-            data: [{ id: 12, name: 'Công nghệ thông tin', code: 'CNTT', is_active: true }],
+            data: [{ id: 12, ten_nganh: 'Công nghệ thông tin', ma_nganh: 'CNTT', status: 1 }],
         } as never));
         locationService.queryLocation.and.returnValue(of(emptyResponse));
 
@@ -41,7 +41,7 @@ describe('HosoListComponent', () => {
 
     beforeEach(() => {
         assignmentService.loadByHoidong.calls.reset();
-        hosoService.load.calls.reset();
+        registrationsService.load.calls.reset();
         nganhHocService.load.calls.reset();
         locationService.queryLocation.calls.reset();
         notificationService.toastError.calls.reset();
@@ -49,7 +49,7 @@ describe('HosoListComponent', () => {
         TestBed.configureTestingModule({
             providers: [
                 { provide: HoidongHosoThisinhService, useValue: assignmentService },
-                { provide: HosoThisinhService, useValue: hosoService },
+                { provide: RegistrationsService, useValue: registrationsService },
                 { provide: NganhhocService, useValue: nganhHocService },
                 { provide: LocationService, useValue: locationService },
                 { provide: NotificationService, useValue: notificationService },
@@ -73,7 +73,7 @@ describe('HosoListComponent', () => {
         component.openAssignDialog();
 
         expect(component.assignIncludeCurrentRound).toBeTrue();
-        expect(hosoService.load).toHaveBeenCalledWith(
+        expect(registrationsService.load).toHaveBeenCalledWith(
             { search: '', dotxettuyen_id: 3 },
             { limit: 500, paged: 1 },
         );
@@ -87,7 +87,7 @@ describe('HosoListComponent', () => {
         component.onAssignRoundFilterChange(false);
 
         expect(component.selectedAssignIds.size).toBe(0);
-        expect(hosoService.load).toHaveBeenCalledWith(
+        expect(registrationsService.load).toHaveBeenCalledWith(
             { search: '', dotxettuyen_id: undefined },
             { limit: 500, paged: 1 },
         );
@@ -100,20 +100,20 @@ describe('HosoListComponent', () => {
 
         component.onAssignRoundFilterChange(true);
 
-        expect(hosoService.load).toHaveBeenCalledWith(
+        expect(registrationsService.load).toHaveBeenCalledWith(
             { search: '', dotxettuyen_id: 3 },
             { limit: 500, paged: 1 },
         );
     });
 
-    it('passes the candidate name search to HosoThisinhService', () => {
+    it('passes the candidate name search to RegistrationsService', () => {
         const component = createComponent();
         component.hoidong = hoidong;
         component.assignSearch = 'Nguyễn Văn A';
 
         component.onAssignSearch();
 
-        expect(hosoService.load).toHaveBeenCalledWith(
+        expect(registrationsService.load).toHaveBeenCalledWith(
             { search: 'Nguyễn Văn A', dotxettuyen_id: 3 },
             { limit: 500, paged: 1 },
         );
@@ -124,7 +124,7 @@ describe('HosoListComponent', () => {
         const oldRequest = new Subject<never>();
         const newRequest = new Subject<never>();
         component.hoidong = hoidong;
-        hosoService.load.and.returnValues(oldRequest, newRequest);
+        registrationsService.load.and.returnValues(oldRequest, newRequest);
 
         component.loadCandidates();
         component.onAssignRoundFilterChange(false);

@@ -6,7 +6,7 @@ import { LocationService } from '@services/location.service';
 import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { IctuQueryCondition } from '@models/dto';
 import { HosoKhongtrungtuyenComponent } from './hoso-khongtrungtuyen.component';
 
@@ -18,7 +18,7 @@ describe('HosoKhongtrungtuyenComponent', () => {
         recordsFiltered: 0,
     };
 
-    const hosoService = jasmine.createSpyObj<HosoThisinhService>('HosoThisinhService', ['query', 'get']);
+    const registrationsService = jasmine.createSpyObj<RegistrationsService>('RegistrationsService', ['query', 'get']);
     const dotService = jasmine.createSpyObj<DotXettuyenService>('DotXettuyenService', ['load']);
     const nganhHocService = jasmine.createSpyObj<NganhhocService>('NganhhocService', ['load']);
     const ctdtService = jasmine.createSpyObj<ChuongtrinhDaotaoService>('ChuongtrinhDaotaoService', ['query']);
@@ -32,7 +32,7 @@ describe('HosoKhongtrungtuyenComponent', () => {
             update: true,
             delete: true,
         });
-        hosoService.query.and.returnValue(of(emptyResponse));
+        registrationsService.query.and.returnValue(of(emptyResponse));
         dotService.load.and.returnValue(of(emptyResponse));
         nganhHocService.load.and.returnValue(of(emptyResponse));
         ctdtService.query.and.returnValue(of(emptyResponse));
@@ -42,8 +42,8 @@ describe('HosoKhongtrungtuyenComponent', () => {
     }
 
     beforeEach(() => {
-        hosoService.query.calls.reset();
-        hosoService.get.calls.reset();
+        registrationsService.query.calls.reset();
+        registrationsService.get.calls.reset();
         dotService.load.calls.reset();
         nganhHocService.load.calls.reset();
         ctdtService.query.calls.reset();
@@ -52,7 +52,7 @@ describe('HosoKhongtrungtuyenComponent', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                { provide: HosoThisinhService, useValue: hosoService },
+                { provide: RegistrationsService, useValue: registrationsService },
                 { provide: DotXettuyenService, useValue: dotService },
                 { provide: NganhhocService, useValue: nganhHocService },
                 { provide: ChuongtrinhDaotaoService, useValue: ctdtService },
@@ -68,7 +68,7 @@ describe('HosoKhongtrungtuyenComponent', () => {
         component.ngOnInit();
 
         expect(component.state()).toBe('forbidden');
-        expect(hosoService.query).not.toHaveBeenCalled();
+        expect(registrationsService.query).not.toHaveBeenCalled();
         expect(dotService.load).not.toHaveBeenCalled();
         expect(nganhHocService.load).not.toHaveBeenCalled();
         expect(ctdtService.query).not.toHaveBeenCalled();
@@ -80,7 +80,7 @@ describe('HosoKhongtrungtuyenComponent', () => {
 
         component.ngOnInit();
 
-        const conditions = hosoService.query.calls.mostRecent().args[0];
+        const conditions = registrationsService.query.calls.mostRecent().args[0];
         expect(conditions).toContain(jasmine.objectContaining({
             conditionName: 'status',
             value: 'KHONG_TRUNG_TUYEN',
@@ -93,13 +93,13 @@ describe('HosoKhongtrungtuyenComponent', () => {
         component.ngOnInit();
         component.searchInfo.search = 'Nguyen Van A';
         component.searchInfo.cccd = '012345678901';
-        hosoService.query.calls.reset();
+        registrationsService.query.calls.reset();
 
         component.resetFilter();
 
         expect(component.searchInfo.search).toBe('');
         expect(component.searchInfo.cccd).toBeUndefined();
-        const conditions = hosoService.query.calls.mostRecent().args[0];
+        const conditions = registrationsService.query.calls.mostRecent().args[0];
         expect(conditions).toContain(jasmine.objectContaining({
             conditionName: 'status',
             value: 'KHONG_TRUNG_TUYEN',

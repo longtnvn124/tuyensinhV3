@@ -7,7 +7,7 @@ import { LocationService } from '@services/location.service';
 import { NotificationService } from '@services/notification.service';
 import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { ExpHosoTuyensinhService } from '@services/tuyensinh/exp-hoso-tuyensinh.service';
 import { UserService } from '@services/user.service';
@@ -22,7 +22,7 @@ describe('HosoXettuyenComponent lookup services', () => {
         recordsFiltered: 0,
     };
 
-    const hosoService = jasmine.createSpyObj<HosoThisinhService>('HosoThisinhService', ['query']);
+    const registrationsService = jasmine.createSpyObj<RegistrationsService>('RegistrationsService', ['query']);
     const dotService = jasmine.createSpyObj<DotXettuyenService>('DotXettuyenService', ['load']);
     const nganhHocService = jasmine.createSpyObj<NganhhocService>('NganhhocService', ['load']);
     const ctdtService = jasmine.createSpyObj<ChuongtrinhDaotaoService>('ChuongtrinhDaotaoService', ['query']);
@@ -37,11 +37,11 @@ describe('HosoXettuyenComponent lookup services', () => {
     const notificationService = jasmine.createSpyObj<NotificationService>('NotificationService', ['toastError']);
 
     beforeEach(() => {
-        hosoService.query.and.returnValue(of(emptyResponse));
+        registrationsService.query.and.returnValue(of(emptyResponse));
         dotService.load.and.returnValue(of(emptyResponse));
         nganhHocService.load.and.returnValue(of({
             ...emptyResponse,
-            data: [{ id: 11, name: 'Công nghệ thông tin', code: '7480201', is_active: true }],
+            data: [{ id: 11, ten_nganh: 'Công nghệ thông tin', ma_nganh: '7480201', status: 1 }],
         } as never));
         ctdtService.query.and.returnValue(of({
             ...emptyResponse,
@@ -61,7 +61,7 @@ describe('HosoXettuyenComponent lookup services', () => {
         TestBed.configureTestingModule({
             providers: [
                 FormBuilder,
-                { provide: HosoThisinhService, useValue: hosoService },
+                { provide: RegistrationsService, useValue: registrationsService },
                 { provide: DotXettuyenService, useValue: dotService },
                 { provide: NganhhocService, useValue: nganhHocService },
                 { provide: ChuongtrinhDaotaoService, useValue: ctdtService },
@@ -100,7 +100,7 @@ describe('HosoXettuyenComponent lookup services', () => {
 
         component.loadData();
 
-        expect(hosoService.query).toHaveBeenCalledWith([], jasmine.any(Object));
+        expect(registrationsService.query).toHaveBeenCalledWith([], jasmine.any(Object));
     });
 
     it('opens the application view drawer for reviewer', () => {

@@ -6,15 +6,14 @@ import { DataTableEvent, DataTableEventName, IctuDataTable, IctuDataTablePaginat
 import { IctuFormControl2 } from '@models/ictu-form-control';
 import { IctuDeletingAnimationControl } from '@models/ictu-deleting-animation-control';
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
-import { HosoStatus, HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
+import { RegistrationStatus, Registrations } from '@app/models/tuyensinh/registrations';
 import { Locations } from '@models/location';
 import { SysRoleName } from '@models/role';
 import { User } from '@models/user';
 import { ChuongtrinhDaotao } from '@models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
-import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import { AuthenticationService } from '@services/authentication.service';
@@ -32,12 +31,14 @@ import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
-import { EMPTY, forkJoin, from, Observable, Subject } from 'rxjs';
+import { EMPTY, forkJoin, from, Observable, of, Subject } from 'rxjs';
 import { filter, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { DanToc, TH_XETTUYEN } from '@app/utilities/syscats';
 import { Popover } from "primeng/popover";
 import { FormThongtinDangkyComponent } from "../form-thongtin-dangky/form-thongtin-dangky.component";
 import { TuvanTuyensinhComponent } from '../tuvan-tuyensinh/tuvan-tuyensinh.component';
+import { TuyensinhStatus } from '@app/models/tuyensinh/tuyensinh-status';
+import { RegistrationsStatusService } from '@app/services/tuyensinh/registrations-status';
 
 @Component({
     selector: 'app-hoso-xettuyen',
@@ -54,10 +55,10 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     // ── Services ────────────────────────────────────────────────
 
-    private hosoService = inject(HosoThisinhService);
+    private registrationsService = inject(RegistrationsService);
     private dotService = inject(DotXettuyenService);
     private nganhHocService = inject(NganhhocService);
-    private ctdtService = inject(ChuongtrinhDaotaoService);
+
     private locationService = inject(LocationService);
     private userService = inject(UserService);
     private exportService = inject(ExpHosoTuyensinhService);
@@ -65,7 +66,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     private notification = inject(NotificationService);
     private fb = inject(FormBuilder);
     private onDestroy$ = new Subject<void>();
-
+    private readonly tuyensinhStatusService = inject(RegistrationsStatusService)
     // ── Permission ──────────────────────────────────────────────
 
     private getPermissionMenuId(): string {
@@ -110,11 +111,13 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     readonly canViewApplication = computed((): boolean => this.isReviewer());
     readonly exportLoading = signal(false);
 
+    listDataStatus: TuyensinhStatus[];
+
     // ── Search / Filter ─────────────────────────────────────────
 
     searchInfo: {
         search: string;
-        status?: HosoStatus;
+        status?: RegistrationStatus;
         dotxettuyen_id?: number;
         nganh_id?: number;
         nguoi_tuvan?: number;
@@ -140,7 +143,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     // ── Table ───────────────────────────────────────────────────
 
-    dataTable: IctuDataTable<HosoThisinh> = new IctuDataTable<HosoThisinh>();
+    dataTable: IctuDataTable<Registrations> = new IctuDataTable<Registrations>();
     state: WritableSignal<'loading' | 'success' | 'error'> = signal<'loading' | 'success' | 'error'>('success');
     private temp: IctuDataTablePaginatorInfo = { paged: 1, resetPaginator: true };
 
@@ -164,7 +167,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         label: s.label,
     }));
 
-    readonly statusBadgeMap: Record<HosoStatus, string> = {
+    readonly statusBadgeMap: Record<RegistrationStatus, string> = {
         [-1]: 'ictu-badge--danger',
         0: 'ictu-badge--warning',
         1: 'ictu-badge--danger',
@@ -178,35 +181,33 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     // ── Drawer & Event system ───────────────────────────────────
 
     readonly drawer = viewChild<Drawer>('masterDrawer');
-    formControl!: IctuFormControl2<HosoThisinh>;
-    eventObserver$: Subject<DataTableEvent<HosoThisinh>> = new Subject<DataTableEvent<HosoThisinh>>();
-    handelEvent!: Record<DataTableEventName, (data?: HosoThisinh | HosoThisinh[]) => void>;
+    formControl!: IctuFormControl2<Registrations>;
+    eventObserver$: Subject<DataTableEvent<Registrations>> = new Subject<DataTableEvent<Registrations>>();
+    handelEvent!: Record<DataTableEventName, (data?: Registrations | Registrations[]) => void>;
 
     // ── Consultation drawer ─────────────────────────────────────
 
     readonly consultationDrawerVisible = signal<boolean>(false);
-    readonly selectedConsultationHoso = signal<HosoThisinh | null>(null);
+    readonly selectedConsultationHoso = signal<Registrations | null>(null);
 
     // ── View detail drawer ──────────────────────────────────────
 
     viewDetailVisible: WritableSignal<boolean> = signal<boolean>(false);
-    viewDetailData: WritableSignal<HosoThisinh | null> = signal<HosoThisinh | null>(null);
+    viewDetailData: WritableSignal<Registrations | null> = signal<Registrations | null>(null);
 
     // ── View application drawer ─────────────────────────────────
 
     readonly viewDrawerVisible = signal<boolean>(false);
-    readonly viewData = signal<HosoThisinh | null>(null);
+    readonly viewData = signal<Registrations | null>(null);
 
     // ── Edit drawer ────────────────────────────────────────────
 
     readonly editDrawerVisible = signal<boolean>(false);
-    readonly editData = signal<HosoThisinh | null>(null);
+    readonly editData = signal<Registrations | null>(null);
 
     constructor() {
-
-        console.log(this.permissionControl());
         
-        this.formControl = new IctuFormControl2<HosoThisinh>({
+        this.formControl = new IctuFormControl2<Registrations>({
             dropdownFields: [],
             formGroup: this.fb.group({}),
             objectName: 'hồ sơ xét tuyển',
@@ -217,15 +218,15 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             OPEN_FORM_ADD: (): void => {
                 // Phase 2 — drawer form
             },
-            OPEN_FORM_UPDATE: (data: HosoThisinh): void => {
+            OPEN_FORM_UPDATE: (data: Registrations): void => {
                 this.editData.set(data);
                 this.editDrawerVisible.set(true);
             },
-            DELETE_SINGLE_ROW: ({ id }: HosoThisinh): void => {
+            DELETE_SINGLE_ROW: ({ id }: Registrations): void => {
                 this.requestDeletingData([id]);
             },
             DELETE_SELECTED_ROWS: (): void => {
-                const ids: number[] = this.dataTable.getSelectedData().map(({ id }: HosoThisinh): number => id);
+                const ids: number[] = this.dataTable.getSelectedData().map(({ id }: Registrations): number => id);
                 if (ids.length) this.requestDeletingData(ids);
             },
             SUBMIT_FORM: (): void => {
@@ -234,7 +235,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         };
 
         this.eventObserver$.pipe(takeUntil(this.onDestroy$)).subscribe(
-            ({ name, data }: DataTableEvent<HosoThisinh>): void => this.handelEvent[name](data),
+            ({ name, data }: DataTableEvent<Registrations>): void => this.handelEvent[name](data),
         );
     }
 
@@ -260,26 +261,23 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         forkJoin({
             dots: this.dotService.load({ search: '' }, qp).pipe(
                 map((r: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
-                    (r.data ?? []).map(d => ({ value: d.id, label: d.name }))),
+                    (r.data ?? []).map(d => ({ value: d.id, label: d.tieude }))),
             ),
             majors: this.nganhHocService.load({ search: '' }, qp).pipe(
                 map((r: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
-                    (r.data ?? []).map(m => ({ value: m.id, label: m.name }))),
+                    (r.data ?? []).map(m => ({ value: m.id, label: m.ten_nganh }))),
             ),
-            programs: this.ctdtService.query([], qp).pipe(
-                map((r: DtoObject<ChuongtrinhDaotao[]>): IctuDropdownOption<number>[] =>
-                    (r.data ?? []).map(p => ({ value: p.id, label: `${p.code} — ${p.name}` }))),
-            ),
+            
             tinhList: this.locationService.queryLocation([], qp, 'regions').pipe(
                 map((r: DtoObject<any[]>): IctuDropdownOption<number>[] =>
                     (r.data ?? []).map(t => ({ value: t.id, label: t.name }))),
             ),
             
         }).pipe(takeUntil(this.onDestroy$)).subscribe({
-            next: ({ dots, majors, programs, tinhList }): void => {
+            next: ({ dots, majors, tinhList }): void => {
                 this.dots.set(dots);
                 this.majors.set(majors);
-                this.programs.set(programs);
+                
                 this.tinhList.set(tinhList);
 
                 this.loadData(1, true);
@@ -366,14 +364,15 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             order: 'DESC',
             orderby: 'created_at',
         };
-        this.hosoService.query(conditions, queryParams).pipe(
-            map((res: DtoObject<HosoThisinh[]>): HosoThisinh[] => {
+        this.registrationsService.query(conditions, queryParams).pipe(
+            map((res: DtoObject<Registrations[]>): Registrations[] => {
                 if (resetPaginator) return this.dataTable.paginator.setupPaginator(res);
                 this.dataTable.paginator.changePage(paged);
                 return res.data ?? [];
             }),
+            switchMap(m=> forkJoin({data: of(m),dataStatus: this.loopGetSatus(m,[])}))
         ).subscribe({
-            next: (data: HosoThisinh[]): void => {
+            next: ({data,dataStatus}): void => {
                 this.dataTable.fillData(data);
                 this.state.set('success');
             },
@@ -427,10 +426,10 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             this.notification.toastError('Bạn không có quyền tạo hồ sơ xét tuyển');
             return;
         }
-        this.eventObserver$.next({ name: 'OPEN_FORM_ADD', data: null as unknown as HosoThisinh });
+        this.eventObserver$.next({ name: 'OPEN_FORM_ADD', data: null as unknown as Registrations });
     }
 
-    editItem(data: HosoThisinh): void {
+    editItem(data: Registrations): void {
         if (!this.permissionControl().canUpdate) {
             this.notification.toastError('Bạn không có quyền cập nhật hồ sơ xét tuyển');
             return;
@@ -438,7 +437,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.eventObserver$.next({ name: 'OPEN_FORM_UPDATE', data });
     }
 
-    viewApplication(data: HosoThisinh): void {
+    viewApplication(data: Registrations): void {
         if (!this.canViewApplication()) {
             this.notification.toastError('Bạn không có quyền xem hồ sơ xét tuyển');
             return;
@@ -447,7 +446,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.viewDrawerVisible.set(true);
     }
 
-    deleteItem(data: HosoThisinh): void {
+    deleteItem(data: Registrations): void {
         if (!this.permissionControl().canDelete) {
             this.notification.toastError('Bạn không có quyền xóa hồ sơ xét tuyển');
             return;
@@ -460,11 +459,11 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             this.notification.toastError('Bạn không có quyền xóa hồ sơ xét tuyển');
             return;
         }
-        this.eventObserver$.next({ name: 'DELETE_SELECTED_ROWS', data: null as unknown as HosoThisinh });
+        this.eventObserver$.next({ name: 'DELETE_SELECTED_ROWS', data: null as unknown as Registrations });
     }
 
     submitForm(): void {
-        this.eventObserver$.next({ name: 'SUBMIT_FORM', data: null as unknown as HosoThisinh });
+        this.eventObserver$.next({ name: 'SUBMIT_FORM', data: null as unknown as Registrations });
     }
 
     onDrawerHide(): void {
@@ -502,8 +501,8 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.notification.startProgressAnimation(controlLoading, 'Đang xuất dữ liệu hồ sơ');
         controlLoading.next({ percent: 10, heading: 'Đang tải danh sách hồ sơ' });
 
-        this.hosoService.query(this.buildConditions(), queryParams).pipe(
-            switchMap((response: DtoObject<HosoThisinh[]>): Observable<HosoTuyensinhExportPayload> => {
+        this.registrationsService.query(this.buildConditions(), queryParams).pipe(
+            switchMap((response: DtoObject<Registrations[]>): Observable<HosoTuyensinhExportPayload> => {
                 const records = response.data ?? [];
                 if (!records.length) {
                     this.notification.toastWarning('Không có dữ liệu hồ sơ để xuất');
@@ -538,12 +537,12 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     }
 
     private loadExportPayload(
-        records: readonly HosoThisinh[],
+        records: readonly Registrations[],
     ): Observable<HosoTuyensinhExportPayload> {
         const queryParams: IctuQueryParams = { limit: -1, paged: 1 };
         return forkJoin({
             majors: this.nganhHocService.load({ search: '' }, queryParams),
-            programs: this.ctdtService.query([], queryParams),
+          
             rounds: this.dotService.load({ search: '' }, queryParams),
             regions: this.locationService.queryLocation([], queryParams, 'regions'),
             provinces: this.locationService.queryLocation([], queryParams, 'provinces'),
@@ -556,17 +555,12 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 records,
                 majors: (responses.majors.data ?? []).map((major: Nganhhoc) => ({
                     id: major.id,
-                    code: major.code,
-                    name: major.name,
-                })),
-                programs: (responses.programs.data ?? []).map((program: ChuongtrinhDaotao) => ({
-                    id: program.id,
-                    code: program.code,
-                    name: program.name,
+                    ma_nganh: major.ma_nganh,
+                    ten_nganh: major.ten_nganh,
                 })),
                 rounds: (responses.rounds.data ?? []).map((round: DotXettuyen) => ({
                     id: round.id,
-                    name: round.name,
+                    tieude: round.tieude,
                 })),
                 regions: (responses.regions.data ?? []).map((region: Locations) => ({
                     id: region.id,
@@ -591,8 +585,8 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     private requestDeletingData(ids: number[]): void {
         this.notification.confirmDelete(ids.length).pipe(
             filter((confirm: boolean): boolean => confirm),
-            map((): IctuDeletingAnimationControl<HosoThisinh> => new IctuDeletingAnimationControl(ids, this.hosoService)),
-            switchMap((ctrl: IctuDeletingAnimationControl<HosoThisinh>): Observable<boolean> => {
+            map((): IctuDeletingAnimationControl<Registrations> => new IctuDeletingAnimationControl(ids, this.registrationsService)),
+            switchMap((ctrl: IctuDeletingAnimationControl<Registrations>): Observable<boolean> => {
                 ctrl.run();
                 return this.notification.startDeleting(ctrl.progress);
             }),
@@ -612,7 +606,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     //  Consultation history
     // ═════════════════════════════════════════════════════════════
 
-    openLichSu(row: HosoThisinh): void {
+    openLichSu(row: Registrations): void {
         this.selectedConsultationHoso.set({ ...row });
         this.consultationDrawerVisible.set(true);
     }
@@ -621,12 +615,12 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     //  View detail
     // ═════════════════════════════════════════════════════════════
 
-    viewDetail(row: HosoThisinh): void {
+    viewDetail(row: Registrations): void {
         this.viewDetailData.set(null);
         this.viewDetailVisible.set(true);
-        const currentRow: HosoThisinh = this.dataTable.data().find((r: HosoThisinh): boolean => r.id === row.id) ?? row;
-        this.hosoService.get(row.id).pipe(takeUntil(this.onDestroy$)).subscribe({
-            next: (data: HosoThisinh): void => {
+        const currentRow: Registrations = this.dataTable.data().find((r: Registrations): boolean => r.id === row.id) ?? row;
+        this.registrationsService.get(row.id).pipe(takeUntil(this.onDestroy$)).subscribe({
+            next: (data: Registrations): void => {
                 this.viewDetailData.set(data);
             },
             error: (): void => {
@@ -639,11 +633,11 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     //  Label helpers
     // ═════════════════════════════════════════════════════════════
 
-    statusLabel(status: HosoStatus | undefined): string {
+    statusLabel(status: RegistrationStatus | undefined): string {
         return this.statusOptions.find(s => s.value === status)?.label ?? `${status ?? '—'}`;
     }
 
-    statusBadgeClass(status: HosoStatus | undefined): string {
+    statusBadgeClass(status: RegistrationStatus | undefined): string {
         return status === undefined
             ? 'ictu-badge--secondary'
             : this.statusBadgeMap[status];
@@ -667,5 +661,31 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     tinhLabel(tinhId: number | undefined): string {
         if (!tinhId) return '—';
         return this.tinhList().find(t => t.value == tinhId)?.label ?? `#${tinhId}`;
+    }
+
+
+    private loopGetSatus(arr: Registrations[], data: TuyensinhStatus[]): Observable<TuyensinhStatus[]> {
+        const index = arr.findIndex(f => !f['_getStatus']);
+
+        if (index !== -1) {
+            const item = arr[index];
+            const condition_status:IctuConditionParam[] = [
+                {
+                    conditionName: 'registration_id',
+                    condition: IctuQueryCondition.equal,
+                    value: item.id.toString(),
+                    orWhere: 'and'
+                },
+            ];
+
+            arr[index]['_getStatus'] = true;
+            return this.tuyensinhStatusService.query(condition_status, {limit:1, paged:1, order:'DESC'}).pipe(switchMap(m => {
+                    return this.loopGetSatus(arr, [...data, ...m.data])
+                }
+            ))
+        } else {
+            return of(data)
+        }
+
     }
 }

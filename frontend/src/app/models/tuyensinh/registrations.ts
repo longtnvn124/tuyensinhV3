@@ -1,8 +1,8 @@
 import { IctuBaseModel } from '@models/ictu-base-model';
 
-export type HosoStatus = -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type RegistrationStatus = -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-export interface HosoThisinh extends IctuBaseModel {
+export interface Registrations extends IctuBaseModel {
     id: number;
     ho_va_ten: string;
     dien_thoai: string;
@@ -14,8 +14,8 @@ export interface HosoThisinh extends IctuBaseModel {
     dia_chi_nha?: string;
     noi_sinh?: number;
     dan_toc?: string;
-    status: HosoStatus;
-    status_connent: number;
+    status: RegistrationStatus;
+    status_connect: number;
     ngay_duyet?: string;
 
     cccd?: string;
@@ -55,4 +55,7 @@ export interface HosoThisinh extends IctuBaseModel {
     content?: string;
     sohieu_vb?: string;
     shared?: string;
+
+    anh_giaykhaisinh:string;
+    anh_giayuutien:string
 }

@@ -2,7 +2,7 @@ import { FormBuilder } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Registrations } from '@models/tuyensinh/registrations';
 import { LichsuTuvan } from '@models/tuyensinh/lichsu-tuvan';
 import { User } from '@models/user';
 import { AuthenticationService } from '@services/authentication.service';
@@ -27,11 +27,11 @@ describe('TuvanTuyensinhComponent readOnly', () => {
         dien_thoai: '0912345678',
         gioi_tinh: 'NAM',
         status: 'MOI',
-        status_connent: 0,
+        status_connect: 0,
         doituong: '00',
         anh_soyeulylich: 'so-yeu-ly-lich.jpg',
         owner_by: 7,
-    } as unknown as HosoThisinh;
+    } as unknown as Registrations;
     const history = { id: 3, hoso_id: 12, user_id: 7 } as LichsuTuvan;
 
     beforeEach(() => {

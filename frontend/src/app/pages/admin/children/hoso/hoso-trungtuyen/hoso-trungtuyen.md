@@ -63,10 +63,10 @@ Hồ sơ thí sinh
     │
     ├── Hội đồng xét tuyển đánh giá ket_qua = trung_tuyen
     │
-    ├── Backend đồng bộ HosoThisinh.status = TRUNG_TUYEN
+    ├── Backend đồng bộ Registrations.status = TRUNG_TUYEN
     │
     └── HosoTrungtuyenComponent
-            ├── Truy vấn HosoThisinhService
+            ├── Truy vấn RegistrationsService
             ├── Luôn lọc status = TRUNG_TUYEN
             ├── Hiển thị danh sách chỉ đọc
             ├── Xem chi tiết hồ sơ
@@ -76,8 +76,8 @@ Hồ sơ thí sinh
 Nguồn kết quả hiện có:
 
 - `hoidong_hoso_thisinh.ket_qua`: giá trị nghiệp vụ `trung_tuyen`.
-- `HosoThisinh.status`: mã `TRUNG_TUYEN` trong `TH_XETTUYEN`.
-- Danh sách dùng `HosoThisinhService`, giống các màn hồ sơ hiện tại.
+- `Registrations.status`: mã `TRUNG_TUYEN` trong `TH_XETTUYEN`.
+- Danh sách dùng `RegistrationsService`, giống các màn hồ sơ hiện tại.
 
 Điều kiện phụ thuộc:
 
@@ -89,7 +89,7 @@ Component chỉ inject API hiện có:
 
 | Service | Mục đích |
 |---|---|
-| `HosoThisinhService` | Query danh sách; lấy chi tiết hồ sơ |
+| `RegistrationsService` | Query danh sách; lấy chi tiết hồ sơ |
 | `DotXettuyenService` | Tải danh mục đợt xét tuyển |
 | `ApiOutsiteService` | Tải ngành và CTĐT |
 | `LocationService` | Tải tỉnh/thành |
@@ -236,15 +236,15 @@ type DetailState = 'idle' | 'loading' | 'success' | 'error';
 
 readonly state = signal<ViewState>('idle');
 readonly detailState = signal<DetailState>('idle');
-readonly dataTable = new IctuDataTable<HosoThisinh>();
+readonly dataTable = new IctuDataTable<Registrations>();
 readonly dots = signal<IctuDropdownOption<number>[]>([]);
 readonly majors = signal<IctuDropdownOption<number>[]>([]);
 readonly programs = signal<IctuDropdownOption<number>[]>([]);
 readonly tinhList = signal<IctuDropdownOption<number>[]>([]);
 readonly consultationDrawerVisible = signal(false);
-readonly selectedConsultationHoso = signal<HosoThisinh | null>(null);
+readonly selectedConsultationHoso = signal<Registrations | null>(null);
 readonly viewDetailVisible = signal(false);
-readonly viewDetailData = signal<HosoThisinh | null>(null);
+readonly viewDetailData = signal<Registrations | null>(null);
 readonly selectedDetailId = signal<number | null>(null);
 ```
 
@@ -303,7 +303,7 @@ Sau đó thêm:
 
 - Search trim: `full_name LIKE` hoặc `phone LIKE`.
 - Đợt: `dot_xet_tuyen_id =`.
-- Ngành: `nganh_id =`, đồng nhất model `HosoThisinh`.
+- Ngành: `nganh_id =`, đồng nhất model `Registrations`.
 - CCCD: `cccd LIKE`.
 - Tỉnh/TP: `tinh_id =`.
 - Nơi sinh: model là ID tỉnh, dùng select và `noi_sinh =`; không dùng text `LIKE`.
@@ -439,8 +439,8 @@ File: `hoso-trungtuyen.component.css`
 
 Không thay đổi:
 
-- `HosoThisinhService`.
-- Model `HosoThisinh`.
+- `RegistrationsService`.
+- Model `Registrations`.
 - `tuvan-tuyensinh`.
 - `hoso-routing.module.ts`.
 - `hoso.module.ts`.
@@ -450,7 +450,7 @@ Không thay đổi:
 
 | Mức độ | Rủi ro | Xử lý |
 |---|---|---|
-| Trung bình | Backend chưa đồng bộ kết quả hội đồng sang `HosoThisinh.status` | Xác nhận API; frontend vẫn query đúng `TRUNG_TUYEN` |
+| Trung bình | Backend chưa đồng bộ kết quả hội đồng sang `Registrations.status` | Xác nhận API; frontend vẫn query đúng `TRUNG_TUYEN` |
 | Trung bình | Permission key `hoso-trungtuyen` chưa cấu hình | Xác nhận cấu hình quyền; không đổi key âm thầm |
 | Trung bình | Tên field ngành giữa code cũ và model không đồng nhất | Dùng `nganh_id`; xác minh request khi test |
 | Thấp | Lookup lỗi | Hiển thị `#ID` hoặc `—` |

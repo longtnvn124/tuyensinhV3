@@ -369,7 +369,7 @@ export const DanToc = [
 export const VBTN = [
     { value: 'THPT', label: 'THPT' },
     { value: 'THN', label: 'TH nghề' },
-    { value: 'GCN', label: 'GCN HT kiến thức' },
+    { value: 'GCN', label: 'GCN Hoàn thành kiến thức VH THPT' },
 ];
 
 export const VBCM = [

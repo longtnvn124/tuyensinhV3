@@ -53,11 +53,11 @@
                                 [disabled]="!permissionControl().canDelete"></mat-checkbox>
                         </td>
                         <td class="col-index text-center">{{ dataTable.paginator.startIndex() + i }}</td>
-                        <td class="text-left">{{ row.name }}</td>
+                        <td class="text-left">{{ row.tieude }}</td>
                         <td class="text-center">{{ formatDateRange(row) }}</td>
                         <td class="wid-120 text-center p-0">
                             <div class="d-flex w-100 h-100 justify-content-center align-items-center">
-                                @if (row.status === 'dang_mo') {
+                                @if (row.status === 1) {
                                 <span class="ictu-badge ictu-badge--success">Đang mở</span>
                                 } @else {
                                 <span class="ictu-badge ictu-badge--secondary">Đã đóng</span>
@@ -116,9 +116,9 @@
                     <div class="ictu-form__row">
                         <label class="ictu-form__label ictu-form__label--required" for="d_name">Tên đợt xét
                             tuyển</label>
-                        <input class="ictu-form__input-field" formControlName="name" id="d_name" pInputText
+                        <input class="ictu-form__input-field" formControlName="tieude" id="d_name" pInputText
                             placeholder="VD: Đợt xét tuyển 2026" type="text">
-                        @if (formControl.formGroup.get('name')?.invalid && formControl.formGroup.get('name')?.touched) {
+                        @if (formControl.formGroup.get('tieude')?.invalid && formControl.formGroup.get('tieude')?.touched) {
                         <small class="ictu-form__error">Vui lòng nhập tên đợt (tối thiểu 2 ký tự)</small>
                         }
                     </div>
@@ -184,7 +184,7 @@
                     }
                     <div class="ictu-form__row">
                         <label class="ictu-form__label" for="d_desc">Mô tả</label>
-                        <textarea class="ictu-form__input-field" formControlName="mo_ta" id="d_desc" pTextarea
+                        <textarea class="ictu-form__input-field" formControlName="mota" id="d_desc" pTextarea
                             placeholder="Mô tả đợt xét tuyển"></textarea>
                     </div>
                     <div class="ictu-form__row">

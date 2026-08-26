@@ -18,11 +18,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { publicHttpContext } from '@app/interceptor/public-http-request';
 
 import { Locations } from '@models/location';
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Registrations } from '@models/tuyensinh/registrations';
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService } from '@services/notification.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 
 type RegistrationLoadState = 'loading' | 'success' | 'error';
@@ -64,7 +64,7 @@ const nonBlank = (
 export class DangKyXetTuyenComponent implements OnInit {
     private readonly destroyRef = inject(DestroyRef);
     private readonly formBuilder = inject(FormBuilder);
-    private readonly hosoService = inject(HosoThisinhService);
+    private readonly registrationsService = inject(RegistrationsService);
     private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
     private readonly notification = inject(NotificationService);
@@ -115,19 +115,17 @@ export class DangKyXetTuyenComponent implements OnInit {
             majors: this.nganhHocService.load(
                 { search: '' },
                 { limit: -1 },
-                publicHttpContext()
             ),
             regions: this.locationService.queryLocation(
                 [],
                 { limit: -1, paged: 1 },
                 'regions',
-                publicHttpContext()
             ),
         })
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: ({ majors, regions }): void => {
-                    this.majors.set(majors.data.filter(major => major.is_active));
+                    this.majors.set(majors.data.filter(major => major.status == 1));
                     this.regions.set(regions.data);
                     this.loadState.set('success');
                 },
@@ -163,7 +161,7 @@ export class DangKyXetTuyenComponent implements OnInit {
         };
 
         this.submitState.set('submitting');
-        this.hosoService
+        this.registrationsService
             .create(payload)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({

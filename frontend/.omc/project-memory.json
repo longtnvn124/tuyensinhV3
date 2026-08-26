@@ -138,6 +138,12 @@
       "type": "file"
     },
     {
+      "path": "src\\app\\pages\\auth\\login\\login.component.html",
+      "accessCount": 5,
+      "lastAccessed": 1787330976584,
+      "type": "file"
+    },
+    {
       "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.ts",
       "accessCount": 4,
       "lastAccessed": 1784254930283,
@@ -207,6 +213,12 @@
       "path": "src\\app\\pages\\admin\\children\\hoso\\hoso-xettuyen\\hoso-xettuyen.component.html",
       "accessCount": 2,
       "lastAccessed": 1785383683650,
+      "type": "file"
+    },
+    {
+      "path": "src\\app\\pages\\auth\\login\\login.component.css",
+      "accessCount": 2,
+      "lastAccessed": 1787330641009,
       "type": "file"
     },
     {

@@ -20,13 +20,12 @@ import { LoadingProgressComponent } from "@theme/components/loading-progress/loa
 import { MatButton } from "@angular/material/button";
 import { MatCheckbox } from "@angular/material/checkbox";
 import { Select } from "primeng/select";
-import { Textarea } from "primeng/textarea";
 import { ChuongtrinhDaotaoComponent } from "./chuongtrinh-daotao/chuongtrinh-daotao.component";
 import { IctuPaginatorControl } from '@app/theme/components/ictu-paginator/ictu-paginator-control';
 
 @Component( {
     selector    : 'app-nganh-hoc' ,
-    imports     : [ ChuongtrinhDaotaoComponent , Drawer , IctuPaginatorComponent , InputText , LoadingProgressComponent , MatButton , MatCheckbox , ReactiveFormsModule , Select , Textarea , FormsModule ] ,
+    imports     : [ ChuongtrinhDaotaoComponent , Drawer , IctuPaginatorComponent , InputText , LoadingProgressComponent , MatButton , MatCheckbox , ReactiveFormsModule , Select  , FormsModule ] ,
     templateUrl : './nganh-hoc.component.html' ,
     styleUrl   : './nganh-hoc.component.css' ,
     standalone : true
@@ -79,10 +78,10 @@ export class NganhhocComponent implements OnInit , OnDestroy , IctuBasePermissio
         this.masterFormControl = new IctuFormControl2<Nganhhoc>( {
             dropdownFields : [] ,
             formGroup      : this.fb.group( {
-                name        : [ '' , [ Validators.required , Validators.minLength( 2 ) , Validators.maxLength( 255 ) ] ] ,
-                code        : [ '' , [ Validators.required , Validators.minLength( 2 ) , Validators.maxLength( 255 ) ] ] ,
-                description : [ '' ] ,
-                is_active   : [ 1 ]
+                ten_nganh   : [ '' , [ Validators.required , Validators.minLength( 2 ) , Validators.maxLength( 255 ) ] ] ,
+                ma_nganh    : [ '' , [ Validators.required , Validators.minLength( 2 ) , Validators.maxLength( 255 ) ] ] ,
+              
+                status      : [ 1 ]
             } ) ,
             objectName : 'ngành học' ,
             drawer     : this.masterDrawer
@@ -92,19 +91,19 @@ export class NganhhocComponent implements OnInit , OnDestroy , IctuBasePermissio
         this.masterHandelEvent = {
             OPEN_FORM_ADD        : () : void => {
                 this.masterFormControl.formGroup.reset( {
-                    name        : '' ,
-                    code        : '' ,
-                    description : '' ,
-                    is_active   : 1
+                    ten_nganh   : '' ,
+                    ma_nganh    : '' ,
+               
+                    status      : 1
                 } );
                 this.masterFormControl.openFormAdd();
             } ,
             OPEN_FORM_UPDATE     : ( data : Nganhhoc ) : void => {
                 this.masterFormControl.formGroup.reset( {
-                    name        : data.name ,
-                    code        : data.code ,
-                    description : data.description || '' ,
-                    is_active   : data.is_active ? 1 : 0
+                    ten_nganh   : data.ten_nganh ,
+                    ma_nganh    : data.ma_nganh ,
+                 
+                    status      : data.status
                 } );
                 this.masterFormControl.openFormEdit( data );
             } ,
@@ -120,10 +119,10 @@ export class NganhhocComponent implements OnInit , OnDestroy , IctuBasePermissio
             SUBMIT_FORM          : () : void => {
                 if ( this.masterFormControl.canSubmit ) {
                     const info : Partial<Nganhhoc> = {
-                        name        : this.masterFormField( 'name' ).value ,
-                        code        : this.masterFormField( 'code' ).value ,
-                        description : this.masterFormField( 'description' ).value ,
-                        is_active   : this.masterFormField( 'is_active' ).value === 1
+                        ten_nganh   : this.masterFormField( 'ten_nganh' ).value ,
+                        ma_nganh    : this.masterFormField( 'ma_nganh' ).value ,
+                    
+                        status      : this.masterFormField( 'status' ).value
                     }
                     const request : Observable<any> = this.masterFormControl.isFormAdd ? this.nganhHocService.create( info ) : this.nganhHocService.update( this.masterFormControl.object.id , info )
                     const message : string          = this.masterFormControl.isFormAdd ? 'Thêm ngành học thành công' : 'Cập nhật ngành học thành công';
@@ -132,10 +131,10 @@ export class NganhhocComponent implements OnInit , OnDestroy , IctuBasePermissio
                             this.notification.toastSuccess( message , 'Thông báo' );
                             if ( this.masterFormControl.isFormAdd ) {
                                 this.masterFormControl.formGroup.reset( {
-                                    name        : '' ,
-                                    code        : '' ,
-                                    description : '' ,
-                                    is_active   : 1
+                                    ten_nganh   : '' ,
+                                    ma_nganh    : '' ,
+                                
+                                    status      : 1
                                 } );
                             }
                             else {
@@ -259,7 +258,7 @@ export class NganhhocComponent implements OnInit , OnDestroy , IctuBasePermissio
 
     showCTDT ( item : Nganhhoc ) : void {
         this.selectedMajor.set( item );
-        this.detailDrawerHeader = signal( `Chương trình đào tạo — ${ item.name }` );
+        this.detailDrawerHeader = signal( `Chương trình đào tạo — ${ item.ten_nganh }` );
         this.detailDrawerVisible = true;
     }
 

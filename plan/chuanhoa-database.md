@@ -22,7 +22,7 @@ CREATE TABLE `registrations` (
   `vb_chuyenmon_nganh` varchar(120) DEFAULT NULL,
   `vb_chuyenmon_namtn` varchar(24) DEFAULT NULL,
   `diem_xettuyen` varchar(255) DEFAULT '' COMMENT 'Điểm trung bình môn hoạc chuyên môn của thí sinh xet tuyển vào đại học',
-  `nganh_dangky` varchar(255) DEFAULT NULL COMMENT 'Ngành đăng ký học',
+  `nganh_id` varchar(255) DEFAULT NULL COMMENT 'Ngành đăng ký học',
   `anh_phieu_dang_ky` varchar(255) DEFAULT NULL,
   `anh_thpt` varchar(255) DEFAULT NULL,
   `anh_the` varchar(100) DEFAULT NULL,

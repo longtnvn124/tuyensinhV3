@@ -46,11 +46,11 @@
                                     <mat-checkbox [checked]="row._ictuDataTableRowChecked" (change)="masterDataTable.selectRow($event.checked, i)" [disabled]="!permissionControl().canDelete"></mat-checkbox>
                                 </td>
                                 <td class="col-index text-center">{{ masterDataTable.paginator.startIndex() + i }}</td>
-                                <td class="wid-100 text-center">{{ row.code }}</td>
-                                <td class="text-left">{{ row.name }}</td>
+                                <td class="wid-100 text-center">{{ row.ma_nganh }}</td>
+                                <td class="text-left">{{ row.ten_nganh }}</td>
                                 <td class="wid-120 text-center p-0">
                                     <div class="d-flex w-100 h-100 justify-content-center align-items-center">
-                                        @if (row.is_active) {
+                                        @if (row.status === 1) {
                                             <span class="ictu-badge ictu-badge--success">Đã kích hoạt</span>
                                         } @else {
                                             <span class="ictu-badge ictu-badge--secondary">Chưa kích hoạt</span>
@@ -59,11 +59,11 @@
                                 </td>
                                 <td class="p-0 wid-120">
                                     <div class="admin-table__btn-actions">
-                                        @if (permissionControl().canView) {
+                                        <!-- @if (permissionControl().canView) {
                                             <button (click)="showCTDT(row)" class="btn ictu-button-success-light" tooltip="Chương trình đào tạo">
                                                 <i class="ti ti-layout-grid-add"></i>
                                             </button>
-                                        }
+                                        } -->
                                         @if (permissionControl().canUpdate) {
                                             <button (click)="editMajor(row)" class="btn ictu-button-info-light">
                                                 <i class="ti ti-edit"></i>
@@ -121,20 +121,20 @@
                     <form [formGroup]="masterFormControl.formGroup">
                         <div class="ictu-form ictu-form--label-on-top">
                             <div class="ictu-form__row">
-                                <label class="ictu-form__label ictu-form__label--required" for="f_name">Tên ngành</label>
-                                <input class="ictu-form__input-field" formControlName="name" id="f_name" pInputText placeholder="Tên ngành học" type="text">
+                                <label class="ictu-form__label ictu-form__label--required" for="f_ten_nganh">Tên ngành</label>
+                                <input class="ictu-form__input-field" formControlName="ten_nganh" id="f_ten_nganh" pInputText placeholder="Tên ngành học" type="text">
                             </div>
                             <div class="ictu-form__row">
-                                <label class="ictu-form__label ictu-form__label--required" for="f_code">Mã ngành</label>
-                                <input class="ictu-form__input-field" formControlName="code" id="f_code" pInputText placeholder="Mã ngành học" type="text">
+                                <label class="ictu-form__label ictu-form__label--required" for="f_ma_nganh">Mã ngành</label>
+                                <input class="ictu-form__input-field" formControlName="ma_nganh" id="f_ma_nganh" pInputText placeholder="Mã ngành học" type="text">
                             </div>
-                            <div class="ictu-form__row">
+                            <!-- <div class="ictu-form__row">
                                 <label class="ictu-form__label" for="f_desc">Mô tả</label>
                                 <textarea class="ictu-form__input-field" formControlName="description" id="f_desc" pTextarea placeholder="Thêm mô tả cho ngành học"></textarea>
-                            </div>
+                            </div> -->
                             <div class="ictu-form__row">
                                 <label class="ictu-form__label">Trạng thái</label>
-                                <p-select [options]="optionList" appendTo="body" class="ictu-form__input-field" formControlName="is_active" placeholder="Trạng thái"/>
+                                <p-select [options]="optionList" appendTo="body" class="ictu-form__input-field" formControlName="status" placeholder="Trạng thái"/>
                             </div>
                         </div>
                     </form>

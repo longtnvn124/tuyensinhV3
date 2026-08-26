@@ -89,7 +89,7 @@
                             >
                                 <option [ngValue]="null" disabled>Chọn ngành đăng ký</option>
                                 @for (major of majors(); track major.id) {
-                                    <option [ngValue]="major.id">{{ major.name }}</option>
+                                    <option [ngValue]="major.id">{{ major.ten_nganh }}</option>
                                 }
                             </select>
                             <i class="pi pi-chevron-down" aria-hidden="true"></i>
@@ -235,6 +235,6 @@
     <footer class="site-footer">
         <span>© 2026 ICTU</span>
         <span class="footer-separator"></span>
-        <span>Trung tâm phần mềm</span>
+        <span>Trung tâm phát triển phần mềm</span>
     </footer>
 </main>

@@ -19,7 +19,7 @@ export interface NganhhocSearchInfo {
 })
 export class NganhhocService extends IctuBaseServiceClass<Nganhhoc> {
     constructor() {
-        super('nganh-hoc');
+        super('nganh');
     }
 
     /* ========== Danh sách + tìm kiếm ========== */
@@ -41,13 +41,13 @@ export class NganhhocService extends IctuBaseServiceClass<Nganhhoc> {
         if (info.search) {
             conditions.push(
                 {
-                    conditionName: 'name',
+                    conditionName: 'ten_nganh',
                     value: `%${info.search}%`,
                     condition: IctuQueryCondition.like,
                     orWhere: 'or',
                 },
                 {
-                    conditionName: 'code',
+                    conditionName: 'ma_nganh',
                     value: `%${info.search}%`,
                     condition: IctuQueryCondition.like,
                     orWhere: 'or',

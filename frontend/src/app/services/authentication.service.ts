@@ -516,84 +516,84 @@ export class AuthenticationService {
 
 	private savePermissions( permission : Permission ) : void {
 		const baseMenus : IctuNavigation[] = [
-			{
-				id        : 'account' ,
-				url       : 'account' ,
-				title     : 'Tài khoản' ,
-				customSvg : 'custom-user-bold' ,
-				child     : [
-					{
-						id        : 'account/profile' ,
-						url       : 'account/profile' ,
-						title     : 'Hồ sơ người dùng' ,
-						customSvg : 'custom-employee-tag'
-					} ,
-					{
-						id    : 'account/label-tc' ,
-						url   : '' ,
-						title : 'Tra cứu'
-					} ,
-					{
-						id    : 'account/activities-logs' ,
-						url   : 'account/activities-logs' ,
-						title : 'Lịch sử truy cập'
-					} ,
-					{
-						id    : 'account/label-hs' ,
-						url   : '' ,
-						title : 'Cập nhật'
-					} ,
-					{
-						id    : 'account/password' ,
-						url   : 'account/password' ,
-						title : 'Cập nhật mật khẩu'
-					} ,
-					{
-						id    : 'account/info' ,
-						url   : 'account/info' ,
-						title : 'Cập nhật thông tin'
-					}
-				]
-			} ,
-			{
-				id        : 'thong-bao' ,
-				url       : 'thong-bao' ,
-				title     : 'Thông báo' ,
-				customSvg : 'custom-notification' ,
-				child     : [
-					{
-						id        : 'thong-bao/thong-ke' ,
-						url       : 'thong-bao/thong-ke' ,
-						title     : 'Thống kê' ,
-						customSvg : 'custom-status-up'
-					} ,
-					{
-						id    : 'thong-bao/label-thong-bao' ,
-						title : 'Thông báo' ,
-						url   : ''
-					} ,
-					{
-						id    : 'thong-bao/danh-sach-thong-bao' ,
-						title : 'Danh sách thông báo' ,
-						url   : 'thong-bao/danh-sach-thong-bao'
-					} ,
-					{
-						id    : 'thong-bao/label-phan-hoi' ,
-						title : 'Phản hồi' ,
-						url   : ''
-					} ,
-					{
-						id    : 'thong-bao/tao-phan-hoi' ,
-						title : 'Tạo phản hồi mới' ,
-						url   : 'thong-bao/tao-phan-hoi'
-					} ,
-					{
-						id    : 'thong-bao/danh-sach-phan-hoi' ,
-						title : 'Danh sách phản hồi' ,
-						url   : 'thong-bao/danh-sach-phan-hoi'
-					}
-				]
-			}
+			// {
+			// 	id        : 'account' ,
+			// 	url       : 'account' ,
+			// 	title     : 'Tài khoản' ,
+			// 	customSvg : 'custom-user-bold' ,
+			// 	child     : [
+			// 		{
+			// 			id        : 'account/profile' ,
+			// 			url       : 'account/profile' ,
+			// 			title     : 'Hồ sơ người dùng' ,
+			// 			customSvg : 'custom-employee-tag'
+			// 		} ,
+			// 		{
+			// 			id    : 'account/label-tc' ,
+			// 			url   : '' ,
+			// 			title : 'Tra cứu'
+			// 		} ,
+			// 		{
+			// 			id    : 'account/activities-logs' ,
+			// 			url   : 'account/activities-logs' ,
+			// 			title : 'Lịch sử truy cập'
+			// 		} ,
+			// 		{
+			// 			id    : 'account/label-hs' ,
+			// 			url   : '' ,
+			// 			title : 'Cập nhật'
+			// 		} ,
+			// 		{
+			// 			id    : 'account/password' ,
+			// 			url   : 'account/password' ,
+			// 			title : 'Cập nhật mật khẩu'
+			// 		} ,
+			// 		{
+			// 			id    : 'account/info' ,
+			// 			url   : 'account/info' ,
+			// 			title : 'Cập nhật thông tin'
+			// 		}
+			// 	]
+			// } ,
+			// {
+			// 	id        : 'thong-bao' ,
+			// 	url       : 'thong-bao' ,
+			// 	title     : 'Thông báo' ,
+			// 	customSvg : 'custom-notification' ,
+			// 	child     : [
+			// 		{
+			// 			id        : 'thong-bao/thong-ke' ,
+			// 			url       : 'thong-bao/thong-ke' ,
+			// 			title     : 'Thống kê' ,
+			// 			customSvg : 'custom-status-up'
+			// 		} ,
+			// 		{
+			// 			id    : 'thong-bao/label-thong-bao' ,
+			// 			title : 'Thông báo' ,
+			// 			url   : ''
+			// 		} ,
+			// 		{
+			// 			id    : 'thong-bao/danh-sach-thong-bao' ,
+			// 			title : 'Danh sách thông báo' ,
+			// 			url   : 'thong-bao/danh-sach-thong-bao'
+			// 		} ,
+			// 		{
+			// 			id    : 'thong-bao/label-phan-hoi' ,
+			// 			title : 'Phản hồi' ,
+			// 			url   : ''
+			// 		} ,
+			// 		{
+			// 			id    : 'thong-bao/tao-phan-hoi' ,
+			// 			title : 'Tạo phản hồi mới' ,
+			// 			url   : 'thong-bao/tao-phan-hoi'
+			// 		} ,
+			// 		{
+			// 			id    : 'thong-bao/danh-sach-phan-hoi' ,
+			// 			title : 'Danh sách phản hồi' ,
+			// 			url   : 'thong-bao/danh-sach-phan-hoi'
+			// 		}
+			// 	]
+			// }
 		];
 		this.permission                    = {
 			nonce : 'nonce-' + Date.now().toString() , data : {

@@ -32,11 +32,11 @@ export const DEPLOYMENTS_FOR_DEV : Record<DevelopmentServers , DeploymentEnviron
     'server_online' : new DeploymentEnvironment( {
         apiServiceConfig    : {
             title                                : 'Hệ thống quản lý tuyển sinh' ,
-            realm                                : 'dttx' ,
+            realm                                : 'tuyensinh' ,
             port                                 : 9081 ,
             googleClientId                       : '973389896263-11sa03rtspsn2fap5uo160l3opa7n62t.apps.googleusercontent.com' ,
             protocol                             : 'https' ,
-            X_APP_ID                             : 'D5006F80-F239-4FBD-9D48-91EE3B1ECFD0' ,
+            X_APP_ID                             : '0645451e-3396-41eb-8d02-ae39cb030cdd' ,
             client                               : 'ictu' ,
             enableSignInWithGoogle               : true ,
             enableSignInWithMicrosoft            : true ,
@@ -45,8 +45,8 @@ export const DEPLOYMENTS_FOR_DEV : Record<DevelopmentServers , DeploymentEnviron
             enableConstructionMode               : false ,
             enableTestingMode                    : true ,
             listOfRestrictedFileTypesForDownload : [ 'pdf' , 'video' , 'audio' , 'text' , 'image' ] ,
-            domainName                           : 'https://dttx.ictu.edu.vn' ,
-            fileHostingService                   : 'aws'
+            domainName                           : 'dttx.ictu.edu.vn' ,
+            fileHostingService                   : 'local'
         } ,
         socketServiceConfig : {
             port : 9082 ,

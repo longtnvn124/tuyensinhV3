@@ -24,7 +24,7 @@ describe('HosoThemComponent lookup services', () => {
         dotService.load.and.returnValue(of(emptyResponse));
         nganhHocService.load.and.returnValue(of({
             ...emptyResponse,
-            data: [{ id: 11, name: 'Công nghệ thông tin', code: '7480201', is_active: true }],
+            data: [{ id: 11, ten_nganh: 'Công nghệ thông tin', ma_nganh: '7480201', status: 1 }],
         } as never));
         ctdtService.load.and.returnValue(of({
             ...emptyResponse,

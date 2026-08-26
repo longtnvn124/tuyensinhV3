@@ -14,7 +14,7 @@ export interface HoidongXettuyenSearchInfo {
 })
 export class HoidongXettuyenService extends IctuBaseServiceClass<HoidongXettuyen> {
     constructor() {
-        super('hoidong-xettuyen');
+        super('hoidongxettuyen');
     }
 
     load(

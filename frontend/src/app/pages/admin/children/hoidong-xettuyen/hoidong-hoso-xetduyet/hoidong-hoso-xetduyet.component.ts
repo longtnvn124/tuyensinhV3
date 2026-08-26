@@ -20,7 +20,7 @@ import { Locations } from '@models/location';
 import { DotXettuyen } from '@models/tuyensinh/dot-xettuyen';
 import { HoidongHosoThisinh } from '@models/tuyensinh/hoidong-hoso-thisinh';
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
-import { HosoStatus, HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { RegistrationStatus, Registrations } from '@models/tuyensinh/registrations';
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService, ProgressAnimationEvent } from '@services/notification.service';
@@ -32,7 +32,7 @@ import {
     QualificationGroup,
 } from '@services/tuyensinh/exp-hoso-daduyet.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { DOI_TUONG, GENDER, TH_XETTUYEN } from '@utilities/syscats';
@@ -54,6 +54,8 @@ import {
     switchMap,
     tap,
 } from 'rxjs';
+import { TuyensinhStatus } from '@app/models/tuyensinh/tuyensinh-status';
+import { RegistrationsStatusService } from '@app/services/tuyensinh/registrations-status';
 
 type ReviewDataState = 'loading' | 'data' | 'error';
 
@@ -122,7 +124,8 @@ export class HoidongHosoXetduyetComponent {
 
     private readonly destroyRef = inject(DestroyRef);
     private readonly assignmentService = inject(HoidongHosoThisinhService);
-    private readonly hosoService = inject(HosoThisinhService);
+    private readonly registrationsService = inject(RegistrationsService);
+    private readonly registrationsStatusService = inject(RegistrationsStatusService);
     private readonly dotXettuyenService = inject(DotXettuyenService);
     private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
@@ -208,8 +211,8 @@ export class HoidongHosoXetduyetComponent {
 
 
 
-    getCandidate(row: HoidongHosoThisinh): HosoThisinh | null {
-        return row._hoso ?? null;
+    getCandidate(row: HoidongHosoThisinh): Registrations | null {
+        return row['_hoso'] ?? null;
     }
 
     getMajorLabel(majorId: number | undefined): string {
@@ -226,12 +229,12 @@ export class HoidongHosoXetduyetComponent {
         return this.lookupLabel(this.provinceOptions(), province, `${province}`);
     }
 
-    getStatusLabel(status: HosoStatus | undefined): string {
+    getStatusLabel(status: RegistrationStatus | undefined): string {
         return TH_XETTUYEN.find((item): boolean => item.value === status)?.label
             ?? `${status ?? 'Chưa xét'}`;
     }
 
-    getStatusClass(status: HosoStatus | undefined): string {
+    getStatusClass(status: RegistrationStatus | undefined): string {
         if (status === 3) return 'review-result--approved';
         if (status === -1) return 'review-result--rejected';
         return 'review-result--pending';
@@ -296,27 +299,37 @@ export class HoidongHosoXetduyetComponent {
             value: `${hoidongId}`,
         }];
 
-        return forkJoin({
-            assignments: this.assignmentService.query(assignmentConditions, queryParams),
-            candidates: this.hosoService.query([], { limit: -1 }),
-        }).pipe(
-            map(({ assignments, candidates }): HoidongHosoThisinh[] =>
-                this.hydrateRecords(assignments.data ?? [], candidates.data ?? []),
+        return this.assignmentService.query(assignmentConditions, queryParams).pipe(switchMap(m => {
+
+            const ids = Array.from(new Set(m.data.map(a => a.tuyensinh_id)));
+            return forkJoin({
+                assignments: of(m),
+                // candidates: this.registrationsService.query([], { paged: 1, limit: -1 })
+                candidates: this.loopGetHosoByIds(ids, [], 50, 1)
+            })
+        })).pipe(
+            map(({ assignments, candidates }): HoidongHosoThisinh[] => {
+        
+                return this.hydrateRecords(assignments.data ?? [], candidates ?? [])
+            }
             ),
         );
     }
 
     private hydrateRecords(
         assignments: readonly HoidongHosoThisinh[],
-        candidates: readonly HosoThisinh[],
+        candidates: readonly Registrations[],
     ): HoidongHosoThisinh[] {
-        const candidatesById = new Map<number, HosoThisinh>(
-            candidates.map((candidate: HosoThisinh): [number, HosoThisinh] => [candidate.id, candidate]),
+        const candidatesById = new Map<number, Registrations>(
+            candidates.map((candidate: Registrations): [number, Registrations] => [candidate.id, candidate]),
         );
-        return assignments.map((row: HoidongHosoThisinh): HoidongHosoThisinh => ({
-            ...row,
-            _hoso: candidatesById.get(row.hoso_id) ?? null,
-        }));
+        return assignments.map((row: HoidongHosoThisinh): HoidongHosoThisinh => {
+
+            return {
+                ...row,
+                _hoso: candidatesById.get(row.tuyensinh_id) ?? null,
+            }
+        });
     }
 
     private applyLoadedData(data: CouncilReviewData | null): void {
@@ -324,7 +337,7 @@ export class HoidongHosoXetduyetComponent {
         this.majors.set(data.majors);
         this.majorOptions.set(data.majors.map((item: Nganhhoc): IctuDropdownOption<number> => ({
             value: item.id,
-            label: item.name,
+            label: item.ten_nganh,
         })));
         this.provinceOptions.set(data.provinceOptions);
         this.records.set(data.records);
@@ -343,58 +356,139 @@ export class HoidongHosoXetduyetComponent {
         if (this.actionLoading()) return;
 
         const selectedIds = this.selectedIds();
+
         const selectedRecords = this.records().filter(
             (row: HoidongHosoThisinh): boolean => selectedIds.has(row.id),
         );
+
         if (!selectedRecords.length) return;
 
         const total = selectedRecords.length;
         const reviewTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+        const statuscheck = TH_XETTUYEN.find(
+            item => item.value.toString() === config.status.toString(),
+        );
+
+        if (!statuscheck) {
+            this.notification.toastError(
+                `Không tìm thấy trạng thái: ${config.status}`,
+            );
+            return;
+        }
+
         this.actionLoading.set(true);
-        this.notification.progressBarWithPercent(this.progress$.asObservable(), config.progressHeading);
+
+        this.notification.progressBarWithPercent(
+            this.progress$.asObservable(),
+            config.progressHeading,
+        );
+
         this.progress$.next(0);
 
         from(selectedRecords).pipe(
             mergeMap(
-                (record: HoidongHosoThisinh): Observable<StatusUpdateItemResult> =>
-                    this.hosoService.update(record.hoso_id, {
-                        status: config.status,
-                        ngay_duyet: reviewTime,
-                    }).pipe(
-                        map((): StatusUpdateItemResult => ({ success: true })),
-                        catchError((error: unknown): Observable<StatusUpdateItemResult> => of({
-                            success: false,
-                            errorMessage: this.getErrorMessage(
-                                error,
-                                'Đã xảy ra lỗi khi cập nhật hồ sơ. Vui lòng thử lại.',
-                            ),
+                (record: HoidongHosoThisinh): Observable<StatusUpdateItemResult> => {
+
+                    // Lưu status cũ trước khi update
+                    const oldStatus = record['_hoso']['status'];
+
+                    const data_status: TuyensinhStatus = {
+                        registration_id: record.tuyensinh_id,
+                        status_key: statuscheck.status_key,
+                        status_value: statuscheck.kyhieu,
+                        status_name: statuscheck.label,
+                        content: '',
+                    };
+
+                    return this.registrationsService.update(
+                        record.tuyensinh_id,
+                        {
+                            status: config.status,
+                            ngay_duyet: reviewTime,
+                        },
+                    ).pipe(
+                        switchMap(() => {
+
+                            // Không thay đổi status => không tạo lịch sử
+                            if (oldStatus?.toString() === config.status?.toString()) {
+                                return of(null);
+                            }
+
+                            // Status thay đổi => tạo lịch sử
+                            return this.registrationsStatusService.create(
+                                data_status,
+                            );
+                        }),
+
+                        map((): StatusUpdateItemResult => ({
+                            success: true,
                         })),
-                    ),
+
+                        catchError(
+                            (error: unknown): Observable<StatusUpdateItemResult> =>
+                                of({
+                                    success: false,
+                                    errorMessage: this.getErrorMessage(
+                                        error,
+                                        'Đã xảy ra lỗi khi cập nhật hồ sơ. Vui lòng thử lại.',
+                                    ),
+                                }),
+                        ),
+                    );
+                },
                 5,
             ),
+
             scan(
-                (result: StatusUpdateResult, item: StatusUpdateItemResult): StatusUpdateResult => ({
+                (
+                    result: StatusUpdateResult,
+                    item: StatusUpdateItemResult,
+                ): StatusUpdateResult => ({
                     success: result.success + Number(item.success),
                     failed: result.failed + Number(!item.success),
-                    errorMessage: result.errorMessage ?? item.errorMessage,
+                    errorMessage:
+                        result.errorMessage ?? item.errorMessage,
                 }),
-                { success: 0, failed: 0 },
+                {
+                    success: 0,
+                    failed: 0,
+                },
             ),
+
             tap(({ success, failed }: StatusUpdateResult): void => {
-                this.progress$.next(Math.round(((success + failed) / total) * 100));
+                this.progress$.next(
+                    Math.round(((success + failed) / total) * 100),
+                );
             }),
+
             last(),
-            finalize((): void => this.actionLoading.set(false)),
+
+            finalize((): void => {
+                this.actionLoading.set(false);
+            }),
+
             takeUntilDestroyed(this.destroyRef),
+
         ).subscribe((result: StatusUpdateResult): void => {
+
             if (result.success > 0) {
-                this.notification.toastSuccess(`Đã ${config.successVerb} ${result.success} hồ sơ`);
+                this.notification.toastSuccess(
+                    `Đã ${config.successVerb} ${result.success} hồ sơ`,
+                );
+
                 this.clearSelection();
                 this.reload();
             }
+
             if (result.failed > 0) {
-                const detail = result.errorMessage ? `: ${result.errorMessage}` : '';
-                this.notification.toastError(`${result.failed} hồ sơ cập nhật thất bại${detail}`);
+                const detail = result.errorMessage
+                    ? `: ${result.errorMessage}`
+                    : '';
+
+                this.notification.toastError(
+                    `${result.failed} hồ sơ cập nhật thất bại${detail}`,
+                );
             }
         });
     }
@@ -495,17 +589,17 @@ export class HoidongHosoXetduyetComponent {
         return {
             council: {
                 id: council.id,
-                name: council.name,
-                reviewDate: council.thoigian_xettuyen,
+                name: council.tieu_de_hoi_dong,
+                reviewDate: council.ngay_xetduyet,
             },
             round: {
                 id: round.id,
-                name: round.name,
+                name: round.tieude,
                 startDate: round.thoi_gian_bat_dau,
                 endDate: round.thoi_gian_ket_thuc,
             },
             documents: {
-                meetingDate: council.thoigian_xettuyen,
+                meetingDate: council.ngay_xetduyet,
                 preparedDate: new Date().toISOString().slice(0, 10),
             },
             candidates: records.map((record: HoidongHosoThisinh): CouncilExportCandidate =>
@@ -517,7 +611,7 @@ export class HoidongHosoXetduyetComponent {
     private mapExportCandidate(record: HoidongHosoThisinh): CouncilExportCandidate {
         const candidate = record._hoso;
         if (!candidate) {
-            throw new Error(`Không tìm thấy dữ liệu hồ sơ #${record.hoso_id}`);
+            throw new Error(`Không tìm thấy dữ liệu hồ sơ #${record.tuyensinh_id}`);
         }
 
         const qualificationGroup = this.getQualificationGroup(candidate.doituong, candidate.id);
@@ -549,9 +643,10 @@ export class HoidongHosoXetduyetComponent {
                 ? candidate.nam_tn ?? ''
                 : candidate.vb_chuyenmon_namtn ?? '',
             registeredMajorId: majorId,
-            registeredMajorName: major?.name ?? '',
-            registeredMajorCode: major?.code ?? '',
-            admissionScore: this.calculateAdmissionScore(candidate, qualificationGroup),
+            registeredMajorName: major?.ten_nganh ?? '',
+            registeredMajorCode: major?.ma_nganh ?? '',
+            admissionScore: candidate.diem_xettuyen,
+            calculatedAdmissionScore: this.calculateAdmissionScore(candidate, qualificationGroup),
             result: TH_XETTUYEN.find((item): boolean => item.value === candidate.status)?.label
                 ?? TH_XETTUYEN.find((item): boolean =>
                     item.kyhieu === record.ket_qua?.trim().toUpperCase(),
@@ -563,7 +658,7 @@ export class HoidongHosoXetduyetComponent {
     }
 
     private calculateAdmissionScore(
-        candidate: HosoThisinh,
+        candidate: Registrations,
         qualificationGroup: QualificationGroup,
     ): number | undefined {
         if (candidate.diem_xettuyen === undefined || candidate.diem_xettuyen === null) {
@@ -571,17 +666,20 @@ export class HoidongHosoXetduyetComponent {
         }
 
         const originalScore = new Decimal(candidate.diem_xettuyen);
-        const priorityScore = new Decimal(candidate.diem_uutien ?? 0);
-        const additionalScore = new Decimal(candidate.diem_cong ?? 0);
         const maximumScore = qualificationGroup === 'THPT' ? new Decimal(30) : new Decimal(10);
-        const scale = qualificationGroup === 'THPT' ? new Decimal(7.5) : new Decimal(2.5);
-        const actualPriorityScore = maximumScore
-            .minus(originalScore)
-            .dividedBy(scale)
-            .times(priorityScore.plus(additionalScore));
+        const thresholdScore = qualificationGroup === 'THPT' ? new Decimal(22.5) : new Decimal(7.5);
+        const reductionRange = qualificationGroup === 'THPT' ? new Decimal(7.5) : new Decimal(2.5);
+        const priorityScore = new Decimal(candidate.diem_uutien ?? 0)
+            .plus(candidate.diem_cong ?? 0)
+            .dividedBy(qualificationGroup === 'THPT' ? 1 : 3);
+        const actualPriorityScore = originalScore.lessThan(thresholdScore)
+            ? priorityScore
+            : maximumScore
+                .minus(originalScore)
+                .dividedBy(reductionRange)
+                .times(priorityScore);
 
-        return originalScore
-            .plus(actualPriorityScore)
+        return Decimal.min(originalScore.plus(actualPriorityScore), maximumScore)
             .toDecimalPlaces(1, Decimal.ROUND_HALF_UP)
             .toNumber();
     }
@@ -595,5 +693,55 @@ export class HoidongHosoXetduyetComponent {
             return normalizedValue;
         }
         throw new Error(`Hồ sơ #${candidateId} có đối tượng xét tuyển không hợp lệ`);
+    }
+
+    loopGetHosoByIds(
+        ids: number[],
+        data: Registrations[],
+        limit: number,
+        page: number = 1
+    ): Observable<Registrations[]> {
+
+        // Đã lấy đủ dữ liệu
+        if (data.length >= ids.length) {
+            return of(data);
+        }
+
+        // Vị trí bắt đầu và kết thúc của page hiện tại
+        const start = limit * (page - 1);
+        const end = limit * page;
+
+        // Lấy danh sách ID theo page
+        const dataGet = ids.slice(start, end);
+
+        // Không còn ID để lấy
+        if (dataGet.length === 0) {
+            return of(data);
+        }
+
+        const con: IctuConditionParam[] = [
+            {
+                conditionName: 'id',
+                condition: IctuQueryCondition.equal,
+                value: dataGet.toString(),
+                orWhere: 'in'
+            }
+        ];
+
+        return this.registrationsService
+            .query(con, {
+                paged: 1,
+                limit: limit
+            })
+            .pipe(
+                switchMap(m => {
+                    return this.loopGetHosoByIds(
+                        ids,
+                        [...data, ...m.data],
+                        limit,
+                        page + 1
+                    );
+                })
+            );
     }
 }

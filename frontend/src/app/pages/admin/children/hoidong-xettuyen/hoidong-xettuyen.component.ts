@@ -19,6 +19,7 @@ import { InputText } from 'primeng/inputtext';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { MatButton } from '@angular/material/button';
 import { Select } from 'primeng/select';
+import { Textarea } from 'primeng/textarea';
 import { DatePicker } from 'primeng/datepicker';
 import { Popover } from 'primeng/popover';
 import { Tooltip } from 'primeng/tooltip';
@@ -30,7 +31,7 @@ import { HoidongHosoXetduyetComponent } from './hoidong-hoso-xetduyet/hoidong-ho
     imports: [
         DatePicker, Drawer, FormsModule, HoidongHosoXetduyetComponent, HosoListComponent,
         IctuPaginatorComponent, InputText, LoadingProgressComponent, MatButton, Popover,
-        ReactiveFormsModule, Select, Tooltip,
+        ReactiveFormsModule, Select, Textarea, Tooltip,
     ],
     templateUrl: './hoidong-xettuyen.component.html',
     styleUrl: './hoidong-xettuyen.component.css',
@@ -38,9 +39,9 @@ import { HoidongHosoXetduyetComponent } from './hoidong-hoso-xetduyet/hoidong-ho
 })
 export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePermission {
 
-    statusOptions: IctuDropdownOption<string>[] = [
-        { value: 'dang_mo', label: 'Đang mở' },
-        { value: 'da_dong', label: 'Đã đóng' },
+    statusOptions: IctuDropdownOption<number>[] = [
+        { value: 1, label: 'Đang mở' },
+        { value: 0, label: 'Đã đóng' },
     ];
 
     dotOptions: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
@@ -76,10 +77,11 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
         this.formControl = new IctuFormControl2<HoidongXettuyen>({
             dropdownFields: [],
             formGroup: this.fb.group({
-                name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
+                tieu_de_hoi_dong: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
+                mo_ta_hoi_dong: [''],
                 dot_xettuyen_id: [null, Validators.required],
-                thoigian_xettuyen: [null, Validators.required],
-                status: ['dang_mo'],
+                ngay_xetduyet: [null, Validators.required],
+                status: [1, Validators.required],
             }),
             objectName: 'hội đồng xét tuyển',
             drawer: this.drawer,
@@ -89,9 +91,10 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
             OPEN_FORM_ADD: (): void => {
                 this.loadDotOptions();
                 this.formControl.formGroup.reset({
-                    name: '',
+                    tieu_de_hoi_dong: '',
+                    mo_ta_hoi_dong: '',
                     dot_xettuyen_id: null,
-                    thoigian_xettuyen: null,
+                    ngay_xetduyet: null,
                     status: 'dang_mo',
                 });
                 this.formControl.openFormAdd();
@@ -99,9 +102,10 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
             OPEN_FORM_UPDATE: (data: HoidongXettuyen): void => {
                 this.loadDotOptions();
                 this.formControl.formGroup.reset({
-                    name: data.name,
+                    tieu_de_hoi_dong: data.tieu_de_hoi_dong,
+                    mo_ta_hoi_dong: data.mo_ta_hoi_dong || '',
                     dot_xettuyen_id: data.dot_xettuyen_id ?? null,
-                    thoigian_xettuyen: data.thoigian_xettuyen ? new Date(data.thoigian_xettuyen) : null,
+                    ngay_xetduyet: data.ngay_xetduyet ? new Date(data.ngay_xetduyet) : null,
                     status: data.status || 'dang_mo',
                 });
                 this.formControl.openFormEdit(data);
@@ -118,9 +122,10 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
             SUBMIT_FORM: (): void => {
                 if (this.formControl.canSubmit) {
                     const info: Partial<HoidongXettuyen> = {
-                        name: this.formField('name').value,
+                        tieu_de_hoi_dong: this.formField('tieu_de_hoi_dong').value,
+                        mo_ta_hoi_dong: this.formField('mo_ta_hoi_dong').value,
                         dot_xettuyen_id: this.formField('dot_xettuyen_id').value,
-                        thoigian_xettuyen: this.toDateString(this.formField('thoigian_xettuyen').value),
+                        ngay_xetduyet: this.toDateString(this.formField('ngay_xetduyet').value),
                         status: this.formField('status').value,
                     };
                     const request: Observable<any> = this.formControl.isFormAdd
@@ -134,9 +139,10 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
                             this.notification.toastSuccess(message, 'Thông báo');
                             if (this.formControl.isFormAdd) {
                                 this.formControl.formGroup.reset({
-                                    name: '',
+                                    tieu_de_hoi_dong: '',
+                                    mo_ta_hoi_dong: '',
                                     dot_xettuyen_id: null,
-                                    thoigian_xettuyen: null,
+                                    ngay_xetduyet: null,
                                     status: 'dang_mo',
                                 });
                             } else {
@@ -176,7 +182,7 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
             next: (res: DtoObject<DotXettuyen[]>): void => {
                 const opts: IctuDropdownOption<number>[] = res.data.map((d: DotXettuyen): IctuDropdownOption<number> => ({
                     value: d.id,
-                    label: d.name,
+                    label: d.tieude,
                 }));
                 this.dotOptions.set(opts);
             },
@@ -213,7 +219,7 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
             next: (res: DtoObject<DotXettuyen[]>): void => {
                 const opts: IctuDropdownOption<number>[] = res.data.map((d: DotXettuyen): IctuDropdownOption<number> => ({
                     value: d.id,
-                    label: d.name,
+                    label: d.tieude,
                 }));
                 this.dotOptions.set(opts);
 
@@ -328,7 +334,7 @@ export class HoidongXettuyenComponent implements OnInit, OnDestroy, IctuBasePerm
 
     openHosoList(item: HoidongXettuyen): void {
         this.detailDrawerHoidong.set({ ...item });
-        this.detailDrawerHeader.set(`Hồ sơ thí sinh — ${item.name}`);
+        this.detailDrawerHeader.set(`Hồ sơ thí sinh — ${item.tieu_de_hoi_dong}`);
         this.detailDrawerVisible = true;
     }
 

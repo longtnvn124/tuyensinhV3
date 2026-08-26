@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { SAVER, Saver } from '@app/providers/saver.provider';
 import { ChuongtrinhDaotao } from '@models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@models/tuyensinh/dot-xettuyen';
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Registrations } from '@models/tuyensinh/registrations';
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { Locations } from '@models/location';
 import { User } from '@models/user';
@@ -18,10 +18,10 @@ import ExcelJS, {
 } from 'exceljs';
 
 export interface HosoTuyensinhExportPayload {
-    records: readonly HosoThisinh[];
-    majors: readonly Pick<Nganhhoc, 'id' | 'code' | 'name'>[];
-    programs: readonly Pick<ChuongtrinhDaotao, 'id' | 'code' | 'name'>[];
-    rounds: readonly Pick<DotXettuyen, 'id' | 'name'>[];
+    records: readonly Registrations[];
+    majors: readonly Pick<Nganhhoc, 'id' | 'ma_nganh' | 'ten_nganh'>[];
+   
+    rounds: readonly Pick<DotXettuyen, 'id' | 'tieude'>[];
     regions: readonly Pick<Locations, 'id' | 'name'>[];
     provinces: readonly Pick<Locations, 'id' | 'name'>[];
     users: readonly Pick<User, 'id' | 'display_name'>[];
@@ -206,17 +206,11 @@ export class ExpHosoTuyensinhService {
         const majorMap = new Map<number, CodeNameLookup>(
             payload.majors.map(major => [
                 major.id,
-                { code: this.text(major.code), name: this.text(major.name) },
-            ]),
-        );
-        const programMap = new Map<number, CodeNameLookup>(
-            payload.programs.map(program => [
-                program.id,
-                { code: this.text(program.code), name: this.text(program.name) },
+                { code: this.text(major.ma_nganh), name: this.text(major.ten_nganh) },
             ]),
         );
         const roundMap = new Map<number, string>(
-            payload.rounds.map(round => [round.id, this.text(round.name)]),
+            payload.rounds.map(round => [round.id, this.text(round.tieude)]),
         );
         const regionMap = new Map<number, string>(
             payload.regions.map(region => [region.id, this.text(region.name)]),
@@ -228,12 +222,12 @@ export class ExpHosoTuyensinhService {
             payload.users.map(user => [user.id, this.text(user.display_name)]),
         );
 
-        payload.records.forEach((record: HosoThisinh, index: number): void => {
+        payload.records.forEach((record: Registrations, index: number): void => {
             const row = worksheet.addRow(this.recordValues(
                 record,
                 index + 1,
                 majorMap,
-                programMap,
+        
                 roundMap,
                 regionMap,
                 provinceMap,
@@ -244,10 +238,9 @@ export class ExpHosoTuyensinhService {
     }
 
     private recordValues(
-        record: HosoThisinh,
+        record: Registrations,
         order: number,
         majors: ReadonlyMap<number, CodeNameLookup>,
-        programs: ReadonlyMap<number, CodeNameLookup>,
         rounds: ReadonlyMap<number, string>,
         regions: ReadonlyMap<number, string>,
         provinces: ReadonlyMap<number, string>,
@@ -256,7 +249,7 @@ export class ExpHosoTuyensinhService {
         const [familyName, givenName] = this.splitName(record.ho_va_ten);
         const fullName = this.text(record.ho_va_ten).trim().replace(/\s+/g, ' ');
         const major = record.nganh_id == null ? undefined : majors.get(record.nganh_id);
-        const program = record.ctdt_id == null ? undefined : programs.get(record.ctdt_id);
+    
         const region = this.lookup(regions, record.dia_chi_tinh);
         const province = this.lookup(provinces, record.dia_chi_xa);
         const detailedAddress = record.dia_chi_nha?.trim() ?? '';
@@ -289,8 +282,6 @@ export class ExpHosoTuyensinhService {
             fullAddress,
             major?.code ?? this.idText(record.nganh_id),
             major?.name ?? this.idText(record.nganh_id),
-            program?.code ?? this.idText(record.ctdt_id),
-            program?.name ?? this.idText(record.ctdt_id),
             record.doituong ?? '',
             record.hinhthuc_xettuyen ?? '',
             record.submit_from ?? '',
@@ -359,7 +350,7 @@ export class ExpHosoTuyensinhService {
         return [parts.slice(0, -1).join(' '), parts.at(-1) ?? ''];
     }
 
-    private statusLabel(status: HosoThisinh['status'] | null): string {
+    private statusLabel(status: Registrations['status'] | null): string {
         return status == null ? '' : STATUS_LABELS.get(status) ?? String(status);
     }
 

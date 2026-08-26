@@ -4,7 +4,7 @@
 
 - **Đã triển khai màn danh sách chỉ đọc.**
 - Đã đối chiếu các cập nhật gần đây của `HosoTrungtuyenComponent`.
-- Trạng thái hồ sơ dùng model số: `HosoStatus = -1`.
+- Trạng thái hồ sơ dùng model số: `RegistrationStatus = -1`.
 - Danh mục ngành và CTĐT dùng service nội bộ.
 - Không sửa component dùng chung, route hoặc service.
 
@@ -26,13 +26,13 @@ Yêu cầu:
 Model hiện tại:
 
 ```typescript
-export type HosoStatus = -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
+export type RegistrationStatus = -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
 ```
 
 Trạng thái cố định của màn:
 
 ```typescript
-const NON_ADMITTED_STATUS: HosoStatus = -1;
+const NON_ADMITTED_STATUS: RegistrationStatus = -1;
 ```
 
 `TH_XETTUYEN` ánh xạ:
@@ -81,7 +81,7 @@ Quy tắc chỉ đọc áp dụng cho mọi vai trò. Backend vẫn phải kiể
 
 | Service | Mục đích |
 |---|---|
-| `HosoThisinhService` | Query danh sách; lấy chi tiết hồ sơ |
+| `RegistrationsService` | Query danh sách; lấy chi tiết hồ sơ |
 | `DotXettuyenService` | Tải danh mục đợt xét tuyển |
 | `NganhhocService` | Tải danh mục ngành nội bộ |
 | `ChuongtrinhDaotaoService` | Tải danh mục CTĐT nội bộ |
@@ -132,11 +132,11 @@ type DetailState = 'idle' | 'loading' | 'success' | 'error';
 
 readonly state = signal<ViewState>('idle');
 readonly detailState = signal<DetailState>('idle');
-readonly dataTable = new IctuDataTable<HosoThisinh>();
+readonly dataTable = new IctuDataTable<Registrations>();
 readonly consultationDrawerVisible = signal(false);
-readonly selectedConsultationHoso = signal<HosoThisinh | null>(null);
+readonly selectedConsultationHoso = signal<Registrations | null>(null);
 readonly viewDetailVisible = signal(false);
-readonly viewDetailData = signal<HosoThisinh | null>(null);
+readonly viewDetailData = signal<Registrations | null>(null);
 readonly selectedDetailId = signal<number | null>(null);
 ```
 
@@ -180,8 +180,8 @@ HosoKhongtrungtuyenComponent
 
 Không thay đổi:
 
-- `HosoThisinhService`.
-- Model `HosoThisinh`.
+- `RegistrationsService`.
+- Model `Registrations`.
 - `TuvanTuyensinhComponent`.
 - Route/module.
 - `FormThongtinDangkyComponent`.

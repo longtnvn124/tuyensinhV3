@@ -59,8 +59,7 @@ export class DashboardComponent implements OnInit {
         this.state.set('loading');
         this.summaryService.getDashboard(year).subscribe({
             next: (res: ExternalApiResponse<any>): void => {
-                console.log('full res:', res);
-
+        
                 const d = res ?? {};
                 this.summary = {
                     hoso: d['hoso'] ?? null,

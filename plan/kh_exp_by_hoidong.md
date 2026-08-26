@@ -39,7 +39,7 @@ Xây dựng chức năng xuất workbook `.xlsx` theo hội đồng xét tuyển
 | Cột | Nội dung | Nguồn |
 |---|---|---|
 | A | TT | Số thứ tự trong nhóm văn bằng |
-| B | Họ và tên | `HosoThisinh.ho_va_ten` |
+| B | Họ và tên | `Registrations.ho_va_ten` |
 | C | Giới tính | `gioi_tinh`, chuẩn hóa qua `GENDER` |
 | D | Ngày sinh | `ngay_sinh`, hiển thị `dd/MM/yyyy` |
 | E | Nơi sinh | Tên địa danh từ `noi_sinh` |
@@ -196,7 +196,7 @@ export interface CouncilExportCandidate {
 }
 ```
 
-Service Excel không phụ thuộc response API/relation `thi-sinh`. Mapper không mutate `HosoThisinh` hoặc `HoidongHosoThisinh`.
+Service Excel không phụ thuộc response API/relation `thi-sinh`. Mapper không mutate `Registrations` hoặc `HoidongHosoThisinh`.
 
 ### 5.4. Quy tắc map
 
@@ -483,7 +483,7 @@ Component dùng lại dữ liệu đã có:
 
 - `records()` chứa assignment và `_hoso` đã hydrate.
 - Catalog `Nganhhoc[]` cung cấp `registeredMajorName` và `registeredMajorCode`.
-- `provinceOptions()` cung cấp `birthPlace` từ `HosoThisinh.noi_sinh`.
+- `provinceOptions()` cung cấp `birthPlace` từ `Registrations.noi_sinh`.
 - Chỉ gọi thêm `DotXettuyenService.get(hoidong.dot_xettuyen_id)` để lấy tên và thời gian đợt.
 
 ### 15.3. Mapping candidate thực tế

@@ -108,12 +108,12 @@
                                                     [checked]="isSelected(row.id)"
                                                     [disabled]="actionLoading()"
                                                     (change)="toggleRow(row.id)"
-                                                    [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.hoso_id)" />
+                                                    [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id)" />
                                             </td>
                                             <td class="review-col-index">{{ index + 1 }}</td>
                                             <td class="review-col-name">
-                                                <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.hoso_id) }}</strong>
-                                                <small>Mã hồ sơ: {{ row.hoso_id }}</small>
+                                                <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id) }}</strong>
+                                                <small>Mã hồ sơ: {{ row['_hoso']['ma_hoso'] ? row['_hoso']['ma_hoso'] : row.tuyensinh_id }}</small>
                                             </td>
                                             <td>{{ getMajorLabel(candidate?.nganh_id) }}</td>
                                             <td>{{ getProvinceLabel(candidate?.dia_chi_tinh) }}</td>

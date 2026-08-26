@@ -153,12 +153,14 @@ export class OvicImgCropV2Component implements OnInit {
 
             this.fileService.uploadFile_tuyensinh(uploadFile).subscribe({
                 next: (res: any) => {
+                    console.log(res);
+                    
 
-                    this.formField().setValue(res.id);
+                    this.formField().setValue(res.name);
                     this.previewUrl.set(
-                        this.fileService.getPreviewLinkLocalFile(res.id),
+                        this.fileService.getPreviewLinkLocalFile(res.name),
                     );
-                    this.onUploadSuccess.emit(res.id);
+                    this.onUploadSuccess.emit(res.name);
                     this.notificationService.toastSuccess('Upload thành công');
                     this.notificationService.isProcessing(false);
                 },

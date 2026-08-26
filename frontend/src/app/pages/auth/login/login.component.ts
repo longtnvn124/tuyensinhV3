@@ -17,12 +17,13 @@ import { NotificationService } from '@services/notification.service';
 import { FormGroupType } from '@models/common';
 import { A11yModule } from "@angular/cdk/a11y";
 import { ButtonDirective } from "primeng/button";
+import { InputTextModule } from "primeng/inputtext";
 
 type FormLogin = FormGroupType<UserSignIn>
 
 @Component( {
 	selector    : 'app-login' ,
-	imports: [ReactiveFormsModule, MatCheckbox,  LoadingProgressComponent, RouterLink, A11yModule, ButtonDirective] ,
+	imports: [ReactiveFormsModule, MatCheckbox, LoadingProgressComponent, RouterLink, A11yModule, ButtonDirective, InputTextModule] ,
 	templateUrl : './login.component.html' ,
 	styleUrl    : './login.component.css'
 } )

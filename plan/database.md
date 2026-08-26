@@ -21,10 +21,10 @@ Ngành học (ví dụ: Công nghệ thông tin, Quản trị kinh doanh...).
 
 interface Nganhhoc {
     id?: number;
-    name: string; // tên ngành
-    code: string; // mã ngành, unique
+    ten_nganh: string; // tên ngành
+    ma_nganh: string; // mã ngành, unique
     description?: string;
-    is_active: boolean; // hiển thị trên website hay không
+    status: number; // hiển thị trên website hay không // 1 hoặc 0
     created_at: Date;
     updated_at: Date;
 }
@@ -59,8 +59,8 @@ interface Dot_xettuyen {
     name: string; // tên đợt
     thoi_gian_bat_dau: Date;
     thoi_gian_ket_thuc: Date;
-    mo_ta?: string;
-    status: string; // "dang_mo" | "da_dong"
+    mota?: string;
+    status: number; // 1 | 0
     created_at: Date;
     updated_at: Date;
 }
@@ -69,7 +69,7 @@ interface Dot_xettuyen {
 
 Hồ sơ thí sinh.
 
-interface Hoso_thisinh {
+interface Registrations {
     id: number;
     ho_va_ten: string; // họ và tên
     dien_thoai: string; // số điện thoại
@@ -82,7 +82,7 @@ interface Hoso_thisinh {
     noi_sinh?: number; // tỉnh/thành phố nơi sinh
     dan_toc?: string;
     status: string;
-    status_connent: number;
+    status_connect: number;
 
     cccd?: string;
     ngay_cap_cccd?: string;
@@ -177,12 +177,12 @@ Hội đồng xét tuyển.
 
 interface Hoidong_xettuyen {
     id?: number;
-    name: string; // tên hội đồng
+    tieu_de_hoi_dong: string; // tên hội đồng
     dot_xet_tuyen_id: number; // đợt xét tuyển
     thoi_gian_xet_tuyen: Date;
-    status: string; // "dang_mo" | "da_dong"
-    created_at: Date;
-    updated_at: Date;
+    status: number; // 0 | 1
+    mo_ta_hoi_dong:string;
+  
 }
 
 ### 3.9. admission_councils_registration

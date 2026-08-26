@@ -2,7 +2,7 @@
 import { Component, inject, Input, OnDestroy, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DtoObject, IctuConditionParam, IctuQueryCondition } from '@models/dto';
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Registrations } from '@models/tuyensinh/registrations';
 import { LichsuTuvan } from '@models/tuyensinh/lichsu-tuvan';
 import { Date2textPipe } from '@pipes/date2text.pipe';
 import { AuthenticationService } from '@services/authentication.service';
@@ -41,7 +41,7 @@ export class TuvanTuyensinhComponent implements OnDestroy {
     private submitSubscription?: Subscription;
     private deleteSubscription?: Subscription;
 
-    readonly currentHoso = signal<HosoThisinh | null>(null);
+    readonly currentHoso = signal<Registrations | null>(null);
     readonly viewState = signal<ConsultationView>('history');
     readonly loadState = signal<ConsultationLoadState>('idle');
     readonly histories = signal<LichsuTuvan[]>([]);
@@ -85,7 +85,7 @@ export class TuvanTuyensinhComponent implements OnDestroy {
         return this.isReadOnly;
     }
 
-    @Input() set hoso(value: HosoThisinh | null) {
+    @Input() set hoso(value: Registrations | null) {
         this.loadSubscription?.unsubscribe();
         this.submitSubscription?.unsubscribe();
         this.deleteSubscription?.unsubscribe();

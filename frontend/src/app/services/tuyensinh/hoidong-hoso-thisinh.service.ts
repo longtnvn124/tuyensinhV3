@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class HoidongHosoThisinhService extends IctuBaseServiceClass<HoidongHosoThisinh> {
     constructor() {
-        super('hoidong-hoso-thisinh');
+        super('hdxd-dsts');
     }
 
     loadByHoidong(

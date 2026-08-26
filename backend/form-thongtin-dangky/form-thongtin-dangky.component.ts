@@ -10,7 +10,7 @@ import {ButtonModule} from 'primeng/button';
 import {RippleModule} from 'primeng/ripple';
 import {SharedModule} from '@shared/shared.module';
 import {AuthenticationService} from '@app/services/authentication.service';
-import {HosoThisinhService} from '@app/services/tuyensinh/hoso-thisinh.service';
+import {RegistrationsService} from '@app/services/tuyensinh/registrations.service';
 import {NotificationService} from '@app/services/notification.service';
 import {DanToc, GENDER, VBTN, VBCM, DANHHIEU_TOTNGHIEP} from '@app/utilities/syscats';
 import {User} from '@app/models/user';
@@ -21,7 +21,7 @@ import {UserService} from '@app/services/user.service';
 import {LocationService} from '@app/services/location.service';
 import {Locations} from '@app/models/location';
 import {DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams} from '@models/dto';
-import {HosoThisinh} from '@app/models/tuyensinh/hoso-thisinh';
+import {Registrations} from '@app/models/tuyensinh/registrations';
 import { OvicImgCropV2Component } from "@app/components/ovic-img-crop-v2/ovic-img-crop-v2.component";
 
 @Component({
@@ -49,7 +49,7 @@ export class FormThongtinDangkyComponent implements OnInit {
 	/* ------------------------------------------------------------------ */
 	private readonly fb            = inject(FormBuilder);
 	private readonly auth          = inject(AuthenticationService);
-	private readonly hosoService   = inject(HosoThisinhService);
+	private readonly registrationsService = inject(RegistrationsService);
 	private readonly locationSvc   = inject(LocationService);
 	private readonly notification  = inject(NotificationService);
 	private readonly userService   = inject(UserService);
@@ -259,7 +259,7 @@ export class FormThongtinDangkyComponent implements OnInit {
 		delete raw.anh_hoc_ba;
 		delete raw.vb_chuyenmon_namtn;
 
-		this.hosoService.addTuyensinh(raw as Partial<HosoThisinh>)
+		this.registrationsService.addRegistration(raw as Partial<Registrations>)
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe({
 				next: () => {

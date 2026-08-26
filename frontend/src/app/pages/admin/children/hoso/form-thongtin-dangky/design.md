@@ -28,7 +28,7 @@ Các service nội bộ được tái sử dụng:
 
 ```text
 frontend/src/app/services/tuyensinh/
-├── hoso-thisinh.service.ts
+├── registrations.service.ts
 ├── nganhhoc.service.ts
 └── chuongtrinh-daotao.service.ts
 ```
@@ -125,7 +125,7 @@ interface HosoCheckRequest {
 
 type HosoCheckResult =
     | { found: false }
-    | { found: true; record: HosoThisinh };
+    | { found: true; record: Registrations };
 ```
 
 Quy tắc tạo request:
@@ -354,7 +354,7 @@ Không thêm state riêng cho kiểm tra CCCD + SĐT. Giao diện trong `cccd_ch
 Giữ API component hiện tại trong giai đoạn này:
 
 ```typescript
-readonly data      = input<HosoThisinh | null>(null);
+readonly data      = input<Registrations | null>(null);
 readonly majorId   = input<number | null>(null);
 readonly programId = input<number | null>(null);
 readonly saved     = output<void>();
@@ -375,7 +375,7 @@ Có thể loại bỏ `majorId`/`programId` ở một đợt refactor riêng n�
 
 Các vấn đề quan sát được trong source hiện tại:
 
-1. Tài liệu cũ dùng `nganh_dangky`/`program_id`, nhưng form hiện tại dùng `nganh_id`/`ctdt_id`.
+1. Form và model hiện tại dùng `nganh_id`/`ctdt_id`; tài liệu cũ từng dùng `program_id`.
 2. HTML chưa có select cho `ctdt_id`.
 3. Ô “Số hiệu văn bằng” tại Section IV đang bind nhầm `vb_chuyenmon_nganh`; cần bind `vb_chuyenmon_sohieu`.
 4. `getFormData()` đang map `tn_vanbang` từ `van_bang_tn`; cần đối chiếu đúng field model/backend trước khi sửa.

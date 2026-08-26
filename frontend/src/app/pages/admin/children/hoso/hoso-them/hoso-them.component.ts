@@ -108,7 +108,7 @@ export class HosoThemComponent implements OnInit {
                     (res: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
                         (res.data ?? []).map((m) => ({
                             value: m.id,
-                            label: m.name,
+                            label: m.ten_nganh,
                         })),
                 ),
             );

@@ -10,12 +10,12 @@ import { IctuDropdownOption } from '@models/ictu-dropdown-option';
 import { Locations } from '@models/location';
 import { HoidongHosoThisinh } from '@models/tuyensinh/hoidong-hoso-thisinh';
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { Registrations } from '@models/tuyensinh/registrations';
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService } from '@services/notification.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
@@ -50,13 +50,13 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     assignLoading = false;
     assignSearch = '';
     assignIncludeCurrentRound = true;
-    assignCandidates: HosoThisinh[] = [];
+    assignCandidates: Registrations[] = [];
     selectedAssignIds: Set<number> = new Set<number>();
     selectedAssignedIds: ReadonlySet<number> = new Set<number>();
     removeLoading = false;
 
     private readonly assignmentService = inject(HoidongHosoThisinhService);
-    private readonly hosoService = inject(HosoThisinhService);
+    private readonly registrationsService = inject(RegistrationsService);
     private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
     private readonly notification = inject(NotificationService);
@@ -94,7 +94,7 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
             paged,
         }).pipe(
             switchMap((assigned: DtoObject<HoidongHosoThisinh[]>) => {
-                const hosoIds: number[] = assigned.data.map((row: HoidongHosoThisinh): number => row.hoso_id);
+                const hosoIds: number[] = assigned.data.map((row: HoidongHosoThisinh): number => row.tuyensinh_id);
                 if (!hosoIds.length) {
                     return of(assigned);
                 }
@@ -105,16 +105,16 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
                     value: hosoIds.toString(),
                     orWhere: 'in',
                 }];
-                return this.hosoService.query(hosoConditions, { limit: -1 }).pipe(
-                    map((hosoResponse: DtoObject<HosoThisinh[]>): DtoObject<HoidongHosoThisinh[]> => {
-                        const hosoById = new Map<number, HosoThisinh>(
-                            hosoResponse.data.map((hoso: HosoThisinh): [number, HosoThisinh] => [hoso.id, hoso]),
+                return this.registrationsService.query(hosoConditions, { limit: -1 }).pipe(
+                    map((hosoResponse: DtoObject<Registrations[]>): DtoObject<HoidongHosoThisinh[]> => {
+                        const hosoById = new Map<number, Registrations>(
+                            hosoResponse.data.map((hoso: Registrations): [number, Registrations] => [hoso.id, hoso]),
                         );
                         return {
                             ...assigned,
                             data: assigned.data.map((row: HoidongHosoThisinh): HoidongHosoThisinh => ({
                                 ...row,
-                                _hoso: hosoById.get(row.hoso_id) ?? null,
+                                _hoso: hosoById.get(row.tuyensinh_id) ?? null,
                             })),
                         };
                     }),
@@ -152,7 +152,7 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
         this.loadData(this.temp.paged, this.temp.resetPaginator);
     }
 
-    getCandidate(row: HoidongHosoThisinh): HosoThisinh | undefined {
+    getCandidate(row: HoidongHosoThisinh): Registrations | undefined {
         return row._hoso ?? undefined;
     }
 
@@ -181,16 +181,16 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     loadCandidates(): void {
         this.candidateLoad$.next();
         this.assignLoading = true;
-        this.hosoService.load({
+        this.registrationsService.load({
             search: this.assignSearch.trim(),
             dotxettuyen_id: this.assignIncludeCurrentRound ? this._hoidong?.dot_xettuyen_id : undefined,
-        }, { limit: 500, paged: 1 }).pipe(
+        }, { limit: -1, paged: 1 }).pipe(
             takeUntil(this.candidateLoad$),
             takeUntil(this.onDestroy$),
         ).subscribe({
-            next: (res: DtoObject<HosoThisinh[]>): void => {
-                const assigned = new Set<number>(this.dataTable.data().map((r: HoidongHosoThisinh): number => r.hoso_id));
-                this.assignCandidates = res.data.filter((c: HosoThisinh): boolean => !assigned.has(c.id));
+            next: (res: DtoObject<Registrations[]>): void => {
+                const assigned = new Set<number>(this.dataTable.data().map((r: HoidongHosoThisinh): number => r.tuyensinh_id));
+                this.assignCandidates = res.data.filter((c: Registrations): boolean => !assigned.has(c.id));
                 this.assignLoading = false;
             },
             error: (): void => {
@@ -216,7 +216,7 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
         if (this.selectedAssignIds.size === this.assignCandidates.length) {
             this.selectedAssignIds = new Set<number>();
         } else {
-            this.selectedAssignIds = new Set<number>(this.assignCandidates.map((c: HosoThisinh): number => c.id));
+            this.selectedAssignIds = new Set<number>(this.assignCandidates.map((c: Registrations): number => c.id));
         }
     }
 
@@ -239,8 +239,8 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
 
         from(ids).pipe(
             mergeMap(
-                (hosoId: number) => this.assignmentService.create({ hoidong_id: hoidongId, hoso_id: hosoId }).pipe(
-                    switchMap(() => this.hosoService.update(hosoId, { status_connent: 1 })),
+                (hosoId: number) => this.assignmentService.create({ hoidong_id: hoidongId, tuyensinh_id: hosoId }).pipe(
+                    switchMap(() => this.registrationsService.update(hosoId, { status_connect: 1 })),
                     map((): boolean => true),
                     catchError(() => of(false)),
                 ),
@@ -340,7 +340,7 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
             switchMap(() => from(assignments).pipe(
                 mergeMap(
                     (assignment: HoidongHosoThisinh) => this.assignmentService.delete(assignment.id).pipe(
-                        switchMap(() => this.hosoService.update(assignment.hoso_id, { status_connent: 0 })),
+                        switchMap(() => this.registrationsService.update(assignment.tuyensinh_id, { status_connect: 0 })),
                         map((): boolean => true),
                         catchError(() => of(false)),
                     ),
@@ -402,7 +402,7 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
         forkJoin({
             majors: this.nganhHocService.load({ search: '' }, queryParams).pipe(
                 map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: Nganhhoc): IctuDropdownOption<number> => ({ value: item.id, label: item.name })),
+                    (response.data ?? []).map((item: Nganhhoc): IctuDropdownOption<number> => ({ value: item.id, label: item.ten_nganh })),
                 ),
             ),
             provinces: this.locationService.queryLocation([], queryParams, 'regions').pipe(

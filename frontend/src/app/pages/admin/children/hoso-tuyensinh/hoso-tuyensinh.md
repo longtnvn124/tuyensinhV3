@@ -79,7 +79,7 @@ Khi user click `[+]` / `Thêm mới` → **KHÔNG mở drawer ngay**. Mở **Dia
 └──────────────────────────────────────────┘
 ```
 
-Sau khi bấm `Kiểm tra` → gọi `HosoThisinhService.checkCccd(cccd)`:
+Sau khi bấm `Kiểm tra` → gọi `RegistrationsService.checkCccd(cccd)`:
 
 | Case | API response | Xử lý |
 |---|---|---|
@@ -91,7 +91,7 @@ Sau khi bấm `Kiểm tra` → gọi `HosoThisinhService.checkCccd(cccd)`:
 - Case 1 + 2 đều mở form **trống** (không phải clone data cũ). CCCD được fill sẵn để không nhập lại.
 - Case 3 chỉ xem thông tin, không cho thao tác — phù hợp với yêu cầu "không cho phép thao tác và hiển thị thông tin".
 - Nếu API check fail (500/timeout) → toast lỗi, giữ dialog mở để retry.
-- Service cần bổ sung: `checkCccd(cccd: string): Observable<HosoThisinh | null>`.
+- Service cần bổ sung: `checkCccd(cccd: string): Observable<Registrations | null>`.
 
 ### 5.1. Thông tin cá nhân
 | Field | Loại | Bắt buộc | Validation |
@@ -194,7 +194,7 @@ Sau này user design xong → thay component này bằng component upload thật
 ## 7. Status enum (đề xuất — chờ backend confirm)
 
 ```ts
-type HosoStatus =
+type RegistrationStatus =
   | 'cho_duyet'    // Chờ duyệt
   | 'da_duyet'     // Đã duyệt
   | 'da_nhap_hoc'  // Đã nhập học
@@ -242,7 +242,7 @@ Reuse:
 | **Tạo** | `frontend/src/app/pages/admin/children/hoso-tuyensinh/upload-placeholder/upload-placeholder.component.css` |
 | **Sửa** | `frontend/src/app/pages/admin/admin-routing.module.ts` (fix typo path) |
 
-Không cần tạo model/service mới — đã có sẵn `HosoThisinh` + `HosoThisinhService`.
+Không cần tạo model/service mới — đã có sẵn `Registrations` + `RegistrationsService`.
 
 ## 10. Câu hỏi chờ user
 

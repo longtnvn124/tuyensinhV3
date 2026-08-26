@@ -25,7 +25,7 @@ Chỉ kế thừa nghiệp vụ cần thiết. Không sao chép giao diện cũ,
 
 ### Gửi đăng ký
 
-- `HosoThisinhService.addTuyensinh(data)`.
+- `RegistrationsService.addRegistration(data)`.
 - Endpoint hiện tại: `POST /hoso-tuyensinh/`.
 - Base service tự ghép API URL, lấy `response.data`.
 
@@ -239,7 +239,7 @@ Không tạo service mới nếu service hiện tại đáp ứng API.
 1. Tạo standalone component.
 2. Dựng typed Reactive Form.
 3. Tải dữ liệu bằng `forkJoin` hoặc tương đương.
-4. Kết nối `HosoThisinhService.addTuyensinh()`.
+4. Kết nối `RegistrationsService.addRegistration()`.
 5. Xử lý loading, error, retry, submitting, success.
 
 ### Giai đoạn 4: Giao diện

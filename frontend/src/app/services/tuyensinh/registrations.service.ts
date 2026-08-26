@@ -4,41 +4,41 @@ import { IctuBaseServiceClass } from '@models/ictu-base-service.class';
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { HosoStatus, HosoThisinh } from '@app/models/tuyensinh/hoso-thisinh';
+import { RegistrationStatus, Registrations } from '@app/models/tuyensinh/registrations';
 
-export interface HosoThisinhSearchInfo {
+export interface RegistrationSearchInfo {
     search: string;
-    status?: HosoStatus;
+    status?: RegistrationStatus;
     dotxettuyen_id?: number;
     nganh_id?: number;
     nguoi_tuvan?: number;
 }
 
-export type HosoCheckCccdResult =
+export type RegistrationCheckCccdResult =
     | { found: false }
-    | { found: true; record: HosoThisinh };
+    | { found: true; record: Registrations };
 
 @Injectable({
     providedIn: 'any',
 })
-export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
-	getTuyensinhByPageNew(conditions: IctuConditionParam[]): Observable<DtoObject<HosoThisinh[]>> {
+export class RegistrationsService extends IctuBaseServiceClass<Registrations> {
+	getRegistrationsByPage(conditions: IctuConditionParam[]): Observable<DtoObject<Registrations[]>> {
 		return this.query(conditions, { limit: 1, paged: 1 });
 	}
-	updateTuyensinh(id: number, data: Partial<HosoThisinh>): Observable<any> {
+	updateRegistration(id: number, data: Partial<Registrations>): Observable<any> {
 		return this.update(id, data);
 	}
-	addTuyensinh(data: Partial<HosoThisinh>, context?: HttpContext): Observable<number> {
+	addRegistration(data: Partial<Registrations>, context?: HttpContext): Observable<number> {
 		return this.create(data, context);
 	}
     constructor() {
-        super('hoso-tuyensinh');
+        super('registrations');
     }
 
     load(
-        info: HosoThisinhSearchInfo,
+        info: RegistrationSearchInfo,
         _queryParams?: Partial<IctuQueryParams>,
-    ): Observable<DtoObject<HosoThisinh[]>> {
+    ): Observable<DtoObject<Registrations[]>> {
         const queryParams: IctuQueryParams = {
             limit: 20,
             paged: 1,
@@ -95,11 +95,11 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
         return this.query(conditions, queryParams);
     }
 
-    checkCccd(cccd?: string, phone?: string): Observable<HosoCheckCccdResult> {
+    checkCccd(cccd?: string, phone?: string): Observable<RegistrationCheckCccdResult> {
         const cleaned = cccd?.trim();
         const cleanedPhone = phone?.trim();
         if (!cleaned && !cleanedPhone) {
-            return of<HosoCheckCccdResult>({ found: false });
+            return of<RegistrationCheckCccdResult>({ found: false });
         }
         const queryParams: IctuQueryParams = {
             limit: 1,
@@ -125,16 +125,16 @@ export class HosoThisinhService extends IctuBaseServiceClass<HosoThisinh> {
             });
         }
         return this.query(conditions, queryParams).pipe(
-            map((res: DtoObject<HosoThisinh[]>): HosoCheckCccdResult => {
-                const first: HosoThisinh | undefined =
+            map((res: DtoObject<Registrations[]>): RegistrationCheckCccdResult => {
+                const first: Registrations | undefined =
                     Array.isArray(res?.data) && res.data.length ? res.data[0] : undefined;
                 return first ? { found: true, record: first } : { found: false };
             }),
-            catchError((): Observable<HosoCheckCccdResult> => of<HosoCheckCccdResult>({ found: false })),
+            catchError((): Observable<RegistrationCheckCccdResult> => of<RegistrationCheckCccdResult>({ found: false })),
         );
     }
 
-    checkpointHoso(cccd?: string, phone?: string): Observable<HosoThisinh | null> {
-        return this.http.post<HosoThisinh | null>(this.api + 'check-point', {cccd, phone});
+    checkpointRegistration(cccd?: string, phone?: string): Observable<Registrations | null> {
+        return this.http.post<Registrations | null>(this.api + 'check-point', {cccd, phone});
     }
 }

@@ -247,8 +247,8 @@ HosoThemComponent (standalone)
 |---------|--------|----------|
 | `ApiOutsiteService` | `getNganhList()` | Danh sách ngành |
 | `ApiOutsiteService` | `getCtdtListByIdNganh(id)` | CTĐT theo major_id |
-| `HosoThisinhService` | `checkCccd(cccd)` | Kiểm tra CCCD |
-| `HosoThisinhService` | `addTuyensinh(payload)` | Tạo hồ sơ (trong child form) |
+| `RegistrationsService` | `checkCccd(cccd)` | Kiểm tra CCCD |
+| `RegistrationsService` | `addRegistration(payload)` | Tạo hồ sơ (trong child form) |
 | `DotXettuyenService` | `load()` | Đợt xét tuyển |
 | `LocationService` | `queryLocation()` | Tỉnh/Huyện/Xã |
 
@@ -262,7 +262,7 @@ rightState = signal<'cccd_check' | 'existing' | 'form'>('cccd_check')
 cccdInput = ''                        // raw string, filtered via replace(/\D/g, '')
 cccdLoading = false
 cccdResult: HosoCheckCccdResult | null = null
-existingRecord: Signal<HosoThisinh | null>  // computed từ cccdResult
+existingRecord: Signal<Registrations | null>  // computed từ cccdResult
 
 // Left panel
 selectedMajorId = signal<number | null>(null)

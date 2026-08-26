@@ -2,9 +2,9 @@ import { IctuBaseModel } from '@models/ictu-base-model';
 
 export interface HoidongXettuyen extends IctuBaseModel {
     id: number;
-    name: string;
-    desc: string;
+    tieu_de_hoi_dong: string;
+    mo_ta_hoi_dong: string;
     dot_xettuyen_id: number;
-    thoigian_xettuyen: string;
+    ngay_xetduyet: string;
     status: string; // "dang_mo" | "da_dong"
 }

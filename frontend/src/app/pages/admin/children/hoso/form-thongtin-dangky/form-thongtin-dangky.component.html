@@ -293,14 +293,14 @@
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Ngày cấp</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Ngày cấp</label>
                                     <p-inputMask class="w-100" mask="99/99/9999" formControlName="ngay_cap_cccd"
                                         placeholder="dd/mm/yyyy" slotChar="dd/mm/yyyy"></p-inputMask>
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Nơi cấp</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Nơi cấp</label>
                                     <p-select class="w-100 ictu-form__input-field" [options]="noicapCCCD"
                                         appendTo="body" [filter]="true" filterBy="label" formControlName="noi_cap_cccd"
                                         placeholder="Chọn" optionLabel="label" optionValue="label"
@@ -348,7 +348,7 @@
 
 
                         <div class="row form-row form-row-flex-row">
-                            <div class="col-2 flex-div">
+                            <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Loại văn bằng</label>
                                     <p-select [options]="listVBTN()" appendTo="body" formControlName="van_bang_tn"
@@ -427,24 +427,24 @@
                     <div class="hoso-form__section-title">V. Thông tin bổ sung</div>
                     <div class="ictu-form ictu-form--label-on-top">
                         <div class="row form-row-flex-row">
-                            <div class="col-3 flex-div">
+                            <div class="col-4 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label ictu-form__label--required">Đối tượng xét tuyển</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Văn bằng sử dụng xét tuyển</label>
                                     <p-select class="w-100" [options]="listDoituong()" appendTo="body"
-                                        formControlName="doituong" placeholder="Chọn đối tượng" optionLabel="label"
+                                        formControlName="doituong" placeholder="Chọn" optionLabel="label"
                                         optionValue="value" [showClear]="false" />
                                 </div>
                             </div>
-                            <div class="col-3 flex-div">
+                            <div class="col-4 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label ictu-form__label--required">Ngành đăng ký</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Ngành đăng ký xét tuyển</label>
                                     <p-select class="w-100" [options]="listNganh()" appendTo="body" [filter]="true"
                                         filterBy="label" formControlName="nganh_id" placeholder="Chọn ngành"
                                         optionLabel="label" optionValue="value" [showClear]="false"
                                         (onChange)="onNganhChange($event.value)" />
                                 </div>
                             </div>
-                            <div class="col-3 flex-div">
+                            <!-- <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Chương trình đào tạo</label>
                                     <p-select class="w-100" [options]="listChuongtrinh()" appendTo="body"
@@ -452,12 +452,12 @@
                                         placeholder="Chọn chương trình" optionLabel="label" optionValue="value"
                                         [showClear]="false" [disabled]="!formData.get('nganh_id')?.value" />
                                 </div>
-                            </div>
-                            <div class="col-3 flex-div">
+                            </div> -->
+                            <div class="col-4 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Đợt xét tuyển</label>
                                     <p-select class="w-100" [options]="listDotXetTuyen()" appendTo="body"
-                                        formControlName="dotxettuyen_id" placeholder="Chọn đợt" optionLabel="name"
+                                        formControlName="dotxettuyen_id" placeholder="Chọn đợt" optionLabel="tieude"
                                         optionValue="id" [showClear]="false" [disabled]="true" />
                                 </div>
                             </div>
@@ -485,7 +485,7 @@
                             </div>
                             <div class="col-4 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Điểm công</label>
+                                    <label class="ictu-form__label">Điểm ưu tiên khu vực</label>
                                     <p-inputNumber class="w-100" formControlName="diem_cong" [min]="0" [max]="10"
                                         [minFractionDigits]="0" [maxFractionDigits]="1"
                                         placeholder="0.00"></p-inputNumber>
@@ -493,7 +493,7 @@
                             </div>
                             <div class="col-4 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Điểm ưu tiên</label>
+                                    <label class="ictu-form__label">Điểm ưu tiên đối tượng</label>
                                     <p-inputNumber class="w-100" formControlName="diem_uutien" [min]="0" [max]="10"
                                         [minFractionDigits]="0" [maxFractionDigits]="1"
                                         placeholder="0.00"></p-inputNumber>
@@ -542,7 +542,7 @@
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label ">Ảnh bằng tốt nghiệp THPT(BTVH)</label>
+                                    <label class="ictu-form__label ">Ảnh bằng tốt nghiệp THPT/ TH nghề/ GCN Hoàn thành kiến thức văn hóa THPT</label>
                                     <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_thpt']" [keyUpload]="'direct'"
                                         [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
@@ -550,15 +550,15 @@
                         </div>
 
                         <div class="row form-row form-row-flex-row">
-                            <div class="col-3 flex-div">
+                            <!-- <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label ictu-form__label--required">Ảnh sơ yếu lý
+                                    <label class="ictu-form__label ">Ảnh sơ yếu lý
                                         lịch</label>
                                     <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_soyeulylich']" [keyUpload]="'direct'"
                                         [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
-                            </div>
-                            <div class="col-9 flex-div">
+                            </div> -->
+                            <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Ảnh bằng, bảng điểm TC, CĐ, ĐH (Nếu có) và học bạ
                                         THPT,BTVH</label>
@@ -568,6 +568,31 @@
                                 </div>
                             </div>
 
+                        </div>
+                        <div class="row form-row form-row-flex-row">
+                            <div class="col-4 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ">Sơ yếu lý lịch</label>
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_soyeulylich']" [keyUpload]="'direct'"
+                                        [resizeToWidth]="400"></ovic-img-crop-v2>
+                                </div>
+                            </div>
+                            <div class="col-4 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ">Giấy khai sinh
+                                        lịch</label>
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_giaykhaisinh']" [keyUpload]="'direct'"
+                                        [resizeToWidth]="400"></ovic-img-crop-v2>
+                                </div>
+                            </div>
+                            <div class="col-4 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ">Giấy tờ chứng nhận thuộc đối tượng ưu tiên
+                                        lịch</label>
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_giayuutien']" [keyUpload]="'direct'"
+                                        [resizeToWidth]="400"></ovic-img-crop-v2>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

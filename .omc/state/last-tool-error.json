@@ -1,0 +1,7 @@
+{
+  "tool_name": "Agent",
+  "tool_input_preview": "{\"description\":\"Rà form hội đồng\",\"prompt\":\"Chỉ review working-tree diff, không sửa file, không tạo PR/comment. Repo d:\\\\data\\\\project\\\\angular\\\\v19\\\\tuyensinh. Scope: frontend/src/app/pages/admin/chi...",
+  "error": "Failed to create worktree: Preparing worktree (new branch 'worktree-agent-a4e94f82e3fdfb34a')\nerror: unable to create file frontend/src/app/pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/components/edit-course-lesson-structure-media-upload/edit-course-lesson-structure-media-model.ts: Filename too long\nfatal: Could not reset index file to revision 'HEAD'.",
+  "timestamp": "2026-08-25T09:34:59.651Z",
+  "retry_count": 2
+}

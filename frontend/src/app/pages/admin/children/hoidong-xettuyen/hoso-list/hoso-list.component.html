@@ -61,11 +61,11 @@
                                         [checked]="isAssignedSelected(row.id)"
                                         [disabled]="removeLoading"
                                         (change)="toggleAssigned(row.id)"
-                                        [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.hoso_id)" />
+                                        [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id)" />
                                 </td>
                             }
                             <td class="hsl-col-idx text-center">{{ dataTable.paginator.startIndex() + i }}</td>
-                            <td>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.hoso_id) }}</td>
+                            <td>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id) }}</td>
                             <td class="hsl-col-major">{{ getMajorLabel(candidate?.nganh_id) }}</td>
                             <td class="hsl-col-birthday">{{ formatBirthday(candidate?.ngay_sinh) }}</td>
                             <td class="hsl-col-phone">{{ candidate?.dien_thoai || '---' }}</td>

@@ -2,7 +2,8 @@ import { FormBuilder } from '@angular/forms';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { HosoThisinh } from '@models/tuyensinh/hoso-thisinh';
+import { IctuQueryCondition } from '@models/dto';
+import { Registrations } from '@models/tuyensinh/registrations';
 import { User } from '@models/user';
 import { AuthenticationService } from '@services/authentication.service';
 import { LocationService } from '@services/location.service';
@@ -10,7 +11,7 @@ import { NotificationService } from '@services/notification.service';
 import { UserService } from '@services/user.service';
 import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
-import { HosoThisinhService } from '@services/tuyensinh/hoso-thisinh.service';
+import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { ParentsService } from '@services/tuyensinh/parents';
 import { TuyensinhStatusService } from '@services/tuyensinh/tuyensinh-status.service';
@@ -22,38 +23,50 @@ describe('FormThongtinDangkyComponent status access', () => {
     const authenticationService = jasmine.createSpyObj<AuthenticationService>('AuthenticationService', ['userHasRole'], {
         user: { id: 7 } as User,
     });
-    const hosoService = jasmine.createSpyObj<HosoThisinhService>('HosoThisinhService', [
-        'updateTuyensinh',
-        'addTuyensinh',
+    const registrationsService = jasmine.createSpyObj<RegistrationsService>('RegistrationsService', [
+        'updateRegistration',
+        'addRegistration',
     ]);
     const notificationService = jasmine.createSpyObj<NotificationService>('NotificationService', [
         'isProcessing',
         'toastSuccess',
         'toastError',
     ]);
+    const locationService = jasmine.createSpyObj<LocationService>('LocationService', ['queryLocation']);
+    const userService = jasmine.createSpyObj<UserService>('UserService', ['query']);
+    const nganhhocService = jasmine.createSpyObj<NganhhocService>('NganhhocService', ['load']);
+    const dotXettuyenService = jasmine.createSpyObj<DotXettuyenService>('DotXettuyenService', ['query']);
 
     beforeEach(() => {
         activeRole = '';
         authenticationService.userHasRole.calls.reset();
         authenticationService.userHasRole.and.callFake((roles: string[]) => roles.includes(activeRole));
-        hosoService.updateTuyensinh.calls.reset();
-        hosoService.addTuyensinh.calls.reset();
-        hosoService.updateTuyensinh.and.returnValue(of({}));
-        hosoService.addTuyensinh.and.returnValue(of(1));
+        registrationsService.updateRegistration.calls.reset();
+        registrationsService.addRegistration.calls.reset();
+        registrationsService.updateRegistration.and.returnValue(of({}));
+        registrationsService.addRegistration.and.returnValue(of(1));
+        locationService.queryLocation.calls.reset();
+        userService.query.calls.reset();
+        nganhhocService.load.calls.reset();
+        dotXettuyenService.query.calls.reset();
+        locationService.queryLocation.and.returnValue(of({ data: [] } as never));
+        userService.query.and.returnValue(of({ data: [] } as never));
+        nganhhocService.load.and.returnValue(of({ data: [] } as never));
+        dotXettuyenService.query.and.returnValue(of({ data: [] } as never));
 
         TestBed.configureTestingModule({
             providers: [
                 FormBuilder,
                 { provide: AuthenticationService, useValue: authenticationService },
-                { provide: HosoThisinhService, useValue: hosoService },
+                { provide: RegistrationsService, useValue: registrationsService },
                 { provide: TuyensinhStatusService, useValue: {} },
-                { provide: NganhhocService, useValue: {} },
+                { provide: NganhhocService, useValue: nganhhocService },
                 { provide: ChuongtrinhDaotaoService, useValue: {} },
-                { provide: LocationService, useValue: {} },
+                { provide: LocationService, useValue: locationService },
                 { provide: NotificationService, useValue: notificationService },
-                { provide: UserService, useValue: {} },
+                { provide: UserService, useValue: userService },
                 { provide: ParentsService, useValue: {} },
-                { provide: DotXettuyenService, useValue: {} },
+                { provide: DotXettuyenService, useValue: dotXettuyenService },
             ],
         });
     });
@@ -73,6 +86,21 @@ describe('FormThongtinDangkyComponent status access', () => {
         expect(createComponent('staff').canUpdateStatus()).toBeFalse();
     });
 
+    it('loads only the active numeric admission round', () => {
+        const component = createComponent('admin');
+
+        component.loadLookups();
+
+        expect(dotXettuyenService.query).toHaveBeenCalledWith([
+            {
+                conditionName: 'status',
+                condition: IctuQueryCondition.equal,
+                value: '1',
+                orWhere: 'and',
+            },
+        ], { limit: 1, paged: 1 });
+    });
+
     it('disables the entire form for reviewer', () => {
         const component = createComponent('reviewer');
 
@@ -85,8 +113,8 @@ describe('FormThongtinDangkyComponent status access', () => {
 
         component.submitData();
 
-        expect(hosoService.updateTuyensinh).not.toHaveBeenCalled();
-        expect(hosoService.addTuyensinh).not.toHaveBeenCalled();
+        expect(registrationsService.updateRegistration).not.toHaveBeenCalled();
+        expect(registrationsService.addRegistration).not.toHaveBeenCalled();
     });
 
     it('builds status options from TH_XETTUYEN', () => {
@@ -103,11 +131,11 @@ describe('FormThongtinDangkyComponent status access', () => {
             dien_thoai: '0912345678',
             gioi_tinh: 'nam',
             status: 3,
-            status_connent: 0,
+            status_connect: 0,
             doituong: '00',
             anh_soyeulylich: 'so-yeu-ly-lich.jpg',
             owner_by: 7,
-        } as HosoThisinh;
+        } as Registrations;
 
         component.getFormData(record);
 
@@ -127,10 +155,14 @@ describe('FormThongtinDangkyComponent status access', () => {
             anh_soyeulylich: 'so-yeu-ly-lich.jpg',
             status: 3,
         });
+        Object.values(component.formData.controls).forEach((control) => {
+            control.clearValidators();
+            control.updateValueAndValidity();
+        });
 
         component.submitData();
 
-        const payload = hosoService.updateTuyensinh.calls.mostRecent().args[1];
+        const payload = registrationsService.updateRegistration.calls.mostRecent().args[1];
         expect(payload.status).toBeUndefined();
     });
 });

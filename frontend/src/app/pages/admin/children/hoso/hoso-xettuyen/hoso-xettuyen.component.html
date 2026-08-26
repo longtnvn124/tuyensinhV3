@@ -111,7 +111,7 @@
                             <th class="text-center col-status">Trạng thái</th>
                             <th class="text-left col-email">Email</th>
                             <th class="text-left col-major">Ngành</th>
-                            <th class="text-left col-program">CTĐT</th>
+
                             <th class="text-left col-dot">Đợt ĐK</th>
                             <th class="text-left col-tinh">Tỉnh/TP</th>
                             <th class="text-left col-noi-sinh">Nơi sinh</th>
@@ -177,7 +177,6 @@
                             </td>
                             <td class="text-left col-email">{{ row.email || '—' }}</td>
                             <td class="text-left col-major">{{ majorLabel(row.nganh_id) }}</td>
-                            <td class="text-left col-program">{{ programLabel(row.ctdt_id) }}</td>
                             <td class="text-left col-dot">{{ dotLabel(row.dotxettuyen_id) }}</td>
                             <td class="text-left col-tinh">{{ tinhLabel(row.dia_chi_tinh) }}</td>
                             <td class="text-left col-noi-sinh">{{ tinhLabel(row.noi_sinh) }}</td>

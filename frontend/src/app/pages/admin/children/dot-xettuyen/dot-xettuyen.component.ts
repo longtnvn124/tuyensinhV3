@@ -37,9 +37,9 @@ const dateRangeValidator: ValidatorFn = (group: AbstractControl): ValidationErro
 })
 export class DotXettuyenComponent implements OnInit, OnDestroy, IctuBasePermission {
 
-    optionList: IctuDropdownOption<string>[] = [
-        { value: 'da_dong', label: 'Đã đóng' },
-        { value: 'dang_mo', label: 'Đang mở' },
+    optionList: IctuDropdownOption<number>[] = [
+        { value: 0, label: 'Đã đóng' },
+        { value: 1, label: 'Đang mở' },
     ];
 
     private service: DotXettuyenService = inject(DotXettuyenService);
@@ -65,11 +65,11 @@ export class DotXettuyenComponent implements OnInit, OnDestroy, IctuBasePermissi
             dropdownFields: [],
             formGroup: this.fb.group(
                 {
-                    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
+                    tieude: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(255)]],
                     thoi_gian_bat_dau: [null, Validators.required],
                     thoi_gian_ket_thuc: [null, Validators.required],
-                    mo_ta: [''],
-                    status: ['dang_mo'],
+                    mota: [''],
+                    status: [1],
                 },
                 { validators: dateRangeValidator },
             ),
@@ -80,21 +80,21 @@ export class DotXettuyenComponent implements OnInit, OnDestroy, IctuBasePermissi
         this.handelEvent = {
             OPEN_FORM_ADD: (): void => {
                 this.formControl.formGroup.reset({
-                    name: '',
+                    tieude: '',
                     thoi_gian_bat_dau: null,
                     thoi_gian_ket_thuc: null,
-                    mo_ta: '',
-                    status: 'dang_mo',
+                    mota: '',
+                    status: 1,
                 });
                 this.formControl.openFormAdd();
             },
             OPEN_FORM_UPDATE: (data: DotXettuyen): void => {
                 this.formControl.formGroup.reset({
-                    name: data.name,
+                    tieude: data.tieude,
                     thoi_gian_bat_dau: data.thoi_gian_bat_dau ? new Date(data.thoi_gian_bat_dau) : null,
                     thoi_gian_ket_thuc: data.thoi_gian_ket_thuc ? new Date(data.thoi_gian_ket_thuc) : null,
-                    mo_ta: data.mo_ta || '',
-                    status: data.status || 'dang_mo',
+                    mota: data.mota || '',
+                    status: data.status ?? 1,
                 });
                 this.formControl.openFormEdit(data);
             },
@@ -110,10 +110,10 @@ export class DotXettuyenComponent implements OnInit, OnDestroy, IctuBasePermissi
             SUBMIT_FORM: (): void => {
                 if (this.formControl.canSubmit) {
                     const info: Partial<DotXettuyen> = {
-                        name: this.formField('name').value,
+                        tieude: this.formField('tieude').value,
                         thoi_gian_bat_dau: this.toDateString(this.formField('thoi_gian_bat_dau').value),
                         thoi_gian_ket_thuc: this.toDateString(this.formField('thoi_gian_ket_thuc').value),
-                        mo_ta: this.formField('mo_ta').value,
+                        mota: this.formField('mota').value,
                         status: this.formField('status').value,
                     };
 
