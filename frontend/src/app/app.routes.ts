@@ -8,11 +8,11 @@ export const routes : Routes = [
 	// 	redirectTo : 'dang-ky-xet-tuyen' ,
 	// 	pathMatch  : 'full'
 	// } ,
-	{
-		path          : 'home' ,
-		loadComponent : () => import('@pages/dang-ky-xet-tuyen/dang-ky-xet-tuyen.component')
-			.then( component => component.DangKyXetTuyenComponent )
-	} ,
+	// {
+	// 	path          : 'home' ,
+	// 	loadComponent : () => import('@pages/dang-ky-xet-tuyen/dang-ky-xet-tuyen.component')
+	// 		.then( component => component.DangKyXetTuyenComponent )
+	// } ,
 	{
 		path         : 'admin' ,
 		canActivate  : [ adminGuard ] ,
@@ -39,7 +39,7 @@ export const routes : Routes = [
 	} ,
 	{
 		path       : '**' ,
-		redirectTo : 'home' ,
+		redirectTo : 'auth/login' ,
 		pathMatch  : 'full'
 	}
 ];

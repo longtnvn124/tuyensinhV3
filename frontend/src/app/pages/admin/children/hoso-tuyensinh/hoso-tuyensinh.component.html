@@ -14,7 +14,7 @@
                 <div class="admin-wrap-table__head-actions">
                     <input [(ngModel)]="masterSearchInfo.search" class="admin-wrap-table__head-actions__search" pInputText placeholder="Tìm theo tên, SĐT..." type="text" (keyup.enter)="onSearch()">
                     <p-select [(ngModel)]="masterSearchInfo.status" [options]="statusOptions" appendTo="body" placeholder="Trạng thái" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
-                    <p-select [(ngModel)]="masterSearchInfo.nganh_id" [options]="majors()" appendTo="body" placeholder="Ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
+                    <p-select [(ngModel)]="masterSearchInfo.nganh_dangky" [options]="majorFilterOptions()" appendTo="body" placeholder="Ngành" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
                     <p-select [(ngModel)]="masterSearchInfo.dotxettuyen_id" [options]="dots()" appendTo="body" placeholder="Đợt XT" optionLabel="label" optionValue="value" [showClear]="true" (onChange)="onSearch()" styleClass="hoso-filter-select"/>
                     @if (permissionControl().canDelete) {
                         <button (click)="deleteSelectedHoso()" [disabled]="!masterDataTable.someItemsChecked()" class="btn ictu-button-danger-gradient" mat-flat-button>

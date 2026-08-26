@@ -83,7 +83,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     /*  Inputs / Outputs                                                   */
     /* ------------------------------------------------------------------ */
     readonly data = input<Registrations | null>(null);
-    readonly majorId = input<number | null>(null);
+    readonly majorId = input<string | null>(null);
     readonly programId = input<number | null>(null);
     readonly readOnly = input<boolean>(false);
     readonly saved = output<void>();
@@ -114,8 +114,8 @@ export class FormThongtinDangkyComponent implements OnInit {
     /* ------------------------------------------------------------------ */
     readonly isManager = computed(() => this.auth.userHasRole(['admin', 'manager']));
     readonly isLanhDaoKhoa = computed(() => this.auth.userHasRole(['direction']));
-    readonly canCheckByPhone = computed(() => this.auth.userHasRole(['admin', 'direction', 'manager']));
-    readonly canUpdateStatus = computed(() => this.auth.userHasRole(['admin', 'manager', 'direction']));
+    readonly canCheckByPhone = computed(() => this.auth.userHasRole(['admin', 'direction', 'manager', 'staff']));
+    readonly canUpdateStatus = computed(() => this.auth.userHasRole(['admin', 'manager', 'direction', 'duyet_hoso']));
     readonly canEdit = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff']));
     readonly canAdd = computed(() => this.auth.userHasRole(['admin', 'manager', 'staff', 'doi-tac']));
     readonly duyetHoso = computed(() => this.auth.userHasRole(['reviewer']));
@@ -129,6 +129,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly isDoitac = signal<boolean>(false);
     readonly isNhanVien = signal<boolean>(false);
     readonly isDoitacNhanvien = signal<boolean>(false);
+    readonly isDuyethoso = signal<boolean>(false);
 
 
     readonly listDantoc = signal<any[]>(DanToc);
@@ -139,7 +140,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly listTinh = signal<Locations[]>([]);
     readonly listXa = signal<Locations[]>([]);
     readonly listUser = signal<User[]>([]);
-    readonly listNganh = signal<IctuDropdownOption<number>[]>([]);
+    readonly listNganh = signal<IctuDropdownOption<string>[]>([]);
     readonly listChuongtrinh = signal<IctuDropdownOption<number>[]>([]);
     readonly statusOptions: IctuDropdownOption<number>[] = TH_XETTUYEN.map(({ label, value }) => ({ label, value }));
 
@@ -156,7 +157,6 @@ export class FormThongtinDangkyComponent implements OnInit {
     ];
 
     private rawProvinces: Locations[] = [];
-
 
 
 
@@ -178,7 +178,7 @@ export class FormThongtinDangkyComponent implements OnInit {
         van_bang_tn: 'Vui lòng chọn văn bằng/tốt nghiệp.',
         nam_tn: 'Vui lòng nhập năm tốt nghiệp.',
         sohieu_vb: 'Vui lòng nhập số hiệu văn bằng tốt nghiệp.',
-        nganh_id: 'Vui lòng chọn ngành đăng ký.',
+        nganh_dangky: 'Vui lòng chọn ngành đăng ký.',
         doituong: 'Vui lòng chọn đối tượng tuyển sinh.',
         anh_the: 'Vui lòng nhập ảnh thẻ.',
         anh_phieu_dang_ky: 'Vui lòng nhập ảnh phiếu đăng ký.',
@@ -210,7 +210,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             dia_chi_tinh: [null],
             dia_chi_xa: [null],
             dia_chi_nha: [''],
-            cccd: ['', [Validators.required, Validators.pattern('[0-9]{12}')]],
+            cccd: ['',this.isAdmin || this.isNhanVien ?[] : [Validators.required, Validators.pattern('[0-9]{12}')] ],
             ngay_cap_cccd: ['', Validators.required],
             noi_cap_cccd: ['', Validators.required],
             van_bang_tn: [''],
@@ -222,13 +222,12 @@ export class FormThongtinDangkyComponent implements OnInit {
             vb_chuyenmon_namtn: [''],
             vb_chuyenmon_noicap: [''],
             vb_chuyenmon_sohieu: [''],
-            nganh_id: [''],
+            nganh_dangky: [''],
             ctdt_id: [null],
             doituong: [''],
             type_diem: [null],
             diem_xettuyen: [null],
             content: [''],
-            nguoi_tuvan: [this.getDefaultNguoiTuvan()],
             dotxettuyen_id: [0],
             status: [0],
             status_connect: [0],
@@ -295,13 +294,13 @@ export class FormThongtinDangkyComponent implements OnInit {
             vb_chuyenmon_namtn: '',
             vb_chuyenmon_noicap: '',
             vb_chuyenmon_sohieu: '',
-            nganh_id: '',
+            nganh_dangky: '',
             ctdt_id: null,
             doituong: '',
             type_diem: null,
             diem_xettuyen: null,
             content: '',
-            nguoi_tuvan: this.getDefaultNguoiTuvan(),
+           
             dotxettuyen_id: 0,
             status: 0,
             status_connect: 0,
@@ -342,11 +341,12 @@ export class FormThongtinDangkyComponent implements OnInit {
                 orWhere: 'and',
             })
         }
+        
 
         forkJoin({
             tinh: this.locationSvc.queryLocation([], qp, 'regions'),
             provinces: this.locationSvc.queryLocation([], qp, 'provinces'),
-            users: this.userService.query(userCond, { limit: -1 }),
+            users:this.isAdmin() || this.isDoitac() ?  this.userService.query(userCond, { limit: -1 }) : of({data:[]}),
             nganh: this.nganhHocService.load({ search: '' }, { limit: -1 }),
             dotxet: this.dotXettuyenService.query(dotCon, { limit: 1, paged: 1 })
         })
@@ -363,7 +363,7 @@ export class FormThongtinDangkyComponent implements OnInit {
                     this.listDotXetTuyen.set(dotxet.data ?? []);
                     const firstDot = (dotxet.data ?? [])[0];
 
-                
+
                     if (firstDot) {
                         this.formData.patchValue({ dotxettuyen_id: firstDot.id });
                     }
@@ -374,15 +374,16 @@ export class FormThongtinDangkyComponent implements OnInit {
                     this.listNganh.set(
                         (nganh.data ?? [])
                             .filter((major) => major.status === 1)
-                            .map((major) => ({ value: major.id, label: major.ten_nganh })),
+                            .map((major) => ({ value: major.ten_nganh, label: major.ten_nganh })),
                     );
 
                     // Nếu có data input từ parent → edit mode
                     const editData = this.data();
                     if (editData) {
+                        this.isDuyethoso.set( this.data().nguoi_tuvan == this.auth.user.id && this.auth.userHasRole(['duyet_hoso']) )
                         this.getFormData(editData);
-                        // if (editData.nganh_id) {
-                        //     this.loadChuongtrinh(editData.nganh_id, editData.ctdt_id ?? null);
+                        // if (editData.nganh_dangky) {
+                        //     this.loadChuongtrinh(editData.nganh_dangky, editData.ctdt_id ?? null);
                         // }
                         this.viewState.set('form');
                     } else {
@@ -403,7 +404,7 @@ export class FormThongtinDangkyComponent implements OnInit {
         return (this.isAdmin() || this.isDoitac()) ? this.auth.user?.id : (this.auth.user?.id ?? null);
     }
 
-    onNganhChange(majorId: number | null): void {
+    onNganhChange(majorId: string | null): void {
         this.formData.patchValue({ ctdt_id: null });
         this.listChuongtrinh.set([]);
         // if (majorId) {
@@ -504,7 +505,7 @@ export class FormThongtinDangkyComponent implements OnInit {
                     this.formData.patchValue({
                         cccd,
                         ...(this.canCheckByPhone() && phone ? { dien_thoai: phone } : {}),
-                        nganh_id: this.majorId(),
+                        nganh_dangky: this.majorId(),
                         ctdt_id: this.programId(),
                     });
                     // if (this.majorId()) {
@@ -528,7 +529,7 @@ export class FormThongtinDangkyComponent implements OnInit {
         return TH_XETTUYEN.find((item) => item.value === status)?.label ?? `${status}`;
     }
 
-    getNganhLabel(majorId: number | null | undefined): string {
+    getNganhLabel(majorId: string | null | undefined): string {
         if (!majorId) return 'Chưa có';
         const found = this.listNganh().find(n => n.value === majorId);
         return found ? found.label : `Mã ngành #${majorId}`;
@@ -559,6 +560,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     submitData(): void {
         if (this.isReadOnly()) return;
 
+
         if (this.formData.invalid) {
             for (const key of Object.keys(this.errorMessages)) {
                 if (this.formData.get(key)?.invalid) {
@@ -569,7 +571,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             return;
         }
 
-       
+
 
         this.submitting.set(true);
         this.notification.isProcessing(true);
@@ -586,9 +588,9 @@ export class FormThongtinDangkyComponent implements OnInit {
             : Number(raw.diem_xettuyen);
         raw.anh_hoc_ba = JSON.stringify(raw.anh_hoc_ba_uploads ?? []);
 
-        if(!raw.nguoi_tuvan){
-            raw.nguoi_tuvan = this.getDefaultNguoiTuvan()
-        }
+        // if(!raw.nguoi_tuvan){
+        //     raw.o = this.getDefaultNguoiTuvan()
+        // }
         delete raw.type_diem;
         delete raw.anh_hoc_ba_uploads;
         if (!this.canUpdateStatus()) {
@@ -603,7 +605,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             // UPDATE
 
 
-           
+
             const data_status: TuyensinhStatus = {
                 registration_id: this.dataId,
                 status_key: this.selectedTH.status_key,
@@ -727,12 +729,11 @@ export class FormThongtinDangkyComponent implements OnInit {
             vb_chuyenmon_namtn: object.vb_chuyenmon_namtn || '',
             vb_chuyenmon_noicap: object.vb_chuyenmon_noicap || '',
             vb_chuyenmon_sohieu: object.vb_chuyenmon_sohieu || '',
-            nganh_id: object.nganh_id ?? null,
+            nganh_dangky: object.nganh_dangky ?? null,
             ctdt_id: object.ctdt_id ?? null,
             doituong: object.doituong,
             diem_xettuyen: object.diem_xettuyen ?? null,
             dotxettuyen_id: object.dotxettuyen_id ?? 0,
-            nguoi_tuvan: object.nguoi_tuvan ?? this.getDefaultNguoiTuvan(),
             status: object.status ?? 0,
             status_connect: object.status_connect ?? 0,
             owner_by: object.owner_by || this.auth.user?.id,

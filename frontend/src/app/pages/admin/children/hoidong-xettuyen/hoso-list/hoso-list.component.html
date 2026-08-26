@@ -1,134 +1,117 @@
 <div class="hsl-wrapper">
     @if (state() === 'loading') {
-        <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
+    <app-loading-progress heading="Loading..." backdropFilter="none"></app-loading-progress>
     }
     @if (state() !== 'error') {
-        <div class="hsl-toolbar">
-            <h5 class="hsl-toolbar__title">Danh sách hồ sơ thí sinh được phân công</h5>
-            <div class="hsl-toolbar__actions">
-                @if (permission?.canDelete && selectedAssignedIds.size > 0) {
-                    <button
-                        type="button"
-                        (click)="removeAssigned()"
-                        [disabled]="removeLoading"
-                        class="btn ictu-button-danger-light hsl-toolbar-button hsl-delete-selected"
-                        mat-flat-button>
-                        <i class="ti ti-trash"></i> Xóa
-                    </button>
-                }
-                @if (permission?.canUpdate) {
-                    <button (click)="openAssignDialog()" class="btn ictu-badge-btn--success-reverse hsl-toolbar-button" mat-flat-button>
-                        <i class="ti ti-user-plus"></i> Gán hồ sơ
-                    </button>
-                }
-            </div>
+    <div class="hsl-toolbar">
+        <h5 class="hsl-toolbar__title">Danh sách hồ sơ thí sinh được phân công</h5>
+        <div class="hsl-toolbar__actions">
+            @if (isAdmin && selectedAssignedIds.size > 0) {
+            <button type="button" (click)="removeAssigned()" [disabled]="removeLoading"
+                class="btn ictu-button-danger-light hsl-toolbar-button hsl-delete-selected" mat-flat-button>
+                <i class="ti ti-trash"></i> Xóa
+            </button>
+            }
+            @if (permission?.canUpdate) {
+            <button (click)="openAssignDialog()" class="btn ictu-badge-btn--success-reverse hsl-toolbar-button"
+                mat-flat-button>
+                <i class="ti ti-user-plus"></i> Gán hồ sơ
+            </button>
+            }
         </div>
+    </div>
 
-        <div class="hsl-table-wrap">
-            <table class="hsl-table">
-                <thead>
-                    <tr>
-                        @if (permission?.canDelete) {
-                            <th class="hsl-col-check text-center">
-                                <mat-checkbox
-                                    [checked]="allAssignedChecked()"
-                                    [indeterminate]="isAssignedSelectionIndeterminate()"
-                                    [disabled]="removeLoading"
-                                    (change)="toggleSelectAllAssigned()"
-                                    aria-label="Chọn tất cả hồ sơ trên trang" />
-                            </th>
-                        }
-                        <th class="hsl-col-idx text-center">#</th>
-                        <th>Họ tên</th>
-                        <th class="hsl-col-major">Ngành học</th>
-                        <th class="hsl-col-birthday">Ngày sinh</th>
-                        <th class="hsl-col-phone">Số điện thoại</th>
-                        <th class="hsl-col-cccd">Số CCCD</th>
-                        <th class="hsl-col-email">Email</th>
-                        <th class="hsl-col-birthplace">Nơi sinh</th>
-                        <th class="hsl-col-ethnicity">Dân tộc</th>
-                        <th class="hsl-col-target">Đối tượng</th>
-                        <th class="hsl-col-actions text-center">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (row of dataTable.data(); track row.id; let i = $index) {
-                        @let candidate = getCandidate(row);
-                        <tr [class.hsl-row--selected]="isAssignedSelected(row.id)">
-                            @if (permission?.canDelete) {
-                                <td class="hsl-col-check text-center">
-                                    <mat-checkbox
-                                        [checked]="isAssignedSelected(row.id)"
-                                        [disabled]="removeLoading"
-                                        (change)="toggleAssigned(row.id)"
-                                        [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id)" />
-                                </td>
-                            }
-                            <td class="hsl-col-idx text-center">{{ dataTable.paginator.startIndex() + i }}</td>
-                            <td>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id) }}</td>
-                            <td class="hsl-col-major">{{ getMajorLabel(candidate?.nganh_id) }}</td>
-                            <td class="hsl-col-birthday">{{ formatBirthday(candidate?.ngay_sinh) }}</td>
-                            <td class="hsl-col-phone">{{ candidate?.dien_thoai || '---' }}</td>
-                            <td class="hsl-col-cccd">{{ candidate?.cccd || '---' }}</td>
-                            <td class="hsl-col-email">{{ candidate?.email || '---' }}</td>
-                            <td class="hsl-col-birthplace">{{ getNoiSinhLabel(candidate?.noi_sinh) }}</td>
-                            <td class="hsl-col-ethnicity">{{ candidate?.dan_toc || '---' }}</td>
-                            <td class="hsl-col-target">{{ getDoiTuongLabel(candidate?.doituong) }}</td>
-                            <td class="hsl-col-actions text-center">
-                                @if (permission?.canDelete) {
-                                    <button
-                                        type="button"
-                                        (click)="removeAssigned(row)"
-                                        [disabled]="removeLoading"
-                                        class="btn ictu-button-danger-light hsl-delete-row"
-                                        mat-flat-button
-                                        tooltip="Xóa khỏi hội đồng"
-                                        aria-label="Xóa hồ sơ khỏi hội đồng">
-                                        <i class="ti ti-trash"></i>
-                                    </button>
-                                }
-                            </td>
-                        </tr>
-                    } @empty {
-                        <tr>
-                            <td [attr.colspan]="permission?.canDelete ? 12 : 11" class="hsl-empty">Hội đồng chưa có hồ sơ nào. Nhấn "Gán hồ sơ" để bắt đầu.</td>
-                        </tr>
+    <div class="hsl-table-wrap">
+        <table class="hsl-table">
+            <thead>
+                <tr>
+                    @if (isAdmin) {
+                    <th class="hsl-col-check text-center">
+                        <mat-checkbox [checked]="allAssignedChecked()"
+                            [indeterminate]="isAssignedSelectionIndeterminate()" [disabled]="removeLoading"
+                            (change)="toggleSelectAllAssigned()" aria-label="Chọn tất cả hồ sơ trên trang" />
+                    </th>
                     }
-                </tbody>
-            </table>
-        </div>
+                    <th class="hsl-col-idx text-center">#</th>
+                    <th>Họ tên</th>
+                    <th class="hsl-col-major">Ngành học</th>
+                    <th class="hsl-col-birthday">Ngày sinh</th>
+                    <th class="hsl-col-phone">Số điện thoại</th>
+                    <th class="hsl-col-cccd">Số CCCD</th>
+                    <th class="hsl-col-email">Email</th>
+                    <th class="hsl-col-birthplace">Nơi sinh</th>
+                    <th class="hsl-col-ethnicity">Dân tộc</th>
+                    <th class="hsl-col-target">Đối tượng</th>
+                    <th class="hsl-col-actions text-center">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (row of dataTable.data(); track row.id; let i = $index) {
+                @let candidate = getCandidate(row);
+                <tr [class.hsl-row--selected]="isAssignedSelected(row.id)">
+                    @if (isAdmin) {
+                    <td class="hsl-col-check text-center">
+                        <mat-checkbox [checked]="isAssignedSelected(row.id)" [disabled]="removeLoading"
+                            (change)="toggleAssigned(row.id)"
+                            [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id)" />
+                    </td>
+                    }
+                    <td class="hsl-col-idx text-center">{{ dataTable.paginator.startIndex() + i }}</td>
+                    <td>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id) }}</td>
+                    <td class="hsl-col-major">{{ candidate?.nganh_dangky}}</td>
+                    <td class="hsl-col-birthday">{{ formatBirthday(candidate?.ngay_sinh) }}</td>
+                    <td class="hsl-col-phone">{{ candidate?.dien_thoai || '---' }}</td>
+                    <td class="hsl-col-cccd">{{ candidate?.cccd || '---' }}</td>
+                    <td class="hsl-col-email">{{ candidate?.email || '---' }}</td>
+                    <td class="hsl-col-birthplace">{{ getNoiSinhLabel(candidate?.noi_sinh) }}</td>
+                    <td class="hsl-col-ethnicity">{{ candidate?.dan_toc || '---' }}</td>
+                    <td class="hsl-col-target">{{ getDoiTuongLabel(candidate?.doituong) }}</td>
+                    <td class="hsl-col-actions text-center">
+                        @if (isAdmin) {
+                        <button type="button" (click)="removeAssigned(row)" [disabled]="removeLoading"
+                            class="btn ictu-button-danger-light hsl-delete-row" mat-flat-button
+                            tooltip="Xóa khỏi hội đồng" aria-label="Xóa hồ sơ khỏi hội đồng">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                        }
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td [attr.colspan]="permission?.canDelete ? 12 : 11" class="hsl-empty">Hội đồng chưa có hồ sơ nào.
+                        Nhấn "Gán hồ sơ" để bắt đầu.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-        <div class="hsl-paginator">
-            <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)" style="--ictu-paginator-gap:10px"></ictu-paginator>
-        </div>
+    <div class="hsl-paginator">
+        <ictu-paginator [control]="dataTable.paginator" (onChangePage)="onChangePage($event)"
+            style="--ictu-paginator-gap:10px"></ictu-paginator>
+    </div>
     } @else {
-        <div class="hsl-error text-center w-100">Tải dữ liệu thất bại. Vui lòng
-            <a (click)="reload($event); $event.preventDefault()" href="#" role="button" class="hsl-error__link">tải lại</a>
-        </div>
+    <div class="hsl-error text-center w-100">Tải dữ liệu thất bại. Vui lòng
+        <a (click)="reload($event); $event.preventDefault()" href="#" role="button" class="hsl-error__link">tải lại</a>
+    </div>
     }
 </div>
 
-<p-dialog
-    [(visible)]="assignDialogVisible"
-    [modal]="true"
-    [style]="{ width: '1024px', maxWidth: '100%' }"
-    [closable]="true"
-    [draggable]="false"
-    [resizable]="false"
-    styleClass="hsl-assign-dialog">
+<p-dialog [(visible)]="assignDialogVisible" [modal]="true" [style]="{ width: '1024px', maxWidth: '100%' }"
+    [closable]="true" [draggable]="false" [resizable]="false" styleClass="hsl-assign-dialog">
     <ng-template #header>
         <div class="hsl-assign__header">
             <span class="hsl-assign__title">Gán hồ sơ thí sinh vào hội đồng</span>
             <div class="hsl-assign__filters">
-                <input
-                    [(ngModel)]="assignSearch"
-                    (keyup.enter)="onAssignSearch()"
-                    class="hsl-assign__search"
-                    pInputText
-                    placeholder="Tìm theo tên..."
-                    type="text" />
-                <mat-checkbox
-                    [checked]="assignIncludeCurrentRound"
+                <div style="max-width: 200px;">
+                    <p-select class="w-100"  [options]="majorOptions()" appendTo="body" placeholder="Chọn ngành"
+                        (onChange)="changeNganh($event)" optionLabel="label" optionValue="value" [showClear]="true" />
+                </div>
+
+
+                <input [(ngModel)]="assignSearch" (keyup.enter)="onAssignSearch()" class="hsl-assign__search" pInputText
+                    placeholder="Tìm theo tên..." type="text" />
+                <mat-checkbox [checked]="assignIncludeCurrentRound"
                     (change)="onAssignRoundFilterChange($event.checked)">
                     Thêm đợt hội đồng
                 </mat-checkbox>
@@ -137,66 +120,61 @@
     </ng-template>
     <div class="hsl-assign">
         @if (assignLoading) {
-            <app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
+        <app-loading-progress heading="Đang tải..." backdropFilter="none"></app-loading-progress>
         } @else {
-            <div class="hsl-assign__table-wrap">
-                <table class="hsl-assign__table">
-                    <thead>
-                        <tr>
-                            <th class="hsl-assign__col-check">
-                                <mat-checkbox
-                                    [checked]="allCandidatesChecked()"
-                                    [indeterminate]="selectedAssignIds.size > 0 && !allCandidatesChecked()"
-                                    (change)="toggleSelectAllCandidates()" />
-                            </th>
-                            <th class="hsl-assign__col-name">Họ tên</th>
-                            <th class="hsl-assign__col-major">Ngành học</th>
-                            <th class="hsl-assign__col-birthday">Ngày sinh</th>
-                            <th class="hsl-assign__col-phone">Số điện thoại</th>
-                            <th class="hsl-assign__col-cccd">Số CCCD</th>
-                            <th class="hsl-assign__col-target">Đối tượng</th>
-                            <th class="hsl-assign__col-birthplace">Nơi sinh</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (c of assignCandidates; track c.id) {
-                            <tr>
-                                <td class="hsl-assign__col-check">
-                                    <mat-checkbox
-                                        [checked]="isCandidateSelected(c.id)"
-                                        (change)="toggleCandidate(c.id)" />
-                                </td>
-                                <td class="hsl-assign__col-name">{{ c.ho_va_ten }}</td>
-                                <td class="hsl-assign__col-major">{{ getMajorLabel(c.nganh_id) }}</td>
-                                <td class="hsl-assign__col-birthday">{{ formatBirthday(c.ngay_sinh) }}</td>
-                                <td class="hsl-assign__col-phone">{{ c.dien_thoai || '---' }}</td>
-                                <td class="hsl-assign__col-cccd">{{ c.cccd || '---' }}</td>
-                                <td class="hsl-assign__col-target">{{ getDoiTuongLabel(c.doituong) }}</td>
-                                <td class="hsl-assign__col-birthplace">{{ getNoiSinhLabel(c.noi_sinh) }}</td>
-                            </tr>
-                        } @empty {
-                            <tr>
-                                <td colspan="8" class="hsl-assign__empty">Không còn thí sinh nào để gán.</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <small class="hsl-assign__hint">Đã chọn <strong>{{ selectedAssignIds.size }}</strong> / {{ assignCandidates.length }} thí sinh.</small>
+        <div class="hsl-assign__table-wrap">
+            <table class="hsl-assign__table">
+                <thead>
+                    <tr>
+                        <th class="hsl-assign__col-check">
+                            <mat-checkbox [checked]="allCandidatesChecked()"
+                                [indeterminate]="selectedAssignIds.size > 0 && !allCandidatesChecked()"
+                                (change)="toggleSelectAllCandidates()" />
+                        </th>
+                        <th class="hsl-assign__col-name">Họ tên</th>
+                        <th class="hsl-assign__col-major">Ngành học</th>
+                        <th class="hsl-assign__col-birthday">Ngày sinh</th>
+                        <th class="hsl-assign__col-phone">Số điện thoại</th>
+                        <th class="hsl-assign__col-cccd">Số CCCD</th>
+                        <th class="hsl-assign__col-target">Đối tượng</th>
+                        <th class="hsl-assign__col-birthplace">Nơi sinh</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (c of assignCandidates; track c.id) {
+                    <tr>
+                        <td class="hsl-assign__col-check">
+                            <mat-checkbox [checked]="isCandidateSelected(c.id)" (change)="toggleCandidate(c.id)" />
+                        </td>
+                        <td class="hsl-assign__col-name">{{ c.ho_va_ten }}</td>
+                        <td class="hsl-assign__col-major">{{ c.nganh_dangky }}</td>
+                        <td class="hsl-assign__col-birthday">{{ formatBirthday(c.ngay_sinh) }}</td>
+                        <td class="hsl-assign__col-phone">{{ c.dien_thoai || '---' }}</td>
+                        <td class="hsl-assign__col-cccd">{{ c.cccd || '---' }}</td>
+                        <td class="hsl-assign__col-target">{{ getDoiTuongLabel(c.doituong) }}</td>
+                        <td class="hsl-assign__col-birthplace">{{ getNoiSinhLabel(c.noi_sinh) }}</td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="8" class="hsl-assign__empty">Không còn thí sinh nào để gán.</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <small class="hsl-assign__hint">Đã chọn <strong>{{ selectedAssignIds.size }}</strong> / {{
+            assignCandidates.length }} thí sinh.</small>
         }
     </div>
     <ng-template #footer>
         <div class="hsl-assign__footer">
             <button (click)="cancelAssign()" class="btn ictu-badge-btn--secondary" mat-flat-button>Hủy</button>
             @if (selectedAssignIds.size > 0) {
-                <button
-                    (click)="confirmAssign()"
-                    [disabled]="assignLoading"
-                    class="btn ictu-badge-btn--primary-reverse"
-                    mat-flat-button>
-                    <i class="ti ti-device-floppy"></i>
-                    Lưu lại ({{ selectedAssignIds.size }})
-                </button>
+            <button (click)="confirmAssign()" [disabled]="assignLoading" class="btn ictu-badge-btn--primary-reverse"
+                mat-flat-button>
+                <i class="ti ti-device-floppy"></i>
+                Lưu lại ({{ selectedAssignIds.size }})
+            </button>
             }
         </div>
     </ng-template>

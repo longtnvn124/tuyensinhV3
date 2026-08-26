@@ -23,12 +23,15 @@ import { DOI_TUONG } from '@utilities/syscats';
 import { Dialog } from 'primeng/dialog';
 import { InputText } from 'primeng/inputtext';
 import { catchError, filter, finalize, forkJoin, from, last, map, mergeMap, of, scan, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { Select } from "primeng/select";
+import { AuthenticationService } from '@app/services/authentication.service';
 
 @Component({
     selector: 'app-hoso-list',
     imports: [
-        Dialog, FormsModule, IctuPaginatorComponent, InputText, LoadingProgressComponent, MatButton, MatCheckbox,
-    ],
+    Dialog, FormsModule, IctuPaginatorComponent, InputText, LoadingProgressComponent, MatButton, MatCheckbox,
+    Select
+],
     templateUrl: './hoso-list.component.html',
     styleUrl: './hoso-list.component.css',
     standalone: true,
@@ -43,12 +46,13 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     dataTable: IctuDataTable<HoidongHosoThisinh> = new IctuDataTable<HoidongHosoThisinh>({ rows: 50 });
     private temp: IctuDataTablePaginatorInfo = { paged: 1, resetPaginator: true };
 
-    readonly majorOptions = signal<IctuDropdownOption<number>[]>([]);
+    readonly majorOptions = signal<IctuDropdownOption<string>[]>([]);
     readonly provinceOptions = signal<IctuDropdownOption<number>[]>([]);
 
     assignDialogVisible = false;
     assignLoading = false;
     assignSearch = '';
+    assignNganh :string = '';
     assignIncludeCurrentRound = true;
     assignCandidates: Registrations[] = [];
     selectedAssignIds: Set<number> = new Set<number>();
@@ -60,12 +64,15 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
     private readonly notification = inject(NotificationService);
+    private readonly auth = inject(AuthenticationService);
     private readonly dataLoad$ = new Subject<void>();
     private readonly candidateLoad$ = new Subject<void>();
     private readonly onDestroy$ = new Subject<void>();
 
 
     private readonly progress = new Subject<number>();
+
+    isAdmin :boolean = this.auth.userHasRole(['admin','direction','manager']);
 
     ngOnInit(): void {
         this.loadLookups();
@@ -161,6 +168,7 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     openAssignDialog(): void {
         if (!this._hoidong?.id) return;
         this.assignSearch = '';
+        this.assignNganh = '';
         this.assignIncludeCurrentRound = true;
         this.selectedAssignIds = new Set<number>();
         this.loadCandidates();
@@ -179,12 +187,46 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     loadCandidates(): void {
+       
         this.candidateLoad$.next();
         this.assignLoading = true;
-        this.registrationsService.load({
-            search: this.assignSearch.trim(),
-            dotxettuyen_id: this.assignIncludeCurrentRound ? this._hoidong?.dot_xettuyen_id : undefined,
-        }, { limit: -1, paged: 1 }).pipe(
+        // this.registrationsService.load({
+        //     search: this.assignSearch.trim(),
+        //     dotxettuyen_id: this.assignIncludeCurrentRound ? this._hoidong?.dot_xettuyen_id : undefined,
+        
+        // }, { limit: -1, paged: 1 })
+        
+        const conditon: IctuConditionParam[] = [
+            {
+                conditionName:'status',
+                condition:IctuQueryCondition.equal,
+                value: '2'
+            },
+        ]
+        if(this.assignIncludeCurrentRound){
+            conditon.push({
+                 conditionName:'dotxettuyen_id',
+                condition:IctuQueryCondition.equal,
+                value: this._hoidong?.dot_xettuyen_id.toString()
+            })
+        }
+        if(this.assignSearch){
+             conditon.push({
+                 conditionName:'ho_va_ten',
+                condition:IctuQueryCondition.like,
+                value: `%${this.assignSearch.trim()}%`
+            })
+        }
+        if(this.assignNganh){
+             conditon.push({
+                 conditionName:'nganh_dangky',
+                condition:IctuQueryCondition.like,
+                value: `%${this.assignNganh.trim()}%`
+            })
+        }
+
+        this.registrationsService.query(conditon, {limit: -1, paged: 1})
+        .pipe(
             takeUntil(this.candidateLoad$),
             takeUntil(this.onDestroy$),
         ).subscribe({
@@ -376,8 +418,8 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    getMajorLabel(majorId: number | undefined): string {
-        return this.majorOptions().find((item: IctuDropdownOption<number>): boolean => item.value === majorId)?.label ?? '---';
+    getMajorLabel(majorId: string | undefined): string {
+        return this.majorOptions().find((item: IctuDropdownOption<string>): boolean => item.value == majorId)?.label ?? '---';
     }
 
     formatBirthday(birthday: string | undefined): string {
@@ -401,8 +443,8 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
         const queryParams: IctuQueryParams = { limit: -1 };
         forkJoin({
             majors: this.nganhHocService.load({ search: '' }, queryParams).pipe(
-                map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: Nganhhoc): IctuDropdownOption<number> => ({ value: item.id, label: item.ten_nganh })),
+                map((response: DtoObject<Nganhhoc[]>): IctuDropdownOption<string>[] =>
+                    (response.data ?? []).map((item: Nganhhoc): IctuDropdownOption<string> => ({ value: item.ten_nganh, label: item.ten_nganh })),
                 ),
             ),
             provinces: this.locationService.queryLocation([], queryParams, 'regions').pipe(
@@ -419,6 +461,12 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
                 this.notification.toastError('Tải dữ liệu ngành học và nơi sinh thất bại');
             },
         });
+    }
+
+    changeNganh(event){
+        this.assignNganh = event.value ? event.value : '';
+         this.selectedAssignIds = new Set<number>();
+        this.loadCandidates();
     }
 
     ngOnDestroy(): void {

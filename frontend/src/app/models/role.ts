@@ -37,6 +37,7 @@ export type TrainingStaffRole = 'training_staff';
 export type ReviewerRole = 'reviewer';
 export type DoiTacRole = 'doi-tac';
 export type DoiTacCvRole = 'doi-tac-cv';
+export type DuyetHosoRole = 'duyet_hoso';
 
 export type SysRoleName =
 	| AdminRole
@@ -46,7 +47,8 @@ export type SysRoleName =
 	| TrainingStaffRole
 	| ReviewerRole
 	| DoiTacRole
-	| DoiTacCvRole;
+	| DoiTacCvRole
+	| DuyetHosoRole;
 
 export const APP_REDIRECT_LINKS: InjectionToken<Map<SysRoleName, string>> =
 	new InjectionToken<Map<SysRoleName, string>>('default redirect for each role');
@@ -56,12 +58,13 @@ export const createAppRedirectLinks: () => Map<SysRoleName, string> =
 		return new Map<SysRoleName, string>([
 			['admin', '/admin/dashboard'],
 			['direction', '/admin/dashboard'],
-			['manager', '/admin/hoso-tuyensinh'],
-			['staff', '/admin/hoso-tuyensinh'],
+			['manager', '/admin/dashboard'],
+			['staff', '/admin/hoso-them'],
 			['training_staff', '/admin/hoso-tuyensinh'],
-			['reviewer', '/admin/dashboard'],
-			['doi-tac', '/admin/hoso-tuyensinh'],
-			['doi-tac-cv', '/admin/hoso-tuyensinh']
+			['reviewer', '/admin/hoso/hoso-xettuyen'],
+			['doi-tac', '/admin/hoso-them'],
+			['doi-tac-cv', '/admin/hoso/hoso-xettuyen'],
+			['duyet_hoso', '/admin/hoso/hoso-xettuyen']
 		]);
 	};
 

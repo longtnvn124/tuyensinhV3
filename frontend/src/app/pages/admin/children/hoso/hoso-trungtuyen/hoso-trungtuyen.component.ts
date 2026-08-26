@@ -31,7 +31,7 @@ type DetailState = 'idle' | 'loading' | 'success' | 'error';
 interface HosoTrungTuyenSearchInfo {
     search: string;
     dotxettuyen_id?: number;
-    nganh_id?: number;
+    nganh_dangky?: string;
     cccd?: string;
     dia_chi_tinh?: number;
     noi_sinh?: number;
@@ -74,6 +74,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
     readonly dataTable = new IctuDataTable<Registrations>();
     readonly dots = signal<IctuDropdownOption<number>[]>([]);
     readonly majors = signal<IctuDropdownOption<number>[]>([]);
+    readonly majorFilterOptions = signal<IctuDropdownOption<string>[]>([]);
     readonly programs = signal<IctuDropdownOption<number>[]>([]);
     readonly tinhList = signal<IctuDropdownOption<number>[]>([]);
     readonly consultationDrawerVisible = signal(false);
@@ -253,7 +254,11 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
             next: ({ dots, majors, provinces }): void => {
                 this.dots.set(dots);
                 this.majors.set(majors);
-         
+                this.majorFilterOptions.set(majors.map((major): IctuDropdownOption<string> => ({
+                    value: major.label,
+                    label: major.label,
+                })));
+
                 this.tinhList.set(provinces);
             },
         });
@@ -279,8 +284,8 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         if (searchInfo.dotxettuyen_id) {
             conditions.push({ conditionName: 'dotxettuyen_id', value: `${searchInfo.dotxettuyen_id}`, condition: IctuQueryCondition.equal });
         }
-        if (searchInfo.nganh_id) {
-            conditions.push({ conditionName: 'nganh_id', value: `${searchInfo.nganh_id}`, condition: IctuQueryCondition.equal });
+        if (searchInfo.nganh_dangky) {
+            conditions.push({ conditionName: 'nganh_dangky', value: searchInfo.nganh_dangky, condition: IctuQueryCondition.equal });
         }
         if (searchInfo.cccd?.trim()) {
             conditions.push({ conditionName: 'cccd', value: `%${searchInfo.cccd.trim()}%`, condition: IctuQueryCondition.like });
@@ -328,7 +333,7 @@ export class HosoTrungtuyenComponent implements OnInit, OnDestroy, IctuBasePermi
         return {
             search: '',
             dotxettuyen_id: undefined,
-            nganh_id: undefined,
+            nganh_dangky: undefined,
             cccd: undefined,
             dia_chi_tinh: undefined,
             noi_sinh: undefined,

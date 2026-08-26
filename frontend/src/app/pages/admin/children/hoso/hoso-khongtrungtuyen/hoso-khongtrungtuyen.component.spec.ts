@@ -34,7 +34,10 @@ describe('HosoKhongtrungtuyenComponent', () => {
         });
         registrationsService.query.and.returnValue(of(emptyResponse));
         dotService.load.and.returnValue(of(emptyResponse));
-        nganhHocService.load.and.returnValue(of(emptyResponse));
+        nganhHocService.load.and.returnValue(of({
+            ...emptyResponse,
+            data: [{ id: 11, ten_nganh: 'Công nghệ thông tin', ma_nganh: '7480201', status: 1 }],
+        } as never));
         ctdtService.query.and.returnValue(of(emptyResponse));
         locationService.queryLocation.and.returnValue(of(emptyResponse));
 
@@ -84,6 +87,24 @@ describe('HosoKhongtrungtuyenComponent', () => {
         expect(conditions).toContain(jasmine.objectContaining({
             conditionName: 'status',
             value: 'KHONG_TRUNG_TUYEN',
+            condition: IctuQueryCondition.equal,
+        }));
+    });
+
+    it('filters by nganh_dangky using the selected ten_nganh', () => {
+        const component = createComponent(true);
+        component.ngOnInit();
+        component.searchInfo.nganh_dangky = 'Công nghệ thông tin';
+        registrationsService.query.calls.reset();
+
+        component.loadData();
+
+        const conditions = registrationsService.query.calls.mostRecent().args[0];
+        expect(component.majors()).toEqual([{ value: 11, label: 'Công nghệ thông tin' }]);
+        expect(component.majorFilterOptions()).toEqual([{ value: 'Công nghệ thông tin', label: 'Công nghệ thông tin' }]);
+        expect(conditions).toContain(jasmine.objectContaining({
+            conditionName: 'nganh_dangky',
+            value: 'Công nghệ thông tin',
             condition: IctuQueryCondition.equal,
         }));
     });

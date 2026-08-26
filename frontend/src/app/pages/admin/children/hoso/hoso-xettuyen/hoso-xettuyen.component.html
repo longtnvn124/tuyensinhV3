@@ -19,7 +19,9 @@
                 <p-select [options]="dots()" appendTo="body" [(ngModel)]="searchInfo.dotxettuyen_id"
                     placeholder="Đợt xét tuyển" class="filter-select" optionLabel="label" optionValue="value"
                     (onChange)="onSearch()" />
-                <!-- 
+
+
+                <!--
                 <button (click)="toggleAdvancedFilter()" mat-flat-button
                     class="btn ictu-badge-btn--secondary-reverse d-flex align-items-center gap-1">
                     @if (showAdvancedFilter()) { <i class="ti ti-chevron-up"></i> }
@@ -38,8 +40,9 @@
                                 </div>
                                 <div class="filter-panel__item">
                                     <label>Ngành</label>
-                                    <p-select [options]="majors()" appendTo="body" [(ngModel)]="searchInfo.nganh_id"
-                                        placeholder="Chọn ngành" optionLabel="label" optionValue="value" />
+                                    <p-select [options]="majorFilterOptions()" appendTo="body"
+                                        [(ngModel)]="searchInfo.nganh_dangky" placeholder="Chọn ngành"
+                                        optionLabel="label" optionValue="value" />
                                 </div>
                                 <div class="filter-panel__item">
                                     <label>Tỉnh/TP</label>
@@ -48,18 +51,13 @@
                                         optionLabel="label" optionValue="value" />
                                 </div>
                             </div>
+
+                            @if (!isduyethoso) {
+                                <mat-checkbox [checked]="onlyMyRecords()"
+                                    (change)="onOnlyMyRecordsChange($event.checked)">Hồ sơ xét duyệt</mat-checkbox>
+                            }
+
                             <div class="filter-panel__row">
-                                <div class="filter-panel__item">
-                                    <label>Nơi sinh</label>
-                                    <p-select [options]="tinhList()" appendTo="body" [(ngModel)]="searchInfo.noi_sinh"
-                                        placeholder="Chọn nơi sinh" optionLabel="label" optionValue="value"
-                                        [showClear]="true" />
-                                </div>
-                                <div class="filter-panel__item">
-                                    <label>Dân tộc</label>
-                                    <p-select [options]="danTocOptions" appendTo="body" [(ngModel)]="searchInfo.dan_toc"
-                                        placeholder="Chọn dân tộc" optionLabel="label" optionValue="value" />
-                                </div>
                                 <div class="filter-panel__item filter-panel__item--actions">
                                     <button (click)="applyFilter()" class="btn ictu-badge-btn--primary-reverse"
                                         mat-flat-button>
@@ -84,10 +82,18 @@
                     [attr.aria-label]="exportLoading() ? 'Đang xuất dữ liệu' : 'Xuất dữ liệu'"
                     [attr.title]="exportLoading() ? 'Đang xuất dữ liệu' : 'Xuất dữ liệu'" mat-flat-button
                     class="btn ictu-badge-btn--primary-reverse">
-                    <i class="ti ti-file-export" [class.ti-loader]="exportLoading()" [class.ti-download]="!exportLoading()"
-                        aria-hidden="true"></i>
+                    <i class="ti ti-file-export" [class.ti-loader]="exportLoading()"
+                        [class.ti-download]="!exportLoading()" aria-hidden="true"></i>
                 </button>
                 }
+
+                @if (isAdmin) {
+                <button mat-flat-button class="" (click)="openFormDuyet()">
+                    <i class="ti ti-adjustments-horizontal"></i> Chọn cb duyệt
+                </button>
+                }
+
+
             </div>
         </div>
 
@@ -102,16 +108,20 @@
                                 <mat-checkbox [checked]="dataTable.totalChecked()"
                                     [indeterminate]="dataTable.partiallyChecked()"
                                     (change)="dataTable.selectRow($event.checked)"
-                                    [disabled]="!dataTable.data().length || !permissionControl().canDelete"></mat-checkbox>
+                                    [disabled]="!dataTable.data().length || !permissionControl().canUpdate"></mat-checkbox>
                             </th>
                             <th class="col-index text-center col-sticky col-sticky--index">#</th>
                             <th class="text-left col-name col-sticky col-sticky--name">Họ tên</th>
                             <th class="text-left col-cccd col-sticky col-sticky--cccd">CCCD</th>
                             <th class="text-left col-phone col-sticky col-sticky--phone">SĐT</th>
                             <th class="text-center col-status">Trạng thái</th>
+                            @if (isAdmin) {
+                            <th class="text-left col-owner">Người sở hữu hồ sơ</th>
+                            <th class="text-left col-reviewer">Người duyệt</th>
+                            }
+
                             <th class="text-left col-email">Email</th>
                             <th class="text-left col-major">Ngành</th>
-
                             <th class="text-left col-dot">Đợt ĐK</th>
                             <th class="text-left col-tinh">Tỉnh/TP</th>
                             <th class="text-left col-noi-sinh">Nơi sinh</th>
@@ -124,7 +134,7 @@
                             <td class="col-checkbox col-sticky col-sticky--checkbox">
                                 <mat-checkbox [checked]="row._ictuDataTableRowChecked"
                                     (change)="dataTable.selectRow($event.checked, i)"
-                                    [disabled]="!permissionControl().canDelete"></mat-checkbox>
+                                    [disabled]="!permissionControl().canUpdate"></mat-checkbox>
                             </td>
                             <td class="col-index text-center col-sticky col-sticky--index">{{
                                 dataTable.paginator.startIndex() + i }}</td>
@@ -175,8 +185,13 @@
                                 <span class="ictu-badge {{ statusBadgeClass(row.status) }}">{{ statusLabel(row.status)
                                     }}</span>
                             </td>
+                            @if (isAdmin) {
+                            <td class="text-left col-owner">{{ userLabel(row.owner_by) }}</td>
+                            <td class="text-left col-reviewer">{{ userLabel(row.nguoi_tuvan) }}</td>
+                            }
                             <td class="text-left col-email">{{ row.email || '—' }}</td>
-                            <td class="text-left col-major">{{ majorLabel(row.nganh_id) }}</td>
+                            <td class="text-left col-major">{{ row['nganh_dangky'] }}</td>
+
                             <td class="text-left col-dot">{{ dotLabel(row.dotxettuyen_id) }}</td>
                             <td class="text-left col-tinh">{{ tinhLabel(row.dia_chi_tinh) }}</td>
                             <td class="text-left col-noi-sinh">{{ tinhLabel(row.noi_sinh) }}</td>
@@ -184,7 +199,7 @@
                         </tr>
                         } @empty {
                         <tr>
-                            <td [colSpan]="13">Không có bản ghi nào.</td>
+                            <td [colSpan]="isAdmin ? 14 : 12">Không có bản ghi nào.</td>
                         </tr>
                         }
                     </tbody>
@@ -401,8 +416,7 @@
 <p-drawer [(visible)]="consultationDrawerVisible" [dismissible]="true"
     [header]="selectedConsultationHoso()?.ho_va_ten ?? 'Quá trình tư vấn'"
     [style]="{'width':'600px', 'max-width':'100%'}" appendTo="body" position="right" styleClass="ictu-p-drawer">
-    <app-tuvan-tuyensinh [hoso]="selectedConsultationHoso()"
-        [readOnly]="!permissionControl().canUpdate" />
+    <app-tuvan-tuyensinh [hoso]="selectedConsultationHoso()" [readOnly]="!permissionControl().canUpdate" />
 </p-drawer>
 
 <!-- ── Drawer: Xem hồ sơ ── -->
@@ -460,6 +474,32 @@
         <div class="ictu-p-drawer__content__footer">
             <button (click)="viewDetailVisible.set(false)" class="btn ictu-badge-btn--secondary"
                 mat-flat-button>Đóng</button>
+        </div>
+    </div>
+</p-drawer>
+
+<p-drawer [visible]="addDuyetVisible()" (visibleChange)="addDuyetVisible.set($event)" [dismissible]="!reviewerSaving()"
+    [style]="{'width':'520px', 'max-width':'100%'}" appendTo="body" position="right" header="Chọn cán bộ duyệt"
+    (onHide)="closeReviewerAssignment()">
+    <div class="ictu-p-drawer__content position-relative">
+        @if (reviewerLoading()) {
+        <app-loading-progress heading="Đang tải danh sách cán bộ..." backdropFilter="none"></app-loading-progress>
+        }
+        <div class="ictu-p-drawer__content__body">
+            <p>Đang gán cán bộ duyệt cho <strong>{{ selectedReviewerRecords().length }}</strong> hồ sơ.</p>
+            <label class="ictu-form__label" for="reviewer-select">Cán bộ duyệt</label>
+            <p-select inputId="reviewer-select" class="w-100" [options]="reviewerOptions()"
+                [ngModel]="selectedReviewerId()" (ngModelChange)="selectedReviewerId.set($event)"
+                optionLabel="display_name" optionValue="id" placeholder="Chọn cán bộ duyệt" appendTo="body"
+                [loading]="reviewerLoading()" [disabled]="reviewerLoading() || reviewerSaving()" />
+        </div>
+        <div class="ictu-p-drawer__content__footer">
+            <button mat-flat-button class="btn ictu-badge-btn--secondary" (click)="closeReviewerAssignment()"
+                [disabled]="reviewerSaving()">Hủy</button>
+            <button mat-flat-button class="btn ictu-badge-btn--primary-reverse" (click)="saveReviewerAssignments()"
+                [disabled]="!selectedReviewerId() || reviewerLoading() || reviewerSaving()">
+                {{ reviewerSaving() ? 'Đang lưu...' : 'Lưu' }}
+            </button>
         </div>
     </div>
 </p-drawer>

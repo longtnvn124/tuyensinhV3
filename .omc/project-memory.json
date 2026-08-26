@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1787622742331,
+  "lastScanned": 1787712939505,
   "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1787622742309,
+      "lastAccessed": 1787712939475,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1787622742310,
+      "lastAccessed": 1787712939476,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,7 +56,7 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1787622742310,
+      "lastAccessed": 1787712939476,
       "keyFiles": [
         "api-outsite.md",
         "chuanhoa-database.md",
@@ -69,33 +69,33 @@
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1787622742311,
+      "lastAccessed": 1787712939477,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 350,
-      "lastAccessed": 1787642411651,
+      "accessCount": 367,
+      "lastAccessed": 1787729553334,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app",
-      "accessCount": 306,
-      "lastAccessed": 1787649792727,
+      "accessCount": 342,
+      "lastAccessed": 1787755309612,
       "type": "directory"
     },
     {
       "path": "",
-      "accessCount": 302,
-      "lastAccessed": 1787649469584,
+      "accessCount": 322,
+      "lastAccessed": 1787737839800,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
-      "accessCount": 271,
-      "lastAccessed": 1787624671970,
+      "accessCount": 272,
+      "lastAccessed": 1787736598813,
       "type": "file"
     },
     {
@@ -123,16 +123,16 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso",
+      "accessCount": 59,
+      "lastAccessed": 1787749194814,
+      "type": "directory"
+    },
+    {
       "path": "frontend\\src\\app\\components\\ovic-avata-type-multiple\\ovic-avata-type-multiple.component.ts",
       "accessCount": 56,
       "lastAccessed": 1786524512578,
       "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\pages\\admin\\children\\hoso",
-      "accessCount": 56,
-      "lastAccessed": 1787624084471,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.html",
@@ -141,16 +141,16 @@
       "type": "file"
     },
     {
-      "path": "frontend",
-      "accessCount": 35,
-      "lastAccessed": 1787650284712,
-      "type": "directory"
+      "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
+      "accessCount": 38,
+      "lastAccessed": 1787737235151,
+      "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
-      "accessCount": 34,
-      "lastAccessed": 1787243861784,
-      "type": "file"
+      "path": "frontend",
+      "accessCount": 37,
+      "lastAccessed": 1787749254940,
+      "type": "directory"
     },
     {
       "path": "plan\\database.md",
@@ -190,9 +190,15 @@
     },
     {
       "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
-      "accessCount": 20,
-      "lastAccessed": 1787586050585,
+      "accessCount": 21,
+      "lastAccessed": 1787731540833,
       "type": "file"
+    },
+    {
+      "path": "frontend\\src\\app\\models",
+      "accessCount": 19,
+      "lastAccessed": 1787737754314,
+      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\hoso-them\\hoso-them.component.css",
@@ -211,12 +217,6 @@
       "accessCount": 17,
       "lastAccessed": 1787219398423,
       "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\models",
-      "accessCount": 16,
-      "lastAccessed": 1786957009374,
-      "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\models\\dto.ts",

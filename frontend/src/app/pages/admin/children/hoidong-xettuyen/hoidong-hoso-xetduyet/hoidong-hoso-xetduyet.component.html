@@ -48,7 +48,7 @@
                                                 [disabled]="!hasSelection() || actionLoading()"
                                                 (click)="batchActions.hide(); onApproveSelected()">
                                                 <i class="ti ti-circle-check" aria-hidden="true"></i>
-                                                <span>Duyệt hồ sơ</span>
+                                                <span>Trúng tuyển</span>
                                             </button>
                                         </li>
                                         <li>
@@ -58,7 +58,7 @@
                                                 [disabled]="!hasSelection() || actionLoading()"
                                                 (click)="batchActions.hide(); onCancelApprovalSelected()">
                                                 <i class="ti ti-circle-x" aria-hidden="true"></i>
-                                                <span>Hủy duyệt hồ sơ</span>
+                                                <span>Không trúng tuyển</span>
                                             </button>
                                         </li>
                                     </ul>
@@ -115,7 +115,7 @@
                                                 <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id) }}</strong>
                                                 <small>Mã hồ sơ: {{ row['_hoso']['ma_hoso'] ? row['_hoso']['ma_hoso'] : row.tuyensinh_id }}</small>
                                             </td>
-                                            <td>{{ getMajorLabel(candidate?.nganh_id) }}</td>
+                                            <td>{{ candidate?.nganh_dangky}}</td>
                                             <td>{{ getProvinceLabel(candidate?.dia_chi_tinh) }}</td>
                                             <td>{{ formatDate(candidate?.ngay_sinh) }}</td>
                                             <td>{{ candidate?.dien_thoai || '---' }}</td>

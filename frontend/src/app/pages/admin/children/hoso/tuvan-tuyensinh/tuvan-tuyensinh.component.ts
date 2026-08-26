@@ -30,6 +30,7 @@ interface ConsultationMethod {
     imports: [LoadingProgressComponent, ReactiveFormsModule, Select, Textarea, DatePicker, Date2textPipe, ButtonDirective, Ripple],
     templateUrl: './tuvan-tuyensinh.component.html',
     styleUrl: './tuvan-tuyensinh.component.css',
+    standalone: true
 })
 export class TuvanTuyensinhComponent implements OnDestroy {
     private readonly formBuilder = inject(FormBuilder);

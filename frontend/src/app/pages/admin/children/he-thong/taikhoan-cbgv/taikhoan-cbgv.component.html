@@ -12,6 +12,11 @@
                 Danh sách cán bộ - giảng viên
             </h4>
             <div class="admin-wrap-table__head-actions">
+                @if (isAdmin()) {
+                <p-select [(ngModel)]="searchInfo.donvi_id" [options]="listDonvi" appendTo="body"
+                    placeholder="Chọn đơn vị" optionLabel="title" optionValue="id" [showClear]="true"
+                    (onChange)="onDonviChange()"></p-select>
+                }
                 <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText
                     placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearch()">
                 @if (permissionControl().canDelete) {
@@ -43,6 +48,9 @@
                         <th class="text-left">Email</th>
                         <th class="text-left">Số điện thoại</th>
                         <th class="text-left">Vai trò</th>
+                        @if (isAdmin()) {
+                        <th class="text-left">Đơn vị</th>
+                        }
 
                         @if (isDoitac()) {
                         <th class="text-left">Người sở hữu</th>
@@ -71,6 +79,9 @@
                             <span class="text-muted">—</span>
                             }
                         </td>
+                        @if (isAdmin()) {
+                        <td class="text-left">{{ getDonviTitle(row.donvi_id) }}</td>
+                        }
 
                         @if (isDoitac()) {
                         <td class="text-left">{{ row['_parent'] }}</td>
@@ -197,6 +208,17 @@
 
                     @if (isAdmin()) {
                     <div class="ictu-form__row">
+                        <label class="ictu-form__label ictu-form__label--required" for="cbgv_donvi_id">Đơn vị</label>
+                        <p-select appendTo="body" class="ictu-form__input-field" formControlName="donvi_id"
+                            inputId="cbgv_donvi_id" placeholder="Chọn đơn vị" [options]="listDonvi"
+                            optionLabel="title" optionValue="id" [filter]="true"></p-select>
+                        @if (formControl.formGroup.get('donvi_id')?.invalid &&
+                        formControl.formGroup.get('donvi_id')?.touched) {
+                        <small class="ictu-form__error">Vui lòng chọn đơn vị</small>
+                        }
+                    </div>
+
+                    <div class="ictu-form__row">
                         <label class="ictu-form__label ictu-form__label--required" for="cbgv_role_ids">Vai trò</label>
                         <p-multiselect appendTo="body" class="ictu-form__input-field" formControlName="role_ids"
                             inputId="cbgv_role_ids" placeholder="Chọn vai trò" [options]="dataRoles" optionLabel="title"
@@ -206,10 +228,6 @@
                         <small class="ictu-form__error">Vui lòng chọn ít nhất 1 vai trò</small>
                         }
                     </div>
-                    }
-
-                    @if(isDoitac()){
-                        
                     }
 
                 </div>

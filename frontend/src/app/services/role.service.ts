@@ -6,6 +6,7 @@ import {
 } from '@models/dto';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { UseCasePermission } from '@models/role';
 
 export interface SimpleRole {
     id: number;
@@ -13,6 +14,10 @@ export interface SimpleRole {
     title: string;
     description?: string;
     ordering?: number;
+}
+
+export interface RoleWithPermissions extends SimpleRole {
+    ucase_ids: UseCasePermission[];
 }
 
 export type PickRole = Pick<SimpleRole, 'id' | 'name' | 'title' | 'description'>;
@@ -49,6 +54,20 @@ export class RoleService extends IctuBaseServiceClass<SimpleRole> {
         );
     }
 
-
-    
+    loadWithPermissions(): Observable<RoleWithPermissions[]> {
+        return this.query([], {
+            limit: 100,
+            paged: 1,
+            order: 'ASC',
+            orderby: 'ordering',
+            select: 'id,name,title,description,ucase_ids',
+        }).pipe(
+            map((response: DtoObject<SimpleRole[]>): RoleWithPermissions[] =>
+                (response.data ?? []).map((role: SimpleRole): RoleWithPermissions => ({
+                    ...role,
+                    ucase_ids: (role as RoleWithPermissions).ucase_ids ?? [],
+                })),
+            ),
+        );
+    }
 }

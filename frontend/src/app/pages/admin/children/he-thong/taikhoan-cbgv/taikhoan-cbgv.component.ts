@@ -10,6 +10,7 @@ import { AbstractControl, FormBuilder, FormsModule, ReactiveFormsModule, Validat
 import { Drawer } from 'primeng/drawer';
 import { InputText } from 'primeng/inputtext';
 import { MultiSelect } from 'primeng/multiselect';
+import { Select } from 'primeng/select';
 import { IctuFormControl2 } from '@models/ictu-form-control';
 import { DataTableEvent, DataTableEventName, IctuDataTable, IctuDataTablePaginatorInfo } from '@models/datatable';
 import { filter, finalize, forkJoin, map, Observable, of, Subject, switchMap, takeUntil } from 'rxjs';
@@ -22,19 +23,23 @@ import { LoadingProgressComponent } from '@theme/components/loading-progress/loa
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { IctuPaginatorControl } from '@app/theme/components/ictu-paginator/ictu-paginator-control';
+import { DonVi, DonviService } from '@app/services/donvi.service';
 
 type CbgvUser = User;
 
 @Component({
     selector: 'app-taikhoan-cbgv',
-    imports: [Drawer, IctuPaginatorComponent, InputText, LoadingProgressComponent, MatButton, MatCheckbox, MultiSelect, ReactiveFormsModule, FormsModule],
+    imports: [Drawer, IctuPaginatorComponent, InputText, LoadingProgressComponent, MatButton, MatCheckbox, MultiSelect, Select, ReactiveFormsModule, FormsModule],
     templateUrl: './taikhoan-cbgv.component.html',
     styleUrl: './taikhoan-cbgv.component.css',
     standalone: true,
 })
 export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBasePermission {
 
-    searchInfo: { search: string } = { search: '' };
+    searchInfo: { search: string; donvi_id: number | null } = {
+        search: '',
+        donvi_id: null,
+    };
     dataTable: IctuDataTable<CbgvUser> = new IctuDataTable<CbgvUser>();
     dataRoles: PickRole[] = [];
     dataUsersDrd : User[]= [];
@@ -46,12 +51,15 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
     private temp: IctuDataTablePaginatorInfo = { paged: 1, resetPaginator: true };
     showPassword = false;
 
+    listDonvi:DonVi[] = [];
+
     togglePassword(): void {
         this.showPassword = !this.showPassword;
     }
 
     private userService = inject(UserService);
     private roleService = inject(RoleService);
+    private donviService = inject(DonviService);
   
     private auth = inject(AuthenticationService);
     private notification = inject(NotificationService);
@@ -72,6 +80,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
     readonly doiTacRoleIds: SysRoleName[] = ['doi-tac', 'doi-tac-cv'];
 
     constructor() {
+        // this.searchInfo.donvi_id = this.auth.user.donvi_id;
         this.formControl = new IctuFormControl2<CbgvUser>({
             dropdownFields: [],
             formGroup: this.fb.group({
@@ -81,7 +90,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                 phone: ['', [Validators.required]],
                 password: ['', [Validators.minLength(8)]],
                 role_ids: [[] as number[], [Validators.required]],
-              
+                donvi_id: [null as number | null, this.isAdmin() ? [Validators.required] : []],
             }),
             objectName: 'cán bộ - giảng viên',
             drawer: this.drawer,
@@ -99,6 +108,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                     phone: '',
                     password: '',
                     role_ids: roleIds,
+                    donvi_id: this.isDoitac() ? this.auth.user.donvi_id : null,
                 });
                 this.formControl.formGroup.get('username')?.enable();
                 this.formControl.formGroup.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
@@ -109,6 +119,11 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                 const roleIds: number[] = (data.role_ids || [])
                     .map(r => Number(r))
                     .filter(n => !isNaN(n));
+                const donviId = this.isDoitac()
+                    ? this.auth.user.donvi_id
+                    : this.listDonvi.some(({ id }: DonVi): boolean => id === data.donvi_id)
+                        ? data.donvi_id
+                        : null;
                 this.formControl.formGroup.reset({
                     username: data.username,
                     display_name: data.display_name,
@@ -116,6 +131,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                     phone: data.phone,
                     password: '',
                     role_ids: roleIds,
+                    donvi_id: donviId,
                 });
                 this.formControl.formGroup.get('username')?.disable();
                 this.formControl.formGroup.get('password')?.setValidators([Validators.minLength(8)]);
@@ -138,6 +154,9 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                         email: this.formField('email').value,
                         phone: this.formField('phone').value,
                         role_ids: (this.formField('role_ids').value as number[]).map(id => id.toString()),
+                        donvi_id: this.isDoitac()
+                            ? this.auth.user.donvi_id
+                            : this.formField('donvi_id').value,
                     };
 
                     const password: string = this.formField('password').value;
@@ -180,20 +199,29 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
     private loadInitial(): void {
         this.notification.isProcessing(true);
 
+        const conditions: IctuConditionParam[] = [
+            { conditionName: 'status', condition: IctuQueryCondition.notEqual, value: '-1', orWhere: 'and' },
+            { conditionName: 'parent_id', condition: IctuQueryCondition.equal, value: this.auth.user.donvi_id.toString(), orWhere: 'and' },
+        ];
 
         forkJoin({
             roles: this.roleService.load(),
-            users: this.userService.query([],{paged: 1, limit: -1,select: 'id,username,display_name,email'}),
+            users: this.userService.query([], { paged: 1, limit: -1, select: 'id,username,display_name,email' }),
+            donvi: this.isAdmin()
+                ? this.donviService.query(conditions, { limit: -1 }).pipe(
+                    map(({ data }: DtoObject<DonVi[]>): DonVi[] => data),
+                )
+                : of([] as DonVi[]),
         })
             .pipe(
                 takeUntil(this.onDestroy$),
                 finalize(() => this.notification.isProcessing(false)),
             )
             .subscribe({
-                next: ({ roles, users }: { roles: PickRole[]; users: DtoObject<User[]> }): void => {
+                next: ({ roles, users, donvi }: { roles: PickRole[]; users: DtoObject<User[]>; donvi: DonVi[] }): void => {
+                    this.listDonvi = donvi;
                     this.dataRoles = roles;
                     this.dataUsersDrd = users.data;
-                    
                     this.loadData(1, true);
                 },
                 error: (): void => {
@@ -204,7 +232,6 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
     ngOnInit(): void {
 
-        console.log(this.isAdmin(),this.isDoitac());
         
         this.loadInitial();
     }
@@ -243,12 +270,19 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
             });
         }
 
-        if(this.isDoitac()) {
+        if (this.isDoitac()) {
             conditions.push({
                 conditionName: 'created_by',
                 value: this.auth.user.id.toString(),
                 condition: IctuQueryCondition.equal,
-                orWhere: 'and'
+                orWhere: 'and',
+            });
+        } else if (this.isAdmin() && this.searchInfo.donvi_id) {
+            conditions.push({
+                conditionName: 'donvi_id',
+                value: this.searchInfo.donvi_id.toString(),
+                condition: IctuQueryCondition.equal,
+                orWhere: 'and',
             });
         }
 
@@ -312,6 +346,14 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
     onSearch(): void {
         this.loadData(1, true);
+    }
+
+    onDonviChange(): void {
+        this.loadData(1, true);
+    }
+
+    getDonviTitle(donviId: number): string {
+        return this.listDonvi.find(({ id }: DonVi): boolean => id === donviId)?.title ?? '—';
     }
 
     onChangePage(paged: number): void {

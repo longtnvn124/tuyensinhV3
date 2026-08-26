@@ -70,7 +70,7 @@
                                     </div>
                                     <div class="filter-panel__item">
                                         <label>Ngành</label>
-                                        <p-select [options]="majors()" appendTo="body" [(ngModel)]="searchInfo.nganh_id"
+                                        <p-select [options]="majorFilterOptions()" appendTo="body" [(ngModel)]="searchInfo.nganh_dangky"
                                             placeholder="Chọn ngành" optionLabel="label" optionValue="value" [showClear]="true" />
                                     </div>
                                     <div class="filter-panel__item">
@@ -160,7 +160,7 @@
                                             <span class="ictu-badge {{ statusBadgeClass(row.status) }}">{{ statusLabel(row.status) }}</span>
                                         </td>
                                         <td class="text-left col-email">{{ row.email || '—' }}</td>
-                                        <td class="text-left col-major">{{ majorLabel(row.nganh_id) }}</td>
+                                        <td class="text-left col-major">{{ row.nganh_dangky }}</td>
                             
                                         <td class="text-left col-dot">{{ dotLabel(row.dotxettuyen_id) }}</td>
                                         <td class="text-left col-tinh">{{ tinhLabel(row.dia_chi_tinh) }}</td>

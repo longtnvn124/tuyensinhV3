@@ -26,8 +26,8 @@ import { Nganhhoc } from '@app/models/tuyensinh/nganhhoc';
 import { ChuongtrinhDaotao } from '@app/models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
 import {
-    HosoCheckCccdResult,
-    HosoThisinhSearchInfo,
+    RegistrationCheckCccdResult,
+    RegistrationSearchInfo,
     RegistrationsService,
 } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
@@ -101,11 +101,11 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
 
     // ── Master state ────────────────────────────────────────────
 
-    masterSearchInfo: HosoThisinhSearchInfo = {
+    masterSearchInfo: RegistrationSearchInfo = {
         search: '',
         status: undefined,
         dotxettuyen_id: undefined,
-        nganh_id: undefined,
+        nganh_dangky: undefined,
         nguoi_tuvan: undefined,
     };
     masterDataTable: IctuDataTable<Registrations> = new IctuDataTable<Registrations>();
@@ -115,6 +115,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     // ── Lookups ─────────────────────────────────────────────────
 
     majors: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
+    majorFilterOptions: WritableSignal<IctuDropdownOption<string>[]> = signal<IctuDropdownOption<string>[]>([]);
     programs: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
     dots: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
 
@@ -126,7 +127,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
     cccdDialogVisible: boolean = false;
     cccdInput: string = '';
     cccdLoading: boolean = false;
-    cccdResult: HosoCheckCccdResult | null = null;
+    cccdResult: RegistrationCheckCccdResult | null = null;
 
     // ── Drawer form ────────────────────────────────────────────
 
@@ -288,6 +289,10 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
             .subscribe({
                 next: ({ majors, programs, dots, listTinh, listXaphuong }) => {
                     this.majors.set(majors);
+                    this.majorFilterOptions.set(majors.map((major): IctuDropdownOption<string> => ({
+                        value: major.label,
+                        label: major.label,
+                    })));
                     this.programs.set(programs);
                     this.dots.set(dots);
                     this.listTinh.set(listTinh);
@@ -420,7 +425,7 @@ export class HosoTuyensinhComponent implements OnInit, OnDestroy, IctuBasePermis
         }
         this.cccdLoading = true;
         this.registrationsService.checkCccd(cccd).subscribe({
-            next: (res: HosoCheckCccdResult) => {
+            next: (res: RegistrationCheckCccdResult) => {
                 this.cccdLoading = false;
                 this.cccdResult = res;
 

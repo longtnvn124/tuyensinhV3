@@ -10,7 +10,7 @@ export interface RegistrationSearchInfo {
     search: string;
     status?: RegistrationStatus;
     dotxettuyen_id?: number;
-    nganh_id?: number;
+    nganh_dangky?: string;
     nguoi_tuvan?: number;
 }
 
@@ -78,10 +78,10 @@ export class RegistrationsService extends IctuBaseServiceClass<Registrations> {
                 condition: IctuQueryCondition.equal,
             });
         }
-        if (info.nganh_id) {
+        if (info.nganh_dangky) {
             conditions.push({
-                conditionName: 'nganh_id',
-                value: `${info.nganh_id}`,
+                conditionName: 'nganh_dangky',
+                value: info.nganh_dangky,
                 condition: IctuQueryCondition.equal,
             });
         }
@@ -134,7 +134,7 @@ export class RegistrationsService extends IctuBaseServiceClass<Registrations> {
         );
     }
 
-    checkpointRegistration(cccd?: string, phone?: string): Observable<Registrations | null> {
-        return this.http.post<Registrations | null>(this.api + 'check-point', {cccd, phone});
+    checkpointRegistration(cccd?: string, dien_thoai?: string): Observable<Registrations | null> {
+        return this.http.post<Registrations | null>(this.api + 'check-point', {cccd, dien_thoai});
     }
 }

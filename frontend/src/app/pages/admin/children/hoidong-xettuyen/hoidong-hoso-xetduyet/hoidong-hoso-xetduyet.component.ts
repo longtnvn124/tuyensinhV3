@@ -616,8 +616,13 @@ export class HoidongHosoXetduyetComponent {
 
         const qualificationGroup = this.getQualificationGroup(candidate.doituong, candidate.id);
         const qualification = DOI_TUONG.find((item): boolean => item.value === qualificationGroup);
-        const majorId = candidate.nganh_id ?? 0;
-        const major = this.majors().find((item: Nganhhoc): boolean => item.id === majorId);
+        const registeredMajorName = candidate.nganh_dangky?.trim();
+        const major = this.majors().find((item: Nganhhoc): boolean =>
+            item.ten_nganh.trim() === registeredMajorName,
+        );
+        if (!major) {
+            throw new Error(`Không tìm thấy ngành đăng ký "${registeredMajorName ?? ''}"`);
+        }
         const genderValue = candidate.gioi_tinh?.trim().toLowerCase();
         const gender = GENDER.find((item): boolean =>
             item.value === genderValue || item.key.toLowerCase() === genderValue,
@@ -642,9 +647,9 @@ export class HoidongHosoXetduyetComponent {
             graduationYear: isHighSchool
                 ? candidate.nam_tn ?? ''
                 : candidate.vb_chuyenmon_namtn ?? '',
-            registeredMajorId: majorId,
-            registeredMajorName: major?.ten_nganh ?? '',
-            registeredMajorCode: major?.ma_nganh ?? '',
+            registeredMajorId: major.id,
+            registeredMajorName: major.ten_nganh,
+            registeredMajorCode: major.ma_nganh,
             admissionScore: candidate.diem_xettuyen,
             calculatedAdmissionScore: this.calculateAdmissionScore(candidate, qualificationGroup),
             result: TH_XETTUYEN.find((item): boolean => item.value === candidate.status)?.label

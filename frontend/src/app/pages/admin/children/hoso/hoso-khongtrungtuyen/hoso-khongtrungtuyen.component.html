@@ -56,7 +56,7 @@
                             </div>
                             <div class="filter-panel__item">
                                 <label>Ngành</label>
-                                <p-select [options]="majors()" appendTo="body" [(ngModel)]="searchInfo.nganh_id"
+                                <p-select [options]="majorFilterOptions()" appendTo="body" [(ngModel)]="searchInfo.nganh_dangky"
                                     placeholder="Chọn ngành" optionLabel="label" optionValue="value"
                                     [showClear]="true" />
                             </div>
@@ -156,7 +156,7 @@
                                     }}</span>
                             </td>
                             <td class="text-left col-email">{{ row.email || '—' }}</td>
-                            <td class="text-left col-major">{{ majorLabel(row.nganh_id) }}</td>
+                            <td class="text-left col-major">{{ row.nganh_dangky  }}</td>
                            
                             <td class="text-left col-dot">{{ dotLabel(row.dotxettuyen_id) }}</td>
                             <td class="text-left col-tinh">{{ tinhLabel(row.dia_chi_tinh) }}</td>
@@ -241,7 +241,7 @@
                     <h3 class="hoso-form__section-title">IV. Thông tin đăng ký</h3>
                     <div class="view-field"><label>Đợt xét tuyển</label><span>{{ dotLabel(hoso.dotxettuyen_id) }}</span>
                     </div>
-                    <div class="view-field"><label>Ngành học</label><span>{{ majorLabel(hoso.nganh_id) }}</span></div>
+                    <div class="view-field"><label>Ngành học</label><span>{{ hoso.nganh_dangky  }}</span></div>
                     <div class="view-field"><label>Hình thức XT</label><span>{{ hoso.hinhthuc_xettuyen || '—' }}</span>
                     </div>
                     <div class="view-field"><label>Điểm XT</label><span>{{ hoso.diem_xettuyen ?? '—' }}</span></div>

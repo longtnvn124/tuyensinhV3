@@ -8,7 +8,7 @@ import { IctuDeletingAnimationControl } from '@models/ictu-deleting-animation-co
 import { DtoObject, IctuConditionParam, IctuQueryCondition, IctuQueryParams } from '@models/dto';
 import { RegistrationStatus, Registrations } from '@app/models/tuyensinh/registrations';
 import { Locations } from '@models/location';
-import { SysRoleName } from '@models/role';
+import { Role, SysRoleName } from '@models/role';
 import { User } from '@models/user';
 import { ChuongtrinhDaotao } from '@models/tuyensinh/chuongtrinh-daotao';
 import { DotXettuyen } from '@app/models/tuyensinh/dot-xettuyen';
@@ -23,6 +23,7 @@ import {
     HosoTuyensinhExportPayload,
 } from '@services/tuyensinh/exp-hoso-tuyensinh.service';
 import { UserService } from '@services/user.service';
+import { RoleService, RoleWithPermissions } from '@services/role.service';
 import { LocationService } from '@app/services/location.service';
 import { Drawer } from 'primeng/drawer';
 import { InputText } from 'primeng/inputtext';
@@ -32,7 +33,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { EMPTY, forkJoin, from, Observable, of, Subject } from 'rxjs';
-import { filter, finalize, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { concatMap, filter, finalize, map, switchMap, takeUntil, tap, toArray } from 'rxjs/operators';
 import { DanToc, TH_XETTUYEN } from '@app/utilities/syscats';
 import { Popover } from "primeng/popover";
 import { FormThongtinDangkyComponent } from "../form-thongtin-dangky/form-thongtin-dangky.component";
@@ -43,10 +44,10 @@ import { RegistrationsStatusService } from '@app/services/tuyensinh/registration
 @Component({
     selector: 'app-hoso-xettuyen',
     imports: [
-    Drawer, FormsModule, IctuPaginatorComponent, InputText, LoadingProgressComponent,
-    MatButton, MatCheckbox, ReactiveFormsModule, Select,
-    Popover, FormThongtinDangkyComponent, TuvanTuyensinhComponent
-],
+        Drawer, FormsModule, IctuPaginatorComponent, InputText, LoadingProgressComponent,
+        MatButton, MatCheckbox, ReactiveFormsModule, Select,
+        Popover, FormThongtinDangkyComponent, TuvanTuyensinhComponent
+    ],
     templateUrl: './hoso-xettuyen.component.html',
     styleUrl: './hoso-xettuyen.component.css',
     standalone: true,
@@ -61,12 +62,14 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     private locationService = inject(LocationService);
     private userService = inject(UserService);
+    private roleService = inject(RoleService);
     private exportService = inject(ExpHosoTuyensinhService);
     private auth = inject(AuthenticationService);
     private notification = inject(NotificationService);
     private fb = inject(FormBuilder);
     private onDestroy$ = new Subject<void>();
     private readonly tuyensinhStatusService = inject(RegistrationsStatusService)
+
     // ── Permission ──────────────────────────────────────────────
 
     private getPermissionMenuId(): string {
@@ -119,7 +122,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         search: string;
         status?: RegistrationStatus;
         dotxettuyen_id?: number;
-        nganh_id?: number;
+        nganh_dangky?: string;
         nguoi_tuvan?: number;
         cccd?: string;
         dia_chi_tinh?: number;
@@ -128,18 +131,18 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         dan_toc?: string;
         ctdt_id?: number;
     } = {
-        search: '',
-        status: undefined,
-        dotxettuyen_id: undefined,
-        nganh_id: undefined,
-        nguoi_tuvan: undefined,
-        cccd: undefined,
-        dia_chi_tinh: undefined,
-        dia_chi_xa: undefined,
-        noi_sinh: undefined,
-        dan_toc: undefined,
-        ctdt_id: undefined,
-    };
+            search: '',
+            status: undefined,
+            dotxettuyen_id: undefined,
+            nganh_dangky: undefined,
+            nguoi_tuvan: undefined,
+            cccd: undefined,
+            dia_chi_tinh: undefined,
+            dia_chi_xa: undefined,
+            noi_sinh: undefined,
+            dan_toc: undefined,
+            ctdt_id: undefined,
+        };
 
     // ── Table ───────────────────────────────────────────────────
 
@@ -150,14 +153,17 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     // ── Filter toggle ───────────────────────────────────────────
 
     showAdvancedFilter: WritableSignal<boolean> = signal<boolean>(false);
+    readonly onlyMyRecords = signal<boolean>(false);// hồ sơ xét duyệt
 
     // ── Lookups ─────────────────────────────────────────────────
 
     dots: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
     majors: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
+    majorFilterOptions: WritableSignal<IctuDropdownOption<string>[]> = signal<IctuDropdownOption<string>[]>([]);
     programs: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
     tinhList: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
     xaList: WritableSignal<IctuDropdownOption<number>[]> = signal<IctuDropdownOption<number>[]>([]);
+    users: WritableSignal<User[]> = signal<User[]>([]);
 
     // ── Static options ──────────────────────────────────────────
 
@@ -205,8 +211,14 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     readonly editDrawerVisible = signal<boolean>(false);
     readonly editData = signal<Registrations | null>(null);
 
+    isAdmin: boolean = this.auth.userHasRole(['admin', 'direction', 'manager']);
+    isduyethoso: boolean = this.auth.userHasRole(['duyet_hoso']);
+    isreview: boolean = this.auth.userHasRole(['reviewer']);
+    isnv: boolean = this.auth.userHasRole(['doi-tac-cv', 'staff']);
+    isDoitac: boolean = this.auth.userHasRole(['doi-tac']);
+
     constructor() {
-        
+
         this.formControl = new IctuFormControl2<Registrations>({
             dropdownFields: [],
             formGroup: this.fb.group({}),
@@ -267,19 +279,27 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 map((r: DtoObject<Nganhhoc[]>): IctuDropdownOption<number>[] =>
                     (r.data ?? []).map(m => ({ value: m.id, label: m.ten_nganh }))),
             ),
-            
+
             tinhList: this.locationService.queryLocation([], qp, 'regions').pipe(
                 map((r: DtoObject<any[]>): IctuDropdownOption<number>[] =>
                     (r.data ?? []).map(t => ({ value: t.id, label: t.name }))),
             ),
-            
+            users: this.isAdmin
+                ? this.userService.query([], {
+                    ...qp,
+                    select: 'id,display_name,email',
+                }).pipe(map((response: DtoObject<User[]>): User[] => response.data ?? []))
+                : of([]),
         }).pipe(takeUntil(this.onDestroy$)).subscribe({
-            next: ({ dots, majors, tinhList }): void => {
+            next: ({ dots, majors, tinhList, users }): void => {
                 this.dots.set(dots);
                 this.majors.set(majors);
-                
+                this.majorFilterOptions.set(majors.map((major): IctuDropdownOption<string> => ({
+                    value: major.label,
+                    label: major.label,
+                })));
                 this.tinhList.set(tinhList);
-
+                this.users.set(users);
                 this.loadData(1, true);
 
             },
@@ -291,34 +311,66 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     //  Data
     // ═════════════════════════════════════════════════════════════
 
-    private readonly assignedViewRoles: SysRoleName[] = ['staff', 'doi-tac-cv'];
-    private readonly ownedViewRoles: SysRoleName[] = ['doi-tac'];
+    private readonly createdViewRoles: SysRoleName[] = ['doi-tac'];
 
     private buildConditions(): IctuConditionParam[] {
         const conditions: IctuConditionParam[] = [];
         const s = this.searchInfo;
         const userId = this.auth.user?.id;
 
-        // Staff / nhân viên đối tác chỉ xem hồ sơ được phân công cho chính mình
-        if (!this.isReviewer() && this.auth.userHasRole(this.assignedViewRoles)) {
-            conditions.push({
-                conditionName: 'nguoi_tuvan',
-                value: `${userId ?? ''}`,
-                condition: IctuQueryCondition.equal,
-            });
-        } else if (!this.isReviewer() && this.auth.userHasRole(this.ownedViewRoles)) {
-            // Đối tác chỉ xem hồ sơ do chính mình tạo
-            conditions.push({
-                conditionName: 'created_by',
-                value: `${userId ?? ''}`,
-                condition: IctuQueryCondition.equal,
-            });
+        // if (this.onlyMyRecords()) {
+        //     conditions.push({
+        //         conditionName: this.auth.userHasRole(this.createdViewRoles) ? 'created_by' : 'owner_by',
+        //         value: `${userId ?? ''}`,
+        //         condition: IctuQueryCondition.equal,
+        //     });
+        // }
+
+        if (this.onlyMyRecords()) {
+
+                conditions.push({
+                    conditionName: 'nguoi_tuvan',
+                    value: userId.toString(),
+                    condition: IctuQueryCondition.equal,
+                })
+        } else {
+            if (this.isAdmin) {
+                conditions.push(
+                );
+            }
+
+            if (this.isduyethoso) {
+                conditions.push({
+                    conditionName: 'nguoi_tuvan',
+                    value: userId.toString(),
+                    condition: IctuQueryCondition.equal,
+                })
+            }
+            if (this.isreview) {
+
+            }
+            if (this.isnv) {
+                conditions.push({
+                    conditionName: 'owner_by',
+                    value: userId.toString(),
+                    condition: IctuQueryCondition.equal,
+                })
+            }
+            if (this.isDoitac) {
+                conditions.push({
+                    conditionName: 'created_by',
+                    value: userId.toString(),
+                    condition: IctuQueryCondition.equal,
+                })
+            }
         }
+
+
+
 
         if (s.search) {
             conditions.push(
-                { conditionName: 'ho_va_ten', value: `%${s.search}%`, condition: IctuQueryCondition.like, orWhere: 'or' },
-                { conditionName: 'dien_thoai', value: `%${s.search}%`, condition: IctuQueryCondition.like, orWhere: 'or' },
+                { conditionName: 'ho_va_ten', value: `%${s.search}%`, condition: IctuQueryCondition.like },
             );
         }
         if (s.status !== undefined) {
@@ -327,11 +379,8 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         if (s.dotxettuyen_id) {
             conditions.push({ conditionName: 'dotxettuyen_id', value: `${s.dotxettuyen_id}`, condition: IctuQueryCondition.equal });
         }
-        if (s.nganh_id) {
-            conditions.push({ conditionName: 'nganh_id', value: `${s.nganh_id}`, condition: IctuQueryCondition.equal });
-        }
-        if (s.nguoi_tuvan) {
-            conditions.push({ conditionName: 'nguoi_tuvan', value: `${s.nguoi_tuvan}`, condition: IctuQueryCondition.equal });
+        if (s.nganh_dangky) {
+            conditions.push({ conditionName: 'nganh_dangky', value: s.nganh_dangky, condition: IctuQueryCondition.equal });
         }
         if (s.cccd) {
             conditions.push({ conditionName: 'cccd', value: `%${s.cccd}%`, condition: IctuQueryCondition.like });
@@ -339,18 +388,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         if (s.dia_chi_tinh) {
             conditions.push({ conditionName: 'dia_chi_tinh', value: `${s.dia_chi_tinh}`, condition: IctuQueryCondition.equal });
         }
-        if (s.dia_chi_xa) {
-            conditions.push({ conditionName: 'dia_chi_xa', value: `${s.dia_chi_xa}`, condition: IctuQueryCondition.equal });
-        }
-        if (s.noi_sinh) {
-            conditions.push({ conditionName: 'noi_sinh', value: `${s.noi_sinh}`, condition: IctuQueryCondition.equal });
-        }
-        if (s.dan_toc) {
-            conditions.push({ conditionName: 'dan_toc', value: s.dan_toc, condition: IctuQueryCondition.equal });
-        }
-        if (s.ctdt_id) {
-            conditions.push({ conditionName: 'ctdt_id', value: `${s.ctdt_id}`, condition: IctuQueryCondition.equal });
-        }
+
         return conditions;
     }
 
@@ -370,9 +408,9 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 this.dataTable.paginator.changePage(paged);
                 return res.data ?? [];
             }),
-            switchMap(m=> forkJoin({data: of(m),dataStatus: this.loopGetSatus(m,[])}))
+            switchMap(m => forkJoin({ data: of(m), dataStatus: this.loopGetSatus(m, []) }))
         ).subscribe({
-            next: ({data,dataStatus}): void => {
+            next: ({ data, dataStatus }): void => {
                 this.dataTable.fillData(data);
                 this.state.set('success');
             },
@@ -400,12 +438,17 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.loadData(1, true);
     }
 
+    onOnlyMyRecordsChange(checked: boolean): void {
+        this.onlyMyRecords.set(checked);
+        this.loadData(1, true);
+    }
+
     resetFilter(): void {
         this.searchInfo = {
             search: '',
             status: undefined,
             dotxettuyen_id: undefined,
-            nganh_id: undefined,
+            nganh_dangky: undefined,
             nguoi_tuvan: undefined,
             cccd: undefined,
             dia_chi_tinh: undefined,
@@ -414,6 +457,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             dan_toc: undefined,
             ctdt_id: undefined,
         };
+        this.onlyMyRecords.set(true);
         this.loadData(1, true);
     }
 
@@ -542,7 +586,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         const queryParams: IctuQueryParams = { limit: -1, paged: 1 };
         return forkJoin({
             majors: this.nganhHocService.load({ search: '' }, queryParams),
-          
+
             rounds: this.dotService.load({ search: '' }, queryParams),
             regions: this.locationService.queryLocation([], queryParams, 'regions'),
             provinces: this.locationService.queryLocation([], queryParams, 'provinces'),
@@ -663,13 +707,19 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         return this.tinhList().find(t => t.value == tinhId)?.label ?? `#${tinhId}`;
     }
 
+    userLabel(userId: number | undefined): string {
+        if (!userId) return '—';
+        const user = this.users().find((item: User): boolean => item.id === userId);
+        if (!user) return `#${userId}`;
+        return user.email ? `${user.display_name} (${user.email})` : user.display_name;
+    }
 
     private loopGetSatus(arr: Registrations[], data: TuyensinhStatus[]): Observable<TuyensinhStatus[]> {
         const index = arr.findIndex(f => !f['_getStatus']);
 
         if (index !== -1) {
             const item = arr[index];
-            const condition_status:IctuConditionParam[] = [
+            const condition_status: IctuConditionParam[] = [
                 {
                     conditionName: 'registration_id',
                     condition: IctuQueryCondition.equal,
@@ -679,13 +729,91 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             ];
 
             arr[index]['_getStatus'] = true;
-            return this.tuyensinhStatusService.query(condition_status, {limit:1, paged:1, order:'DESC'}).pipe(switchMap(m => {
-                    return this.loopGetSatus(arr, [...data, ...m.data])
-                }
+            return this.tuyensinhStatusService.query(condition_status, { limit: 1, paged: 1, order: 'DESC' }).pipe(switchMap(m => {
+                return this.loopGetSatus(arr, [...data, ...m.data])
+            }
             ))
         } else {
             return of(data)
         }
 
     }
+    readonly addDuyetVisible = signal<boolean>(false);
+    readonly reviewerOptions = signal<User[]>([]);
+    readonly selectedReviewerId = signal<number | null>(null);
+    readonly reviewerLoading = signal<boolean>(false);
+    readonly reviewerSaving = signal<boolean>(false);
+    readonly selectedReviewerRecords = computed<Registrations[]>(() => this.dataTable.getSelectedData());
+
+    openFormDuyet(): void {
+        if (!this.selectedReviewerRecords().length) {
+            this.notification.toastWarning('Vui lòng chọn ít nhất một hồ sơ');
+            return;
+        }
+
+        this.selectedReviewerId.set(null);
+        this.reviewerOptions.set([]);
+        this.addDuyetVisible.set(true);
+        this.loadReviewerOptions();
+    }
+
+    closeReviewerAssignment(): void {
+        if (this.reviewerSaving()) return;
+        this.addDuyetVisible.set(false);
+        this.selectedReviewerId.set(null);
+    }
+
+    saveReviewerAssignments(): void {
+        const reviewerId: number | null = this.selectedReviewerId();
+        const records: Registrations[] = this.selectedReviewerRecords();
+        if (!reviewerId || !records.length || this.reviewerSaving()) return;
+
+        this.reviewerSaving.set(true);
+        from(records).pipe(
+            concatMap((record: Registrations): Observable<unknown> =>
+                this.registrationsService.updateRegistration(record.id, { nguoi_tuvan: reviewerId }),
+            ),
+            toArray(),
+            finalize((): void => this.reviewerSaving.set(false)),
+            takeUntil(this.onDestroy$),
+        ).subscribe({
+            next: (): void => {
+                this.notification.toastSuccess(`Đã gán cán bộ duyệt cho ${records.length} hồ sơ`);
+                this.addDuyetVisible.set(false);
+                this.selectedReviewerId.set(null);
+                this.loadData(this.temp.paged, false);
+            },
+            error: (): void => {
+                this.notification.toastError('Gán cán bộ duyệt thất bại, quá trình đã dừng');
+                this.loadData(this.temp.paged, false);
+            },
+        });
+    }
+
+    private loadReviewerOptions(): void {
+        this.reviewerLoading.set(true);
+        this.roleService.load().pipe(
+            switchMap((roles) => {
+                const reviewerRole = roles.find((role): boolean => role.name === 'duyet_hoso');
+                if (!reviewerRole) return of([] as User[]);
+
+                const conditions: IctuConditionParam[] = [{
+                    conditionName: 'role_ids',
+                    condition: IctuQueryCondition.like,
+                    value: `%${reviewerRole.id}%`,
+                    orWhere: 'and',
+                }];
+                return this.userService.query(conditions, {
+                    limit: -1,
+                    select: 'id,display_name,email',
+                }).pipe(map((response: DtoObject<User[]>): User[] => response.data ?? []));
+            }),
+            finalize((): void => this.reviewerLoading.set(false)),
+            takeUntil(this.onDestroy$),
+        ).subscribe({
+            next: (users: User[]): void => this.reviewerOptions.set(users),
+            error: (): void => this.notification.toastError('Tải danh sách cán bộ duyệt thất bại'),
+        });
+    }
+
 }

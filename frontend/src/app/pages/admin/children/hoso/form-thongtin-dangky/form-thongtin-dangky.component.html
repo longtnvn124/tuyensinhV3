@@ -89,7 +89,7 @@
             </div>
             <div class="existing__info-row">
                 <span class="existing__info-label">Ngành đăng ký</span>
-                <span class="existing__info-value">{{ getNganhLabel(record.nganh_id) }}</span>
+                <span class="existing__info-value">{{ record['nganh_dangky'] }}</span>
             </div>
             <div class="existing__info-row">
                 <span class="existing__info-label">Ngày tạo</span>
@@ -285,7 +285,7 @@
                         <div class="row form-row form-row-flex-row">
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label ictu-form__label--required">Số CCCD</label>
+                                    <label class="ictu-form__label "  [class.ictu-form__label--required]="!isAdmin && !isNhanVien" >Số CCCD</label>
                                     <input class="ictu-form__input-field" formControlName="cccd" pInputText type="text"
                                         placeholder="Nhập số CCCD" maxlength="12" autocomplete="off"
                                         [readonly]="!isAdmin()" />
@@ -439,7 +439,7 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ictu-form__label--required">Ngành đăng ký xét tuyển</label>
                                     <p-select class="w-100" [options]="listNganh()" appendTo="body" [filter]="true"
-                                        filterBy="label" formControlName="nganh_id" placeholder="Chọn ngành"
+                                        filterBy="label" formControlName="nganh_dangky" placeholder="Chọn ngành"
                                         optionLabel="label" optionValue="value" [showClear]="false"
                                         (onChange)="onNganhChange($event.value)" />
                                 </div>
@@ -516,7 +516,7 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Người tư vấn</label>
                                     <p-select class="w-100" [options]="listUserTuvan()" appendTo="body" [filter]="true"
-                                        filterBy="name_email" formControlName="nguoi_tuvan"
+                                        filterBy="name_email" formControlName="owner_by"
                                         placeholder="Chọn người tư vấn" optionLabel="name_email" optionValue="id"
                                         [showClear]="true" />
                                 </div>
@@ -558,6 +558,14 @@
                                         [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
                             </div> -->
+                            <div class="col-3 flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label ">Giấy khai sinh
+                                        lịch</label>
+                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_giaykhaisinh']" [keyUpload]="'direct'"
+                                        [resizeToWidth]="400"></ovic-img-crop-v2>
+                                </div>
+                            </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Ảnh bằng, bảng điểm TC, CĐ, ĐH (Nếu có) và học bạ
@@ -570,27 +578,25 @@
 
                         </div>
                         <div class="row form-row form-row-flex-row">
-                            <div class="col-4 flex-div">
+                            <div class="col-6 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ">Sơ yếu lý lịch</label>
-                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_soyeulylich']" [keyUpload]="'direct'"
-                                        [resizeToWidth]="400"></ovic-img-crop-v2>
+                                    <!-- <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_soyeulylich']" [keyUpload]="'direct'"
+                                        [resizeToWidth]="400"></ovic-img-crop-v2> -->
+
+                                        <ovic-avata-type-multiple [disabled]="isReadOnly()" [formField]="f['anh_soyeulylich']" [multiple]="true"
+                                        [accept]="'.jpg,.png,.jpeg'"></ovic-avata-type-multiple>
                                 </div>
                             </div>
-                            <div class="col-4 flex-div">
-                                <div class="ictu-form__row">
-                                    <label class="ictu-form__label ">Giấy khai sinh
-                                        lịch</label>
-                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_giaykhaisinh']" [keyUpload]="'direct'"
-                                        [resizeToWidth]="400"></ovic-img-crop-v2>
-                                </div>
-                            </div>
-                            <div class="col-4 flex-div">
+                            
+                            <div class="col-6 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ">Giấy tờ chứng nhận thuộc đối tượng ưu tiên
                                         lịch</label>
-                                    <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_giayuutien']" [keyUpload]="'direct'"
-                                        [resizeToWidth]="400"></ovic-img-crop-v2>
+                                    <!-- <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_giayuutien']" [keyUpload]="'direct'"
+                                        [resizeToWidth]="400"></ovic-img-crop-v2> -->
+                                        <ovic-avata-type-multiple [disabled]="isReadOnly()" [formField]="f['anh_giayuutien']" [multiple]="true"
+                                        [accept]="'.jpg,.png,.jpeg'"></ovic-avata-type-multiple>
                                 </div>
                             </div>
                         </div>
@@ -609,7 +615,7 @@
             <span>Hủy</span>
         </button>
         }
-        @if (canUpdateStatus() && dataId) {
+        @if (canUpdateStatus() && dataId || isDuyethoso) {
         <p-select class="form-status-select" [options]="statusOptions" appendTo="body"
             formControlName="status" optionLabel="label" optionValue="value"
             placeholder="Chọn trạng thái"></p-select>
