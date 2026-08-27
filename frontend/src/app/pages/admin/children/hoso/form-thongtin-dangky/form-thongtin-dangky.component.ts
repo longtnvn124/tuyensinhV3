@@ -112,7 +112,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     /* ------------------------------------------------------------------ */
     /*  Role flags (temporary — user will add details later)               */
     /* ------------------------------------------------------------------ */
-    readonly isManager = computed(() => this.auth.userHasRole(['admin', 'manager']));
+    readonly isManager = computed(() => this.auth.userHasRole(['admin','direction', 'manager']));
     readonly isLanhDaoKhoa = computed(() => this.auth.userHasRole(['direction']));
     readonly canCheckByPhone = computed(() => this.auth.userHasRole(['admin', 'direction', 'manager', 'staff']));
     readonly canUpdateStatus = computed(() => this.auth.userHasRole(['admin', 'manager', 'direction', 'duyet_hoso']));
@@ -243,7 +243,10 @@ export class FormThongtinDangkyComponent implements OnInit {
             diem_cong: [0],
             diem_uutien: [0],
             anh_giaykhaisinh: [''],
-            anh_giayuutien: ['']
+            anh_giayuutien: [''],
+            van_bang_tn_sohieu:[''],
+            diachi_nhangiay:[''],
+
 
         });
         this.isAdmin.set(this.auth.userHasRole(['admin', 'direction', 'manager']));
@@ -316,7 +319,9 @@ export class FormThongtinDangkyComponent implements OnInit {
             diem_cong: 0,
             diem_uutien: 0,
             anh_giaykhaisinh: '',
-            anh_giayuutien: ''
+            anh_giayuutien: '',
+            van_bang_tn_sohieu:'',
+            diachi_nhangiay:''
         });
     }
 
@@ -750,6 +755,8 @@ export class FormThongtinDangkyComponent implements OnInit {
             diem_uutien: object.diem_uutien || 0,
             anh_giaykhaisinh: object.anh_giaykhaisinh || '',
             anh_giayuutien: object.anh_giayuutien || '',
+            diachi_nhangiay: object.diachi_nhangiay || '',
+            van_bang_tn_sohieu: object.van_bang_tn_sohieu || '',
 
         });
         this.showDiemTb.set(true);

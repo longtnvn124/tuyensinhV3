@@ -59,4 +59,6 @@ export interface Registrations extends IctuBaseModel {
     anh_giaykhaisinh:string;
     anh_giayuutien:string;
     nganh_dangky?:string;
+    diachi_nhangiay?:string;
+    van_bang_tn_sohieu?:string;
 }

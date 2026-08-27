@@ -359,9 +359,16 @@
 
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Mã bằng</label>
+                                    <input class="ictu-form__input-field" formControlName="van_bang_tn_sohieu" pInputText
+                                        type="text" placeholder="Vd: QD..." />
+                                </div>
+                            </div>
+                            <div class="col flex-div">
+                                <div class="ictu-form__row">
                                     <label class="ictu-form__label">Năm tốt nghiệp</label>
                                     <input class="ictu-form__input-field" formControlName="nam_tn" pInputText
-                                        type="text" placeholder="Vd: QD..." />
+                                        type="text" placeholder="Vd: 2026..." />
                                 </div>
                             </div>
 
@@ -458,7 +465,7 @@
                                     <label class="ictu-form__label">Đợt xét tuyển</label>
                                     <p-select class="w-100" [options]="listDotXetTuyen()" appendTo="body"
                                         formControlName="dotxettuyen_id" placeholder="Chọn đợt" optionLabel="tieude"
-                                        optionValue="id" [showClear]="false" [disabled]="true" />
+                                        optionValue="id" [showClear]="false" [disabled]="!isManager()" />
                                 </div>
                             </div>
                             
@@ -507,6 +514,16 @@
                                     <label class="ictu-form__label">Nội dung</label>
                                     <textarea class="ictu-form__input-field" formControlName="content" pInputTextarea
                                         rows="3" placeholder="Ghi chú..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row form-row-flex-row mt-2">
+                            <div class="col flex-div">
+                                <div class="ictu-form__row">
+                                    <label class="ictu-form__label">Địa chỉ nhận giấy báo trúng tuyển</label>
+                                    <textarea class="ictu-form__input-field" formControlName="diachi_nhangiay" pInputTextarea
+                                        rows="2" placeholder="Địa chỉ..."></textarea>
+
                                 </div>
                             </div>
                         </div>
