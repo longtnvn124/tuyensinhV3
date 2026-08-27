@@ -12,7 +12,7 @@
                 Danh sách cán bộ - giảng viên
             </h4>
             <div class="admin-wrap-table__head-actions">
-                @if (isAdmin()) {
+                @if (isAdmin() || isPhogiamdoc()) {
                 <p-select [(ngModel)]="searchInfo.donvi_id" [options]="listDonvi" appendTo="body"
                     placeholder="Chọn đơn vị" optionLabel="title" optionValue="id" [showClear]="true"
                     (onChange)="onDonviChange()"></p-select>
@@ -48,7 +48,7 @@
                         <th class="text-left">Email</th>
                         <th class="text-left">Số điện thoại</th>
                         <th class="text-left">Vai trò</th>
-                        @if (isAdmin()) {
+                        @if (isAdmin() || isPhogiamdoc()) {
                         <th class="text-left">Đơn vị</th>
                         }
 
@@ -79,7 +79,7 @@
                             <span class="text-muted">—</span>
                             }
                         </td>
-                        @if (isAdmin()) {
+                        @if (isAdmin() || isPhogiamdoc()) {
                         <td class="text-left">{{ getDonviTitle(row.donvi_id) }}</td>
                         }
 
@@ -206,7 +206,7 @@
                         </div>
                     </div>
 
-                    @if (isAdmin()) {
+                    @if (isAdmin() || isPhogiamdoc()) {
                     <div class="ictu-form__row">
                         <label class="ictu-form__label ictu-form__label--required" for="cbgv_donvi_id">Đơn vị</label>
                         <p-select appendTo="body" class="ictu-form__input-field" formControlName="donvi_id"

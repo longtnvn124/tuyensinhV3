@@ -42,7 +42,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
     };
     dataTable: IctuDataTable<CbgvUser> = new IctuDataTable<CbgvUser>();
     dataRoles: PickRole[] = [];
-    dataUsersDrd : User[]= [];
+    dataUsersDrd: User[] = [];
     formControl: IctuFormControl2<CbgvUser>;
     readonly drawer = viewChild<Drawer>('masterDrawer');
     eventObserver$: Subject<DataTableEvent<CbgvUser>> = new Subject<DataTableEvent<CbgvUser>>();
@@ -51,7 +51,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
     private temp: IctuDataTablePaginatorInfo = { paged: 1, resetPaginator: true };
     showPassword = false;
 
-    listDonvi:DonVi[] = [];
+    listDonvi: DonVi[] = [];
 
     togglePassword(): void {
         this.showPassword = !this.showPassword;
@@ -60,7 +60,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
     private userService = inject(UserService);
     private roleService = inject(RoleService);
     private donviService = inject(DonviService);
-  
+
     private auth = inject(AuthenticationService);
     private notification = inject(NotificationService);
     private fb = inject(FormBuilder);
@@ -68,14 +68,15 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
     permissionControl: Signal<IctuPermissionControl> = signal<IctuPermissionControl>(new IctuPermissionControl(this.auth.getUserPermission('he-thong/quan-ly-tai-khoan')));
 
-    paginatorControl : Signal<IctuPaginatorControl> = signal<IctuPaginatorControl>( new IctuPaginatorControl( {
-            pageLinkSize      : 5 ,
-            rows              : 20 ,
-            showFirstLastIcon : true
-        } ) );
+    paginatorControl: Signal<IctuPaginatorControl> = signal<IctuPaginatorControl>(new IctuPaginatorControl({
+        pageLinkSize: 5,
+        rows: 20,
+        showFirstLastIcon: true
+    }));
 
 
     isAdmin: Signal<boolean> = computed((): boolean => this.auth.userHasRole(['admin']) || this.auth.userHasRole(['direction']));
+    isPhogiamdoc: Signal<boolean> = computed((): boolean => this.auth.userHasRole(['manager']));
     isDoitac: Signal<boolean> = computed((): boolean => this.auth.userHasRole(this.doiTacRoleIds));
     readonly doiTacRoleIds: SysRoleName[] = ['doi-tac', 'doi-tac-cv'];
 
@@ -90,7 +91,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                 phone: ['', [Validators.required]],
                 password: ['', [Validators.minLength(8)]],
                 role_ids: [[] as number[], [Validators.required]],
-                donvi_id: [null as number | null, this.isAdmin() ? [Validators.required] : []],
+                donvi_id: [null as number | null, this.isAdmin() || this.isPhogiamdoc() ? [Validators.required] : []],
             }),
             objectName: 'cán bộ - giảng viên',
             drawer: this.drawer,
@@ -204,10 +205,10 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
             { conditionName: 'parent_id', condition: IctuQueryCondition.equal, value: this.auth.user.donvi_id.toString(), orWhere: 'and' },
         ];
 
+
         forkJoin({
             roles: this.roleService.load(),
-            users: this.userService.query([], { paged: 1, limit: -1, select: 'id,username,display_name,email' }),
-            donvi: this.isAdmin()
+            donvi: this.isAdmin() || this.isPhogiamdoc()
                 ? this.donviService.query(conditions, { limit: -1 }).pipe(
                     map(({ data }: DtoObject<DonVi[]>): DonVi[] => data),
                 )
@@ -221,7 +222,6 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                 next: ({ roles, users, donvi }: { roles: PickRole[]; users: DtoObject<User[]>; donvi: DonVi[] }): void => {
                     this.listDonvi = donvi;
                     this.dataRoles = roles;
-                    this.dataUsersDrd = users.data;
                     this.loadData(1, true);
                 },
                 error: (): void => {
@@ -232,21 +232,42 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
 
     ngOnInit(): void {
 
-        
+
         this.loadInitial();
     }
 
-    loadData(paged: number = 1, resetPaginator: boolean = true): void {
+    loadData(paged: number , resetPaginator: boolean = true): void {
+
+        let roleids = [];
+        let queryParams = {};
+
         
-         const queryParams: IctuQueryParams = {
+        queryParams = {
             limit: this.paginatorControl().rows(),
-            paged:paged,
+            paged: paged,
             order: 'DESC',
             orderby: 'id',
-            exclude:this.auth.user.id
-           
-        
+
         };
+
+
+        if (this.isAdmin()) {
+            roleids = this.dataRoles.map(m => m.id)
+            queryParams = {
+                ...queryParams,
+                role_ids: roleids.length ? roleids.toString() : ''
+
+            };
+
+        }
+        if (this.isPhogiamdoc()) {
+            roleids = this.dataRoles.filter(f => ['staff', 'doi-tac'].includes(f.name)).map(m => m.id)
+            queryParams = {
+                ...queryParams,
+                role_ids: roleids.length ? roleids.toString() : ''
+
+            };
+        }
 
         const conditions: IctuConditionParam[] = [];
         if (this.searchInfo.search) {
@@ -277,7 +298,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                 condition: IctuQueryCondition.equal,
                 orWhere: 'and',
             });
-        } else if (this.isAdmin() && this.searchInfo.donvi_id) {
+        } else if ((this.isAdmin() || this.isPhogiamdoc()) && this.searchInfo.donvi_id) {
             conditions.push({
                 conditionName: 'donvi_id',
                 value: this.searchInfo.donvi_id.toString(),
@@ -287,37 +308,37 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
         }
 
         this.userService.query(conditions, queryParams)
-        .subscribe({
-            next: (res) => {
+            .subscribe({
+                next: (res) => {
 
-                if ( resetPaginator ) {
-                    this.paginatorControl().setupPaginator( res )
+                    if (resetPaginator) {
+                        this.paginatorControl().setupPaginator(res)
+                    }
+                    else {
+                        this.paginatorControl().changePage(paged);
+                    }
+
+                    const data = res.data.length > 0 ? res.data.map(m => {
+                        m['_role_name'] = m.role_ids.map(id => {
+                            const role = this.dataRoles.find(r => r.id === Number(id));
+                            return role ? role.title : `#${id}`;
+                        }).join(', ');
+
+                        return m;
+                    }) : [];
+
+
+                    this.dataTable.fillData(res.data);
+
+                    this.state.set('success');
+
+
+                }, error: () => {
+                    this.state.set('error');
+
                 }
-                else {
-                    this.paginatorControl().changePage( paged );
-                }
-
-                const data = res.data.length> 0 ? res.data.map(m=>{
-                    m['_role_name'] = m.role_ids.map(id => {
-                        const role = this.dataRoles.find(r => r.id === Number(id));
-                        return role ? role.title : `#${id}`;
-                    }).join(', ');
-                
-                    return m;
-                }) : [];
-
-
-                this.dataTable.fillData(res.data);
-            
-                this.state.set('success');
-
-    
-            }, error: () => {
-                this.state.set('error');
-
             }
-        }
-        );
+            );
 
     }
 
@@ -357,7 +378,8 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
     }
 
     onChangePage(paged: number): void {
-        this.loadData(paged, true);
+      
+        this.loadData(paged, false);
     }
 
     onDrawerHide(): void {
