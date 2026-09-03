@@ -213,12 +213,21 @@ export class ExpHosoDaduyetService {
         worksheet.getCell(`${rightStartColumn}1`).value = 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM';
         worksheet.mergeCells(`A2:${leftEndColumn}2`);
         worksheet.mergeCells(`${rightStartColumn}2:${lastColumn}2`);
-        worksheet.getCell('A2').value = 'TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG';
+        worksheet.getCell('A2').value = config.key === 'result'
+            ? 'TRƯỜNG ĐẠI HỌC CÔNG NGHỆ'
+            : 'TRƯỜNG ĐẠI HỌC CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG';
         worksheet.getCell(`${rightStartColumn}2`).value = 'Độc lập - Tự do - Hạnh phúc';
 
         for (const address of ['A1', 'A2', `${rightStartColumn}1`, `${rightStartColumn}2`]) {
             worksheet.getCell(address).font = { ...BASE_FONT, bold: true };
             worksheet.getCell(address).alignment = CENTER_ALIGNMENT;
+        }
+
+        if (config.key === 'result') {
+            worksheet.mergeCells(`A3:${leftEndColumn}3`);
+            worksheet.getCell('A3').value = 'THÔNG TIN VÀ TRUYỀN THÔNG';
+            worksheet.getCell('A3').font = { ...BASE_FONT, bold: true, underline: true };
+            worksheet.getCell('A3').alignment = CENTER_ALIGNMENT;
         }
 
         worksheet.mergeCells(`A4:${lastColumn}4`);
@@ -508,6 +517,7 @@ export class ExpHosoDaduyetService {
     }
 
     private createCandidateNote(candidate: CouncilExportCandidate, key: SheetKey): string {
+        if (key === 'result') return 'Đủ điều kiện xét tuyển';
         if (candidate.note?.trim()) return candidate.note.trim();
         if (key === 'source') return 'Đủ điều kiện xét tuyển';
         if (candidate.result === ADMITTED_RESULT) return 'Đủ điều kiện trúng tuyển';

@@ -99,7 +99,7 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly submitting = signal(false);
     readonly showDiemTb = signal(true);
     readonly listUserTuvan = signal<User[]>([]);
-    readonly showNguoiTuvan = computed(() => this.isAdmin() || this.isDoitac());
+    readonly showNguoiTuvan = computed(() => this.isAdmin() || this.isDoitac() || this.isDuyethoso());
     dataId: number | null = null;
 
     /* ------------------------------------------------------------------ */
@@ -214,13 +214,13 @@ export class FormThongtinDangkyComponent implements OnInit {
             ngay_cap_cccd: ['', Validators.required],
             noi_cap_cccd: ['', Validators.required],
             van_bang_tn: [''],
-            nam_tn: [''],
-            tn_noicap: [''],
+            nam_tn: ['', Validators.required],
+            tn_noicap: ['', Validators.required],
             sohieu_vb: [''],
             vb_chuyenmon: [''],
-            vb_chuyenmon_nganh: [''],
-            vb_chuyenmon_namtn: [''],
-            vb_chuyenmon_noicap: [''],
+            vb_chuyenmon_nganh: ['', Validators.required],
+            vb_chuyenmon_namtn: ['', Validators.required],
+            vb_chuyenmon_noicap: ['', Validators.required],
             vb_chuyenmon_sohieu: [''],
             nganh_dangky: [''],
             ctdt_id: [null],
@@ -244,13 +244,14 @@ export class FormThongtinDangkyComponent implements OnInit {
             diem_uutien: [0],
             anh_giaykhaisinh: [''],
             anh_giayuutien: [''],
-            van_bang_tn_sohieu:[''],
-            diachi_nhangiay:[''],
+            van_bang_tn_sohieu:['', Validators.required],
+            diachi_nhangiay:['', Validators.required],
 
 
         });
         this.isAdmin.set(this.auth.userHasRole(['admin', 'direction', 'manager']));
         this.isDoitac.set(this.auth.userHasRole(['doi-tac']));
+        this.isDuyethoso.set(this.auth.userHasRole(['duyet_hoso']));
         this.isNhanVien.set(this.auth.userHasRole(['staff']));
         this.isDoitacNhanvien.set(this.auth.userHasRole(['doi-tac-cv']));
         if (this.duyetHoso()) {
@@ -351,7 +352,7 @@ export class FormThongtinDangkyComponent implements OnInit {
         forkJoin({
             tinh: this.locationSvc.queryLocation([], qp, 'regions'),
             provinces: this.locationSvc.queryLocation([], qp, 'provinces'),
-            users:this.isAdmin() || this.isDoitac() ?  this.userService.query(userCond, { limit: -1 }) : of({data:[]}),
+            users:this.isAdmin() || this.isDoitac() || this.isDuyethoso() ?  this.userService.query(userCond, { limit: -1 }) : of({data:[]}),
             nganh: this.nganhHocService.load({ search: '' }, { limit: -1 }),
             dotxet: this.dotXettuyenService.query(dotCon, { limit: 1, paged: 1 })
         })

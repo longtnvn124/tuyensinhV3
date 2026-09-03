@@ -339,13 +339,13 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 );
             }
 
-            if (this.isduyethoso) {
-                conditions.push({
-                    conditionName: 'nguoi_tuvan',
-                    value: userId.toString(),
-                    condition: IctuQueryCondition.equal,
-                })
-            }
+            // if (this.isduyethoso) {
+            //     conditions.push({
+            //         conditionName: 'nguoi_tuvan',
+            //         value: userId.toString(),
+            //         condition: IctuQueryCondition.equal,
+            //     })
+            // }
             if (this.isreview) {
 
             }
@@ -457,7 +457,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             dan_toc: undefined,
             ctdt_id: undefined,
         };
-        this.onlyMyRecords.set(true);
+        // this.onlyMyRecords.set(true);
         this.loadData(1, true);
     }
 

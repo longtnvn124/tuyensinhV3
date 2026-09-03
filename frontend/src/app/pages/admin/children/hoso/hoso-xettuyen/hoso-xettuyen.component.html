@@ -11,14 +11,23 @@
                     <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
                 </svg>
                 Danh sách hồ sơ xét tuyển
-            </h4>
-            <div class="admin-wrap-table__head-actions d-flex flex-wrap align-items-center gap-2">
-                <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText
-                    placeholder="Tìm kiếm..." type="text" (keyup.enter)="onSearch()">
+            </h4> 
+            <div class="admin-wrap-table__head-actions d-flex flex-wrap align-items-center gap-2" style="width:1%; flex: 1 1 auto;">
 
-                <p-select [options]="dots()" appendTo="body" [(ngModel)]="searchInfo.dotxettuyen_id"
-                    placeholder="Đợt xét tuyển" class="filter-select" optionLabel="label" optionValue="value"
-                    (onChange)="onSearch()" />
+                <div>
+                        <mat-checkbox [checked]="onlyMyRecords()"
+                                    (change)="onOnlyMyRecordsChange($event.checked)">Hồ sơ xét duyệt</mat-checkbox>
+                </div> 
+
+                <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText
+                    placeholder="Nhập họ và tên " type="text" (keyup.enter)="onSearch()">
+
+                <div style="max-width: 150px;width: 100%;"> 
+                    <p-select [options]="dots()" appendTo="body" [(ngModel)]="searchInfo.dotxettuyen_id" [filter]="true" filterBy="label"
+                    placeholder="Đợt xét tuyển" class="w-100 filter-select" optionLabel="label" optionValue="value"
+                    (onChange)="onSearch()" />    
+                
+                </div>
 
 
                 <!--
@@ -52,10 +61,9 @@
                                 </div>
                             </div>
 
-                            @if (!isduyethoso) {
-                                <mat-checkbox [checked]="onlyMyRecords()"
-                                    (change)="onOnlyMyRecordsChange($event.checked)">Hồ sơ xét duyệt</mat-checkbox>
-                            }
+                            <!-- @if (!isduyethoso) {
+                              
+                            } -->
 
                             <div class="filter-panel__row">
                                 <div class="filter-panel__item filter-panel__item--actions">
@@ -186,7 +194,7 @@
                                 <span class="ictu-badge {{ statusBadgeClass(row.status) }}">{{ statusLabel(row.status)
                                     }}</span>
                             </td>
-                            @if (isAdmin) {
+                            @if (isAdmin || isduyethoso) {
                             <td class="text-left col-owner">{{ getTime(row['created_at']) }}</td>
                             <td class="text-left col-owner">{{ userLabel(row.owner_by) }}</td>
                             <td class="text-left col-reviewer">{{ userLabel(row.nguoi_tuvan) }}</td>
@@ -201,7 +209,7 @@
                         </tr>
                         } @empty {
                         <tr>
-                            <td [colSpan]="isAdmin ? 14 : 12">Không có bản ghi nào.</td>
+                            <td [colSpan]="isAdmin || isduyethoso ? 14 : 12">Không có bản ghi nào.</td>
                         </tr>
                         }
                     </tbody>

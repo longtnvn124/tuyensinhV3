@@ -350,7 +350,7 @@
                         <div class="row form-row form-row-flex-row">
                             <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Loại văn bằng</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Loại văn bằng</label>
                                     <p-select [options]="listVBTN()" appendTo="body" formControlName="van_bang_tn"
                                         placeholder="Chọn" optionLabel="label" class="w-100 ictu-form__input-field"
                                         optionValue="value" [showClear]="false" />
@@ -359,14 +359,14 @@
 
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Mã bằng</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Mã bằng</label>
                                     <input class="ictu-form__input-field" formControlName="van_bang_tn_sohieu" pInputText
                                         type="text" placeholder="Vd: QD..." />
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Năm tốt nghiệp</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Năm tốt nghiệp</label>
                                     <input class="ictu-form__input-field" formControlName="nam_tn" pInputText
                                         type="text" placeholder="Vd: 2026..." />
                                 </div>
@@ -374,7 +374,7 @@
 
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Nơi cấp</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Nơi cấp</label>
                                     <input class="ictu-form__input-field" formControlName="tn_noicap" pInputText
                                         type="text" placeholder="Vd: Trường..." />
                                 </div>
@@ -394,7 +394,7 @@
                     <div class="ictu-form ictu-form--label-on-top">
 
                         <div class="row form-row-flex-row mt-3">
-                            <div class="col-3 flex-div">
+                            <div class="col-2 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Số hiệu văn bằng</label>
                                     <input class="ictu-form__input-field" formControlName="vb_chuyenmon_sohieu"
@@ -403,21 +403,21 @@
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Ngành tốt nghiệp</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Ngành tốt nghiệp</label>
                                     <input class="ictu-form__input-field" formControlName="vb_chuyenmon_nganh"
                                         placeholder="Vd: Công nghệ thông tin" pInputText type="text" />
                                 </div>
                             </div>
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Nơi cấp</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Nơi cấp</label>
                                     <input class="ictu-form__input-field" formControlName="vb_chuyenmon_noicap"
                                         placeholder="Vd: Trường ...." pInputText type="text" />
                                 </div>
                             </div>
-                            <div class="col-2 flex-div">
+                            <div class="col-3 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Năm tốt nghiệp</label>
+                                    <label class="ictu-form__label ictu-form__label--required">Năm tốt nghiệp</label>
                                     <input class="ictu-form__input-field" formControlName="vb_chuyenmon_namtn"
                                         placeholder="Vd: 2026" pInputText type="text" />
                                 </div>
@@ -486,7 +486,7 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Điểm xét tuyển gốc</label>
                                     <p-inputNumber class="w-100" formControlName="diem_xettuyen" [min]="0" [max]="30"
-                                        [minFractionDigits]="0" [maxFractionDigits]="1"
+                                        [minFractionDigits]="0" [maxFractionDigits]="2"
                                         placeholder="0.00"></p-inputNumber>
                                 </div>
                             </div>
@@ -494,7 +494,7 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Điểm ưu tiên khu vực</label>
                                     <p-inputNumber class="w-100" formControlName="diem_cong" [min]="0" [max]="10"
-                                        [minFractionDigits]="0" [maxFractionDigits]="1"
+                                        [minFractionDigits]="0" [maxFractionDigits]="2"
                                         placeholder="0.00"></p-inputNumber>
                                 </div>
                             </div>
@@ -502,7 +502,7 @@
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Điểm ưu tiên đối tượng</label>
                                     <p-inputNumber class="w-100" formControlName="diem_uutien" [min]="0" [max]="10"
-                                        [minFractionDigits]="0" [maxFractionDigits]="1"
+                                        [minFractionDigits]="0" [maxFractionDigits]="2"
                                         placeholder="0.00"></p-inputNumber>
                                 </div>
                             </div>
@@ -519,8 +519,8 @@
                         </div>
                         <div class="row form-row-flex-row mt-2">
                             <div class="col flex-div">
-                                <div class="ictu-form__row">
-                                    <label class="ictu-form__label">Địa chỉ nhận giấy báo trúng tuyển</label>
+                                <div class="ictu-form__row ">
+                                    <label class="ictu-form__label ictu-form__label--required">Địa chỉ nhận giấy báo trúng tuyển</label>
                                     <textarea class="ictu-form__input-field" formControlName="diachi_nhangiay" pInputTextarea
                                         rows="2" placeholder="Địa chỉ..."></textarea>
 
@@ -532,7 +532,7 @@
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Người tư vấn</label>
-                                    <p-select class="w-100" [options]="listUserTuvan()" appendTo="body" [filter]="true"
+                                    <p-select class="w-100" [options]="listUserTuvan()" appendTo="body" [filter]="true" [disabled]="isDuyethoso()"
                                         filterBy="name_email" formControlName="owner_by"
                                         placeholder="Chọn người tư vấn" optionLabel="name_email" optionValue="id"
                                         [showClear]="true" />
@@ -583,7 +583,7 @@
                                         [resizeToWidth]="400"></ovic-img-crop-v2>
                                 </div>
                             </div>
-                            <div class="col flex-div">
+                            <div class="col-9 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label">Ảnh bằng, bảng điểm TC, CĐ, ĐH (Nếu có) và học bạ
                                         THPT,BTVH</label>
@@ -608,8 +608,7 @@
                             
                             <div class="col-6 flex-div">
                                 <div class="ictu-form__row">
-                                    <label class="ictu-form__label ">Giấy tờ chứng nhận thuộc đối tượng ưu tiên
-                                        lịch</label>
+                                    <label class="ictu-form__label ">Giấy tờ chứng nhận thuộc đối tượng ưu tiên</label>
                                     <!-- <ovic-img-crop-v2 [disabled]="isReadOnly()" [formField]="f['anh_giayuutien']" [keyUpload]="'direct'"
                                         [resizeToWidth]="400"></ovic-img-crop-v2> -->
                                         <ovic-avata-type-multiple [disabled]="isReadOnly()" [formField]="f['anh_giayuutien']" [multiple]="true"
