@@ -284,7 +284,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 map((r: DtoObject<any[]>): IctuDropdownOption<number>[] =>
                     (r.data ?? []).map(t => ({ value: t.id, label: t.name }))),
             ),
-            users: this.isAdmin
+            users: this.isAdmin || this.isduyethoso
                 ? this.userService.query([], {
                     ...qp,
                     select: 'id,display_name,email',
@@ -708,8 +708,9 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     }
 
     userLabel(userId: number | undefined): string {
+        console.log(userId);
         if (!userId) return '—';
-        const user = this.users().find((item: User): boolean => item.id === userId);
+        const user = this.users().find((item: User): boolean => item.id == userId);
         if (!user) return `#${userId}`;
         return user.email ? `${user.display_name} (${user.email})` : user.display_name;
     }
