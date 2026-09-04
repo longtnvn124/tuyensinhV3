@@ -382,7 +382,7 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
             switchMap(() => from(assignments).pipe(
                 mergeMap(
                     (assignment: HoidongHosoThisinh) => this.assignmentService.delete(assignment.id).pipe(
-                        switchMap(() => this.registrationsService.update(assignment.tuyensinh_id, { status_connect: 0 })),
+                        switchMap(() => this.registrationsService.update(assignment.tuyensinh_id, { status_connect: 0, status: 2 })),
                         map((): boolean => true),
                         catchError(() => of(false)),
                     ),

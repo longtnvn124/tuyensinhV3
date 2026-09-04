@@ -69,7 +69,7 @@ describe('TaikhoanCbgvComponent unit handling', () => {
         component.listDonvi = [{ id: 21, title: 'Khoa CNTT', parent_id: 11, description: '', status: 1 }];
         component.searchInfo.donvi_id = 21;
 
-        component.loadData();
+        component.loadData(1);
 
         expect(userService.query).toHaveBeenCalledWith(
             jasmine.arrayContaining([jasmine.objectContaining({ conditionName: 'donvi_id', value: '21' })]),

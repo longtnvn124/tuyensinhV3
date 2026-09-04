@@ -20,7 +20,7 @@
                 </div> 
 
                 <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText
-                    placeholder="Nhập họ và tên " type="text" (keyup.enter)="onSearch()">
+                    placeholder="Nhập họ tên hoặc số CCCD" type="text" (keyup.enter)="onSearch()">
 
                 <div style="max-width: 150px;width: 100%;"> 
                     <p-select [options]="dots()" appendTo="body" [(ngModel)]="searchInfo.dotxettuyen_id" [filter]="true" filterBy="label"
@@ -43,10 +43,10 @@
 
                         <div class="filter-panel">
                             <div class="filter-panel__row">
-                                <div class="filter-panel__item">
+                                <!-- <div class="filter-panel__item">
                                     <label>Số CCCD</label>
                                     <input pInputText [(ngModel)]="searchInfo.cccd" placeholder="Số CCCD" />
-                                </div>
+                                </div> -->
                                 <div class="filter-panel__item">
                                     <label>Ngành</label>
                                     <p-select [options]="majorFilterOptions()" appendTo="body"

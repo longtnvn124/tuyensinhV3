@@ -70,7 +70,7 @@ describe('HoidongXettuyenComponent', () => {
             tieu_de_hoi_dong: 'Hội đồng tháng 8',
             mo_ta_hoi_dong: 'Xét tuyển đợt bổ sung',
             dot_xettuyen_id: 3,
-            ngay_xettuyen: '2026-08-25',
+            ngay_xetduyet: '2026-08-25',
             status: 'da_dong',
         } as HoidongXettuyen;
 
@@ -104,7 +104,7 @@ describe('HoidongXettuyenComponent', () => {
             tieu_de_hoi_dong: 'Hội đồng tháng 8',
             mo_ta_hoi_dong: 'Xét tuyển đợt bổ sung',
             dot_xettuyen_id: 3,
-            ngay_xettuyen: '2026-08-25',
+            ngay_xetduyet: '2026-08-25',
             status: 'dang_mo',
         });
     });

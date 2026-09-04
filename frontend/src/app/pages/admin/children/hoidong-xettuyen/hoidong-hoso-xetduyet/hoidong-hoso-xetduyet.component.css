@@ -161,6 +161,19 @@
     background: #f8fbff;
 }
 
+.review-table tbody .review-table__row--clickable {
+    cursor: pointer;
+}
+
+.review-table tbody .review-table__row--clickable:hover td {
+    background: #f0f9ff;
+}
+
+.review-table tbody .review-table__row--clickable:focus-visible td {
+    outline: 3px solid rgba(37, 99, 235, 0.28);
+    outline-offset: -3px;
+}
+
 .review-table tbody .review-table__row--selected td {
     background: #eff6ff;
 }

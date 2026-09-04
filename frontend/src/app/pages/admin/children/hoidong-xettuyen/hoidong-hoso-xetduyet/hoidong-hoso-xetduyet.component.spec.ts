@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
 import { Registrations } from '@models/tuyensinh/registrations';
+import { AuthenticationService } from '@services/authentication.service';
 import { LocationService } from '@services/location.service';
 import { NotificationService } from '@services/notification.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
@@ -35,6 +36,7 @@ describe('HoidongHosoXetduyetComponent', () => {
         'toastSuccess',
     ]);
     const exportService = jasmine.createSpyObj<ExpHosoDaduyetService>('ExpHosoDaduyetService', ['exportExcel']);
+    const authService = jasmine.createSpyObj<AuthenticationService>('AuthenticationService', ['userHasRole']);
 
     beforeEach(() => {
         assignmentService.query.calls.reset();
@@ -44,6 +46,7 @@ describe('HoidongHosoXetduyetComponent', () => {
         exportService.exportExcel.calls.reset();
         notificationService.toastError.calls.reset();
         notificationService.toastSuccess.calls.reset();
+        authService.userHasRole.calls.reset();
 
         assignmentService.query.and.returnValue(of(emptyResponse));
         registrationsService.query.and.returnValue(of(emptyResponse));
@@ -59,6 +62,7 @@ describe('HoidongHosoXetduyetComponent', () => {
             data: [{ id: 12, ten_nganh: 'Công nghệ thông tin', ma_nganh: 'CNTT', status: 1 }],
         } as never));
         locationService.queryLocation.and.returnValue(of(emptyResponse));
+        authService.userHasRole.and.returnValue(false);
 
         TestBed.configureTestingModule({
             imports: [HoidongHosoXetduyetComponent],
@@ -70,6 +74,7 @@ describe('HoidongHosoXetduyetComponent', () => {
                 { provide: LocationService, useValue: locationService },
                 { provide: NotificationService, useValue: notificationService },
                 { provide: ExpHosoDaduyetService, useValue: exportService },
+                { provide: AuthenticationService, useValue: authService },
             ],
         });
     });
@@ -160,7 +165,7 @@ describe('HoidongHosoXetduyetComponent', () => {
             tieu_de_hoi_dong: 'Hội đồng tháng 8',
             mo_ta_hoi_dong: '',
             dot_xettuyen_id: 3,
-            ngay_xettuyen: '2026-08-17',
+            ngay_xetduyet: '2026-08-17',
             status: 'dang_mo',
         } as HoidongXettuyen;
         assignmentService.query.and.returnValue(of({
@@ -265,7 +270,7 @@ describe('HoidongHosoXetduyetComponent', () => {
             tieu_de_hoi_dong: 'Hội đồng tháng 8',
             mo_ta_hoi_dong: '',
             dot_xettuyen_id: 3,
-            ngay_xettuyen: '2026-08-17',
+            ngay_xetduyet: '2026-08-17',
             status: 'dang_mo',
         } as HoidongXettuyen);
         fixture.detectChanges();
@@ -289,5 +294,72 @@ describe('HoidongHosoXetduyetComponent', () => {
             'Hồ sơ #21 có đối tượng xét tuyển không hợp lệ',
         );
         expect(fixture.componentInstance.actionLoading()).toBeFalse();
+    });
+
+    it('opens edit drawer when a row is clicked by an allowed user', () => {
+        authService.userHasRole.and.returnValue(true);
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentRef.setInput('hoidong', { id: 8 });
+        fixture.detectChanges();
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A' },
+        } as never]);
+        fixture.detectChanges();
+
+        const row: HTMLTableRowElement | null = fixture.nativeElement.querySelector('tbody tr');
+        row?.click();
+
+        expect(row).not.toBeNull();
+        expect(authService.userHasRole).toHaveBeenCalledWith(['admin', 'manager', 'direction']);
+        expect(fixture.componentInstance.editDrawerVisible()).toBeTrue();
+        expect(fixture.componentInstance.editData()?.ho_va_ten).toBe('Nguyễn Văn A');
+    });
+
+    it('opens edit drawer for users with an allowed role', () => {
+        authService.userHasRole.and.returnValue(true);
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        const row = {
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A' },
+        } as never;
+
+        fixture.componentInstance.openEditRow(row);
+
+        expect(authService.userHasRole).toHaveBeenCalledWith(['admin', 'manager', 'direction']);
+        expect(fixture.componentInstance.editDrawerVisible()).toBeTrue();
+        expect(fixture.componentInstance.editData()?.ho_va_ten).toBe('Nguyễn Văn A');
+    });
+
+    it('does not open edit drawer for users without an allowed role', () => {
+        authService.userHasRole.and.returnValue(false);
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        const row = {
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A' },
+        } as never;
+
+        fixture.componentInstance.openEditRow(row);
+
+        expect(fixture.componentInstance.editDrawerVisible()).toBeFalse();
+        expect(fixture.componentInstance.editData()).toBeNull();
+    });
+
+    it('reloads data when the edit drawer is hidden', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentRef.setInput('hoidong', { id: 8 });
+        fixture.detectChanges();
+        assignmentService.query.calls.reset();
+
+        fixture.componentInstance.onEditDrawerHide();
+
+        expect(fixture.componentInstance.editData()).toBeNull();
+        expect(assignmentService.query).toHaveBeenCalledTimes(1);
     });
 });

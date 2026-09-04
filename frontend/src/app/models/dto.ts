@@ -48,7 +48,7 @@ export interface IctuConditionParam {
 
 export type IctuOrWhereCondition = 'like' | 'andlike' | 'orlike' | 'in' | 'orin' | 'notin' | 'ornotin' | 'and' | 'or';
 
-export type IctuQueryParamName = 'include' | 'include_by' | 'exclude' | 'exclude_by' | 'condition' | 'max' | 'min' | 'sum' | 'avg' | 'limit' | 'offset' | 'paged' | 'orderby' | 'order' | 'groupby' | 'pluck' | 'select' | 'first' | 'with';
+export type IctuQueryParamName = 'search' | 'include' | 'include_by' | 'exclude' | 'exclude_by' | 'condition' | 'max' | 'min' | 'sum' | 'avg' | 'limit' | 'offset' | 'paged' | 'orderby' | 'order' | 'groupby' | 'pluck' | 'select' | 'first' | 'with';
 
 export type IctuQueryParams = { [T in IctuQueryParamName]? : string | number }
 

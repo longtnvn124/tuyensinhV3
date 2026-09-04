@@ -236,7 +236,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
         this.loadInitial();
     }
 
-    loadData(paged: number , resetPaginator: boolean = true): void {
+    loadData(paged: number = 1, resetPaginator: boolean = true): void {
 
         let roleids = [];
         let queryParams = {};

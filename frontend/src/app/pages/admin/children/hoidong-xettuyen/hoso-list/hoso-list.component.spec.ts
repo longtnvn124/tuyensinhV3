@@ -63,7 +63,7 @@ describe('HosoListComponent', () => {
         component.ngOnInit();
 
         expect(nganhHocService.load).toHaveBeenCalledWith({ search: '' }, { limit: -1 });
-        expect(component.majorOptions()).toEqual([{ value: 12, label: 'Công nghệ thông tin' }]);
+        expect(component.majorOptions()).toEqual([{ value: 'Công nghệ thông tin', label: 'Công nghệ thông tin' }]);
     });
 
     it('filters candidates by the council admission round when opening the dialog', () => {

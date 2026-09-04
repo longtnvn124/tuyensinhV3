@@ -102,12 +102,13 @@
                                 <tbody>
                                     @for (row of records(); track row.id; let index = $index) {
                                         @let candidate = getCandidate(row);
-                                        <tr [class.review-table__row--selected]="isSelected(row.id)">
+                                        <tr [class.review-table__row--selected]="isSelected(row.id)" (click)="openEditRow(row)" [style.cursor]="canEditRow() ? 'pointer' : ''">
                                             <td class="review-col-check">
                                                 <mat-checkbox
                                                     [checked]="isSelected(row.id)"
                                                     [disabled]="actionLoading()"
                                                     (change)="toggleRow(row.id)"
+                                                    (click)="$event.stopPropagation()"
                                                     [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id)" />
                                             </td>
                                             <td class="review-col-index">{{ index + 1 }}</td>
@@ -145,3 +146,19 @@
         </main>
     }
 </section>
+
+
+
+<p-drawer #formEdit [(visible)]="editDrawerVisible" [style]="{'width':'1024px', 'max-width':'100%'}" appendTo="body"
+    position="right" (onHide)="editData.set(null)">
+
+    <ng-template #header let-headerClass="class">
+        <div style="font-size: 16px; font-weight: 600;">
+            {{editData()?.ho_va_ten ? editData()!.ho_va_ten + ' > Cập nhật' : 'Cập nhật'}}
+        </div>
+    </ng-template>
+    @if (editData(); as record) {
+    <app-form-thongtin-dangky [data]="record" (saved)="onEditSaved()"
+        (cancel)="onEditSaved()"></app-form-thongtin-dangky>
+    }
+</p-drawer>

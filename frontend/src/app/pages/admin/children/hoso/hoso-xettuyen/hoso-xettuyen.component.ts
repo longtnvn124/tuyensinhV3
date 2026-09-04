@@ -368,11 +368,11 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
 
 
-        if (s.search) {
-            conditions.push(
-                { conditionName: 'ho_va_ten', value: `%${s.search}%`, condition: IctuQueryCondition.like },
-            );
-        }
+        // if (s.search) {
+        //     conditions.push(
+        //         { conditionName: 'ho_va_ten', value: `%${s.search}%`, condition: IctuQueryCondition.like },
+        //     );
+        // }
         if (s.status !== undefined) {
             conditions.push({ conditionName: 'status', value: `${s.status}`, condition: IctuQueryCondition.equal });
         }
@@ -382,9 +382,9 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         if (s.nganh_dangky) {
             conditions.push({ conditionName: 'nganh_dangky', value: s.nganh_dangky, condition: IctuQueryCondition.equal });
         }
-        if (s.cccd) {
-            conditions.push({ conditionName: 'cccd', value: `%${s.cccd}%`, condition: IctuQueryCondition.like });
-        }
+        // if (s.cccd) {
+        //     conditions.push({ conditionName: 'cccd', value: `%${s.cccd}%`, condition: IctuQueryCondition.like });
+        // }
         if (s.dia_chi_tinh) {
             conditions.push({ conditionName: 'dia_chi_tinh', value: `${s.dia_chi_tinh}`, condition: IctuQueryCondition.equal });
         }
@@ -396,12 +396,16 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         this.state.set('loading');
         this.temp = { paged, resetPaginator };
         const conditions: IctuConditionParam[] = this.buildConditions();
-        const queryParams: IctuQueryParams = {
+        let queryParams: IctuQueryParams = {
             limit: this.dataTable.paginator.rows(),
             paged,
             order: 'DESC',
             orderby: 'created_at',
         };
+
+        if(this.searchInfo.search){
+            queryParams = {...queryParams, search: this.searchInfo.search}
+        }
         this.registrationsService.query(conditions, queryParams).pipe(
             map((res: DtoObject<Registrations[]>): Registrations[] => {
                 if (resetPaginator) return this.dataTable.paginator.setupPaginator(res);
@@ -708,7 +712,6 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     }
 
     userLabel(userId: number | undefined): string {
-        console.log(userId);
         if (!userId) return '—';
         const user = this.users().find((item: User): boolean => item.id == userId);
         if (!user) return `#${userId}`;

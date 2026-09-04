@@ -301,8 +301,8 @@ describe('HosoXettuyenComponent lookup services', () => {
 
         expect(userService.load.calls.allArgs().map(([info]) => info.role_id)).toEqual([1, 2]);
         expect(component.reviewerOptions()).toEqual([
-            { value: 7, label: 'Nguyễn A (a@example.test)' },
-            { value: 8, label: 'Trần B (b@example.test)' },
+            { id: 7, display_name: 'Nguyễn A', email: 'a@example.test' },
+            { id: 8, display_name: 'Trần B', email: 'b@example.test' },
         ]);
         expect(component.addDuyetVisible()).toBeTrue();
     });

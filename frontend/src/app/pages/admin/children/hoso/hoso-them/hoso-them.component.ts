@@ -118,7 +118,7 @@ export class HosoThemComponent implements OnInit {
             .pipe(
                 map(
                     (res: DtoObject<DotXettuyen[]>): IctuDropdownOption<number>[] =>
-                        (res.data ?? []).map((d) => ({ value: d.id, label: d.name })),
+                        (res.data ?? []).map((d) => ({ value: d.id, label: d.tieude })),
                 ),
             );
 

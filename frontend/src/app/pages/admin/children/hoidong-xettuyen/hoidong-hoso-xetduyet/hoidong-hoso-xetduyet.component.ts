@@ -24,6 +24,7 @@ import { RegistrationStatus, Registrations } from '@models/tuyensinh/registratio
 import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService, ProgressAnimationEvent } from '@services/notification.service';
+import { AuthenticationService } from '@services/authentication.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import {
     CouncilAdmissionExportPayload,
@@ -56,6 +57,8 @@ import {
 } from 'rxjs';
 import { TuyensinhStatus } from '@app/models/tuyensinh/tuyensinh-status';
 import { RegistrationsStatusService } from '@app/services/tuyensinh/registrations-status';
+import { Drawer } from "primeng/drawer";
+import { FormThongtinDangkyComponent } from "../../hoso/form-thongtin-dangky/form-thongtin-dangky.component";
 
 type ReviewDataState = 'loading' | 'data' | 'error';
 
@@ -96,6 +99,8 @@ interface StatusUpdateConfig {
         MatButton,
         MatCheckbox,
         Popover,
+        Drawer,
+        FormThongtinDangkyComponent
     ],
     templateUrl: './hoidong-hoso-xetduyet.component.html',
     styleUrl: './hoidong-hoso-xetduyet.component.css',
@@ -122,7 +127,14 @@ export class HoidongHosoXetduyetComponent {
         this.selectedCount() > 0 && !this.areAllSelected(),
     );
 
+    readonly editDrawerVisible = signal(false);
+    readonly editData = signal<Registrations | null>(null);
+
     private readonly destroyRef = inject(DestroyRef);
+    private readonly auth = inject(AuthenticationService);
+    readonly canEditRow = computed(() =>
+        this.auth.userHasRole(['admin', 'manager', 'direction']),
+    );
     private readonly assignmentService = inject(HoidongHosoThisinhService);
     private readonly registrationsService = inject(RegistrationsService);
     private readonly registrationsStatusService = inject(RegistrationsStatusService);
@@ -209,7 +221,31 @@ export class HoidongHosoXetduyetComponent {
         });
     }
 
+    openEditRow(row: HoidongHosoThisinh): void {
 
+        if (!this.canEditRow()) return;
+
+        const candidate = this.getCandidate(row);
+        if (!candidate) {
+            this.notification.toastError(`Không tìm thấy dữ liệu hồ sơ #${row.tuyensinh_id}`);
+            return;
+        }
+
+        this.editData.set(candidate);
+        this.editDrawerVisible.set(true);
+
+    }
+
+    onEditSaved(): void {
+        this.editData.set(null);
+        this.editDrawerVisible.set(false);
+        this.reload();
+    }
+
+    onEditDrawerHide(): void {
+        this.editData.set(null);
+        this.reload();
+    }
 
     getCandidate(row: HoidongHosoThisinh): Registrations | null {
         return row['_hoso'] ?? null;
@@ -309,7 +345,7 @@ export class HoidongHosoXetduyetComponent {
             })
         })).pipe(
             map(({ assignments, candidates }): HoidongHosoThisinh[] => {
-        
+
                 return this.hydrateRecords(assignments.data ?? [], candidates ?? [])
             }
             ),
@@ -551,9 +587,22 @@ export class HoidongHosoXetduyetComponent {
         controlLoading.next({ percent: 10, heading: 'Đang tải thông tin đợt xét tuyển' });
 
         this.dotXettuyenService.get(council.dot_xettuyen_id).pipe(
-            map((round: DotXettuyen): CouncilAdmissionExportPayload =>
-                this.createExportPayload(council, round, this.records()),
+            // map((round: DotXettuyen): CouncilAdmissionExportPayload =>
+
+            //     this.createExportPayload(council, round, this.records()),
+            // ),
+            switchMap((round: DotXettuyen) =>
+                this.loadRecords(council.id).pipe(
+                    map((records) =>
+                        this.createExportPayload(
+                            council,
+                            round,
+                            records,
+                        ),
+                    ),
+                ),
             ),
+
             tap((): void => {
                 controlLoading.next({ percent: 50, heading: 'Đang tạo file Excel' });
             }),
