@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1788524466553,
+  "lastScanned": 1788793426606,
   "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1788524466496,
+      "lastAccessed": 1788793426585,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1788524466497,
+      "lastAccessed": 1788793426585,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,7 +56,7 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1788524466497,
+      "lastAccessed": 1788793426585,
       "keyFiles": [
         "api-outsite.md",
         "chuanhoa-database.md",
@@ -69,15 +69,15 @@
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1788524466499,
+      "lastAccessed": 1788793426586,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 376,
-      "lastAccessed": 1788531163519,
+      "accessCount": 382,
+      "lastAccessed": 1788794326837,
       "type": "directory"
     },
     {
@@ -88,8 +88,8 @@
     },
     {
       "path": "",
-      "accessCount": 330,
-      "lastAccessed": 1788531515757,
+      "accessCount": 333,
+      "lastAccessed": 1788794295389,
       "type": "directory"
     },
     {
@@ -196,8 +196,8 @@
     },
     {
       "path": "frontend\\src\\app\\models",
-      "accessCount": 21,
-      "lastAccessed": 1788528838086,
+      "accessCount": 22,
+      "lastAccessed": 1788794034597,
       "type": "directory"
     },
     {
@@ -219,6 +219,12 @@
       "type": "file"
     },
     {
+      "path": "frontend\\src\\app\\models\\tuyensinh\\chuongtrinh-daotao.ts",
+      "accessCount": 16,
+      "lastAccessed": 1788794294209,
+      "type": "file"
+    },
+    {
       "path": "frontend\\src\\app\\models\\dto.ts",
       "accessCount": 15,
       "lastAccessed": 1787239413051,
@@ -228,12 +234,6 @@
       "path": "frontend\\src\\app\\components\\ovic-img-crop-v2\\ovic-img-crop-v2.component.html",
       "accessCount": 14,
       "lastAccessed": 1787219398255,
-      "type": "file"
-    },
-    {
-      "path": "frontend\\src\\app\\models\\tuyensinh\\chuongtrinh-daotao.ts",
-      "accessCount": 13,
-      "lastAccessed": 1787019089466,
       "type": "file"
     },
     {

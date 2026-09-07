@@ -564,7 +564,10 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 controlLoading.next({ percent: 70, heading: 'Đang tạo file Excel' });
             }),
             switchMap((payload: HosoTuyensinhExportPayload): Observable<void> =>
-                from(this.exportService.exportExcel(payload)),
+            {
+                return from(this.exportService.exportExcel(payload));
+            }
+
             ),
             tap((): void => {
                 controlLoading.next({ percent: 100, heading: 'Đã xuất dữ liệu' });

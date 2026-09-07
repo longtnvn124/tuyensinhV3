@@ -1,7 +1,0 @@
-{
-  "tool_name": "PowerShell",
-  "tool_input_preview": "{\"command\":\"npm --prefix frontend test -- --watch=false --browsers=ChromeHeadless --include=\\\"src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.spec.t...",
-  "error": "Exit code 1\n> tuyesinhv3@1.0.0 test\n> ng test --watch=false --browsers=ChromeHeadless --include=src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.spec.ts\n\n\u001b[33m>\u001b[39m Building...\r\n\u001b[32m√\u001b[39m Building...\r\nApplication bundle generation failed. [6.395 seconds] - 2026-09-04T14:22:03.681Z\n\n\u001b[1m\u001b[31m\u001b[31mX \u001b[41;31m[\u001b[41;97mERROR\u001b[41;31m]\u001b[0m \u001b[1mTS2322: Type '{ id: number; display_name: string; email: string; }' is not assignable to type 'ExpectedRecu...",
-  "timestamp": "2026-09-04T14:22:04.031Z",
-  "retry_count": 1
-}

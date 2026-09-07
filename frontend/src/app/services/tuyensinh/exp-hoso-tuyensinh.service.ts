@@ -20,7 +20,7 @@ import ExcelJS, {
 export interface HosoTuyensinhExportPayload {
     records: readonly Registrations[];
     majors: readonly Pick<Nganhhoc, 'id' | 'ma_nganh' | 'ten_nganh'>[];
-   
+
     rounds: readonly Pick<DotXettuyen, 'id' | 'tieude'>[];
     regions: readonly Pick<Locations, 'id' | 'name'>[];
     provinces: readonly Pick<Locations, 'id' | 'name'>[];
@@ -40,7 +40,7 @@ interface CodeNameLookup {
 
 const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const SHEET_NAME = 'DL hồ sơ';
-const COLUMN_COUNT = 44;
+const COLUMN_COUNT = 42;
 const LAST_COLUMN = 'AR';
 const BASE_FONT: Partial<Font> = { name: 'Times New Roman', size: 11 };
 const THIN_BORDER: Partial<Border> = {
@@ -72,11 +72,11 @@ const GROUPS: readonly ExportGroup[] = [
     { name: 'Quản lý hồ sơ', startColumn: 1, endColumn: 6 },
     { name: 'Thông tin cá nhân', startColumn: 7, endColumn: 18 },
     { name: 'Địa chỉ', startColumn: 19, endColumn: 22 },
-    { name: 'Đăng ký xét tuyển', startColumn: 23, endColumn: 29 },
-    { name: 'Điểm', startColumn: 30, endColumn: 32 },
-    { name: 'Bằng THPT', startColumn: 33, endColumn: 36 },
-    { name: 'Văn bằng chuyên môn', startColumn: 37, endColumn: 41 },
-    { name: 'Theo dõi nghiệp vụ', startColumn: 42, endColumn: 44 },
+    { name: 'Đăng ký xét tuyển', startColumn: 23, endColumn: 27 },
+    { name: 'Điểm', startColumn: 28, endColumn: 30 },
+    { name: 'Bằng THPT', startColumn: 31, endColumn: 34 },
+    { name: 'Văn bằng chuyên môn', startColumn: 35, endColumn: 39 },
+    { name: 'Theo dõi nghiệp vụ', startColumn: 40, endColumn: 42 },
 ];
 const HEADERS: readonly string[] = [
     'STT',
@@ -103,8 +103,8 @@ const HEADERS: readonly string[] = [
     'Địa chỉ đầy đủ',
     'Mã ngành',
     'Tên ngành',
-    'Mã CTĐT',
-    'Tên CTĐT',
+    // 'Mã CTĐT',
+    // 'Tên CTĐT',
     'Đối tượng',
     'Hình thức xét tuyển',
     'Nguồn nộp',
@@ -113,7 +113,7 @@ const HEADERS: readonly string[] = [
     'Điểm cộng',
     'Văn bằng tốt nghiệp',
     'Năm tốt nghiệp',
-    'Số hiệu',
+    'Mã bằng',
     'Nơi cấp',
     'Văn bằng',
     'Ngành tốt nghiệp',
@@ -203,9 +203,9 @@ export class ExpHosoTuyensinhService {
         worksheet: Worksheet,
         payload: HosoTuyensinhExportPayload,
     ): void {
-        const majorMap = new Map<number, CodeNameLookup>(
+        const majorMap = new Map<string, CodeNameLookup>(
             payload.majors.map(major => [
-                major.id,
+                major.ten_nganh,
                 { code: this.text(major.ma_nganh), name: this.text(major.ten_nganh) },
             ]),
         );
@@ -227,7 +227,7 @@ export class ExpHosoTuyensinhService {
                 record,
                 index + 1,
                 majorMap,
-        
+
                 roundMap,
                 regionMap,
                 provinceMap,
@@ -240,7 +240,7 @@ export class ExpHosoTuyensinhService {
     private recordValues(
         record: Registrations,
         order: number,
-        majors: ReadonlyMap<number, CodeNameLookup>,
+        majors: ReadonlyMap<string, CodeNameLookup>,
         rounds: ReadonlyMap<number, string>,
         regions: ReadonlyMap<number, string>,
         provinces: ReadonlyMap<number, string>,
@@ -248,8 +248,8 @@ export class ExpHosoTuyensinhService {
     ): CellValue[] {
         const [familyName, givenName] = this.splitName(record.ho_va_ten);
         const fullName = this.text(record.ho_va_ten).trim().replace(/\s+/g, ' ');
-        const major = record.nganh_id == null ? undefined : majors.get(record.nganh_id);
-    
+        const major = record.nganh_dangky == null ? undefined : majors.get(record.nganh_dangky);
+
         const region = this.lookup(regions, record.dia_chi_tinh);
         const province = this.lookup(provinces, record.dia_chi_xa);
         const detailedAddress = record.dia_chi_nha?.trim() ?? '';
@@ -280,7 +280,7 @@ export class ExpHosoTuyensinhService {
             province,
             detailedAddress,
             fullAddress,
-            major?.code ?? this.idText(record.nganh_id),
+            major?.code ?? record.nganh_dangky,
             major?.name ?? this.idText(record.nganh_id),
             record.doituong ?? '',
             record.hinhthuc_xettuyen ?? '',
@@ -290,7 +290,7 @@ export class ExpHosoTuyensinhService {
             record.diem_cong ?? '',
             record.van_bang_tn ?? '',
             record.nam_tn ?? '',
-            record.sohieu_vb ?? '',
+            record.van_bang_tn_sohieu ?? '',
             record.tn_noicap ?? '',
             record.vb_chuyenmon ?? '',
             record.vb_chuyenmon_nganh ?? '',
