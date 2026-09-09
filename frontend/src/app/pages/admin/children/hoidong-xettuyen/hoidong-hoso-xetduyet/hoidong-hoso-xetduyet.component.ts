@@ -734,7 +734,7 @@ export class HoidongHosoXetduyetComponent {
                 .times(priorityScore);
 
         return Decimal.min(originalScore.plus(actualPriorityScore), maximumScore)
-            .toDecimalPlaces(1, Decimal.ROUND_HALF_UP)
+            .toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
             .toNumber();
     }
 

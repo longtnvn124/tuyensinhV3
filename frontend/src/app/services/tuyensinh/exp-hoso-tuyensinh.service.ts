@@ -40,8 +40,8 @@ interface CodeNameLookup {
 
 const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const SHEET_NAME = 'DL hồ sơ';
-const COLUMN_COUNT = 42;
-const LAST_COLUMN = 'AR';
+const COLUMN_COUNT = 43;
+const LAST_COLUMN = 'AS';
 const BASE_FONT: Partial<Font> = { name: 'Times New Roman', size: 11 };
 const THIN_BORDER: Partial<Border> = {
     style: 'thin',
@@ -76,7 +76,7 @@ const GROUPS: readonly ExportGroup[] = [
     { name: 'Điểm', startColumn: 28, endColumn: 30 },
     { name: 'Bằng THPT', startColumn: 31, endColumn: 34 },
     { name: 'Văn bằng chuyên môn', startColumn: 35, endColumn: 39 },
-    { name: 'Theo dõi nghiệp vụ', startColumn: 40, endColumn: 42 },
+    { name: 'Theo dõi nghiệp vụ', startColumn: 40, endColumn: 43 },
 ];
 const HEADERS: readonly string[] = [
     'STT',
@@ -120,14 +120,15 @@ const HEADERS: readonly string[] = [
     'Nơi cấp',
     'Số hiệu',
     'Năm tốt nghiệp',
-    'Tài khoản phụ trách',
-    'Cán bộ tư vấn',
+    'Tài khoản nhập DL',
+    'Tài khoản sở hữu HS',
+    'Tài khoản Duyệt HS',
     'Ghi chú',
 ];
 const COLUMN_WIDTHS: readonly number[] = [
     7, 12, 28, 22, 18, 18, 17, 16, 24, 28, 22, 14, 16, 12, 14, 22, 16, 26,
     22, 24, 28, 42, 16, 30, 16, 30, 17, 22, 18, 16, 16, 14, 24, 17, 18, 26,
-    22, 26, 26, 18, 17, 24, 24, 38,
+    22, 26, 26, 28, 28, 28, 24, 38,
 ];
 const STATUS_LABELS = new Map<number, string>([
     [-1, 'Không trúng tuyển'],
@@ -297,6 +298,7 @@ export class ExpHosoTuyensinhService {
             record.vb_chuyenmon_noicap ?? '',
             record.vb_chuyenmon_sohieu ?? '',
             record.vb_chuyenmon_namtn ?? '',
+            this.lookup(users, record.created_by),
             this.lookup(users, record.owner_by),
             this.lookup(users, record.nguoi_tuvan),
             record.content ?? '',

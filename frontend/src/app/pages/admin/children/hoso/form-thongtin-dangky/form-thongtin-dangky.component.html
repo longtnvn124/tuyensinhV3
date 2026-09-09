@@ -387,7 +387,7 @@
 
 
                 <!-- ════════════════════════════════════════════
-                    Section IV: Văn bằng chuyên môn đã tốt nghiệp 
+                    Section IV: Văn bằng chuyên môn đã tốt nghiệp
                     ════════════════════════════════════════════ -->
                 <section class="hoso-form__section">
                     <div class="hoso-form__section-title">IV. Văn bằng chuyên môn đã tốt nghiệp</div>
@@ -465,10 +465,10 @@
                                     <label class="ictu-form__label">Đợt xét tuyển</label>
                                     <p-select class="w-100" [options]="listDotXetTuyen()" appendTo="body"
                                         formControlName="dotxettuyen_id" placeholder="Chọn đợt" optionLabel="tieude"
-                                        optionValue="id" [showClear]="false" [disabled]="!isManager()" />
+                                        optionValue="id" [showClear]="false" [disabled]="!isManager() && !isDuyethoso()" />
                                 </div>
                             </div>
-                            
+
                             <!-- @if (showDiemTb()) {
                             <div class="col flex-div">
                                 <div class="ictu-form__row">
@@ -605,7 +605,7 @@
                                         [accept]="'.jpg,.png,.jpeg'"></ovic-avata-type-multiple>
                                 </div>
                             </div>
-                            
+
                             <div class="col-6 flex-div">
                                 <div class="ictu-form__row">
                                     <label class="ictu-form__label ">Giấy tờ chứng nhận thuộc đối tượng ưu tiên</label>
