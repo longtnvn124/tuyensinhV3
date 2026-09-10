@@ -362,4 +362,46 @@ describe('HoidongHosoXetduyetComponent', () => {
         expect(fixture.componentInstance.editData()).toBeNull();
         expect(assignmentService.query).toHaveBeenCalledTimes(1);
     });
+
+    it('filters loaded records by accent-insensitive candidate name', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        const records = [{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn Ánh', dien_thoai: '0912345678', cccd: '012345678901' },
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, ho_va_ten: 'Trần Thị Bình', dien_thoai: '0987654321', cccd: '987654321012' },
+        }] as never;
+        fixture.componentInstance.records.set(records);
+
+        fixture.componentInstance.searchTerm.set('nguyen van anh');
+
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([1]);
+        expect(fixture.componentInstance.records()).toBe(records);
+    });
+
+    it('filters loaded records by partial phone number or CCCD', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A', dien_thoai: '0912 345 678', cccd: '012345678901' },
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, ho_va_ten: 'Trần Thị B', dien_thoai: '0987654321', cccd: '987654321012' },
+        }] as never);
+
+        fixture.componentInstance.searchTerm.set('345-678');
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([1]);
+
+        fixture.componentInstance.searchTerm.set('4321012');
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([2]);
+    });
 });

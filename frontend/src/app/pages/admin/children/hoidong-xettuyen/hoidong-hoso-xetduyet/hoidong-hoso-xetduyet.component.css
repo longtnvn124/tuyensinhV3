@@ -19,12 +19,59 @@
     border-radius: 8px;
 }
 
+.review-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 320px;
+    min-width: 0;
+    max-width: 420px;
+    width: 100%;
+    height: 40px;
+}
+
+.review-search-icon {
+    position: absolute;
+    left: 10px;
+    font-size: 16px;
+    color: var(--accent-500, #94a3b8);
+    pointer-events: none;
+}
+
+.review-search-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px 0 36px;
+    border: 1px solid var(--accent-200, #e2e8f0);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--accent-800, #1e293b);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.review-search-input:focus-visible {
+    border-color: var(--primary-600, #2563eb);
+    outline: none;
+}
+
+.review-search-input::placeholder {
+    color: var(--accent-400, #cbd5e1);
+}
+
 .review-export-button {
+    flex: 0 0 auto;
+    min-width: 90px;
+    height: 40px;
+    padding: 0 14px !important;
+    white-space: nowrap;
     background: var(--primary-600, #2563eb) !important;
     color: #fff !important;
 }
 
 .review-menu-button {
+    flex: 0 0 40px;
     width: 40px;
     height: 40px;
     border: 1px solid var(--accent-200, #e2e8f0);
@@ -333,7 +380,12 @@ button:focus-visible,
     }
 
     .review-selection-bar__actions {
-        margin-left: auto;
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .review-search-wrap {
+        max-width: none;
     }
 
     .review-state {

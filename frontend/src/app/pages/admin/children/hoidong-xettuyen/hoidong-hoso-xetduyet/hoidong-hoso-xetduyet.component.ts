@@ -95,13 +95,14 @@ interface StatusUpdateConfig {
 @Component({
     selector: 'app-hoidong-hoso-xetduyet',
     imports: [
-        LoadingProgressComponent,
-        MatButton,
-        MatCheckbox,
-        Popover,
-        Drawer,
-        FormThongtinDangkyComponent
-    ],
+    LoadingProgressComponent,
+    MatButton,
+    MatCheckbox,
+    Popover,
+    Drawer,
+    FormThongtinDangkyComponent,
+    
+],
     templateUrl: './hoidong-hoso-xetduyet.component.html',
     styleUrl: './hoidong-hoso-xetduyet.component.css',
     standalone: true,
@@ -115,16 +116,30 @@ export class HoidongHosoXetduyetComponent {
     readonly majorOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     readonly provinceOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     readonly records = signal<readonly HoidongHosoThisinh[]>([]);
+    readonly searchTerm = signal<string>('');
+
+    readonly filteredRecords = computed((): readonly HoidongHosoThisinh[] => {
+        const keyword = this.normalizeSearchText(this.searchTerm());
+        if (!keyword) {
+            return this.records();
+        }
+        return this.records().filter((row: HoidongHosoThisinh): boolean =>
+            this.matchSearchRow(row, keyword),
+        );
+    });
 
     private readonly majors = signal<readonly Nganhhoc[]>([]);
     readonly selectedIds = signal<ReadonlySet<number>>(new Set<number>());
     readonly selectedCount = computed((): number => this.selectedIds().size);
     readonly hasSelection = computed((): boolean => this.selectedCount() > 0);
-    readonly areAllSelected = computed((): boolean =>
-        this.records().length > 0 && this.selectedCount() === this.records().length,
-    );
+    readonly areAllSelected = computed((): boolean => {
+        const visibleRecords = this.filteredRecords();
+        return visibleRecords.length > 0
+            && visibleRecords.every((row: HoidongHosoThisinh): boolean => this.selectedIds().has(row.id));
+    });
     readonly isSelectionIndeterminate = computed((): boolean =>
-        this.selectedCount() > 0 && !this.areAllSelected(),
+        this.filteredRecords().some((row: HoidongHosoThisinh): boolean => this.selectedIds().has(row.id))
+        && !this.areAllSelected(),
     );
 
     readonly editDrawerVisible = signal(false);
@@ -194,11 +209,18 @@ export class HoidongHosoXetduyetComponent {
 
     toggleAll(): void {
         if (this.actionLoading()) return;
+        const visibleRecords = this.filteredRecords();
+        const nextSelection = new Set(this.selectedIds());
         if (this.areAllSelected()) {
-            this.clearSelection();
-            return;
+            visibleRecords.forEach((row: HoidongHosoThisinh): void => {
+                nextSelection.delete(row.id);
+            });
+        } else {
+            visibleRecords.forEach((row: HoidongHosoThisinh): void => {
+                nextSelection.add(row.id);
+            });
         }
-        this.selectedIds.set(new Set(this.records().map((row: HoidongHosoThisinh): number => row.id)));
+        this.selectedIds.set(nextSelection);
     }
 
     clearSelection(): void {
@@ -251,6 +273,13 @@ export class HoidongHosoXetduyetComponent {
         return row['_hoso'] ?? null;
     }
 
+    onSearchInput(event: Event): void {
+        const input = event.target;
+        if (input instanceof HTMLInputElement) {
+            this.searchTerm.set(input.value);
+        }
+    }
+
     getMajorLabel(majorId: number | undefined): string {
         return this.lookupLabel(this.majorOptions(), majorId);
     }
@@ -263,6 +292,29 @@ export class HoidongHosoXetduyetComponent {
             return province;
         }
         return this.lookupLabel(this.provinceOptions(), province, `${province}`);
+    }
+
+    private normalizeSearchText(value: string | undefined | null): string {
+        return (value ?? '')
+            .trim()
+            .toLowerCase()
+            .replace(/đ/g, 'd')
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]/g, '');
+    }
+
+    private matchSearchRow(row: HoidongHosoThisinh, keyword: string): boolean {
+        const candidate = this.getCandidate(row);
+        if (!candidate) {
+            return false;
+        }
+        const candidateAny = candidate as unknown as { cccd_so?: string };
+        const cccdValue = candidate.cccd || candidateAny.cccd_so;
+
+        return this.normalizeSearchText(candidate.ho_va_ten).includes(keyword)
+            || this.normalizeSearchText(candidate.dien_thoai).includes(keyword)
+            || this.normalizeSearchText(cccdValue).includes(keyword);
     }
 
     getStatusLabel(status: RegistrationStatus | undefined): string {
@@ -285,6 +337,7 @@ export class HoidongHosoXetduyetComponent {
 
     private prepareForLoad(hoidong: HoidongXettuyen | null): void {
         this.clearSelection();
+        this.searchTerm.set('');
         this.records.set([]);
         this.majors.set([]);
         this.majorOptions.set([]);

@@ -26,10 +26,23 @@
                             <div class="review-selection-bar__selection">
                                 <span class="review-selection-bar__count">
                                     Đã chọn <strong>{{ selectedCount() }}</strong> / {{ records().length }} hồ sơ
+                                    @if (searchTerm()) {
+                                        <span>(hiển thị {{ filteredRecords().length }})</span>
+                                    }
                                 </span>
                             </div>
 
                             <div class="review-selection-bar__actions">
+                                <div class="review-search-wrap">
+                                    <i class="ti ti-search review-search-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="search"
+                                        class="review-search-input"
+                                        placeholder="CCCD, họ tên, SĐT..."
+                                        aria-label="Tìm kiếm hồ sơ theo CCCD, họ và tên hoặc số điện thoại"
+                                        [value]="searchTerm()"
+                                        (input)="onSearchInput($event)" />
+                                </div>
                                 <button
                                     type="button"
                                     class="review-menu-button"
@@ -38,8 +51,7 @@
                                     [disabled]="actionLoading()"
                                     (click)="batchActions.toggle($event)">
                                     <i class="ti ti-dots-vertical" aria-hidden="true"></i>
-                                </button>
-                                <p-popover #batchActions styleClass="ictu-popover-no-padding">
+                                     <p-popover #batchActions styleClass="ictu-popover-no-padding">
                                     <ul class="review-actions-menu">
                                         <li>
                                             <button
@@ -63,6 +75,9 @@
                                         </li>
                                     </ul>
                                 </p-popover>
+                                </button>
+                               
+                                
                                 <button
                                     type="button"
                                     class="review-export-button"
@@ -75,6 +90,7 @@
                             </div>
                         </div>
 
+                        @if (filteredRecords().length) {
                         <div class="review-table-wrap">
                             <table class="review-table">
                                 <caption class="visually-hidden">Danh sách hồ sơ xét duyệt</caption>
@@ -100,7 +116,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @for (row of records(); track row.id; let index = $index) {
+                                    @for (row of filteredRecords(); track row.id; let index = $index) {
                                         @let candidate = getCandidate(row);
                                         <tr [class.review-table__row--selected]="isSelected(row.id)" (click)="openEditRow(row)" [style.cursor]="canEditRow() ? 'pointer' : ''">
                                             <td class="review-col-check">
@@ -132,6 +148,12 @@
                                 </tbody>
                             </table>
                         </div>
+                        } @else {
+                            <div class="review-state review-state--empty" role="status">
+                                <h3>Không tìm thấy hồ sơ</h3>
+                                <p>Thử từ khóa khác hoặc xóa nội dung tìm kiếm.</p>
+                            </div>
+                        }
                     } @else {
                         <div class="review-state review-state--empty">
                             <span class="review-state__icon">
