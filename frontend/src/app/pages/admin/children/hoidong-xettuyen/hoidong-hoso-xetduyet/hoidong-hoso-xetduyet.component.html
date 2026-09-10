@@ -19,7 +19,7 @@
                             Tải lại dữ liệu
                         </button>
                     </div>
-                }
+                } 
                 @case ('data') {
                     @if (records().length) {
                         <div class="review-selection-bar">
@@ -109,12 +109,12 @@
                                                     [disabled]="actionLoading()"
                                                     (change)="toggleRow(row.id)"
                                                     (click)="$event.stopPropagation()"
-                                                    [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id)" />
+                                                    [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id || 'Hồ sơ chưa xác định')" />
                                             </td>
                                             <td class="review-col-index">{{ index + 1 }}</td>
                                             <td class="review-col-name">
-                                                <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id) }}</strong>
-                                                <small>Mã hồ sơ: {{ row['_hoso']['ma_hoso'] ? row['_hoso']['ma_hoso'] : row.tuyensinh_id }}</small>
+                                                <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id || 'Hồ sơ chưa xác định') }}</strong>
+                                                <small>Mã hồ sơ: {{ row['_hoso'] && row['_hoso']['ma_hoso'] ? row['_hoso']['ma_hoso'] : (row.tuyensinh_id || 'Hồ sơ chưa xác định') }}</small>
                                             </td>
                                             <td>{{ candidate?.nganh_dangky}}</td>
                                             <td>{{ getProvinceLabel(candidate?.dia_chi_tinh) }}</td>

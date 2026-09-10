@@ -47,6 +47,9 @@
                                     <label>Số CCCD</label>
                                     <input pInputText [(ngModel)]="searchInfo.cccd" placeholder="Số CCCD" />
                                 </div> -->
+
+
+                                
                                 <div class="filter-panel__item">
                                     <label>Ngành</label>
                                     <p-select [options]="majorFilterOptions()" appendTo="body"
@@ -61,9 +64,12 @@
                                 </div>
                             </div>
 
-                            <!-- @if (!isduyethoso) {
-                              
-                            } -->
+                            @if (isAdmin) {
+                              <div class="">
+                                    <mat-checkbox [checked]="onlyByUser()"
+                                    (change)="onOnlyByUserChange($event.checked)">Hồ sơ của tôi</mat-checkbox>
+                                </div> 
+                            }
 
                             <div class="filter-panel__row">
                                 <div class="filter-panel__item filter-panel__item--actions">

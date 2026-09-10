@@ -154,6 +154,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     showAdvancedFilter: WritableSignal<boolean> = signal<boolean>(false);
     readonly onlyMyRecords = signal<boolean>(false);// hồ sơ xét duyệt
+    readonly onlyByUser = signal<boolean>(false);// hồ sơ của tôi 
 
     // ── Lookups ─────────────────────────────────────────────────
 
@@ -328,15 +329,23 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
         if (this.onlyMyRecords()) {
 
-                conditions.push({
-                    conditionName: 'nguoi_tuvan',
-                    value: userId.toString(),
-                    condition: IctuQueryCondition.equal,
-                })
+            conditions.push({
+                conditionName: 'nguoi_tuvan',
+                value: userId.toString(),
+                condition: IctuQueryCondition.equal,
+            })
         } else {
             if (this.isAdmin) {
-                conditions.push(
-                );
+
+                if (this.onlyByUser()) {
+
+                    conditions.push({
+                        conditionName: 'owner_by',
+                        value: userId.toString(),
+                        condition: IctuQueryCondition.equal,
+                    }
+                    );
+                }
             }
 
             // if (this.isduyethoso) {
@@ -403,8 +412,8 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             orderby: 'created_at',
         };
 
-        if(this.searchInfo.search){
-            queryParams = {...queryParams, search: this.searchInfo.search}
+        if (this.searchInfo.search) {
+            queryParams = { ...queryParams, search: this.searchInfo.search }
         }
         this.registrationsService.query(conditions, queryParams).pipe(
             map((res: DtoObject<Registrations[]>): Registrations[] => {
@@ -443,7 +452,21 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     }
 
     onOnlyMyRecordsChange(checked: boolean): void {
+
+        if (checked == true) {
+            this.onlyByUser.set(false);
+        }
         this.onlyMyRecords.set(checked);
+        this.loadData(1, true);
+    }
+
+    onOnlyByUserChange(checked: boolean): void {
+        console.log(checked);
+        this.onlyByUser.set(checked);
+
+        if (checked == true) {
+            this.onlyMyRecords.set(false);
+        }
         this.loadData(1, true);
     }
 
@@ -563,8 +586,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             tap((): void => {
                 controlLoading.next({ percent: 70, heading: 'Đang tạo file Excel' });
             }),
-            switchMap((payload: HosoTuyensinhExportPayload): Observable<void> =>
-            {
+            switchMap((payload: HosoTuyensinhExportPayload): Observable<void> => {
                 return from(this.exportService.exportExcel(payload));
             }
 
@@ -823,20 +845,20 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         });
     }
 
-    getTime(time :string){
-        if(!time){
+    getTime(time: string) {
+        if (!time) {
             return '-';
         }
-       const date = new Date(time);
+        const date = new Date(time);
 
-    if (isNaN(date.getTime())) {
-        return '-';
-    }
+        if (isNaN(date.getTime())) {
+            return '-';
+        }
 
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
 
-    return `${day}/${month}/${year}`;
+        return `${day}/${month}/${year}`;
     }
 }

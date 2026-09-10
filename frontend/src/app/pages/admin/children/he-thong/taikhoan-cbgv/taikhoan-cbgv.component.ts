@@ -169,6 +169,7 @@ export default class TaikhoanCbgvComponent implements OnInit, OnDestroy, IctuBas
                         ? this.userService.create({
                             username: this.formField('username').value,
                             ...info,
+                            status:1
                         } as Partial<CbgvUser>)
                         : this.userService.update(this.formControl.object.id, info);
                     const message: string = this.formControl.isFormAdd
