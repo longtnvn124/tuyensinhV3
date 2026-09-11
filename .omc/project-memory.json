@@ -10,7 +10,7 @@
   },
   "build": {
     "buildCommand": null,
-    "testCommand": null,
+    "testCommand": "cd frontend && npm test -- --include='src/app/services/tuyensinh/exportDlTuyensinhCu.service.spec.ts' --watch=false",
     "lintCommand": null,
     "devCommand": null,
     "scripts": {}
@@ -76,20 +76,20 @@
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 387,
-      "lastAccessed": 1789063964283,
+      "accessCount": 395,
+      "lastAccessed": 1789119070265,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app",
-      "accessCount": 350,
-      "lastAccessed": 1789060964847,
+      "accessCount": 357,
+      "lastAccessed": 1789118881403,
       "type": "directory"
     },
     {
       "path": "",
-      "accessCount": 334,
-      "lastAccessed": 1789060928583,
+      "accessCount": 346,
+      "lastAccessed": 1789113980301,
       "type": "directory"
     },
     {
@@ -141,16 +141,16 @@
       "type": "file"
     },
     {
+      "path": "frontend",
+      "accessCount": 39,
+      "lastAccessed": 1789113981427,
+      "type": "directory"
+    },
+    {
       "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
       "accessCount": 38,
       "lastAccessed": 1787737235151,
       "type": "file"
-    },
-    {
-      "path": "frontend",
-      "accessCount": 38,
-      "lastAccessed": 1789061210389,
-      "type": "directory"
     },
     {
       "path": "plan\\database.md",
@@ -190,8 +190,8 @@
     },
     {
       "path": "frontend\\src\\app\\models\\ictu-base-model.ts",
-      "accessCount": 22,
-      "lastAccessed": 1788528113396,
+      "accessCount": 23,
+      "lastAccessed": 1789097673009,
       "type": "file"
     },
     {

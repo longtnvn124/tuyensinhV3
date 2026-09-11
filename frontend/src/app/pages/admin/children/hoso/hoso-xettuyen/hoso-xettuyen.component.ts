@@ -115,7 +115,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     readonly exportLoading = signal(false);
 
     listDataStatus: TuyensinhStatus[];
-
+    // readonly statusOptions= TH_XETTUYEN;
     // ── Search / Filter ─────────────────────────────────────────
 
     searchInfo: {
@@ -130,6 +130,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         noi_sinh?: number;
         dan_toc?: string;
         ctdt_id?: number;
+        
     } = {
             search: '',
             status: undefined,

@@ -11,9 +11,13 @@ import {
     CouncilAdmissionExportPayload,
     ExpHosoDaduyetService,
 } from '@services/tuyensinh/exp-hoso-daduyet.service';
+import {
+    ExportDlTuyensinhCuService,
+} from '@services/tuyensinh/exportDlTuyensinhCu.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
 import { RegistrationsService } from '@services/tuyensinh/registrations.service';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
+import { UserService } from '@services/user.service';
 import { HoidongHosoXetduyetComponent } from './hoidong-hoso-xetduyet.component';
 
 describe('HoidongHosoXetduyetComponent', () => {
@@ -29,6 +33,7 @@ describe('HoidongHosoXetduyetComponent', () => {
     const dotXettuyenService = jasmine.createSpyObj<DotXettuyenService>('DotXettuyenService', ['get']);
     const nganhHocService = jasmine.createSpyObj<NganhhocService>('NganhhocService', ['load']);
     const locationService = jasmine.createSpyObj<LocationService>('LocationService', ['queryLocation']);
+    const userService = jasmine.createSpyObj<UserService>('UserService', ['query']);
     const notificationService = jasmine.createSpyObj<NotificationService>('NotificationService', [
         'progressBarWithPercent',
         'startProgressAnimation',
@@ -36,6 +41,7 @@ describe('HoidongHosoXetduyetComponent', () => {
         'toastSuccess',
     ]);
     const exportService = jasmine.createSpyObj<ExpHosoDaduyetService>('ExpHosoDaduyetService', ['exportExcel']);
+    const legacyExportService = jasmine.createSpyObj<ExportDlTuyensinhCuService>('ExportDlTuyensinhCuService', ['exportExcel']);
     const authService = jasmine.createSpyObj<AuthenticationService>('AuthenticationService', ['userHasRole']);
 
     beforeEach(() => {
@@ -44,6 +50,7 @@ describe('HoidongHosoXetduyetComponent', () => {
         registrationsService.update.calls.reset();
         dotXettuyenService.get.calls.reset();
         exportService.exportExcel.calls.reset();
+        legacyExportService.exportExcel.calls.reset();
         notificationService.toastError.calls.reset();
         notificationService.toastSuccess.calls.reset();
         authService.userHasRole.calls.reset();
@@ -57,10 +64,14 @@ describe('HoidongHosoXetduyetComponent', () => {
             thoi_gian_ket_thuc: '2026-08-31',
         } as never));
         exportService.exportExcel.and.returnValue(Promise.resolve());
+        legacyExportService.exportExcel.and.returnValue(Promise.resolve());
         nganhHocService.load.and.returnValue(of({
             ...emptyResponse,
             data: [{ id: 12, ten_nganh: 'Công nghệ thông tin', ma_nganh: 'CNTT', status: 1 }],
         } as never));
+        locationService.queryLocation.calls.reset();
+        userService.query.calls.reset();
+        userService.query.and.returnValue(of(emptyResponse));
         locationService.queryLocation.and.returnValue(of(emptyResponse));
         authService.userHasRole.and.returnValue(false);
 
@@ -72,8 +83,10 @@ describe('HoidongHosoXetduyetComponent', () => {
                 { provide: DotXettuyenService, useValue: dotXettuyenService },
                 { provide: NganhhocService, useValue: nganhHocService },
                 { provide: LocationService, useValue: locationService },
+                { provide: UserService, useValue: userService },
                 { provide: NotificationService, useValue: notificationService },
                 { provide: ExpHosoDaduyetService, useValue: exportService },
+                { provide: ExportDlTuyensinhCuService, useValue: legacyExportService },
                 { provide: AuthenticationService, useValue: authService },
             ],
         });
@@ -171,14 +184,15 @@ describe('HoidongHosoXetduyetComponent', () => {
         assignmentService.query.and.returnValue(of({
             ...emptyResponse,
             data: [
-                { id: 1, hoidong_id: 8, hoso_id: 21, ket_qua: '', ghi_chu: 'Đã kiểm tra' },
-                { id: 2, hoidong_id: 8, hoso_id: 22, ket_qua: '', ghi_chu: '' },
+                { id: 1, hoidong_id: 8, tuyensinh_id: 21, ket_qua: '', ghi_chu: 'Đã kiểm tra' },
+                { id: 2, hoidong_id: 8, tuyensinh_id: 22, ket_qua: '', ghi_chu: '' },
             ],
         } as never));
         registrationsService.query.and.returnValue(of({
             ...emptyResponse,
             data: [{
                 id: 21,
+                created_at: '2026-09-01 00:00:00',
                 ho_va_ten: ' Nguyễn Văn A ',
                 gioi_tinh: 'nam',
                 ngay_sinh: '2005-06-15',
@@ -196,6 +210,7 @@ describe('HoidongHosoXetduyetComponent', () => {
                 diem_cong: 0.5,
             }, {
                 id: 22,
+                created_at: '2026-09-02 08:30:00',
                 ho_va_ten: 'Trần Thị B',
                 gioi_tinh: 'nu',
                 status: 3,
@@ -207,9 +222,13 @@ describe('HoidongHosoXetduyetComponent', () => {
                 diem_cong: 0.5,
             }],
         } as never));
-        locationService.queryLocation.and.returnValue(of({
+        locationService.queryLocation.and.returnValues(
+            of({ ...emptyResponse, data: [{ id: 9, name: 'Thái Nguyên' }] } as never),
+            of({ ...emptyResponse, data: [{ id: 101, name: 'Phường Phan Đình Phùng' }] } as never),
+        );
+        userService.query.and.returnValue(of({
             ...emptyResponse,
-            data: [{ id: 9, name: 'Thái Nguyên' }],
+            data: [{ id: 5, display_name: 'Cán bộ tuyển sinh' }],
         } as never));
 
         const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
@@ -295,6 +314,159 @@ describe('HoidongHosoXetduyetComponent', () => {
         );
         expect(fixture.componentInstance.actionLoading()).toBeFalse();
     });
+
+    it('exports legacy raw candidates to ExportDlTuyensinhCuService when records are created before 2026-09-01', fakeAsync(() => {
+        const council = {
+            id: 8,
+            tieu_de_hoi_dong: 'Hội đồng tháng 8',
+            dot_xettuyen_id: 3,
+        } as HoidongXettuyen;
+        assignmentService.query.and.returnValue(of({
+            ...emptyResponse,
+            data: [
+                { id: 1, hoidong_id: 8, tuyensinh_id: 21, ket_qua: '', ghi_chu: 'Ghi chú cũ' },
+            ],
+        } as never));
+        registrationsService.query.and.returnValue(of({
+            ...emptyResponse,
+            data: [{
+                id: 21,
+                created_at: '2026-08-15 14:00:00',
+                ho_va_ten: 'Lê Văn Cũ',
+                gioi_tinh: 'Nam',
+                ngay_sinh: '2004-03-20',
+                noi_sinh: 9,
+                dan_toc: 'Tày',
+                dien_thoai: '0912345678',
+                email: 'levancu@gmail.com',
+                cccd: '012345678901',
+                ngay_cap_cccd: '2022-01-10',
+                dia_chi_nha: '123 Đường Cũ',
+                dia_chi_tinh: 9,
+                dia_chi_xa: 101,
+                doituong: 'KHONG_XAC_DINH',
+                nganh_dangky: 'Ngành Chưa Chuẩn Hóa',
+                diem_xettuyen: 21.5,
+                diem_uutien: 1,
+                diem_cong: 0.5,
+                van_bang_tn: 'Bằng THPT cũ',
+                van_bang_tn_sohieu: 'VB123',
+                tn_noicap: 'Sở GD Cũ',
+                nam_tn: '2022',
+                diachi_nhangiay: 'Thái Nguyên',
+                created_by: 5,
+                owner_by: 6,
+                nguoi_tuvan: 7,
+            }],
+        } as never));
+        locationService.queryLocation.and.callFake((_conditions, _params, table) => of({
+            ...emptyResponse,
+            data: table === 'regions'
+                ? [{ id: 9, name: 'Thái Nguyên' }]
+                : [{ id: 101, name: 'Phường Phan Đình Phùng' }],
+        } as never));
+        userService.query.and.returnValue(of({
+            ...emptyResponse,
+            data: [
+                { id: 5, display_name: 'Cán bộ tuyển sinh' },
+                { id: 6, display_name: 'Người nhập hồ sơ' },
+                { id: 7, display_name: 'Người duyệt hồ sơ' },
+            ],
+        } as never));
+
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentRef.setInput('hoidong', council);
+        fixture.detectChanges();
+
+        fixture.componentInstance.onExportData();
+        flushMicrotasks();
+
+        expect(legacyExportService.exportExcel).toHaveBeenCalledTimes(1);
+        expect(exportService.exportExcel).not.toHaveBeenCalled();
+        const payload = legacyExportService.exportExcel.calls.mostRecent().args[0];
+        expect(payload.council.name).toBe('Hội đồng tháng 8');
+        expect(payload.candidates.length).toBe(1);
+        expect(payload.candidates[0]).toEqual(jasmine.objectContaining({
+            id: 21,
+            fullName: 'Lê Văn Cũ',
+            phone: '0912345678',
+            email: 'levancu@gmail.com',
+            cccd: '012345678901',
+            address: '123 Đường Cũ',
+            provinceId: 9,
+            wardId: 101,
+            registeredMajorName: 'Ngành Chưa Chuẩn Hóa',
+            recipientAddress: 'Thái Nguyên',
+            createdById: 5,
+            ownerById: 6,
+            consultantId: 7,
+            note: 'Ghi chú cũ',
+        }));
+        expect(notificationService.toastSuccess).toHaveBeenCalledWith('Xuất dữ liệu xét tuyển thành công');
+        expect(fixture.componentInstance.actionLoading()).toBeFalse();
+    }));
+
+    it('exports two separate files when council has both legacy and current records', fakeAsync(() => {
+        const council = {
+            id: 8,
+            tieu_de_hoi_dong: 'Hội đồng hỗn hợp',
+            dot_xettuyen_id: 3,
+        } as HoidongXettuyen;
+        assignmentService.query.and.returnValue(of({
+            ...emptyResponse,
+            data: [
+                { id: 1, hoidong_id: 8, tuyensinh_id: 21, ket_qua: '', ghi_chu: 'Cũ' },
+                { id: 2, hoidong_id: 8, tuyensinh_id: 22, ket_qua: '', ghi_chu: 'Mới' },
+            ],
+        } as never));
+        registrationsService.query.and.returnValue(of({
+            ...emptyResponse,
+            data: [{
+                id: 21,
+                created_at: '2026-08-31 23:59:59',
+                ho_va_ten: 'Hồ Sơ Cũ',
+                gioi_tinh: 'Nam',
+                nganh_dangky: 'Tự do',
+            }, {
+                id: 22,
+                created_at: '2026-09-01 00:00:00',
+                ho_va_ten: 'Hồ Sơ Mới',
+                gioi_tinh: 'nu',
+                ngay_sinh: '2005-06-15',
+                noi_sinh: 9,
+                dan_toc: 'Kinh',
+                status: 3,
+                doituong: 'THPT',
+                van_bang_tn: 'Bằng tốt nghiệp THPT',
+                vb_chuyenmon_nganh: 'Công nghệ thông tin',
+                tn_noicap: 'Sở GD&ĐT Thái Nguyên',
+                nam_tn: '2023',
+                nganh_dangky: 'Công nghệ thông tin',
+                diem_xettuyen: 25.5,
+                diem_uutien: 1.5,
+                diem_cong: 0.5,
+            }],
+        } as never));
+        locationService.queryLocation.and.callFake((_conditions, _params, table) => of({
+            ...emptyResponse,
+            data: table === 'regions'
+                ? [{ id: 9, name: 'Thái Nguyên' }]
+                : [{ id: 101, name: 'Phường Phan Đình Phùng' }],
+        } as never));
+        userService.query.and.returnValue(of({ ...emptyResponse, data: [] } as never));
+
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentRef.setInput('hoidong', council);
+        fixture.detectChanges();
+
+        fixture.componentInstance.onExportData();
+        flushMicrotasks();
+
+        expect(legacyExportService.exportExcel).toHaveBeenCalledTimes(1);
+        expect(exportService.exportExcel).toHaveBeenCalledTimes(1);
+        expect(notificationService.toastSuccess).toHaveBeenCalledWith('Xuất dữ liệu xét tuyển thành công');
+        expect(fixture.componentInstance.actionLoading()).toBeFalse();
+    }));
 
     it('opens edit drawer when a row is clicked by an allowed user', () => {
         authService.userHasRole.and.returnValue(true);

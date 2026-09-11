@@ -66,7 +66,7 @@ export interface CouncilAdmissionExportPayload {
 
 type SheetKey = 'admitted' | 'proposed' | 'result' | 'source';
 
-interface SheetConfig {
+export interface SheetConfig {
     key: SheetKey;
     name: string;
     title: string;
@@ -89,6 +89,7 @@ const SHEET_CONFIGS: readonly SheetConfig[] = [
     { key: 'proposed', name: 'DS đề nghị TT', title: 'DANH SÁCH ĐỀ NGHỊ CÔNG NHẬN TRÚNG TUYỂN', columnCount: 10 },
     { key: 'result', name: 'KQ xét tuyển', title: 'KẾT QUẢ XÉT TUYỂN', columnCount: 14 },
     { key: 'source', name: 'DL xét tuyển', title: 'DỮ LIỆU XÉT TUYỂN', columnCount: 14 },
+    // { key: 'upline', name: 'DL Nhập học', title: 'DỮ LIỆU NHẬP HỌC', columnCount:  },
 ];
 
 const BASE_FONT: Partial<Font> = {

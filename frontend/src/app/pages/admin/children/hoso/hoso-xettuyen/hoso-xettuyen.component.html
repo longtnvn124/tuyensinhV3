@@ -11,22 +11,23 @@
                     <use href="fonts/custom-icon.svg#custom-folder-open-2"></use>
                 </svg>
                 Danh sách hồ sơ xét tuyển
-            </h4> 
-            <div class="admin-wrap-table__head-actions d-flex flex-wrap align-items-center gap-2" style="width:1%; flex: 1 1 auto;">
+            </h4>
+            <div class="admin-wrap-table__head-actions d-flex flex-wrap align-items-center gap-2"
+                style="width:1%; flex: 1 1 auto;">
 
                 <div>
-                        <mat-checkbox [checked]="onlyMyRecords()"
-                                    (change)="onOnlyMyRecordsChange($event.checked)">Hồ sơ xét duyệt</mat-checkbox>
-                </div> 
+                    <mat-checkbox [checked]="onlyMyRecords()" (change)="onOnlyMyRecordsChange($event.checked)">Hồ sơ xét
+                        duyệt</mat-checkbox>
+                </div>
 
                 <input [(ngModel)]="searchInfo.search" class="admin-wrap-table__head-actions__search" pInputText
                     placeholder="Nhập họ tên hoặc số CCCD" type="text" (keyup.enter)="onSearch()">
 
-                <div style="max-width: 150px;width: 100%;"> 
-                    <p-select [options]="dots()" appendTo="body" [(ngModel)]="searchInfo.dotxettuyen_id" [filter]="true" filterBy="label"
-                    placeholder="Đợt xét tuyển" class="w-100 filter-select" optionLabel="label" optionValue="value"
-                    (onChange)="onSearch()" />    
-                
+                <div style="max-width: 150px;width: 100%;">
+                    <p-select [options]="dots()" appendTo="body" [(ngModel)]="searchInfo.dotxettuyen_id" [filter]="true"
+                        filterBy="label" placeholder="Đợt xét tuyển" class="w-100 filter-select" optionLabel="label"
+                        optionValue="value" (onChange)="onSearch()" />
+
                 </div>
 
 
@@ -41,34 +42,44 @@
                     <i class="ti ti-filter"></i>
                     <p-popover #op>
 
-                        <div class="filter-panel">
+                        <div class="filter-panel" style="max-width: 600px;">
                             <div class="filter-panel__row">
                                 <!-- <div class="filter-panel__item">
                                     <label>Số CCCD</label>
                                     <input pInputText [(ngModel)]="searchInfo.cccd" placeholder="Số CCCD" />
                                 </div> -->
 
-
-                                
-                                <div class="filter-panel__item">
-                                    <label>Ngành</label>
-                                    <p-select [options]="majorFilterOptions()" appendTo="body"
-                                        [(ngModel)]="searchInfo.nganh_dangky" placeholder="Chọn ngành"
-                                        optionLabel="label" optionValue="value" />
+                              
+                                <div class="col-6">
+                                    <div class="filter-panel__item">
+                                        <label>Ngành</label>
+                                        <p-select [options]="majorFilterOptions()" appendTo="body"
+                                            [(ngModel)]="searchInfo.nganh_dangky" placeholder="Chọn ngành"
+                                            optionLabel="label" optionValue="value" />
+                                    </div>
                                 </div>
+                                <div class="col-6">
+                                    <div class="filter-panel__item">
+                                        <label>Tỉnh/TP</label>
+                                        <p-select [options]="tinhList()" appendTo="body"
+                                            [(ngModel)]="searchInfo.dia_chi_tinh" placeholder="Chọn tỉnh"
+                                            optionLabel="label" optionValue="value" />
+                                    </div>
+                                </div>
+
+
                                 <div class="filter-panel__item">
-                                    <label>Tỉnh/TP</label>
-                                    <p-select [options]="tinhList()" appendTo="body"
-                                        [(ngModel)]="searchInfo.dia_chi_tinh" placeholder="Chọn tỉnh"
-                                        optionLabel="label" optionValue="value" />
+                                    <label>Trạng thái</label>
+                                    <p-select [options]="statusOptions" appendTo="body" [(ngModel)]="searchInfo.status"
+                                        placeholder="Chọn trạng thái" optionLabel="label" optionValue="value" />
                                 </div>
                             </div>
 
                             @if (isAdmin) {
-                              <div class="">
-                                    <mat-checkbox [checked]="onlyByUser()"
-                                    (change)="onOnlyByUserChange($event.checked)">Hồ sơ của tôi</mat-checkbox>
-                                </div> 
+                            <div class="">
+                                <mat-checkbox [checked]="onlyByUser()" (change)="onOnlyByUserChange($event.checked)">Hồ
+                                    sơ của tôi</mat-checkbox>
+                            </div>
                             }
 
                             <div class="filter-panel__row">

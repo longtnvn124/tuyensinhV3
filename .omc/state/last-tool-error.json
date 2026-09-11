@@ -1,7 +1,0 @@
-{
-  "tool_name": "Agent",
-  "tool_input_preview": "{\"description\":\"Review toolbar CSS fix\",\"prompt\":\"Review-only current HoidongHosoXetduyet toolbar HTML/CSS changes for button deformation and responsive layout. No edits. Focus on flex shrink, nowrap,...",
-  "error": "Failed to create worktree: Preparing worktree (new branch 'worktree-agent-afef560c014bccca2')\nerror: failed to open file 'frontend/src/app/pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/components/edit-course-lesson-structure-media-upload/edit-course-lesson-structure-media-model.ts': Filename too long\nfatal: Could not reset index file to revision 'HEAD'.",
-  "timestamp": "2026-09-10T18:15:07.365Z",
-  "retry_count": 1
-}

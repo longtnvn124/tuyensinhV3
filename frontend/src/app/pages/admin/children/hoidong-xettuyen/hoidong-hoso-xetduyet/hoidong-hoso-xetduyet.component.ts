@@ -25,6 +25,8 @@ import { Nganhhoc } from '@models/tuyensinh/nganhhoc';
 import { LocationService } from '@services/location.service';
 import { NotificationService, ProgressAnimationEvent } from '@services/notification.service';
 import { AuthenticationService } from '@services/authentication.service';
+import { UserService } from '@services/user.service';
+import { User } from '@models/user';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import {
     CouncilAdmissionExportPayload,
@@ -42,6 +44,7 @@ import Decimal from 'decimal.js';
 import { Popover } from 'primeng/popover';
 import {
     catchError,
+    concatMap,
     finalize,
     forkJoin,
     from,
@@ -59,12 +62,19 @@ import { TuyensinhStatus } from '@app/models/tuyensinh/tuyensinh-status';
 import { RegistrationsStatusService } from '@app/services/tuyensinh/registrations-status';
 import { Drawer } from "primeng/drawer";
 import { FormThongtinDangkyComponent } from "../../hoso/form-thongtin-dangky/form-thongtin-dangky.component";
+import {
+    ExportDlTuyensinhCuService,
+    TuyensinhCuExportCandidate,
+    TuyensinhCuExportPayload,
+} from '@app/services/tuyensinh/exportDlTuyensinhCu.service';
 
 type ReviewDataState = 'loading' | 'data' | 'error';
 
 interface CouncilLookups {
     majors: Nganhhoc[];
-    provinceOptions: IctuDropdownOption<number>[];
+    regions: Locations[];
+    provinces: Locations[];
+    users: User[];
 }
 
 interface CouncilReviewData extends CouncilLookups {
@@ -115,6 +125,9 @@ export class HoidongHosoXetduyetComponent {
     readonly errorMessage = signal('');
     readonly majorOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     readonly provinceOptions = signal<readonly IctuDropdownOption<number>[]>([]);
+    private readonly regions = signal<readonly Locations[]>([]);
+    private readonly provinces = signal<readonly Locations[]>([]);
+    private readonly users = signal<readonly User[]>([]);
     readonly records = signal<readonly HoidongHosoThisinh[]>([]);
     readonly searchTerm = signal<string>('');
 
@@ -156,8 +169,10 @@ export class HoidongHosoXetduyetComponent {
     private readonly dotXettuyenService = inject(DotXettuyenService);
     private readonly nganhHocService = inject(NganhhocService);
     private readonly locationService = inject(LocationService);
+    private readonly userService = inject(UserService);
     private readonly notification = inject(NotificationService);
     private readonly expHosoDaduyetService = inject(ExpHosoDaduyetService);
+    private readonly exportDlTuyensinhCuService = inject(ExportDlTuyensinhCuService);
     private readonly loadRequest$ = new Subject<HoidongXettuyen | null>();
     private readonly progress$ = new Subject<number>();
 
@@ -340,6 +355,9 @@ export class HoidongHosoXetduyetComponent {
         this.searchTerm.set('');
         this.records.set([]);
         this.majors.set([]);
+        this.regions.set([]);
+        this.provinces.set([]);
+        this.users.set([]);
         this.majorOptions.set([]);
         this.provinceOptions.set([]);
         this.errorMessage.set('');
@@ -365,13 +383,14 @@ export class HoidongHosoXetduyetComponent {
             majors: this.nganhHocService.load({ search: '' }, queryParams).pipe(
                 map((response: DtoObject<Nganhhoc[]>): Nganhhoc[] => response.data ?? []),
             ),
-            provinceOptions: this.locationService.queryLocation([], queryParams, 'regions').pipe(
-                map((response: DtoObject<Locations[]>): IctuDropdownOption<number>[] =>
-                    (response.data ?? []).map((item: Locations): IctuDropdownOption<number> => ({
-                        value: item.id,
-                        label: item.name,
-                    })),
-                ),
+            regions: this.locationService.queryLocation([], queryParams, 'regions').pipe(
+                map((response: DtoObject<Locations[]>): Locations[] => response.data ?? []),
+            ),
+            provinces: this.locationService.queryLocation([], queryParams, 'provinces').pipe(
+                map((response: DtoObject<Locations[]>): Locations[] => response.data ?? []),
+            ),
+            users: this.userService.query([], queryParams).pipe(
+                map((response: DtoObject<User[]>): User[] => response.data ?? []),
             ),
         });
     }
@@ -424,11 +443,17 @@ export class HoidongHosoXetduyetComponent {
     private applyLoadedData(data: CouncilReviewData | null): void {
         if (!data) return;
         this.majors.set(data.majors);
+        this.regions.set(data.regions);
+        this.provinces.set(data.provinces);
+        this.users.set(data.users);
         this.majorOptions.set(data.majors.map((item: Nganhhoc): IctuDropdownOption<number> => ({
             value: item.id,
             label: item.ten_nganh,
         })));
-        this.provinceOptions.set(data.provinceOptions);
+        this.provinceOptions.set(data.regions.map((item: Locations): IctuDropdownOption<number> => ({
+            value: item.id,
+            label: item.name,
+        })));
         this.records.set(data.records);
         this.state.set('data');
     }
@@ -640,28 +665,14 @@ export class HoidongHosoXetduyetComponent {
         controlLoading.next({ percent: 10, heading: 'Đang tải thông tin đợt xét tuyển' });
 
         this.dotXettuyenService.get(council.dot_xettuyen_id).pipe(
-            // map((round: DotXettuyen): CouncilAdmissionExportPayload =>
-
-            //     this.createExportPayload(council, round, this.records()),
-            // ),
             switchMap((round: DotXettuyen) =>
                 this.loadRecords(council.id).pipe(
-                    map((records) =>
-                        this.createExportPayload(
-                            council,
-                            round,
-                            records,
-                        ),
+                    map((records: HoidongHosoThisinh[]): Observable<void> =>
+                        this.exportRecordGroups(council, round, records, controlLoading),
                     ),
                 ),
             ),
-
-            tap((): void => {
-                controlLoading.next({ percent: 50, heading: 'Đang tạo file Excel' });
-            }),
-            switchMap((payload: CouncilAdmissionExportPayload): Observable<void> =>
-                from(this.expHosoDaduyetService.exportExcel(payload)),
-            ),
+            switchMap((exportResult: Observable<void>): Observable<void> => exportResult),
             tap((): void => {
                 controlLoading.next({ percent: 100, heading: 'Đã xuất dữ liệu' });
             }),
@@ -681,6 +692,126 @@ export class HoidongHosoXetduyetComponent {
                 ));
             },
         });
+    }
+
+    private exportRecordGroups(
+        council: HoidongXettuyen,
+        round: DotXettuyen,
+        records: readonly HoidongHosoThisinh[],
+        controlLoading: Subject<ProgressAnimationEvent>,
+    ): Observable<void> {
+        const cutoffDate = dayjs('2026-09-01');
+        const legacyRecords = records.filter((record: HoidongHosoThisinh): boolean =>
+            this.isBeforeCutoff(record._hoso?.created_at, cutoffDate),
+        );
+        const currentRecords = records.filter((record: HoidongHosoThisinh): boolean =>
+            !this.isBeforeCutoff(record._hoso?.created_at, cutoffDate),
+        );
+        const exports: Array<() => Promise<void>> = [];
+
+        if (legacyRecords.length > 0) {
+            const payload = this.createRawExportPayload(council, round, legacyRecords);
+            exports.push(() => this.exportDlTuyensinhCuService.exportExcel(payload));
+        }
+        if (currentRecords.length > 0) {
+            const payload = this.createExportPayload(council, round, currentRecords);
+            exports.push(() => this.expHosoDaduyetService.exportExcel(payload));
+        }
+
+        if (exports.length === 0) {
+            return from(Promise.reject(new Error('Không có hồ sơ hợp lệ để xuất')));
+        }
+
+        return from(exports).pipe(
+            concatMap((exportOperation: () => Promise<void>, index: number): Observable<void> => {
+                controlLoading.next({
+                    percent: 50 + Math.round((index / exports.length) * 40),
+                    heading: `Đang tạo file Excel ${index + 1}/${exports.length}`,
+                });
+                return from(exportOperation());
+            }),
+            last(),
+            map((): void => undefined),
+        );
+    }
+
+    private isBeforeCutoff(value: string | undefined, cutoffDate: dayjs.Dayjs): boolean {
+        if (!value) return false;
+        const parsedDate = dayjs(value);
+        return parsedDate.isValid() && parsedDate.isBefore(cutoffDate);
+    }
+
+    private createRawExportPayload(
+        council: HoidongXettuyen,
+        round: DotXettuyen,
+        records: readonly HoidongHosoThisinh[],
+    ): TuyensinhCuExportPayload {
+        return {
+            council: {
+                id: council.id,
+                name: council.tieu_de_hoi_dong,
+            },
+            round: {
+                id: round.id,
+                name: round.tieude,
+            },
+            majors: this.majors().map((item: Nganhhoc): Pick<Nganhhoc, 'id' | 'ma_nganh' | 'ten_nganh'> => ({
+                id: item.id,
+                ma_nganh: item.ma_nganh,
+                ten_nganh: item.ten_nganh,
+            })),
+            regions: this.regions().map((item: Locations): Pick<Locations, 'id' | 'name'> => ({
+                id: item.id,
+                name: item.name,
+            })),
+            provinces: this.provinces(),
+            users: this.users(),
+            candidates: records.map((record: HoidongHosoThisinh): TuyensinhCuExportCandidate =>
+                this.mapRawExportCandidate(record, round),
+            ),
+        };
+    }
+
+    private mapRawExportCandidate(
+        record: HoidongHosoThisinh,
+        round: DotXettuyen,
+    ): TuyensinhCuExportCandidate {
+        const candidate = record._hoso;
+        if (!candidate) {
+            throw new Error(`Không tìm thấy dữ liệu hồ sơ #${record.tuyensinh_id}`);
+        }
+
+        return {
+            id: candidate.id,
+            fullName: candidate.ho_va_ten,
+            roundName: round.tieude,
+            gender: candidate.gioi_tinh,
+            birthDate: candidate.ngay_sinh,
+            birthPlace: this.lookupLabel(this.provinceOptions(), candidate.noi_sinh, ''),
+            ethnicity: candidate.dan_toc,
+            phone: candidate.dien_thoai,
+            email: candidate.email,
+            cccd: candidate.cccd,
+            cccdDate: candidate.ngay_cap_cccd,
+            address: candidate.dia_chi_nha,
+            provinceId: candidate.dia_chi_tinh,
+            wardId: candidate.dia_chi_xa,
+            registeredMajorCode: '',
+            registeredMajorName: candidate.nganh_dangky ?? '',
+            admissionScore: candidate.diem_xettuyen,
+            highSchoolDiplomaCode: candidate.van_bang_tn_sohieu,
+            highSchoolDiplomaPlace: candidate.tn_noicap,
+            qualificationName: candidate.van_bang_tn || candidate.vb_chuyenmon,
+            qualificationCode: candidate.vb_chuyenmon_sohieu,
+            graduationMajor: candidate.vb_chuyenmon_nganh,
+            graduationInstitution: candidate.vb_chuyenmon_noicap,
+            graduationYear: candidate.vb_chuyenmon_namtn || candidate.nam_tn,
+            recipientAddress: candidate.diachi_nhangiay,
+            createdById: candidate.created_by,
+            ownerById: candidate.owner_by,
+            consultantId: candidate.nguoi_tuvan,
+            note: record.ghi_chu || candidate.content,
+        };
     }
 
     private createExportPayload(

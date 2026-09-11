@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd d:/data/project/angular/v19/tuyensinh/frontend && npx ng build --configuration development 2>&1 | Select-String -Pattern \\\"error|Error|ERROR\\\" | Select-Object -First 20\",\"timeout\":12000...",
-  "error": "Exit code 127\n/usr/bin/bash: line 1: Select-String: command not found\n/usr/bin/bash: line 1: Select-Object: command not found",
-  "timestamp": "2026-08-21T16:34:53.731Z",
+  "tool_name": "Agent",
+  "tool_input_preview": "{\"description\":\"Review raw export mapping\",\"prompt\":\"Read-only review changes in frontend/src/app/services/tuyensinh/exportDlTuyensinhCu.service.ts and frontend/src/app/pages/admin/children/hoidong-xe...",
+  "error": "Failed to create worktree: Preparing worktree (new branch 'worktree-agent-abb36ff1fffe82d82')\nerror: failed to open file 'frontend/src/app/pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/components/edit-course-lesson-structure-media-upload/edit-course-lesson-structure-media-model.ts': Filename too long\nfatal: Could not reset index file to revision 'HEAD'.",
+  "timestamp": "2026-09-11T04:25:21.763Z",
   "retry_count": 1
 }
