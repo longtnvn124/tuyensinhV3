@@ -701,20 +701,14 @@ export class HoidongHosoXetduyetComponent {
         controlLoading: Subject<ProgressAnimationEvent>,
     ): Observable<void> {
         const cutoffDate = dayjs('2026-09-01');
-        const legacyRecords = records.filter((record: HoidongHosoThisinh): boolean =>
-            this.isBeforeCutoff(record._hoso?.created_at, cutoffDate),
-        );
-        const currentRecords = records.filter((record: HoidongHosoThisinh): boolean =>
-            !this.isBeforeCutoff(record._hoso?.created_at, cutoffDate),
-        );
+        const isLegacyCouncil = this.isBeforeCutoff(council.created_at, cutoffDate);
         const exports: Array<() => Promise<void>> = [];
 
-        if (legacyRecords.length > 0) {
-            const payload = this.createRawExportPayload(council, round, legacyRecords);
+        if (isLegacyCouncil) {
+            const payload = this.createRawExportPayload(council, round, records);
             exports.push(() => this.exportDlTuyensinhCuService.exportExcel(payload));
-        }
-        if (currentRecords.length > 0) {
-            const payload = this.createExportPayload(council, round, currentRecords);
+        } else {
+            const payload = this.createExportPayload(council, round, records);
             exports.push(() => this.expHosoDaduyetService.exportExcel(payload));
         }
 
@@ -835,13 +829,25 @@ export class HoidongHosoXetduyetComponent {
                 meetingDate: council.ngay_xetduyet,
                 preparedDate: new Date().toISOString().slice(0, 10),
             },
+            regions: this.regions().map((item: Locations): Pick<Locations, 'id' | 'name'> => ({
+                id: item.id,
+                name: item.name,
+            })),
+            provinces: this.provinces().map((item: Locations): Pick<Locations, 'id' | 'name'> => ({
+                id: item.id,
+                name: item.name,
+            })),
+            users: this.users().map((item: User): Pick<User, 'id' | 'display_name'> => ({
+                id: item.id,
+                display_name: item.display_name,
+            })),
             candidates: records.map((record: HoidongHosoThisinh): CouncilExportCandidate =>
-                this.mapExportCandidate(record),
+                this.mapExportCandidate(record, round),
             ),
         };
     }
 
-    private mapExportCandidate(record: HoidongHosoThisinh): CouncilExportCandidate {
+    private mapExportCandidate(record: HoidongHosoThisinh, round: DotXettuyen): CouncilExportCandidate {
         const candidate = record._hoso;
         if (!candidate) {
             throw new Error(`Không tìm thấy dữ liệu hồ sơ #${record.tuyensinh_id}`);
@@ -864,11 +870,19 @@ export class HoidongHosoXetduyetComponent {
 
         return {
             id: candidate.id,
+            roundName: round.tieude,
             fullName: candidate.ho_va_ten.trim(),
             gender: gender?.label ?? candidate.gioi_tinh ?? '',
             birthDate: candidate.ngay_sinh,
             birthPlace: this.lookupLabel(this.provinceOptions(), candidate.noi_sinh, ''),
             ethnicity: candidate.dan_toc ?? '',
+            phone: candidate.dien_thoai,
+            email: candidate.email,
+            cccd: candidate.cccd,
+            cccdDate: candidate.ngay_cap_cccd,
+            provinceId: candidate.dia_chi_tinh,
+            wardId: candidate.dia_chi_xa,
+            address: candidate.dia_chi_nha,
             qualificationGroup,
             qualificationName: isHighSchool
                 ? candidate.van_bang_tn?.trim() || qualification?.label.trim() || ''
@@ -880,10 +894,19 @@ export class HoidongHosoXetduyetComponent {
             graduationYear: isHighSchool
                 ? candidate.nam_tn ?? ''
                 : candidate.vb_chuyenmon_namtn ?? '',
+            highSchoolDiplomaCode: candidate.van_bang_tn_sohieu,
+            highSchoolDiplomaPlace: candidate.tn_noicap,
+            qualificationCode: candidate.vb_chuyenmon_sohieu,
+            recipientAddress: candidate.diachi_nhangiay,
+            createdById: candidate.created_by,
+            ownerById: candidate.owner_by,
+            consultantId: candidate.nguoi_tuvan,
             registeredMajorId: major.id,
             registeredMajorName: major.ten_nganh,
             registeredMajorCode: major.ma_nganh,
             admissionScore: candidate.diem_xettuyen,
+            priorityRegionScore: candidate.diem_cong,
+            priorityObjectScore: candidate.diem_uutien,
             calculatedAdmissionScore: this.calculateAdmissionScore(candidate, qualificationGroup),
             result: TH_XETTUYEN.find((item): boolean => item.value === candidate.status)?.label
                 ?? TH_XETTUYEN.find((item): boolean =>

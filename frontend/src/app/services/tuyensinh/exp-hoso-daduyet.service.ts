@@ -1,4 +1,6 @@
 import { inject, Injectable } from '@angular/core';
+import { Locations } from '@models/location';
+import { User } from '@models/user';
 import { SAVER, Saver } from '@app/providers/saver.provider';
 import ExcelJS, {
     Alignment,
@@ -38,20 +40,37 @@ export interface AdmissionDocumentExportInfo {
 
 export interface CouncilExportCandidate {
     id: number;
+    roundName?: string;
     fullName: string;
     gender: string;
     birthDate?: string;
     birthPlace: string;
     ethnicity: string;
+    phone?: string;
+    email?: string;
+    cccd?: string;
+    cccdDate?: string;
+    provinceId?: number;
+    wardId?: number;
+    address?: string;
     qualificationGroup: QualificationGroup;
     qualificationName: string;
+    highSchoolDiplomaCode?: string;
+    highSchoolDiplomaPlace?: string;
+    qualificationCode?: string;
     graduationMajor: string;
     graduationInstitution: string;
     graduationYear: string;
+    recipientAddress?: string;
+    createdById?: number;
+    ownerById?: number;
+    consultantId?: number;
     registeredMajorId: number;
     registeredMajorName: string;
     registeredMajorCode: string;
     admissionScore?: number;
+    priorityRegionScore?: number;
+    priorityObjectScore?: number;
     calculatedAdmissionScore?: number;
     result: string;
     note?: string;
@@ -61,7 +80,16 @@ export interface CouncilAdmissionExportPayload {
     council: CouncilExportInfo;
     round: AdmissionRoundExportInfo;
     documents: AdmissionDocumentExportInfo;
+    regions?: readonly Pick<Locations, 'id' | 'name'>[];
+    provinces?: readonly Pick<Locations, 'id' | 'name'>[];
+    users?: readonly Pick<User, 'id' | 'display_name'>[];
     candidates: readonly CouncilExportCandidate[];
+}
+
+interface SummaryLookups {
+    regions: ReadonlyMap<number, string>;
+    provinces: ReadonlyMap<number, string>;
+    users: ReadonlyMap<number, string>;
 }
 
 type SheetKey = 'admitted' | 'proposed' | 'result' | 'source';
@@ -89,8 +117,31 @@ const SHEET_CONFIGS: readonly SheetConfig[] = [
     { key: 'proposed', name: 'DS đề nghị TT', title: 'DANH SÁCH ĐỀ NGHỊ CÔNG NHẬN TRÚNG TUYỂN', columnCount: 10 },
     { key: 'result', name: 'KQ xét tuyển', title: 'KẾT QUẢ XÉT TUYỂN', columnCount: 14 },
     { key: 'source', name: 'DL xét tuyển', title: 'DỮ LIỆU XÉT TUYỂN', columnCount: 14 },
-    // { key: 'upline', name: 'DL Nhập học', title: 'DỮ LIỆU NHẬP HỌC', columnCount:  },
 ];
+const SUMMARY_SHEET_NAME = 'Dữ liệu tổng hợp';
+const SUMMARY_HEADERS: readonly string[] = [
+    'TT', 'Đợt', 'Mã SV', 'CCCD', 'Ngày cấp', 'Họ tên gộp', 'Họ', 'Tên',
+    'Ngày sinh', 'Giới tính', 'Dân tộc', 'Nơi sinh', 'Điện thoại', 'Email ictu',
+    'Email', 'Tỉnh/Thành phố', 'Phường/Xã', 'Địa chỉ', 'Mã tỉnh lớp 12',
+    'Mã trường lớp 12', 'Tên trường lớp 12', 'KV ưu tiên', 'ĐT ưu tiên',
+    'Mã ngành\nĐKXT', 'Tên ngành\nĐKXT', 'Điểm xét tuyển gốc', 'Điểm ƯT KV',
+    'Điểm ƯT ĐT', 'Điểm xét tuyển', 'Mã Bằng THPT', 'Nơi cấp bằng THPT',
+    'Học lực lớp 12 ', 'Hạnh kiểm lớp 12', 'Bằng chuyên môn',
+    'Mã Bằng chuyên môn', 'Ngành tốt nghiệp', 'Nơi cấp bằng chuyên môn',
+    'Năm TN', 'Địa chỉ nhận giấy báo', 'CB tuyển sinh', 'TK nhập HS',
+    'TK duyệt HS', 'Ghi chú',
+];
+const SUMMARY_COLUMN_WIDTHS: readonly number[] = [
+    9.29, 17, 17.14, 15.43, 15.57, 26.57, 19.14, 10.29, 16.57, 15.71,
+    14.43, 24.86, 17.29, 28.14, 29.29, 14.57, 16.71, 63.57, 21.71, 24.71,
+    27.57, 23.29, 23.29, 16.71, 20.86, 25.14, 25.14, 25.14, 20.86, 22.14,
+    22.14, 21.14, 25.29, 16.29, 26.86, 30.71, 33.43, 14.71, 93.29, 43.86,
+    43.86, 23.71, 14.57,
+];
+const SUMMARY_CENTERED_COLUMNS = new Set<number>([
+    1, 2, 3, 4, 5, 9, 10, 11, 13, 16, 17, 19, 20, 22, 23, 24, 25, 26, 27,
+    28, 29, 30, 31, 32, 33, 34, 35, 38,
+]);
 
 const BASE_FONT: Partial<Font> = {
     name: 'Times New Roman',
@@ -136,6 +187,8 @@ export class ExpHosoDaduyetService {
             const candidates = this.filterCandidates(payload.candidates, config.key);
             this.buildSheet(worksheet, config, payload, candidates);
         }
+
+        this.buildSummarySheet(workbook, payload);
 
         return workbook;
     }
@@ -606,5 +659,175 @@ export class ExpHosoDaduyetService {
         if (!payload?.council || !payload.round || !payload.documents || !Array.isArray(payload.candidates)) {
             throw new Error('Dữ liệu xuất hồ sơ xét tuyển không hợp lệ.');
         }
+    }
+
+    private buildSummarySheet(
+        workbook: Workbook,
+        payload: CouncilAdmissionExportPayload,
+    ): void {
+        const worksheet = workbook.addWorksheet(SUMMARY_SHEET_NAME);
+        this.configureSummarySheet(worksheet, payload.candidates.length);
+        this.addSummaryHeader(worksheet);
+        const lookups = this.createSummaryLookups(payload);
+        const roundName = payload.round?.name;
+        payload.candidates.forEach((candidate: CouncilExportCandidate, index: number): void => {
+            this.addSummaryCandidate(worksheet, candidate, index + 2, roundName, lookups);
+        });
+    }
+
+    private createSummaryLookups(payload: CouncilAdmissionExportPayload): SummaryLookups {
+        const regions = new Map<number, string>(
+            payload.regions?.map(item => [item.id, this.text(item.name)]) ?? [],
+        );
+        const provinces = new Map<number, string>(
+            payload.provinces?.map(item => [item.id, this.text(item.name)]) ?? [],
+        );
+        const users = new Map<number, string>(
+            payload.users?.map(item => [item.id, this.text(item.display_name)]) ?? [],
+        );
+        return { regions, provinces, users };
+    }
+
+    private lookupSummaryName(map: ReadonlyMap<number, string>, id: number | undefined): string {
+        return id == null ? '' : map.get(id) ?? '';
+    }
+
+    private configureSummarySheet(worksheet: Worksheet, candidateCount: number): void {
+        worksheet.columns = SUMMARY_COLUMN_WIDTHS.map((width: number): { width: number } => ({ width }));
+        worksheet.views = [{
+            state: 'frozen',
+            xSplit: 4,
+            ySplit: 1,
+            topLeftCell: 'E2',
+            zoomScale: 85,
+            zoomScaleNormal: 85,
+        }];
+        worksheet.autoFilter = `A1:AQ${Math.max(2, candidateCount + 1)}`;
+        worksheet.properties.defaultRowHeight = 20;
+        worksheet.getRow(1).height = 31.5;
+        worksheet.pageSetup = {
+            orientation: 'landscape',
+            fitToPage: false,
+            margins: {
+                left: 0.7,
+                right: 0.7,
+                top: 0.75,
+                bottom: 0.75,
+                header: 0.3,
+                footer: 0.3,
+            },
+        };
+    }
+
+    private addSummaryHeader(worksheet: Worksheet): void {
+        const row = worksheet.getRow(1);
+        row.values = [...SUMMARY_HEADERS];
+        for (let column = 1; column <= SUMMARY_HEADERS.length; column += 1) {
+            const cell = row.getCell(column);
+            cell.font = { ...BASE_FONT, bold: true };
+            cell.alignment = CENTER_ALIGNMENT;
+            cell.border = DATA_BORDER;
+        }
+    }
+
+    private addSummaryCandidate(
+        worksheet: Worksheet,
+        candidate: CouncilExportCandidate,
+        rowNumber: number,
+        roundName: string,
+        lookups: SummaryLookups,
+    ): void {
+        const row = worksheet.getRow(rowNumber);
+        row.values = this.summaryCandidateValues(candidate, roundName, lookups);
+        row.height = 47.25;
+
+        for (let column = 1; column <= SUMMARY_HEADERS.length; column += 1) {
+            const cell = row.getCell(column);
+            cell.font = BASE_FONT;
+            cell.border = DATA_BORDER;
+            cell.alignment = {
+                horizontal: SUMMARY_CENTERED_COLUMNS.has(column) ? 'center' : 'left',
+                vertical: 'middle',
+                wrapText: true,
+            };
+        }
+
+        row.getCell(1).value = { formula: `SUBTOTAL(3,$B$2:B${rowNumber})` };
+    }
+
+    private summaryCandidateValues(candidate: CouncilExportCandidate, roundName: string, lookups: SummaryLookups): Array<string | number | null> {
+        const fullName = this.normalizeSummaryName(candidate.fullName);
+        const [familyName, givenName] = this.splitSummaryName(fullName);
+        const birthDate = this.formatSummaryDate(candidate.birthDate);
+
+        return [
+            null,
+            this.text(roundName),
+            '',
+            this.text(candidate.cccd),
+            this.formatDate(candidate.cccdDate),
+            fullName,
+            familyName,
+            givenName,
+            birthDate,
+            candidate.gender,
+            candidate.ethnicity,
+            candidate.birthPlace,
+            this.text(candidate.phone),
+            '',
+            this.text(candidate.email),
+            this.lookupSummaryName(lookups.regions, candidate.provinceId),
+            this.lookupSummaryName(lookups.provinces, candidate.wardId),
+            this.text(candidate.address),
+            '',
+            '',
+            '',
+            '',
+            '',
+            candidate.registeredMajorCode,
+            candidate.registeredMajorName,
+            candidate.admissionScore ?? '',
+            candidate.priorityRegionScore ?? '',
+            candidate.priorityObjectScore ?? '',
+            candidate.calculatedAdmissionScore ?? '',
+            this.text(candidate.highSchoolDiplomaCode),
+            this.text(candidate.highSchoolDiplomaPlace),
+            '',
+            '',
+            candidate.qualificationName,
+            this.text(candidate.qualificationCode),
+            candidate.graduationMajor,
+            candidate.graduationInstitution,
+            candidate.graduationYear,
+            this.text(candidate.recipientAddress),
+            this.lookupSummaryName(lookups.users, candidate.createdById),
+            this.lookupSummaryName(lookups.users, candidate.ownerById),
+            this.lookupSummaryName(lookups.users, candidate.consultantId),
+            candidate.note?.trim() || '',
+        ];
+    }
+
+    private normalizeSummaryName(value: string | undefined): string {
+        return this.text(value).replace(/\s+/g, ' ');
+    }
+
+    private splitSummaryName(fullName: string): [string, string] {
+        const parts = fullName.split(' ').filter(Boolean);
+        if (parts.length <= 1) {
+            return ['', parts[0] ?? ''];
+        }
+        return [parts.slice(0, -1).join(' '), parts.at(-1) ?? ''];
+    }
+
+    private formatSummaryDate(value: string | undefined): string {
+        if (!value) return '';
+        const datePart = value.slice(0, 10);
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+        return match ? `${match[3]}/${match[2]}/${match[1]}` : value;
+    }
+
+    private text(value: string | number | null | undefined): string {
+        if (value === undefined || value === null) return '';
+        return String(value).trim();
     }
 }

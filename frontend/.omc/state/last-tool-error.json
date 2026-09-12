@@ -1,7 +1,7 @@
 {
-  "tool_name": "Agent",
-  "tool_input_preview": "{\"description\":\"Review raw export mapping\",\"prompt\":\"Read-only review changes in frontend/src/app/services/tuyensinh/exportDlTuyensinhCu.service.ts and frontend/src/app/pages/admin/children/hoidong-xe...",
-  "error": "Failed to create worktree: Preparing worktree (new branch 'worktree-agent-abb36ff1fffe82d82')\nerror: failed to open file 'frontend/src/app/pages/edit-course/children/edit-course-lessons/children/edit-course-lesson-structure-media/components/edit-course-lesson-structure-media-upload/edit-course-lesson-structure-media-model.ts': Filename too long\nfatal: Could not reset index file to revision 'HEAD'.",
-  "timestamp": "2026-09-11T04:25:21.763Z",
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd frontend && npm test -- --include='**/exp-hoso-daduyet.service.spec.ts' --watch=false --browsers=ChromeHeadless 2>&1 | tail -n 200\",\"timeout\":240000,\"description\":\"Run export service te...",
+  "error": "Exit code 1\n/usr/bin/bash: line 1: cd: frontend: No such file or directory",
+  "timestamp": "2026-09-11T16:10:16.331Z",
   "retry_count": 1
 }

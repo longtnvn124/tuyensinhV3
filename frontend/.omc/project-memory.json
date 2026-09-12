@@ -32,8 +32,8 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "cd frontend && npx tsc --noEmit -p tsconfig.app.json 2>&1",
-    "testCommand": "npm test",
+    "buildCommand": "npm run build",
+    "testCommand": "npm test -- --include='**/exp-hoso-daduyet.service.spec.ts' --watch=false --browsers=ChromeHeadless 2>&1 | tail -n 120",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
     "scripts": {
@@ -121,8 +121,8 @@
     },
     {
       "path": "src\\app",
-      "accessCount": 6,
-      "lastAccessed": 1783305854982,
+      "accessCount": 7,
+      "lastAccessed": 1789147170792,
       "type": "directory"
     },
     {

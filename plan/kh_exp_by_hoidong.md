@@ -1,147 +1,61 @@
-# Kế hoạch xuất Excel hồ sơ theo hội đồng xét tuyển
+# Xuất Excel hồ sơ theo hội đồng xét tuyển
 
-## 1. Mục tiêu
+## 1. Phạm vi và trạng thái
 
-Xây dựng chức năng xuất workbook `.xlsx` theo hội đồng xét tuyển, có nội dung và định dạng tương tự `plan/mau_dl_ts.xlsx`.
+Chức năng đã triển khai tại:
 
-- Dùng `exceljs` đọc template, ghi dữ liệu, giữ định dạng, sinh file.
-- Dùng `file-saver` qua `SAVER` provider hiện có.
-- Xuất đủ 4 sheet: `DS TT`, `DS đề nghị TT`, `KQ xét tuyển`, `DL xét tuyển`.
-- Lấy toàn bộ dữ liệu theo `hoidong_id`, không phụ thuộc trang hiện tại.
-- Nhóm theo ngành đăng ký, sau đó theo văn bằng đầu vào.
-- Không hardcode danh sách ngành, số thí sinh, vị trí dòng dữ liệu.
+- `frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.ts`.
+- `frontend/src/app/services/tuyensinh/exportDlTuyensinhCu.service.ts`.
+- `frontend/src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.ts`.
 
-## 2. Phân tích file mẫu
+`HoidongHosoXetduyetComponent.onExportData()` xuất dữ liệu theo hội đồng. Hồ sơ được tách theo ngày tạo:
 
-### 2.1. Cấu trúc workbook
-
-| Sheet | Cột | Nội dung |
-|---|---:|---|
-| `DS TT` | A:J | Danh sách trúng tuyển |
-| `DS đề nghị TT` | A:J | Danh sách đề nghị trúng tuyển |
-| `KQ xét tuyển` | A:M | Kết quả xét tuyển, có mã ngành, điểm, ghi chú |
-| `DL xét tuyển` | A:M | Dữ liệu đầu vào xét tuyển |
-
-Đặc điểm chung:
-
-- Đầu sheet: đơn vị, quốc hiệu, tiêu ngữ, tên báo cáo, đợt, căn cứ văn bản.
-- Chia theo ngành bằng số La Mã.
-- Mỗi ngành chia 4 nhóm: Đại học, Cao đẳng, Trung cấp, THPT.
-- `DH/CD/TC` dùng mã phương thức `500`; `THPT` dùng `200`.
-- Mỗi nhóm có dòng header riêng.
-- Cuối ngành có tổng; cuối sheet có tổng toàn danh sách.
-- `DL xét tuyển` có ngày lập và người lập danh sách.
-- Không có công thức, ảnh, data validation.
-- Khổ A4 ngang, `fitToWidth = 1`.
-
-### 2.2. Mapping cột A:J
-
-| Cột | Nội dung | Nguồn |
+| Nhóm hồ sơ | Điều kiện | Service |
 |---|---|---|
-| A | TT | Số thứ tự trong nhóm văn bằng |
-| B | Họ và tên | `Registrations.ho_va_ten` |
-| C | Giới tính | `gioi_tinh`, chuẩn hóa qua `GENDER` |
-| D | Ngày sinh | `ngay_sinh`, hiển thị `dd/MM/yyyy` |
-| E | Nơi sinh | Tên địa danh từ `noi_sinh` |
-| F | Dân tộc | `dan_toc` |
-| G | Văn bằng | Nhãn từ `doituong`/dữ liệu văn bằng |
-| H | Ngành/Nghề tốt nghiệp | `vb_chuyenmon_nganh`; THPT có thể rỗng |
-| I | Nơi cấp bằng | `vb_chuyenmon_noicap`; THPT dùng `tn_noicap` |
-| J | Năm TN | `vb_chuyenmon_namtn`; THPT dùng `nam_tn` |
+| Dữ liệu cũ | `created_at` trước `2026-09-01` | `ExportDlTuyensinhCuService` |
+| Dữ liệu hiện hành | `created_at` từ `2026-09-01` hoặc không có ngày tạo hợp lệ | `ExpHosoDaduyetService` |
 
-### 2.3. Mapping cột K:M
+Một hội đồng có cả hai nhóm sẽ tải **hai file Excel**, theo thứ tự file dữ liệu cũ rồi đến file dữ liệu hiện hành.
 
-Áp dụng cho `KQ xét tuyển`, `DL xét tuyển`:
+## 2. Workbook hiện hành
 
-| Cột | Nội dung | Nguồn |
-|---|---|---|
-| K | Mã ngành | `Nganhhoc.code`, tra bằng `nganh_id` |
-| L | Điểm xét tuyển | `diem_xettuyen` |
-| M | Ghi chú | Sinh theo sheet và trạng thái hồ sơ |
+`ExpHosoDaduyetService` dựng workbook mới hoàn toàn bằng `ExcelJS`; không tải hoặc phụ thuộc template `.xlsx` trong `assets`.
 
-Tiêu đề điểm:
+### 2.1. Sheet
 
-- `DH/CD/TC`: `Điểm xét tuyển (thang điểm 10)`.
-- `THPT`: `Điểm xét tuyển (thang điểm 30)`.
+| Thứ tự | Sheet | Cột | Nội dung |
+|---:|---|---:|---|
+| 1 | `DS TT` | A:J | Danh sách thí sinh trúng tuyển |
+| 2 | `DS đề nghị TT` | A:J | Danh sách đề nghị công nhận trúng tuyển |
+| 3 | `KQ xét tuyển` | A:N | Kết quả xét tuyển |
+| 4 | `DL xét tuyển` | A:N | Dữ liệu xét tuyển |
+| 5 | `Dữ liệu tổng hợp` | A:AQ | Bảng tổng hợp 43 cột theo mẫu nhập học |
 
-## 3. Bài học từ `btnExportDataThisinhByKehoachV2()`
+### 2.2. Định dạng được sinh bởi service
 
-Luồng cũ:
+- Font mặc định: `Times New Roman`, cỡ `11`.
+- Khổ giấy A4 ngang, `fitToWidth = 1`, căn giữa theo chiều ngang.
+- Độ rộng cột A:N: `7, 27, 11, 14, 20, 13, 18, 27, 25, 11, 14, 16, 31, 22`.
+- Header bảng có border mảnh, nền xanh nhạt, căn giữa, wrap text.
+- Dòng dữ liệu và dòng tổng có border mảnh; chiều cao lần lượt `32` và `24`.
+- Phần ký tên chỉ có trong sheet `DL xét tuyển`.
 
-1. Component tải orders, thí sinh, danh mục bằng `forkJoin`.
-2. Component chuẩn hóa dữ liệu.
-3. `ExportExcelHskService` dựng workbook, tải file.
+Sheet `Dữ liệu tổng hợp` dùng định dạng riêng:
 
-Nên kế thừa:
+- 43 cột A:AQ.
+- Freeze panes `xSplit: 4`, `ySplit: 1`, `topLeftCell: E2`, zoom `85%`.
+- Auto-filter `A1:AQ<n>`.
+- Header cao `31.5`, dòng dữ liệu cao `47.25`.
+- Cột TT dùng công thức `SUBTOTAL(3,$B$2:B<n>)`.
+- Cột Z/AC giữ kiểu number; cột I dùng text `DD/MM/YYYY`.
 
-- Tải toàn bộ dữ liệu theo khóa cha.
-- Tải lookup song song.
-- Chuẩn hóa text, ngày, trạng thái trước khi ghi Excel.
-- Nhóm dữ liệu trước khi truyền service.
-- Hiển thị tiến độ; đóng loading ở cả success/error.
+Workbook có tiêu đề cơ quan, quốc hiệu, tên hội đồng, thông tin đợt xét tuyển; metadata văn bản chỉ hiển thị khi payload có giá trị tương ứng.
 
-Không nên sao chép:
-
-- `any[]`, khóa `_hoten`, `_ngaysinh`, ...
-- Xác định cột bằng `Object.keys(data[0])`.
-- Hardcode số ngành/ID ngành.
-- Mutate object API.
-- Dựng toàn bộ style thủ công khi đã có template chuẩn.
-
-## 4. Hiện trạng dự án đích
-
-Điểm tích hợp:
-
-- `HoidongHosoXetduyetComponent.onExportData()` đã hoàn thiện luồng xuất.
-- Nút `Xuất dữ liệu` gọi trực tiếp hàm trên.
-- Component tái sử dụng `records()` đã hydrate `_hoso`, `provinceOptions()` và catalog ngành đã tải; không tải lại assignments/hồ sơ/địa chỉ khi xuất.
-- `DotXettuyenService.get()` chỉ tải thêm metadata của đợt xét tuyển.
-- `ExpHosoDaduyetService` đã dựng đủ 4 sheet và tải file qua `SAVER`.
-- `exceljs`, `file-saver`, `SAVER` provider đã được tích hợp.
-
-Dữ liệu hiện có:
-
-- Cá nhân: họ tên, giới tính, ngày sinh, nơi sinh, dân tộc.
-- Ngành: `nganh_id`.
-- Nhóm đầu vào: `doituong` (`DH`, `CD`, `TC`, `THPT`).
-- Văn bằng THPT: `van_bang_tn`, `nam_tn`, `tn_noicap`.
-- Văn bằng chuyên môn: `vb_chuyenmon`, `vb_chuyenmon_nganh`, `vb_chuyenmon_noicap`, `vb_chuyenmon_namtn`.
-- Điểm: `diem_xettuyen`.
-- Kết quả: `status`.
-- Lookup: ngành, địa danh, đợt, `DOI_TUONG`, `GENDER`, `TH_XETTUYEN`.
-
-Metadata hành chính chưa có nguồn chính thức:
-
-- Số/ngày quyết định trúng tuyển.
-- Số/ngày công văn đề nghị trúng tuyển.
-- Ngày biên bản hội đồng.
-- Người lập danh sách.
-
-Không hardcode ngày hoặc tên người từ file mẫu.
-
-## 5. Contract dữ liệu đầu vào
-
-### 5.1. API service
+## 3. Contract service
 
 ```typescript
-export interface CouncilAdmissionExportPayload {
-    council: CouncilExportInfo;
-    round: AdmissionRoundExportInfo;
-    documents: AdmissionDocumentExportInfo;
-    candidates: readonly CouncilExportCandidate[];
-}
+export type QualificationGroup = 'DH' | 'CD' | 'TC' | 'THPT';
 
-export class ExpHosoDaduyetService {
-    export(payload: CouncilAdmissionExportPayload): Promise<void>;
-    buildWorkbook(payload: CouncilAdmissionExportPayload): Promise<Workbook>;
-}
-```
-
-`buildWorkbook()` tách riêng để test mà không tải file.
-
-### 5.2. Hội đồng, đợt, văn bản
-
-```typescript
 export interface CouncilExportInfo {
     id: number;
     name: string;
@@ -164,16 +78,6 @@ export interface AdmissionDocumentExportInfo {
     preparedDate?: string;
     preparedBy?: string;
 }
-```
-
-Ngày đầu vào dùng ISO `yyyy-MM-dd`; Excel hiển thị `dd/MM/yyyy`.
-
-Giai đoạn đầu: metadata truyền từ dialog/cấu hình xuất. Nếu cần lưu lâu dài, thêm vào hội đồng/đợt hoặc bảng cấu hình văn bản riêng.
-
-### 5.3. Thí sinh chuẩn hóa
-
-```typescript
-export type QualificationGroup = 'DH' | 'CD' | 'TC' | 'THPT';
 
 export interface CouncilExportCandidate {
     id: number;
@@ -191,342 +95,205 @@ export interface CouncilExportCandidate {
     registeredMajorName: string;
     registeredMajorCode: string;
     admissionScore?: number;
+    calculatedAdmissionScore?: number;
     result: string;
     note?: string;
 }
+
+export interface CouncilAdmissionExportPayload {
+    council: CouncilExportInfo;
+    round: AdmissionRoundExportInfo;
+    documents: AdmissionDocumentExportInfo;
+    candidates: readonly CouncilExportCandidate[];
+}
+
+export class ExpHosoDaduyetService {
+    buildWorkbook(payload: CouncilAdmissionExportPayload): Promise<Workbook>;
+    export(payload: CouncilAdmissionExportPayload): Promise<void>;
+    exportExcel(payload: CouncilAdmissionExportPayload): Promise<void>;
+}
 ```
 
-Service Excel không phụ thuộc response API/relation `thi-sinh`. Mapper không mutate `Registrations` hoặc `HoidongHosoThisinh`.
+`buildWorkbook()` là API dựng workbook tách riêng; `export()` gọi trực tiếp API này, ghi buffer `.xlsx`, tạo `Blob` đúng MIME và tải qua `SAVER`. `buildWorkbook()` cũng cho phép kiểm thử mà không tải file. `exportExcel()` là alias gọi `export()`.
 
-### 5.4. Quy tắc map
+Tên file có dạng:
 
-| Export | Nguồn/quy tắc |
-|---|---|
-| `fullName` | `ho_va_ten.trim()` |
-| `gender` | Tra `GENDER`; thiếu thì rỗng |
-| `birthDate` | Phần ngày, format `dd/MM/yyyy` |
-| `birthPlace` | ID thì tra địa danh; string thì dùng trực tiếp |
-| `ethnicity` | `dan_toc` |
-| `qualificationGroup` | Chuẩn hóa `doituong` |
-| `qualificationName` | `DOI_TUONG`; ưu tiên `vb_chuyenmon` |
-| `graduationMajor` | `vb_chuyenmon_nganh`; THPT có thể rỗng |
-| `graduationInstitution` | `vb_chuyenmon_noicap`; THPT dùng `tn_noicap` |
-| `graduationYear` | `vb_chuyenmon_namtn`; THPT dùng `nam_tn` |
-| `registeredMajorName/code` | Tra `Nganhhoc` bằng `nganh_id` |
-| `admissionScore` | `diem_xettuyen`, giữ kiểu number |
-| `result` | `status` |
-| `note` | `content` nếu nghiệp vụ cho phép |
-
-## 6. Bộ lọc từng sheet
-
-Phương án đề xuất, cần xác nhận:
-
-| Sheet | Tập dữ liệu |
-|---|---|
-| `DL xét tuyển` | Toàn bộ hồ sơ thuộc hội đồng |
-| `KQ xét tuyển` | Hồ sơ đã có kết quả xét tuyển |
-| `DS đề nghị TT` | Chỉ `TRUNG_TUYEN` |
-| `DS TT` | Chỉ `TRUNG_TUYEN` |
-
-Ghi chú:
-
-- `TRUNG_TUYEN`: `Đủ điều kiện trúng tuyển`.
-- `KHONG_TRUNG_TUYEN`: `Không đủ điều kiện trúng tuyển`.
-- `DL xét tuyển`: dùng nhãn trạng thái thích hợp, ví dụ `Đủ điều kiện xét tuyển`.
-
-Hiện chưa có trạng thái riêng tách “đề nghị trúng tuyển” và “đã ban hành quyết định trúng tuyển”; vì vậy hai sheet có thể cùng dữ liệu. Nếu nghiệp vụ cần khác nhau, bổ sung trạng thái/cờ trước khi code.
-
-## 7. Nhóm, sắp xếp, tổng hợp
-
-1. Lọc theo sheet.
-2. Nhóm theo `registeredMajorId`.
-3. Sắp xếp ngành theo danh mục; nếu không có thứ tự, dùng `registeredMajorCode`.
-4. Trong ngành, nhóm cố định: `DH`, `CD`, `TC`, `THPT`.
-5. Sắp xếp tên bằng `localeCompare(..., 'vi')` để file ổn định.
-6. TT bắt đầu lại từ 1 trong mỗi nhóm.
-7. Tổng ngành lấy từ dữ liệu thực tế sau lọc.
-8. Tổng cuối sheet bằng tổng các ngành.
-9. Nhóm rỗng hiển thị hay bỏ cần xác nhận.
-
-## 8. Kiến trúc template-based
-
-### 8.1. Template
-
-- Sao chép, làm sạch file mẫu thành `frontend/src/assets/templates/kh_exp_by_hoidong.xlsx`.
-- Service tải bằng `HttpClient`, `responseType: 'arraybuffer'`.
-- ExcelJS đọc bằng `workbook.xlsx.load(arrayBuffer)`.
-- Xóa dữ liệu cá nhân mẫu; giữ style mẫu cho từng loại dòng.
-- Dựng lại vùng động theo số ngành/nhóm/thí sinh.
-- Dùng `duplicateRow()` hoặc clone style cell.
-- Unmerge vùng động trước; merge lại sau khi sinh dòng.
-- Ghi bằng `workbook.xlsx.writeBuffer()`; tải qua `SAVER`.
-
-Ưu điểm: giữ font, border, merge, độ rộng, chiều cao, print setup; dễ thay biểu mẫu.
-
-### 8.2. Trách nhiệm service
-
-`ExpHosoDaduyetService`:
-
-- Tải/kiểm tra template đủ 4 sheet.
-- Validate payload tối thiểu.
-- Lọc, nhóm, sắp xếp dữ liệu chuẩn hóa.
-- Ghi metadata tiêu đề.
-- Dựng ngành, nhóm, header, data, tổng, ký tên.
-- Giữ style/merge/page setup.
-- Sinh tên file; trả workbook/tải file.
-
-Không gọi API, hiển thị toast/progress, sửa trạng thái, mutate đầu vào.
-
-### 8.3. Trách nhiệm component
-
-`HoidongHosoXetduyetComponent`:
-
-1. Kiểm tra hội đồng; khóa nút khi đang xuất.
-2. Tải song song toàn bộ assignment, ngành, nơi sinh, đợt.
-3. Map sang `CouncilExportCandidate[]`.
-4. Tạo payload và gọi service.
-5. Cập nhật tiến độ.
-6. Dùng `finalize()` đóng loading mọi nhánh.
-7. Báo lỗi rõ khi API/template lỗi.
-
-Tối ưu:
-
-- Workbook cần `noi_sinh`, không cần tải `dia_chi_xa` nếu không dùng.
-- Batch các ID địa danh duy nhất.
-- Tạo `Map<number, string>` cho địa danh; `Map<number, Nganhhoc>` cho ngành.
-- Có thể dùng `loadAllByHoidong()` nếu endpoint `limit: -1` ổn định; nếu chưa xác nhận, giữ phân trang hiện tại.
-
-## 9. File dự kiến thay đổi
-
-### Tạo mới
-
-- `frontend/src/assets/templates/kh_exp_by_hoidong.xlsx`.
-- Có thể thêm `frontend/src/app/models/tuyensinh/council-admission-export.ts`.
-- `frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.spec.ts`.
-
-### Chỉnh sửa
-
-- `frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.ts`.
-- `frontend/src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.ts`.
-- `frontend/src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.spec.ts`.
-
-Chỉ sửa HTML/model/backend nếu xác nhận cần dialog hoặc lưu metadata hành chính.
-
-## 10. Các giai đoạn thực hiện
-
-### Giai đoạn 1: Chuẩn hóa template
-
-1. Sao chép mẫu vào assets.
-2. Giữ 4 sheet, tên, style, print setup.
-3. Xóa dữ liệu cá nhân mẫu.
-4. Giữ dòng style mẫu hoặc sheet template ẩn.
-5. Đánh dấu vùng động.
-6. Kiểm tra Angular build copy template.
-
-### Giai đoạn 2: Contract và mapper
-
-1. Tạo interface typed.
-2. Implement mapper bất biến.
-3. Chuẩn hóa ngày, giới tính, văn bằng, ngành, điểm, status.
-4. Validate nhóm văn bằng, ngành, họ tên.
-
-### Giai đoạn 3: Service ExcelJS
-
-1. Inject `HttpClient`, `SAVER`.
-2. Tải và kiểm tra template.
-3. Tạo helper lọc, nhóm, tiêu đề, ghi chú, format.
-4. Dựng lại từng sheet.
-5. Áp style/merge/page setup.
-6. Tính tổng.
-7. Ghi metadata.
-8. Ghi buffer, tải file.
-
-### Giai đoạn 4: Component
-
-1. Tải hồ sơ, ngành, nơi sinh, đợt song song.
-2. Map payload.
-3. Thu metadata từ nguồn được xác nhận.
-4. Gọi export.
-5. Hoàn thiện progress, loading, toast, chặn click lặp.
-
-### Giai đoạn 5: Kiểm thử
-
-1. Unit test mapper.
-2. Unit test service bằng cách đọc lại buffer qua ExcelJS.
-3. Unit test component orchestration.
-4. Build production.
-5. Chạy UI, xuất file thật.
-6. Mở bằng Excel/LibreOffice, so sánh mẫu.
-
-## 11. Kiểm thử và nghiệm thu
-
-### Workbook
-
-- [ ] Đủ 4 sheet, đúng tên/thứ tự.
-- [ ] Mở không báo repair.
-- [ ] Không còn dữ liệu cá nhân mẫu.
-- [ ] Tên file an toàn: `ket-qua-xet-tuyen_<hoi-dong>_<yyyyMMdd-HHmmss>.xlsx`.
-
-### Dữ liệu
-
-- [ ] Đúng hội đồng; không giới hạn bởi phân trang UI.
-- [ ] Nhóm đúng ngành và `DH/CD/TC/THPT`.
-- [ ] Mã phương thức đúng `500/200`.
-- [ ] Ngày `dd/MM/yyyy`.
-- [ ] Điểm là number, định dạng thống nhất.
-- [ ] Nơi sinh, tên/mã ngành đúng lookup.
-- [ ] Ghi chú đúng status/sheet.
-- [ ] Tổng ngành và tổng sheet chính xác.
-
-### Định dạng
-
-- [ ] Font, cỡ, bold/italic tương tự mẫu.
-- [ ] Merge, border, width, height đúng.
-- [ ] Wrap text cột dài.
-- [ ] A4 ngang, fit một trang chiều rộng.
-- [ ] Phần ký đúng vị trí.
-
-### Trường hợp biên
-
-- [ ] Hội đồng rỗng.
-- [ ] Nhóm/ngành rỗng.
-- [ ] Thiếu nơi sinh, mã ngành, ngày sinh, điểm.
-- [ ] `doituong` ngoài 4 mã.
-- [ ] Template thiếu/không tải được.
-- [ ] API lỗi.
-- [ ] Bấm xuất nhiều lần.
-
-### Unit test service
-
-- Không mutate payload.
-- Đúng thứ tự ngành/nhóm.
-- Đúng 10/13 cột.
-- Đúng thang điểm 10/30.
-- Đúng bộ lọc sheet.
-- Đúng tổng.
-- `export()` gọi `SAVER` đúng một lần với MIME `.xlsx`.
-
-## 12. Rủi ro
-
-### Cao
-
-- Chưa có quy tắc tách `DS đề nghị TT`/`DS TT`.
-- Metadata văn bản chưa có nguồn chính thức.
-- Merge động có thể hỏng nếu chèn/xóa dòng không kiểm soát.
-
-### Trung bình
-
-- `doituong`/văn bằng cũ không đồng nhất.
-- `noi_sinh` có thể là ID hoặc string.
-- Điểm mẫu lẫn text dấu phẩy và number dấu chấm.
-- Dữ liệu lớn có thể làm UI đứng khi ExcelJS ghi workbook.
-
-### Thấp
-
-- Tên file có ký tự đặc biệt.
-- Máy người dùng thiếu font mẫu.
-
-Độ phức tạp: **Trung bình–Cao**.
-
-## 13. Cần xác nhận trước khi code
-
-1. `DS đề nghị TT` và `DS TT` cùng dùng `TRUNG_TUYEN`, hay có trạng thái/cờ riêng?
-2. `KQ xét tuyển` gồm cả trúng tuyển và không trúng tuyển, hay chỉ hồ sơ đủ điều kiện?
-3. `DL xét tuyển` gồm toàn bộ hồ sơ hội đồng, hay chỉ `DU_DK_XET_TUYEN` trở lên?
-4. Nhóm văn bằng rỗng vẫn hiển thị như mẫu hay bỏ?
-5. Metadata quyết định, công văn, biên bản, người lập lấy từ đâu?
-6. Có cần dialog nhập metadata mỗi lần xuất không?
-7. Điểm hiển thị dấu phẩy hay dấu chấm? Đề xuất giữ number, format `0.00`.
-8. Giai đoạn đầu cần đủ 4 sheet, hay chỉ `KQ xét tuyển` và `DL xét tuyển`?
-
-## 14. Kết luận
-
-`plan/mau_dl_ts.xlsx` đủ làm mẫu; chưa cần file mẫu khác.
-
-Triển khai hiện tại dùng payload typed. Component tải/map dữ liệu; `ExpHosoDaduyetService` chỉ quản lý workbook và tải file. Workbook được dựng bằng ExcelJS trong service, chưa dùng template asset.
-
-## 15. Nhật ký triển khai
-
-### 15.1. File đã thay đổi
-
-- `frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.ts`: tạo contract typed, dựng 4 sheet, style, filter, nhóm, tổng, ghi file và tải qua `SAVER`.
-- `frontend/src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.ts`: hoàn thiện `onExportData()`, map dữ liệu component sang payload và gọi `exportExcel()`.
-- `frontend/src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.spec.ts`: bổ sung test orchestration và mapping payload.
-- `plan/kh_exp_by_hoidong.md`: cập nhật trạng thái, contract thực tế và kết quả kiểm chứng.
-
-### 15.2. Dữ liệu `onExportData()` truyền vào service
-
-```typescript
-const payload: CouncilAdmissionExportPayload = {
-    council: {
-        id: hoidong.id,
-        name: hoidong.name,
-        reviewDate: hoidong.thoigian_xettuyen,
-    },
-    round: {
-        id: dotXettuyen.id,
-        name: dotXettuyen.name,
-        startDate: dotXettuyen.thoi_gian_bat_dau,
-        endDate: dotXettuyen.thoi_gian_ket_thuc,
-    },
-    documents: {
-        meetingDate: hoidong.thoigian_xettuyen,
-        preparedDate: new Date().toISOString().slice(0, 10),
-    },
-    candidates: records.map(mapExportCandidate),
-};
-
-await expHosoDaduyetService.exportExcel(payload);
+```text
+ket-qua-xet-tuyen_<ten-hoi-dong-da-chuan-hoa>_<UTC-yyyyMMdd-HHmmss>.xlsx
 ```
 
-Component dùng lại dữ liệu đã có:
+## 4. Luồng tại component
 
-- `records()` chứa assignment và `_hoso` đã hydrate.
-- Catalog `Nganhhoc[]` cung cấp `registeredMajorName` và `registeredMajorCode`.
-- `provinceOptions()` cung cấp `birthPlace` từ `Registrations.noi_sinh`.
-- Chỉ gọi thêm `DotXettuyenService.get(hoidong.dot_xettuyen_id)` để lấy tên và thời gian đợt.
+1. Chặn thao tác nếu đang xuất, thiếu hội đồng, thiếu đợt xét tuyển hoặc hội đồng không có hồ sơ.
+2. Mở progress animation.
+3. Lấy đợt bằng `DotXettuyenService.get(council.dot_xettuyen_id)`; map `round.name` từ `round.tieude`, cùng `thoi_gian_bat_dau`/`thoi_gian_ket_thuc` vào `startDate`/`endDate`.
+4. Tải lại toàn bộ assignment của hội đồng (`limit: -1`), sau đó lấy hồ sơ theo lô 50 ID và hydrate vào `_hoso`.
+5. Chia hồ sơ cũ/hiện hành theo `created_at` với mốc `2026-09-01`.
+6. Tạo payload tương ứng, xuất tuần tự từng file.
+7. Hoàn tất progress, đóng loading trong `finalize()`; thông báo toast success/error.
 
-### 15.3. Mapping candidate thực tế
+Catalog ngành, địa danh, người dùng đã tải ở luồng khởi tạo component được tái sử dụng khi map payload. Lần xuất vẫn tải lại assignment/hồ sơ để đảm bảo dữ liệu mới nhất.
 
-| Payload | Nguồn component/model |
+## 5. Mapping hồ sơ hiện hành
+
+| Payload | Nguồn/quy tắc |
 |---|---|
 | `id` | `_hoso.id` |
 | `fullName` | `_hoso.ho_va_ten.trim()` |
-| `gender` | Tra `GENDER` bằng `_hoso.gioi_tinh` |
+| `gender` | Nhãn từ `GENDER` theo `gioi_tinh`; không tra được thì dùng giá trị gốc hoặc rỗng |
 | `birthDate` | `_hoso.ngay_sinh` |
-| `birthPlace` | Tra `provinceOptions()` bằng `_hoso.noi_sinh` |
-| `ethnicity` | `_hoso.dan_toc` |
-| `qualificationGroup` | Chuẩn hóa `_hoso.doituong` thành `DH/CD/TC/THPT` |
-| `qualificationName` | THPT: `van_bang_tn`; nhóm khác: `vb_chuyenmon`; thiếu thì dùng `DOI_TUONG` |
-| `graduationMajor` | `vb_chuyenmon_nganh`; THPT để rỗng |
+| `birthPlace` | Tra `provinceOptions()` theo `_hoso.noi_sinh` |
+| `ethnicity` | `_hoso.dan_toc`, thiếu thì rỗng |
+| `qualificationGroup` | `_hoso.doituong`, chỉ nhận `DH`, `CD`, `TC`, `THPT`; giá trị khác dừng export và báo hồ sơ lỗi |
+| `qualificationName` | THPT: `van_bang_tn`; nhóm khác: `vb_chuyenmon`; thiếu thì nhãn `DOI_TUONG` |
+| `graduationMajor` | `vb_chuyenmon_nganh` |
 | `graduationInstitution` | THPT: `tn_noicap`; nhóm khác: `vb_chuyenmon_noicap` |
 | `graduationYear` | THPT: `nam_tn`; nhóm khác: `vb_chuyenmon_namtn` |
-| `registeredMajorId` | `_hoso.nganh_id` |
-| `registeredMajorName/code` | Tra catalog `Nganhhoc[]` |
+| `registeredMajorId/name/code` | Tra `Nganhhoc` có `ten_nganh.trim()` bằng `nganh_dangky.trim()`; dùng `id`, `ten_nganh`, `ma_nganh` từ catalog |
 | `admissionScore` | `_hoso.diem_xettuyen` |
-| `result` | `_hoso.status`; thiếu thì dùng `HoidongHosoThisinh.ket_qua` |
-| `note` | `HoidongHosoThisinh.ghi_chu`; thiếu thì dùng `_hoso.content` |
+| `calculatedAdmissionScore` | Kết quả công thức điểm ưu tiên tại mục 6 |
+| `result` | Nhãn `TH_XETTUYEN` theo `_hoso.status`; nếu không có, tra `record.ket_qua` theo `kyhieu`; cuối cùng dùng chính `record.ket_qua` |
+| `note` | `record.ghi_chu.trim()` hoặc `_hoso.content.trim()` |
 
-Nếu `_hoso` thiếu hoặc `doituong` ngoài `DH/CD/TC/THPT`, component dừng export và hiển thị hồ sơ gây lỗi. Component không mutate object API.
+Không map `registeredMajorId` trực tiếp từ `_hoso.nganh_id` trong luồng hiện hành. Nếu không tìm được ngành theo `nganh_dangky`, export dừng với thông báo lỗi.
 
-### 15.4. Metadata chưa có nguồn
+## 6. Công thức điểm xét tuyển sau công thức
 
-Các trường sau vẫn để trống cho đến khi có model/API/dialog chính thức:
+`calculatedAdmissionScore` dùng `decimal.js`, không làm tròn số thực trung gian.
+
+| Nhóm | Thang tối đa | Ngưỡng | Khoảng giảm | Điểm ưu tiên ban đầu |
+|---|---:|---:|---:|---|
+| `THPT` | 30 | 22.5 | 7.5 | `diem_uutien + diem_cong` |
+| `DH`, `CD`, `TC` | 10 | 7.5 | 2.5 | `(diem_uutien + diem_cong) / 3` |
+
+Quy tắc:
+
+1. Không có `diem_xettuyen` thì `calculatedAdmissionScore` để trống.
+2. Điểm gốc dưới ngưỡng: cộng toàn bộ điểm ưu tiên ban đầu.
+3. Điểm gốc từ ngưỡng trở lên: điểm ưu tiên thực tế bằng `(điểm tối đa - điểm gốc) / khoảng giảm × điểm ưu tiên ban đầu`.
+4. Tổng điểm không vượt thang tối đa.
+5. Làm tròn 2 chữ số thập phân, `Decimal.ROUND_HALF_UP`.
+
+Ví dụ: THPT có `diem_xettuyen = 25.5`, `diem_uutien = 1.5`, `diem_cong = 0.5` cho kết quả `26.7`.
+
+Lưu ý: test component spec hiện ghi nhận DH `(8.1, 1, 0.5)` = `8.5` và THPT `(29.5, 3, 2)` = `29.8`, nhưng theo công thức ở trên DH = `8.48` và THPT = `29.83`. Cần đồng bộ giữa implementation và test trước khi dùng làm chuẩn.
+
+## 7. Cột dữ liệu
+
+### 7.1. Cột A:J
+
+| Cột | Nội dung | Giá trị |
+|---|---|---|
+| A | TT | Số thứ tự, bắt đầu lại từ 1 trong từng nhóm văn bằng |
+| B | Họ và tên | `fullName` |
+| C | Giới tính | `gender` |
+| D | Ngày sinh | `birthDate`, hiển thị `dd/MM/yyyy` nếu đầu vào là ISO |
+| E | Nơi sinh | `birthPlace` |
+| F | Dân tộc | `ethnicity` |
+| G | Văn bằng | `qualificationName`; thiếu thì nhãn nhóm |
+| H | Ngành/Nghề tốt nghiệp | `graduationMajor` |
+| I | Nơi cấp bằng | `graduationInstitution` |
+| J | Năm TN | `graduationYear` |
+
+### 7.2. Cột K:N
+
+Chỉ có tại `KQ xét tuyển` và `DL xét tuyển`.
+
+| Cột | Nội dung | Giá trị |
+|---|---|---|
+| K | Mã ngành | `registeredMajorCode` |
+| L | Điểm xét tuyển | `admissionScore`, dạng text với dấu phẩy thập phân |
+| M | Ghi chú | Theo quy tắc sheet tại mục 8 |
+| N | Điểm xét tuyển sau công thức | `calculatedAdmissionScore`, dạng text với dấu phẩy thập phân |
+
+`admissionScore` và `calculatedAdmissionScore` được ghi thành text (dấu phẩy) qua `formatScore()`; cột A (`TT`) là cột số duy nhất còn lại.
+
+Tiêu đề cột L:
+
+- `THPT`: `Điểm xét tuyển (thang điểm 30)`.
+- `DH`, `CD`, `TC`: `Điểm xét tuyển (thang điểm 10)`.
+
+## 8. Lọc, nhóm và ghi chú
+
+### 8.1. Bộ lọc sheet
+
+| Sheet | Dữ liệu |
+|---|---|
+| `DL xét tuyển` | Toàn bộ candidate của payload |
+| `KQ xét tuyển` | Candidate có `result.trim().length > 0` |
+| `DS đề nghị TT` | Candidate có `result === 'Trúng tuyển'` |
+| `DS TT` | Candidate có `result === 'Trúng tuyển'` |
+
+Hai sheet danh sách trúng tuyển hiện dùng cùng điều kiện do service chưa có trạng thái riêng cho “đề nghị” và “đã công nhận”.
+
+### 8.2. Nhóm và sắp xếp
+
+1. Nhóm theo `registeredMajorId`.
+2. Sắp xếp ngành theo `registeredMajorCode`, tiếp theo `registeredMajorName`, rồi `registeredMajorId`.
+3. Trong mỗi ngành, duyệt thứ tự `DH`, `CD`, `TC`, `THPT`.
+4. Bỏ nhóm văn bằng không có thí sinh.
+5. Sắp xếp thí sinh theo `fullName.localeCompare(..., 'vi')`.
+6. Ghi tổng từng ngành từ số candidate thực tế sau lọc.
+7. Ghi tổng cuối sheet từ tổng candidate của sheet.
+
+### 8.3. Ghi chú
+
+| Sheet | Quy tắc cột ghi chú |
+|---|---|
+| `KQ xét tuyển` | Luôn `Đủ điều kiện xét tuyển` |
+| `DL xét tuyển` | Ưu tiên `candidate.note`; không có thì `Đủ điều kiện xét tuyển` |
+
+`DS TT` và `DS đề nghị TT` chỉ có 10 cột nên không có cột ghi chú.
+
+## 9. Metadata hành chính
+
+Component hiện truyền:
+
+```typescript
+{
+    meetingDate: council.ngay_xetduyet,
+    preparedDate: new Date().toISOString().slice(0, 10),
+}
+```
+
+Các giá trị chưa có nguồn UI/model chính thức, do đó để trống:
 
 - `decisionNumber`, `decisionDate`.
 - `proposalNumber`, `proposalDate`.
 - `preparedBy`.
 
-### 15.5. Quy tắc dữ liệu theo sheet
+Hiển thị theo sheet trong `ExpHosoDaduyetService`:
 
-- `DL xét tuyển`: toàn bộ hồ sơ hội đồng.
-- `KQ xét tuyển`: hồ sơ có `result`.
-- `DS đề nghị TT`: hồ sơ `TRUNG_TUYEN`.
-- `DS TT`: hồ sơ `TRUNG_TUYEN`.
+| Sheet | Trường metadata | Ghi chú |
+|---|---|---|
+| `DS TT` | `decisionNumber`, `decisionDate` | Dòng 7: `Theo Quyết định số … ngày …` |
+| `DS đề nghị TT` | `proposalNumber`, `proposalDate` | Dòng 7: `Theo Công văn đề nghị số … ngày …` |
+| `KQ xét tuyển` | `meetingDate` | Dòng 7: `Theo biên bản họp hội đồng ngày …` |
+| `DL xét tuyển` | `preparedDate`, `preparedBy` | Phần ký: `Thái Nguyên, ngày dd tháng MM năm yyyy` và người lập |
 
-### 15.6. Kết quả kiểm chứng
+`council.reviewDate` được map ở component nhưng service hiện không dùng. Khi không có `preparedDate`, service hiển thị `ngày ..... tháng ..... năm ........` tại phần ký. Ngày có giá trị dùng định dạng hành chính `ngày dd tháng MM năm yyyy`.
 
-- Angular production build: đạt sau khi hoàn thiện service.
-- Smoke workbook: đạt; serialize/reload đủ 4 sheet, đúng tổng/filter, điểm giữ kiểu number với format `0.00`, payload không bị mutate.
-- Component spec đã bổ sung kiểm tra payload export và dữ liệu văn bằng không hợp lệ.
-- Test runner toàn dự án trước đó bị chặn khi bundle bởi dependency `jsqr` và đường dẫn global style `src/styles.css`; đây là lỗi cấu hình/phụ thuộc tồn tại ngoài luồng export.
+## 10. Kiểm thử đã có
+
+`hoidong-hoso-xetduyet.component.spec.ts` kiểm tra:
+
+- Map payload export của hồ sơ hiện hành.
+- Công thức điểm theo hai thang, gồm giới hạn điểm tối đa.
+- Không export khi `doituong` không hợp lệ.
+- Định tuyến hồ sơ cũ sang `ExportDlTuyensinhCuService`.
+- Xuất hai file khi hội đồng đồng thời có dữ liệu cũ và hiện hành.
+
+Chưa có spec trực tiếp cho `ExpHosoDaduyetService`; các component spec đang mock `exportExcel`, nên chưa xác nhận trực tiếp số sheet, kiểu cell, style, filter/tổng sau khi serialize workbook hoặc MIME của `Blob`. Test trường hợp hai nhóm cũng mới xác nhận cả hai service được gọi, chưa assert thứ tự tải file.
+
+Lưu ý: test hiện hành đang dùng các giá trị kỳ vọng điểm `8.5` và `29.8`; theo công thức decimal hiện tại kết quả tương ứng là `8.48` và `29.83`. Cần điều chỉnh test hoặc công thức sau khi chốt quy tắc nghiệp vụ.
+## 11. Checklist kiểm chứng tiếp theo
+
+- [ ] Build Angular production sau thay đổi service/component.
+- [ ] Xuất hội đồng chỉ có hồ sơ cũ.
+- [ ] Xuất hội đồng chỉ có hồ sơ hiện hành.
+- [ ] Xuất hội đồng có cả hai nhóm, xác nhận tải hai file theo thứ tự.
+- [ ] Kiểm tra đủ 4 sheet và thứ tự `DS TT`, `DS đề nghị TT`, `KQ xét tuyển`, `DL xét tuyển` trong file hiện hành.
+- [ ] Kiểm tra sheet 14 cột có cột N `Điểm xét tuyển sau công thức`.
+- [ ] Kiểm tra lọc `Trúng tuyển`, tổng ngành, tổng sheet và số thứ tự từng nhóm.
+- [ ] Mở file bằng Excel/LibreOffice, xác nhận không yêu cầu repair.
+- [ ] Kiểm tra lỗi map ngành, thiếu `_hoso` và `doituong` không hợp lệ đều thông báo rõ.
