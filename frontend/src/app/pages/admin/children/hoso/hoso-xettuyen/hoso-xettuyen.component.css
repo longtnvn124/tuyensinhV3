@@ -76,9 +76,10 @@
 
 .col-sticky--checkbox { left: 0; z-index: 11; }
 .col-sticky--index { left: 50px; z-index: 11; }
-.col-sticky--name { left: 110px; z-index: 11; }
-.col-sticky--cccd { left: 360px; z-index: 11; }
-.col-sticky--phone { left: 520px; z-index: 11; }
+.col-sticky--mahoso { left: 110px; z-index: 11; }
+.col-sticky--name { left: 190px; z-index: 11; }
+.col-sticky--cccd { left: 440px; z-index: 11; }
+.col-sticky--phone { left: 580px; z-index: 11; }
 
 thead .col-sticky {
     z-index: 21;

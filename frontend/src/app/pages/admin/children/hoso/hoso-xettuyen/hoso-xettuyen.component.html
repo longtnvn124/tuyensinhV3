@@ -49,7 +49,7 @@
                                     <input pInputText [(ngModel)]="searchInfo.cccd" placeholder="Số CCCD" />
                                 </div> -->
 
-                              
+
                                 <div class="col-6">
                                     <div class="filter-panel__item">
                                         <label>Ngành</label>
@@ -136,6 +136,7 @@
                                     [disabled]="!dataTable.data().length || !permissionControl().canUpdate"></mat-checkbox>
                             </th>
                             <th class="col-index text-center col-sticky col-sticky--index">#</th>
+                            <th class="text-left text-center col-sticky col-sticky--mahoso ">Mã hồ sơ</th>
                             <th class="text-left col-name col-sticky col-sticky--name">Họ tên</th>
                             <th class="text-left col-cccd col-sticky col-sticky--cccd">CCCD</th>
                             <th class="text-left col-phone col-sticky col-sticky--phone">SĐT</th>
@@ -143,6 +144,7 @@
                             @if (isAdmin||isduyethoso) {
                             <th class="text-left col-owner">Ngày tạo</th>
                             <th class="text-left col-owner">Người sở hữu hồ sơ</th>
+                            <th class="text-left col-owner">Người nhập hồ sơ</th>
                             <th class="text-left col-reviewer">Người duyệt</th>
                             }
 
@@ -164,6 +166,7 @@
                             </td>
                             <td class="col-index text-center col-sticky col-sticky--index">{{
                                 dataTable.paginator.startIndex() + i }}</td>
+                            <td class="col-sticky text-center col-sticky--mahoso">{{row['ma_hoso']}}</td>
                             <td class="text-left col-name col-sticky col-sticky--name">
                                 <div class="d-flex justify-content-between align-items-center gap-2">
                                     <span class="name-text">{{ row.ho_va_ten }}</span>
@@ -213,8 +216,9 @@
                             </td>
                             @if (isAdmin || isduyethoso) {
                             <td class="text-left col-owner">{{ getTime(row['created_at']) }}</td>
-                            <td class="text-left col-owner">{{ userLabel(row.owner_by) }}</td>
-                            <td class="text-left col-reviewer">{{ userLabel(row.nguoi_tuvan) }}</td>
+                            <td class="text-left col-owner">{{ userLabel(row.created_by) }}</td>
+                            <td class="text-left col-owner">{{ userLabel(row.owner_by, true) }}</td>
+                            <td class="text-left col-owner">{{ userLabel(row.nguoi_tuvan) }}</td>
                             }
                             <td class="text-left col-email">{{ row.email || '—' }}</td>
                             <td class="text-left col-major">{{ row['nganh_dangky'] }}</td>

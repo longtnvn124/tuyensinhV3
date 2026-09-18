@@ -24,7 +24,7 @@ export interface HosoTuyensinhExportPayload {
     rounds: readonly Pick<DotXettuyen, 'id' | 'tieude'>[];
     regions: readonly Pick<Locations, 'id' | 'name'>[];
     provinces: readonly Pick<Locations, 'id' | 'name'>[];
-    users: readonly Pick<User, 'id' | 'display_name'>[];
+    users: readonly Pick<User, 'id' | 'display_name' | 'username'>[];
 }
 
 interface ExportGroup {
@@ -220,7 +220,14 @@ export class ExpHosoTuyensinhService {
             payload.provinces.map(province => [province.id, this.text(province.name)]),
         );
         const userMap = new Map<number, string>(
-            payload.users.map(user => [user.id, this.text(user.display_name)]),
+            payload.users.map(user => {
+                const displayName = this.text(user.display_name).trim();
+                const username = this.text(user.username).trim();
+                const label = displayName && username
+                    ? `${displayName} - ${username}`
+                    : (displayName || username);
+                return [user.id, label];
+            }),
         );
 
         payload.records.forEach((record: Registrations, index: number): void => {

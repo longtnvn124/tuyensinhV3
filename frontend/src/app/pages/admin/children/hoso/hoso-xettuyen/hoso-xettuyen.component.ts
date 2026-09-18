@@ -130,7 +130,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         noi_sinh?: number;
         dan_toc?: string;
         ctdt_id?: number;
-        
+
     } = {
             search: '',
             status: undefined,
@@ -155,7 +155,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
 
     showAdvancedFilter: WritableSignal<boolean> = signal<boolean>(false);
     readonly onlyMyRecords = signal<boolean>(false);// hồ sơ xét duyệt
-    readonly onlyByUser = signal<boolean>(false);// hồ sơ của tôi 
+    readonly onlyByUser = signal<boolean>(false);// hồ sơ của tôi
 
     // ── Lookups ─────────────────────────────────────────────────
 
@@ -289,7 +289,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             users: this.isAdmin || this.isduyethoso
                 ? this.userService.query([], {
                     ...qp,
-                    select: 'id,display_name,email',
+                    select: 'id,display_name,email,username',
                 }).pipe(map((response: DtoObject<User[]>): User[] => response.data ?? []))
                 : of([]),
         }).pipe(takeUntil(this.onDestroy$)).subscribe({
@@ -620,10 +620,12 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
             rounds: this.dotService.load({ search: '' }, queryParams),
             regions: this.locationService.queryLocation([], queryParams, 'regions'),
             provinces: this.locationService.queryLocation([], queryParams, 'provinces'),
-            users: this.userService.query([], {
-                ...queryParams,
-                select: 'id,display_name',
-            }),
+            users: this.users().length > 0
+                ? of({ data: this.users() })
+                : this.userService.query([], {
+                    ...queryParams,
+                    select: 'id,display_name,username',
+                }),
         }).pipe(
             map((responses): HosoTuyensinhExportPayload => ({
                 records,
@@ -647,6 +649,8 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 users: (responses.users.data ?? []).map((user: User) => ({
                     id: user.id,
                     display_name: user.display_name,
+                    username: user.username,
+                    email: user.email,
                 })),
             })),
         );
@@ -737,11 +741,12 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         return this.tinhList().find(t => t.value == tinhId)?.label ?? `#${tinhId}`;
     }
 
-    userLabel(userId: number | undefined): string {
+    userLabel(userId: number | undefined , haveEmail?:boolean): string {
         if (!userId) return '—';
         const user = this.users().find((item: User): boolean => item.id == userId);
         if (!user) return `#${userId}`;
-        return user.email ? `${user.display_name} (${user.email})` : user.display_name;
+        console.log(user.username)
+        return user.username ? `${user.display_name} (${user.username} ${haveEmail? ' - ' + user.email : ''})` : user.username;
     }
 
     private loopGetSatus(arr: Registrations[], data: TuyensinhStatus[]): Observable<TuyensinhStatus[]> {
@@ -835,7 +840,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
                 }];
                 return this.userService.query(conditions, {
                     limit: -1,
-                    select: 'id,display_name,email',
+                    select: 'id,display_name,email,username',
                 }).pipe(map((response: DtoObject<User[]>): User[] => response.data ?? []));
             }),
             finalize((): void => this.reviewerLoading.set(false)),

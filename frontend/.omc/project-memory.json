@@ -32,8 +32,8 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "npm run build",
-    "testCommand": "npm test -- --include='**/exp-hoso-daduyet.service.spec.ts' --watch=false --browsers=ChromeHeadless 2>&1 | tail -n 120",
+    "buildCommand": "npm run build 2>&1 | grep -iE \"error|fail\" | head -20",
+    "testCommand": "npm test -- --watch=false --browsers=ChromeHeadless 2>&1 | grep -iE \"error|fail\" | head -30",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
     "scripts": {

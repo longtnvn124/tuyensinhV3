@@ -379,6 +379,7 @@ export const VBCM = [
 ];
 
 export const TH_XETTUYEN = [
+    { label: 'Không đủ đk xét tuyển', kyhieu: 'KHONG_DU_DK_XET_TUYEN', value: -1, status_key: 'XET_TUYEN', content: true, admin: false, show: true },
     { label: 'Chờ duyệt', kyhieu: 'KHOI_TAO', value: 0, status_key: 'XET_TUYEN', content: false, admin: false, show: false },
     { label: 'Hồ sơ chưa đủ, cần bổ sung', kyhieu: 'THIEU_HOSO', value: 1, status_key: 'XET_TUYEN', content: true, admin: false, show: true },
     { label: 'Đã duyệt, chờ kết quả xét tuyển', kyhieu: 'CHOKQ_XET_TUYEN', value: 2, status_key: 'XET_TUYEN', content: false, admin: false, show: true },
@@ -423,7 +424,7 @@ export const DANHHIEU_TOTNGHIEP = [
 ]
 
 export const DOI_TUONG: { value: string; label: string; key: string }[] = [
-  { value: 'DH', label: 'Đại học ', key: 'ĐH' }, 
+  { value: 'DH', label: 'Đại học ', key: 'ĐH' },
   { value: 'CD', label: 'Cao đẳng', key: 'CĐ' },
   { value: 'TC', label: 'Trung cấp', key: 'TC' },
   { value: 'THPT', label: 'THPT', key: 'THPT' },
