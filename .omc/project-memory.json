@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1789718805575,
+  "lastScanned": 1789953282635,
   "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1789718803164,
+      "lastAccessed": 1789953282612,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1789718803168,
+      "lastAccessed": 1789953282612,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,7 +56,7 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1789718803246,
+      "lastAccessed": 1789953282612,
       "keyFiles": [
         "api-outsite.md",
         "chuanhoa-database.md",
@@ -69,7 +69,7 @@
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1789718803382,
+      "lastAccessed": 1789953282613,
       "keyFiles": []
     }
   },
