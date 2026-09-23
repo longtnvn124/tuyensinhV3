@@ -74,6 +74,7 @@ export interface CouncilExportCandidate {
     calculatedAdmissionScore?: number;
     result: string;
     note?: string;
+    graduationTHPT?:string;
 }
 
 export interface CouncilAdmissionExportPayload {
@@ -82,14 +83,14 @@ export interface CouncilAdmissionExportPayload {
     documents: AdmissionDocumentExportInfo;
     regions?: readonly Pick<Locations, 'id' | 'name'>[];
     provinces?: readonly Pick<Locations, 'id' | 'name'>[];
-    users?: readonly Pick<User, 'id' | 'display_name'>[];
+    users?: any[];
     candidates: readonly CouncilExportCandidate[];
 }
 
 interface SummaryLookups {
     regions: ReadonlyMap<number, string>;
     provinces: ReadonlyMap<number, string>;
-    users: ReadonlyMap<number, string>;
+    users: any[];
 }
 
 type SheetKey = 'admitted' | 'proposed' | 'result' | 'source';
@@ -453,7 +454,7 @@ export class ExpHosoDaduyetService {
             candidate.ethnicity,
             candidate.qualificationName || this.qualificationLabel(candidate.qualificationGroup),
             candidate.graduationMajor,
-            candidate.graduationInstitution,
+            candidate.qualificationGroup == 'THPT' ? candidate.graduationTHPT : candidate.graduationInstitution,
             candidate.graduationYear,
         ];
         if (config.columnCount === 14) {
@@ -682,14 +683,23 @@ export class ExpHosoDaduyetService {
         const provinces = new Map<number, string>(
             payload.provinces?.map(item => [item.id, this.text(item.name)]) ?? [],
         );
-        const users = new Map<number, string>(
-            payload.users?.map(item => [item.id, this.text(item.display_name)]) ?? [],
-        );
-        return { regions, provinces, users };
+        // const users = new Map<number, string>(
+        //     payload.users?.map(item => [item.id, this.text(item.display_name)]) ?? [],
+        // );
+        return { regions, provinces, users: payload.users };
     }
 
     private lookupSummaryName(map: ReadonlyMap<number, string>, id: number | undefined): string {
-        return id == null ? '' : map.get(id) ?? '';
+        return id == null ? '' : map.get(id)  ?? '';
+    }
+    private lookupSummaryNameUser(data:any[], id:number): string {
+
+        const item = data.find(f=>f.id == id);
+        return item? item['display_name'] : '';
+    }
+    private getNameUserMap(data:any[], id:number): string {
+        const item = data.find(f=>f.id == id);
+        return item? item['display_name_format'] : '';
     }
 
     private configureSummarySheet(worksheet: Worksheet, candidateCount: number): void {
@@ -800,9 +810,10 @@ export class ExpHosoDaduyetService {
             candidate.graduationInstitution,
             candidate.graduationYear,
             this.text(candidate.recipientAddress),
-            this.lookupSummaryName(lookups.users, candidate.createdById),
-            this.lookupSummaryName(lookups.users, candidate.ownerById),
-            this.lookupSummaryName(lookups.users, candidate.consultantId),
+            this.lookupSummaryNameUser(lookups.users, candidate.createdById),
+            // this.lookupSummaryName(lookups.users, candidate.ownerById),
+            this.getNameUserMap(lookups.users, candidate.ownerById),
+            this.lookupSummaryNameUser(lookups.users, candidate.consultantId),
             candidate.note?.trim() || '',
         ];
     }

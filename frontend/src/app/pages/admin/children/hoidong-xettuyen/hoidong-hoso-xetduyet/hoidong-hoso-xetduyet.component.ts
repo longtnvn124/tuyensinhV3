@@ -111,7 +111,7 @@ interface StatusUpdateConfig {
     Popover,
     Drawer,
     FormThongtinDangkyComponent,
-    
+
 ],
     templateUrl: './hoidong-hoso-xetduyet.component.html',
     styleUrl: './hoidong-hoso-xetduyet.component.css',
@@ -386,13 +386,21 @@ export class HoidongHosoXetduyetComponent {
             regions: this.locationService.queryLocation([], queryParams, 'regions').pipe(
                 map((response: DtoObject<Locations[]>): Locations[] => response.data ?? []),
             ),
-            provinces: this.locationService.queryLocation([], queryParams, 'provinces').pipe(
-                map((response: DtoObject<Locations[]>): Locations[] => response.data ?? []),
-            ),
+            provinces: this.getloopDataLocation([],1,900,1),
             users: this.userService.query([], queryParams).pipe(
                 map((response: DtoObject<User[]>): User[] => response.data ?? []),
             ),
         });
+    }
+
+    private getloopDataLocation( data:Locations[],recordsTotal:number, limit:number,page:number):Observable<Locations[]>{
+        if(data.length < recordsTotal){
+            return this.locationService.queryLocation([], {limit:limit, paged: page}, 'provinces').pipe(switchMap((m)=>{
+                return this.getloopDataLocation(data.concat(m.data),m.recordsFiltered,limit,page+1);
+            }))
+        }else{
+            return of(data);
+        }
     }
 
     private loadRecords(hoidongId: number): Observable<HoidongHosoThisinh[]> {
@@ -700,11 +708,12 @@ export class HoidongHosoXetduyetComponent {
         records: readonly HoidongHosoThisinh[],
         controlLoading: Subject<ProgressAnimationEvent>,
     ): Observable<void> {
-        const cutoffDate = dayjs('2026-09-01');
-        const isLegacyCouncil = this.isBeforeCutoff(council.created_at, cutoffDate);
+        // const cutoffDate = dayjs('2026-09-01');
+        // const isLegacyCouncil = this.isBeforeCutoff(council.created_at, cutoffDate);
         const exports: Array<() => Promise<void>> = [];
 
-        if (isLegacyCouncil) {
+
+        if (council.id < 36 ) {
             const payload = this.createRawExportPayload(council, round, records);
             exports.push(() => this.exportDlTuyensinhCuService.exportExcel(payload));
         } else {
@@ -837,9 +846,10 @@ export class HoidongHosoXetduyetComponent {
                 id: item.id,
                 name: item.name,
             })),
-            users: this.users().map((item: User): Pick<User, 'id' | 'display_name'> => ({
+            users: this.users().map((item: User) => ({
                 id: item.id,
-                display_name: item.display_name,
+                display_name: item.display_name ,
+                display_name_format: item.display_name + ' (' + item.username + ')',
             })),
             candidates: records.map((record: HoidongHosoThisinh): CouncilExportCandidate =>
                 this.mapExportCandidate(record, round),
@@ -867,7 +877,7 @@ export class HoidongHosoXetduyetComponent {
             item.value === genderValue || item.key.toLowerCase() === genderValue,
         );
         const isHighSchool = qualificationGroup === 'THPT';
-
+        console.log(isHighSchool)
         return {
             id: candidate.id,
             roundName: round.tieude,
@@ -888,9 +898,8 @@ export class HoidongHosoXetduyetComponent {
                 ? candidate.van_bang_tn?.trim() || qualification?.label.trim() || ''
                 : candidate.vb_chuyenmon?.trim() || qualification?.label.trim() || '',
             graduationMajor: candidate.vb_chuyenmon_nganh?.trim() ?? '',
-            graduationInstitution: isHighSchool
-                ? candidate.tn_noicap ?? ''
-                : candidate.vb_chuyenmon_noicap ?? '',
+            graduationInstitution: isHighSchool ? '' : candidate.vb_chuyenmon_noicap ?? '',
+            graduationTHPT: candidate.tn_noicap ?? '',
             graduationYear: isHighSchool
                 ? candidate.nam_tn ?? ''
                 : candidate.vb_chuyenmon_namtn ?? '',
@@ -915,6 +924,7 @@ export class HoidongHosoXetduyetComponent {
                 ?? record.ket_qua?.trim()
                 ?? '',
             note: record.ghi_chu?.trim() || candidate.content?.trim(),
+
         };
     }
 

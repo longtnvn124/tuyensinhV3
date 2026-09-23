@@ -187,20 +187,25 @@ export class HosoListComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     loadCandidates(): void {
-       
+
         this.candidateLoad$.next();
         this.assignLoading = true;
         // this.registrationsService.load({
         //     search: this.assignSearch.trim(),
         //     dotxettuyen_id: this.assignIncludeCurrentRound ? this._hoidong?.dot_xettuyen_id : undefined,
-        
+
         // }, { limit: -1, paged: 1 })
-        
+
         const conditon: IctuConditionParam[] = [
             {
                 conditionName:'status',
                 condition:IctuQueryCondition.equal,
                 value: '2'
+            },
+            {
+                conditionName:'status_connect',
+                condition:IctuQueryCondition.notEqual,
+                value: '1'
             },
         ]
         if(this.assignIncludeCurrentRound){
