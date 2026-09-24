@@ -188,7 +188,7 @@
                                                 </li>
                                                 <li class="popover-menu__divider"></li>
                                                 }
-                                                @if (permissionControl().canUpdate) {
+                                                @if (permissionControl().canUpdate && row.status !== 2 || isAdmin || chekcDuyetHosso(row) ) {
                                                 <li class="popover-menu__item" (click)="btnevent.hide(); editItem(row)">
                                                     <i class="ti ti-edit"></i>
                                                     <span>Cập nhật</span>

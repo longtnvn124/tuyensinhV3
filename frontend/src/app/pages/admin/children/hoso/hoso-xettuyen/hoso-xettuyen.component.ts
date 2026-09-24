@@ -462,7 +462,7 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     }
 
     onOnlyByUserChange(checked: boolean): void {
-        console.log(checked);
+
         this.onlyByUser.set(checked);
 
         if (checked == true) {
@@ -745,7 +745,6 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         if (!userId) return '—';
         const user = this.users().find((item: User): boolean => item.id == userId);
         if (!user) return `#${userId}`;
-        console.log(user.username)
         return user.username ? `${user.display_name} (${user.username} ${haveEmail? ' - ' + user.email : ''})` : user.username;
     }
 
@@ -866,5 +865,9 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
         const year = date.getFullYear();
 
         return `${day}/${month}/${year}`;
+    }
+
+    chekcDuyetHosso(row:Registrations){
+        return this.isduyethoso && this.auth.user.id == row.nguoi_tuvan;
     }
 }
