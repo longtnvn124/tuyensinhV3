@@ -1,7 +1,7 @@
 {
-  "tool_name": "Agent",
-  "tool_input_preview": "{\"description\":\"Add targeted export regression test\",\"prompt\":\"Trong working directory hiện tại, KHÔNG dùng worktree. Task nhỏ: sheet 2 'DS đề nghị TT' thêm cột 'Mã số bằng' giữa Dân tộc và Văn bằng, ...",
-  "error": "Refusing to use d:\\data\\project\\angular\\v19\\tuyensinh\\.claude\\worktrees\\agent-a72c05f72524626a7 as an isolation worktree: git resolves its working tree to D:/data/project/angular/v19/tuyensinh/.claude/worktrees/agent-a72c05f72524626a7 (a core.worktree redirect, or a checkout discovered above it), so commands run there would write outside the worktree. Remove the redirect, restore the worktree's own .git, or recreate the worktree, then retry.",
-  "timestamp": "2026-09-24T12:48:40.439Z",
-  "retry_count": 3
+  "tool_name": "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics",
+  "tool_input_preview": "{\"file\":\"D:/data/project/angular/v19/tuyensinh/frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.ts\"}",
+  "error": "Language server 'typescript-language-server' not found.\nInstall with: npm install -g typescript-language-server typescript",
+  "timestamp": "2026-09-25T07:48:44.219Z",
+  "retry_count": 1
 }

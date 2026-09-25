@@ -3,7 +3,9 @@
     "allow": [
       "PowerShell(npm --prefix frontend test -- --watch=false --browsers=ChromeHeadless --include=\"src/app/pages/admin/children/hoso/form-thongtin-dangky/form-thongtin-dangky.component.spec.ts\" --include=\"src/app/pages/admin/children/hoso/hoso-xettuyen/hoso-xettuyen.component.spec.ts\" --include=\"src/app/pages/admin/children/hoso/hoso-khongtrungtuyen/hoso-khongtrungtuyen.component.spec.ts\" --include=\"src/app/pages/admin/children/hoso/tuvan-tuyensinh/tuvan-tuyensinh.component.spec.ts\" --include=\"src/app/pages/admin/children/hoidong-xettuyen/hoso-list/hoso-list.component.spec.ts\" --include=\"src/app/pages/admin/children/hoidong-xettuyen/hoidong-hoso-xetduyet/hoidong-hoso-xetduyet.component.spec.ts\")",
       "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics_directory",
-      "PowerShell(New-Item -ItemType Directory -Force -Path \"plane\")"
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"plane\")",
+      "Bash(npm test *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

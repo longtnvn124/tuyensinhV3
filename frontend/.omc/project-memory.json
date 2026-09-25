@@ -32,7 +32,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "npm run build 2>&1 | grep -iE \"error|fail\" | head -20",
+    "buildCommand": "npx tsc -p tsconfig.app.json --noEmit",
     "testCommand": "npm test -- --watch=false --browsers=ChromeHeadless 2>&1 | grep -iE \"error|fail\" | head -30",
     "lintCommand": "npm run lint",
     "devCommand": "npm run start",
@@ -120,6 +120,12 @@
       "type": "file"
     },
     {
+      "path": "src",
+      "accessCount": 8,
+      "lastAccessed": 1790323946007,
+      "type": "directory"
+    },
+    {
       "path": "src\\app",
       "accessCount": 7,
       "lastAccessed": 1789147170792,
@@ -166,12 +172,6 @@
       "accessCount": 3,
       "lastAccessed": 1783567887395,
       "type": "file"
-    },
-    {
-      "path": "src",
-      "accessCount": 3,
-      "lastAccessed": 1784254964424,
-      "type": "directory"
     },
     {
       "path": "",

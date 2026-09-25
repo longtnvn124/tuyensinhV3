@@ -1,7 +1,7 @@
 {
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"npx ng test --include=\\\"**/exp-hoso-daduyet.service.spec.ts\\\" --watch=false --browsers=ChromeHeadless\",\"timeout\":300000,\"description\":\"Run targeted export service tests\",\"run_in_background...",
-  "error": "Exit code 1\n\u001b[33m❯\u001b[39m Building...\r\n\u001b[32m✔\u001b[39m Building...\r\nApplication bundle generation failed. [3.805 seconds] - 2026-09-24T13:10:14.708Z\n\n\u001b[1m\u001b[31m\u001b[31mX \u001b[41;31m[\u001b[41;97mERROR\u001b[41;31m]\u001b[0m \u001b[1mTS2322: Type '{ id: number; display_name: string; email: string; }' is not assignable to type 'ExpectedRecursive<User>'.\r\n  Type '{ id: number; display_name: string; email: string; }' is missing the following properties from type '{ id: Any | ExpectedRecursive<number>; username: Any | ExpectedRecurs...",
-  "timestamp": "2026-09-24T13:10:14.983Z",
+  "tool_name": "Grep",
+  "tool_input_preview": "{\"pattern\":\"formatScore|Score|diem\",\"path\":\"frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.ts\",\"output_mode\":\"content\"}",
+  "error": "Path does not exist: frontend/src/app/services/tuyensinh/exp-hoso-daduyet.service.ts. Note: your current working directory is D:\\data\\project\\angular\\v19\\tuyensinh\\frontend.",
+  "timestamp": "2026-09-25T08:02:22.152Z",
   "retry_count": 1
 }

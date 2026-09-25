@@ -47,7 +47,7 @@ Sheet `Dữ liệu tổng hợp` dùng định dạng riêng:
 - Auto-filter `A1:AQ<n>`.
 - Header cao `31.5`, dòng dữ liệu cao `47.25`.
 - Cột TT dùng công thức `SUBTOTAL(3,$B$2:B<n>)`.
-- Cột Z/AC giữ kiểu number; cột I dùng text `DD/MM/YYYY`.
+- Các cột điểm (Z, AA, AB, AC) dùng text với 2 chữ số thập phân phân cách bởi dấu phẩy qua `formatScore()`; cột I dùng text `DD/MM/YYYY`.
 
 Workbook có tiêu đề cơ quan, quốc hiệu, tên hội đồng, thông tin đợt xét tuyển; metadata văn bản chỉ hiển thị khi payload có giá trị tương ứng.
 
@@ -206,7 +206,7 @@ Chỉ có tại `KQ xét tuyển` và `DL xét tuyển`.
 | M | Ghi chú | Theo quy tắc sheet tại mục 8 |
 | N | Điểm xét tuyển sau công thức | `calculatedAdmissionScore`, dạng text với dấu phẩy thập phân |
 
-`admissionScore` và `calculatedAdmissionScore` được ghi thành text (dấu phẩy) qua `formatScore()`; cột A (`TT`) là cột số duy nhất còn lại.
+`admissionScore` và `calculatedAdmissionScore` được ghi thành text qua `formatScore()`, luôn lấy 2 số sau dấu phẩy và dùng dấu phẩy phân cách (ví dụ `8` -> `8,00`, `6.7` -> `6,70`, `6.78` -> `6,78`); cột A (`TT`) là cột số duy nhất còn lại.
 
 Tiêu đề cột L:
 
@@ -232,7 +232,7 @@ Hai sheet danh sách trúng tuyển hiện dùng cùng điều kiện do service
 2. Sắp xếp ngành theo `registeredMajorCode`, tiếp theo `registeredMajorName`, rồi `registeredMajorId`.
 3. Trong mỗi ngành, duyệt thứ tự `DH`, `CD`, `TC`, `THPT`.
 4. Bỏ nhóm văn bằng không có thí sinh.
-5. Sắp xếp thí sinh theo `fullName.localeCompare(..., 'vi')`.
+5. Với 3 sheet đầu (`DS TT`, `DS đề nghị TT`, `KQ xét tuyển`), sắp xếp thí sinh trong từng nhóm văn bằng/đối tượng từ A đến Z theo chữ cuối của `fullName` (Tên), nếu trùng tên thì xét tiếp họ đệm. Sheet `DL xét tuyển` giữ nguyên thứ tự ban đầu của nhóm.
 6. Ghi tổng từng ngành từ số candidate thực tế sau lọc.
 7. Ghi tổng cuối sheet từ tổng candidate của sheet.
 

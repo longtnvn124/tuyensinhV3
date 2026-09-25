@@ -196,10 +196,10 @@ describe('ExpHosoDaduyetService', () => {
         expect(firstRow?.getCell(18).value).toBe('123 Đường A');
         expect(firstRow?.getCell(24).value).toBe('7480201');
         expect(firstRow?.getCell(25).value).toBe('Công nghệ thông tin');
-        expect(firstRow?.getCell(26).value).toBe(25.5);
-        expect(firstRow?.getCell(27).value).toBe(0.5);
-        expect(firstRow?.getCell(28).value).toBe(1.5);
-        expect(firstRow?.getCell(29).value).toBe(26.7);
+        expect(firstRow?.getCell(26).value).toBe('25,50');
+        expect(firstRow?.getCell(27).value).toBe('0,50');
+        expect(firstRow?.getCell(28).value).toBe('1,50');
+        expect(firstRow?.getCell(29).value).toBe('26,70');
         expect(firstRow?.getCell(30).value).toBe('VB123456');
         expect(firstRow?.getCell(31).value).toBe('Sở GD&ĐT Thái Nguyên');
         expect(firstRow?.getCell(34).value).toBe('Bằng tốt nghiệp THPT');
@@ -217,10 +217,10 @@ describe('ExpHosoDaduyetService', () => {
         expect(secondRow?.getCell(7).value).toBe('Nguyễn');
         expect(secondRow?.getCell(8).value).toBe('Bình');
         expect(secondRow?.getCell(10).value).toBe('Nữ');
-        expect(secondRow?.getCell(26).value).toBe(8.2);
-        expect(secondRow?.getCell(27).value).toBe(0.5);
-        expect(secondRow?.getCell(28).value).toBe(1);
-        expect(secondRow?.getCell(29).value).toBe(8.58);
+        expect(secondRow?.getCell(26).value).toBe('8,20');
+        expect(secondRow?.getCell(27).value).toBe('0,50');
+        expect(secondRow?.getCell(28).value).toBe('1,00');
+        expect(secondRow?.getCell(29).value).toBe('8,58');
         expect(secondRow?.getCell(36).value).toBe('Toán học');
         expect(secondRow?.getCell(37).value).toBe('ĐH Sư phạm');
         expect(secondRow?.getCell(38).value).toBe('2025');
@@ -315,5 +315,120 @@ describe('ExpHosoDaduyetService', () => {
         const [blob, filename] = saveSpy.calls.mostRecent().args as [Blob, string];
         expect(blob.type).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         expect(filename).toContain('ket-qua-xet-tuyen_hoi-dong-tuyen-sinh-2026_');
+    });
+
+    it('sorts candidates by given name (last word of fullName) A-Z in the first 3 sheets, but preserves order in sheet 4', async () => {
+        const candidateC = {
+            ...basePayload.candidates[0],
+            id: 201,
+            fullName: 'Nguyễn Văn Cường',
+            qualificationGroup: 'THPT' as const,
+            status: 3,
+        };
+        const candidateA = {
+            ...basePayload.candidates[0],
+            id: 202,
+            fullName: 'Trần Anh',
+            qualificationGroup: 'THPT' as const,
+            status: 3,
+        };
+        const candidateB1 = {
+            ...basePayload.candidates[0],
+            id: 203,
+            fullName: 'Nguyễn Văn Bình',
+            qualificationGroup: 'THPT' as const,
+            status: 3,
+        };
+        const candidateB2 = {
+            ...basePayload.candidates[0],
+            id: 204,
+            fullName: 'Lê Văn Bình',
+            qualificationGroup: 'THPT' as const,
+            status: 3,
+        };
+
+        const payload: CouncilAdmissionExportPayload = {
+            ...basePayload,
+            candidates: [candidateC, candidateA, candidateB1, candidateB2],
+        };
+
+        const workbook = await service.buildWorkbook(payload);
+
+        for (const sheetName of ['DS TT', 'DS đề nghị TT', 'KQ xét tuyển']) {
+            const sheet = workbook.getWorksheet(sheetName);
+            const names: string[] = [];
+            sheet?.eachRow((row) => {
+                const c1 = row.getCell(1).value;
+                if (typeof c1 === 'number' && c1 >= 1) {
+                    names.push(String(row.getCell(2).value));
+                }
+            });
+            expect(names).toEqual([
+                'Trần Anh',
+                'Lê Văn Bình',
+                'Nguyễn Văn Bình',
+                'Nguyễn Văn Cường',
+            ]);
+        }
+
+        const sheet4 = workbook.getWorksheet('DL xét tuyển');
+        const sheet4Names: string[] = [];
+        sheet4?.eachRow((row) => {
+            const c1 = row.getCell(1).value;
+            if (typeof c1 === 'number' && c1 >= 1) {
+                sheet4Names.push(String(row.getCell(2).value));
+            }
+        });
+        expect(sheet4Names).toEqual([
+            'Nguyễn Văn Cường',
+            'Trần Anh',
+            'Nguyễn Văn Bình',
+            'Lê Văn Bình',
+        ]);
+    });
+
+    it('formats scores with 2 decimal places using comma separator (e.g. 8 -> 8,00; 6.7 -> 6,70; 6.78 -> 6,78)', async () => {
+        const payload: CouncilAdmissionExportPayload = {
+            ...basePayload,
+            candidates: [
+                {
+                    ...basePayload.candidates[0],
+                    id: 301,
+                    fullName: 'Thí sinh Điểm Tròn',
+                    admissionScore: 8,
+                    calculatedAdmissionScore: 8.5,
+                    status: 3,
+                },
+                {
+                    ...basePayload.candidates[0],
+                    id: 302,
+                    fullName: 'Thí sinh Điểm Lẻ',
+                    admissionScore: 6.7,
+                    calculatedAdmissionScore: 6.78,
+                    status: 3,
+                },
+            ],
+        };
+
+        const workbook = await service.buildWorkbook(payload);
+        const resultSheet = workbook.getWorksheet('KQ xét tuyển');
+
+        const rows: ExcelJS.Row[] = [];
+        resultSheet?.eachRow((row) => {
+            const c1 = row.getCell(1).value;
+            if (typeof c1 === 'number' && c1 >= 1) {
+                rows.push(row);
+            }
+        });
+
+        expect(rows.length).toBe(2);
+        const row1 = rows.find(r => r.getCell(2).value === 'Thí sinh Điểm Tròn');
+        const row2 = rows.find(r => r.getCell(2).value === 'Thí sinh Điểm Lẻ');
+
+        // Col 12: admissionScore, Col 14: calculatedAdmissionScore
+        expect(row1?.getCell(12).value).toBe('8,00');
+        expect(row1?.getCell(14).value).toBe('8,50');
+        expect(row2?.getCell(12).value).toBe('6,70');
+        expect(row2?.getCell(14).value).toBe('6,78');
     });
 });

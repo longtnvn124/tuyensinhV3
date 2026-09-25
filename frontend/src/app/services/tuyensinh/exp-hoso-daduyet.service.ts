@@ -333,11 +333,19 @@ export class ExpHosoDaduyetService {
 
         let qualificationNumber = 1;
         for (const qualification of QUALIFICATION_ORDER) {
-            const groupCandidates = major.candidates
-                .filter((candidate: CouncilExportCandidate): boolean => candidate.qualificationGroup === qualification)
-                .sort((left: CouncilExportCandidate, right: CouncilExportCandidate): number =>
-                    left.fullName.localeCompare(right.fullName, 'vi'),
-                );
+            const candidatesInGroup = major.candidates.filter(
+                (candidate: CouncilExportCandidate): boolean => candidate.qualificationGroup === qualification,
+            );
+            const shouldSortByName =
+                config.key === 'admitted' ||
+                config.key === 'proposed' ||
+                config.key === 'result';
+            const groupCandidates = shouldSortByName
+                ? [...candidatesInGroup].sort(
+                    (left: CouncilExportCandidate, right: CouncilExportCandidate): number =>
+                        this.compareCandidateByName(left, right),
+                )
+                : candidatesInGroup;
             if (!groupCandidates.length) continue;
 
             this.addQualificationSection(
@@ -504,10 +512,15 @@ export class ExpHosoDaduyetService {
         }
     }
 
-    private formatScore(score?: number): string {
-        return score === undefined || score === null
-            ? ''
-            : score.toString().replace('.', ',');
+    private formatScore(score?: number | string): string {
+        if (score === undefined || score === null || score === '') {
+            return '';
+        }
+        const num = Number(score);
+        if (Number.isNaN(num)) {
+            return '';
+        }
+        return num.toFixed(2).replace('.', ',');
     }
 
     private styleTotalRow(row: Row, columnCount: number): void {
@@ -553,6 +566,28 @@ export class ExpHosoDaduyetService {
             const codeComparison = left.code.localeCompare(right.code, 'vi');
             return codeComparison || left.name.localeCompare(right.name, 'vi') || left.id - right.id;
         });
+    }
+
+    private compareCandidateByName(
+        left: CouncilExportCandidate,
+        right: CouncilExportCandidate,
+    ): number {
+        const leftFullName = this.normalizeSummaryName(left.fullName);
+        const rightFullName = this.normalizeSummaryName(right.fullName);
+        const [leftFamily, leftGiven] = this.splitSummaryName(leftFullName);
+        const [rightFamily, rightGiven] = this.splitSummaryName(rightFullName);
+
+        const givenComparison = leftGiven.localeCompare(rightGiven, 'vi');
+        if (givenComparison !== 0) {
+            return givenComparison;
+        }
+
+        const familyComparison = leftFamily.localeCompare(rightFamily, 'vi');
+        if (familyComparison !== 0) {
+            return familyComparison;
+        }
+
+        return left.id - right.id;
     }
 
     private createRoundDescription(round: AdmissionRoundExportInfo): string {
@@ -809,10 +844,10 @@ export class ExpHosoDaduyetService {
             '',
             candidate.registeredMajorCode,
             candidate.registeredMajorName,
-            candidate.admissionScore ?? '',
-            candidate.priorityRegionScore ?? '',
-            candidate.priorityObjectScore ?? '',
-            candidate.calculatedAdmissionScore ?? '',
+            this.formatScore(candidate.admissionScore),
+            this.formatScore(candidate.priorityRegionScore),
+            this.formatScore(candidate.priorityObjectScore),
+            this.formatScore(candidate.calculatedAdmissionScore),
             this.text(candidate.highSchoolDiplomaCode),
             this.text(candidate.highSchoolDiplomaPlace),
             '',
