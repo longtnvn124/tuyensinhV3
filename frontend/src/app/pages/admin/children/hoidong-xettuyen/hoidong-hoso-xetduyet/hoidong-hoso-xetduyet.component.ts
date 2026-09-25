@@ -67,6 +67,7 @@ import {
     TuyensinhCuExportCandidate,
     TuyensinhCuExportPayload,
 } from '@app/services/tuyensinh/exportDlTuyensinhCu.service';
+import { STATUS_LABELS } from '@services/tuyensinh/exp-hoso-tuyensinh.service';
 
 type ReviewDataState = 'loading' | 'data' | 'error';
 
@@ -863,8 +864,9 @@ export class HoidongHosoXetduyetComponent {
             throw new Error(`Không tìm thấy dữ liệu hồ sơ #${record.tuyensinh_id}`);
         }
 
+
         const qualificationGroup = this.getQualificationGroup(candidate.doituong, candidate.id);
-        const qualification = DOI_TUONG.find((item): boolean => item.value === qualificationGroup);
+        const qualification = DOI_TUONG.find((item): boolean => item.value == qualificationGroup);
         const registeredMajorName = candidate.nganh_dangky?.trim();
         const major = this.majors().find((item: Nganhhoc): boolean =>
             item.ten_nganh.trim() === registeredMajorName,
@@ -877,7 +879,6 @@ export class HoidongHosoXetduyetComponent {
             item.value === genderValue || item.key.toLowerCase() === genderValue,
         );
         const isHighSchool = qualificationGroup === 'THPT';
-        console.log(isHighSchool)
         return {
             id: candidate.id,
             roundName: round.tieude,
@@ -896,7 +897,10 @@ export class HoidongHosoXetduyetComponent {
             qualificationGroup,
             qualificationName: isHighSchool
                 ? candidate.van_bang_tn?.trim() || qualification?.label.trim() || ''
-                : candidate.vb_chuyenmon?.trim() || qualification?.label.trim() || '',
+                : qualification?.label.trim() || '',
+            diplomaNumber: isHighSchool
+                ? candidate.van_bang_tn_sohieu?.trim() || ''
+                : candidate.vb_chuyenmon_sohieu?.trim() || '',
             graduationMajor: candidate.vb_chuyenmon_nganh?.trim() ?? '',
             graduationInstitution: isHighSchool ? '' : candidate.vb_chuyenmon_noicap ?? '',
             graduationTHPT: candidate.tn_noicap ?? '',
@@ -917,14 +921,10 @@ export class HoidongHosoXetduyetComponent {
             priorityRegionScore: candidate.diem_cong,
             priorityObjectScore: candidate.diem_uutien,
             calculatedAdmissionScore: this.calculateAdmissionScore(candidate, qualificationGroup),
-            result: TH_XETTUYEN.find((item): boolean => item.value === candidate.status)?.label
-                ?? TH_XETTUYEN.find((item): boolean =>
-                    item.kyhieu === record.ket_qua?.trim().toUpperCase(),
-                )?.label
-                ?? record.ket_qua?.trim()
-                ?? '',
+            status: candidate.status,
+            result: STATUS_LABELS.get(candidate.status)
+                ?? (candidate.status != null ? String(candidate.status) : ''),
             note: record.ghi_chu?.trim() || candidate.content?.trim(),
-
         };
     }
 

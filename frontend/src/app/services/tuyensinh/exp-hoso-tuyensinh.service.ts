@@ -130,7 +130,7 @@ const COLUMN_WIDTHS: readonly number[] = [
     22, 24, 28, 42, 16, 30, 16, 30, 17, 22, 18, 16, 16, 14, 24, 17, 18, 26,
     22, 26, 26, 28, 28, 28, 24, 38,
 ];
-const STATUS_LABELS = new Map<number, string>([
+export const STATUS_LABELS = new Map<number, string>([
     [-1, 'Không trúng tuyển'],
     [0, 'Chờ duyệt'],
     [1, 'Hồ sơ chưa đủ, cần bổ sung'],

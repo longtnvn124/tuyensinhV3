@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Locations } from '@models/location';
+import { RegistrationStatus } from '@models/tuyensinh/registrations';
 import { User } from '@models/user';
 import { SAVER, Saver } from '@app/providers/saver.provider';
 import ExcelJS, {
@@ -58,6 +59,7 @@ export interface CouncilExportCandidate {
     highSchoolDiplomaCode?: string;
     highSchoolDiplomaPlace?: string;
     qualificationCode?: string;
+    diplomaNumber?: string;
     graduationMajor: string;
     graduationInstitution: string;
     graduationYear: string;
@@ -72,6 +74,7 @@ export interface CouncilExportCandidate {
     priorityRegionScore?: number;
     priorityObjectScore?: number;
     calculatedAdmissionScore?: number;
+    status?: RegistrationStatus;
     result: string;
     note?: string;
     graduationTHPT?:string;
@@ -83,14 +86,14 @@ export interface CouncilAdmissionExportPayload {
     documents: AdmissionDocumentExportInfo;
     regions?: readonly Pick<Locations, 'id' | 'name'>[];
     provinces?: readonly Pick<Locations, 'id' | 'name'>[];
-    users?: any[];
+    users?: readonly any[];
     candidates: readonly CouncilExportCandidate[];
 }
 
 interface SummaryLookups {
     regions: ReadonlyMap<number, string>;
     provinces: ReadonlyMap<number, string>;
-    users: any[];
+    users: readonly any[];
 }
 
 type SheetKey = 'admitted' | 'proposed' | 'result' | 'source';
@@ -99,7 +102,7 @@ export interface SheetConfig {
     key: SheetKey;
     name: string;
     title: string;
-    columnCount: 10 | 14;
+    columnCount: 10 | 11 | 14;
 }
 
 interface MajorGroup {
@@ -115,7 +118,7 @@ const NON_ADMITTED_RESULT = 'Không trúng tuyển';
 const QUALIFICATION_ORDER: readonly QualificationGroup[] = ['DH', 'CD', 'TC', 'THPT'];
 const SHEET_CONFIGS: readonly SheetConfig[] = [
     { key: 'admitted', name: 'DS TT', title: 'DANH SÁCH THÍ SINH TRÚNG TUYỂN', columnCount: 10 },
-    { key: 'proposed', name: 'DS đề nghị TT', title: 'DANH SÁCH ĐỀ NGHỊ CÔNG NHẬN TRÚNG TUYỂN', columnCount: 10 },
+    { key: 'proposed', name: 'DS đề nghị TT', title: 'DANH SÁCH ĐỀ NGHỊ CÔNG NHẬN TRÚNG TUYỂN', columnCount: 11 },
     { key: 'result', name: 'KQ xét tuyển', title: 'KẾT QUẢ XÉT TUYỂN', columnCount: 14 },
     { key: 'source', name: 'DL xét tuyển', title: 'DỮ LIỆU XÉT TUYỂN', columnCount: 14 },
 ];
@@ -211,7 +214,7 @@ export class ExpHosoDaduyetService {
         payload: CouncilAdmissionExportPayload,
         candidates: readonly CouncilExportCandidate[],
     ): void {
-        this.configureWorksheet(worksheet, config.columnCount);
+        this.configureWorksheet(worksheet, config);
         this.addAdministrativeHeader(worksheet, config, payload);
 
         const majorGroups = this.groupByMajor(candidates);
@@ -231,9 +234,12 @@ export class ExpHosoDaduyetService {
         });
     }
 
-    private configureWorksheet(worksheet: Worksheet, columnCount: number): void {
-        const widths = [7, 27, 11, 14, 20, 13, 18, 27, 25, 11, 14, 16, 31, 22];
-        worksheet.columns = widths.slice(0, columnCount).map((width: number) => ({ width }));
+    private configureWorksheet(worksheet: Worksheet, config: SheetConfig): void {
+        const defaultWidths = [7, 27, 11, 14, 20, 13, 18, 27, 25, 11, 14, 16, 31, 22];
+        const widths = config.key === 'proposed'
+            ? [7, 27, 11, 14, 20, 13, 18, 18, 27, 25, 11]
+            : defaultWidths.slice(0, config.columnCount);
+        worksheet.columns = widths.map((width: number) => ({ width }));
         worksheet.pageSetup = {
             paperSize: 9,
             orientation: 'landscape',
@@ -259,8 +265,8 @@ export class ExpHosoDaduyetService {
         payload: CouncilAdmissionExportPayload,
     ): void {
         const lastColumn = this.columnLetter(config.columnCount);
-        const leftEndColumn = config.columnCount === 10 ? 'E' : 'G';
-        const rightStartColumn = config.columnCount === 10 ? 'F' : 'H';
+        const leftEndColumn = config.columnCount === 10 ? 'E' : (config.columnCount === 11 ? 'F' : 'G');
+        const rightStartColumn = config.columnCount === 10 ? 'F' : (config.columnCount === 11 ? 'G' : 'H');
 
         worksheet.mergeCells(`A1:${leftEndColumn}1`);
         worksheet.mergeCells(`${rightStartColumn}1:${lastColumn}1`);
@@ -366,12 +372,12 @@ export class ExpHosoDaduyetService {
         sectionRow.getCell(1).alignment = { vertical: 'middle', wrapText: true };
         sectionRow.height = 22;
 
-        const headerRow = worksheet.addRow(this.headers(config.columnCount, qualification));
+        const headerRow = worksheet.addRow(this.headers(config, qualification));
         this.styleHeaderRow(headerRow, config.columnCount);
 
         candidates.forEach((candidate: CouncilExportCandidate, index: number): void => {
             const row = worksheet.addRow(this.candidateValues(candidate, index + 1, config));
-            this.styleDataRow(row, config.columnCount);
+            this.styleDataRow(row, config);
         });
     }
 
@@ -414,7 +420,7 @@ export class ExpHosoDaduyetService {
         nameRow.getCell(signatureColumn).font = { ...BASE_FONT, bold: true };
     }
 
-    private headers(columnCount: number, qualification: QualificationGroup): string[] {
+    private headers(config: SheetConfig, qualification: QualificationGroup): string[] {
         const headers = [
             'TT',
             'Họ và tên',
@@ -422,12 +428,13 @@ export class ExpHosoDaduyetService {
             'Ngày sinh',
             'Nơi sinh',
             'Dân tộc',
+            ...(config.key === 'proposed' ? ['Mã số bằng'] : []),
             'Văn bằng',
             'Ngành/Nghề tốt nghiệp',
             'Nơi cấp bằng',
             'Năm TN',
         ];
-        if (columnCount === 14) {
+        if (config.columnCount === 14) {
             headers.push(
                 'Mã ngành',
                 qualification === 'THPT'
@@ -452,6 +459,7 @@ export class ExpHosoDaduyetService {
             this.formatDate(candidate.birthDate),
             candidate.birthPlace,
             candidate.ethnicity,
+            ...(config.key === 'proposed' ? [this.text(candidate.diplomaNumber)] : []),
             candidate.qualificationName || this.qualificationLabel(candidate.qualificationGroup),
             candidate.graduationMajor,
             candidate.qualificationGroup == 'THPT' ? candidate.graduationTHPT : candidate.graduationInstitution,
@@ -479,14 +487,17 @@ export class ExpHosoDaduyetService {
         }
     }
 
-    private styleDataRow(row: Row, columnCount: number): void {
+    private styleDataRow(row: Row, config: SheetConfig): void {
         row.height = 32;
-        for (let column = 1; column <= columnCount; column += 1) {
+        const centerColumns = config.key === 'proposed'
+            ? [1, 3, 4, 6, 7, 11]
+            : [1, 3, 4, 6, 10, 11, 12, 14];
+        for (let column = 1; column <= config.columnCount; column += 1) {
             const cell = row.getCell(column);
             cell.font = BASE_FONT;
             cell.border = DATA_BORDER;
             cell.alignment = {
-                horizontal: [1, 3, 4, 6, 10, 11, 12, 14].includes(column) ? 'center' : 'left',
+                horizontal: centerColumns.includes(column) ? 'center' : 'left',
                 vertical: 'middle',
                 wrapText: true,
             };
@@ -513,11 +524,13 @@ export class ExpHosoDaduyetService {
         candidates: readonly CouncilExportCandidate[],
         key: SheetKey,
     ): CouncilExportCandidate[] {
-        if (key === 'source') return [...candidates];
+        if (key === 'source' || key === 'proposed') return [...candidates];
         if (key === 'result') {
-            return candidates.filter((candidate: CouncilExportCandidate): boolean => candidate.result.trim().length > 0);
+            return candidates.filter((candidate: CouncilExportCandidate): boolean =>
+                candidate.status !== undefined,
+            );
         }
-        return candidates.filter((candidate: CouncilExportCandidate): boolean => candidate.result === ADMITTED_RESULT);
+        return candidates.filter((candidate: CouncilExportCandidate): boolean => candidate.status === 3);
     }
 
     private groupByMajor(candidates: readonly CouncilExportCandidate[]): MajorGroup[] {
@@ -692,14 +705,14 @@ export class ExpHosoDaduyetService {
     private lookupSummaryName(map: ReadonlyMap<number, string>, id: number | undefined): string {
         return id == null ? '' : map.get(id)  ?? '';
     }
-    private lookupSummaryNameUser(data:any[], id:number): string {
+    private lookupSummaryNameUser(data: readonly any[], id: number): string {
 
-        const item = data.find(f=>f.id == id);
-        return item? item['display_name'] : '';
+        const item = data.find(f => f.id == id);
+        return item ? item['display_name'] : '';
     }
-    private getNameUserMap(data:any[], id:number): string {
-        const item = data.find(f=>f.id == id);
-        return item? item['display_name_format'] : '';
+    private getNameUserMap(data: readonly any[], id: number): string {
+        const item = data.find(f => f.id == id);
+        return item ? item['display_name_format'] : '';
     }
 
     private configureSummarySheet(worksheet: Worksheet, candidateCount: number): void {

@@ -26,7 +26,7 @@ Một hội đồng có cả hai nhóm sẽ tải **hai file Excel**, theo thứ
 | Thứ tự | Sheet | Cột | Nội dung |
 |---:|---|---:|---|
 | 1 | `DS TT` | A:J | Danh sách thí sinh trúng tuyển |
-| 2 | `DS đề nghị TT` | A:J | Danh sách đề nghị công nhận trúng tuyển |
+| 2 | `DS đề nghị TT` | A:K | Danh sách đề nghị công nhận trúng tuyển (thêm cột Mã số bằng giữa Dân tộc và Văn bằng) |
 | 3 | `KQ xét tuyển` | A:N | Kết quả xét tuyển |
 | 4 | `DL xét tuyển` | A:N | Dữ liệu xét tuyển |
 | 5 | `Dữ liệu tổng hợp` | A:AQ | Bảng tổng hợp 43 cột theo mẫu nhập học |

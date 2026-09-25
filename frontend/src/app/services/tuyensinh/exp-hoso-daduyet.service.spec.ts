@@ -237,6 +237,77 @@ describe('ExpHosoDaduyetService', () => {
         expect(reloaded.getWorksheet('Dữ liệu tổng hợp')?.rowCount).toBe(3);
     });
 
+    it('DS đề nghị TT sheet has 11 columns with Mã số bằng between Dân tộc and Văn bằng', async () => {
+        const payload: CouncilAdmissionExportPayload = {
+            ...basePayload,
+            candidates: [
+                {
+                    ...basePayload.candidates[0],
+                    diplomaNumber: 'SB-THPT-001',
+                },
+                {
+                    ...basePayload.candidates[1],
+                    diplomaNumber: 'CM-DH-002',
+                },
+            ],
+        };
+        const workbook = await service.buildWorkbook(payload);
+        const sheet1 = workbook.getWorksheet('DS TT');
+        const sheet2 = workbook.getWorksheet('DS đề nghị TT');
+
+        expect(sheet1).toBeDefined();
+        expect(sheet1?.columnCount).toBe(10);
+
+        expect(sheet2).toBeDefined();
+        expect(sheet2?.columnCount).toBe(11);
+    });
+
+    it('DS đề nghị TT header row has Dân tộc at col 6, Mã số bằng at col 7, Văn bằng at col 8', async () => {
+        const workbook = await service.buildWorkbook(basePayload);
+        const sheet2 = workbook.getWorksheet('DS đề nghị TT');
+        let headerRow: ExcelJS.Row | undefined;
+        sheet2?.eachRow((row) => {
+            if (headerRow) return;
+            if (row.getCell(6).value === 'Dân tộc') {
+                headerRow = row;
+            }
+        });
+
+        expect(headerRow).toBeDefined();
+        expect(headerRow?.getCell(6).value).toBe('Dân tộc');
+        expect(headerRow?.getCell(7).value).toBe('Mã số bằng');
+        expect(headerRow?.getCell(8).value).toBe('Văn bằng');
+        expect(headerRow?.getCell(9).value).toBe('Ngành/Nghề tốt nghiệp');
+        expect(headerRow?.getCell(11).value).toBe('Năm TN');
+    });
+
+    it('DS đề nghị TT data rows render diplomaNumber at col 7', async () => {
+        const payload: CouncilAdmissionExportPayload = {
+            ...basePayload,
+            candidates: [
+                { ...basePayload.candidates[0], qualificationGroup: 'THPT', diplomaNumber: 'SB-THPT-001' },
+                { ...basePayload.candidates[1], qualificationGroup: 'DH',   diplomaNumber: 'CM-DH-002' },
+            ],
+        };
+        const workbook = await service.buildWorkbook(payload);
+        const sheet2 = workbook.getWorksheet('DS đề nghị TT');
+
+        const dataRows: ExcelJS.Row[] = [];
+        sheet2?.eachRow((row) => {
+            const c1 = row.getCell(1).value;
+            if (typeof c1 === 'number' && c1 >= 1) {
+                dataRows.push(row);
+            }
+        });
+
+        expect(dataRows.length).toBeGreaterThanOrEqual(2);
+        const thptRow = dataRows.find(r => r.getCell(8).value === 'Bằng tốt nghiệp THPT');
+        const dhRow   = dataRows.find(r => r.getCell(8).value === 'Bằng Đại học');
+
+        expect(thptRow?.getCell(7).value).toBe('SB-THPT-001');
+        expect(dhRow?.getCell(7).value).toBe('CM-DH-002');
+    });
+
     it('invokes saver when calling export', async () => {
         await service.export(basePayload);
 
