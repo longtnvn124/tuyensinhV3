@@ -232,7 +232,7 @@ Hai sheet danh sách trúng tuyển hiện dùng cùng điều kiện do service
 2. Sắp xếp ngành theo `registeredMajorCode`, tiếp theo `registeredMajorName`, rồi `registeredMajorId`.
 3. Trong mỗi ngành, duyệt thứ tự `DH`, `CD`, `TC`, `THPT`.
 4. Bỏ nhóm văn bằng không có thí sinh.
-5. Với 3 sheet đầu (`DS TT`, `DS đề nghị TT`, `KQ xét tuyển`), sắp xếp thí sinh trong từng nhóm văn bằng/đối tượng từ A đến Z theo chữ cuối của `fullName` (Tên), nếu trùng tên thì xét tiếp họ đệm. Sheet `DL xét tuyển` giữ nguyên thứ tự ban đầu của nhóm.
+5. Với các sheet danh sách (`DS TT`, `DS đề nghị TT`, `KQ xét tuyển`, `DL xét tuyển`), sắp xếp thí sinh trong từng nhóm văn bằng/đối tượng từ A đến Z theo chữ cuối của `fullName` (Tên), nếu trùng tên thì xét tiếp họ đệm.
 6. Ghi tổng từng ngành từ số candidate thực tế sau lọc.
 7. Ghi tổng cuối sheet từ tổng candidate của sheet.
 

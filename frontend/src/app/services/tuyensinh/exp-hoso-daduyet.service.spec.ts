@@ -354,7 +354,7 @@ describe('ExpHosoDaduyetService', () => {
 
         const workbook = await service.buildWorkbook(payload);
 
-        for (const sheetName of ['DS TT', 'DS đề nghị TT', 'KQ xét tuyển']) {
+        for (const sheetName of ['DS TT', 'DS đề nghị TT', 'KQ xét tuyển', 'DL xét tuyển']) {
             const sheet = workbook.getWorksheet(sheetName);
             const names: string[] = [];
             sheet?.eachRow((row) => {
@@ -370,21 +370,6 @@ describe('ExpHosoDaduyetService', () => {
                 'Nguyễn Văn Cường',
             ]);
         }
-
-        const sheet4 = workbook.getWorksheet('DL xét tuyển');
-        const sheet4Names: string[] = [];
-        sheet4?.eachRow((row) => {
-            const c1 = row.getCell(1).value;
-            if (typeof c1 === 'number' && c1 >= 1) {
-                sheet4Names.push(String(row.getCell(2).value));
-            }
-        });
-        expect(sheet4Names).toEqual([
-            'Nguyễn Văn Cường',
-            'Trần Anh',
-            'Nguyễn Văn Bình',
-            'Lê Văn Bình',
-        ]);
     });
 
     it('formats scores with 2 decimal places using comma separator (e.g. 8 -> 8,00; 6.7 -> 6,70; 6.78 -> 6,78)', async () => {

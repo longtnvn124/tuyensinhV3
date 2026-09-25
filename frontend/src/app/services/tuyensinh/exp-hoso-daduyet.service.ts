@@ -336,16 +336,10 @@ export class ExpHosoDaduyetService {
             const candidatesInGroup = major.candidates.filter(
                 (candidate: CouncilExportCandidate): boolean => candidate.qualificationGroup === qualification,
             );
-            const shouldSortByName =
-                config.key === 'admitted' ||
-                config.key === 'proposed' ||
-                config.key === 'result';
-            const groupCandidates = shouldSortByName
-                ? [...candidatesInGroup].sort(
-                    (left: CouncilExportCandidate, right: CouncilExportCandidate): number =>
-                        this.compareCandidateByName(left, right),
-                )
-                : candidatesInGroup;
+            const groupCandidates = [...candidatesInGroup].sort(
+                (left: CouncilExportCandidate, right: CouncilExportCandidate): number =>
+                    this.compareCandidateByName(left, right),
+            );
             if (!groupCandidates.length) continue;
 
             this.addQualificationSection(
