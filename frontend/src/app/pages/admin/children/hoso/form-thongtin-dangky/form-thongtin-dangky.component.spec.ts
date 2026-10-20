@@ -12,6 +12,7 @@ import { UserService } from '@services/user.service';
 import { ChuongtrinhDaotaoService } from '@services/tuyensinh/chuongtrinh-daotao.service';
 import { DotXettuyenService } from '@services/tuyensinh/dot-xettuyen.service';
 import { RegistrationsService } from '@services/tuyensinh/registrations.service';
+import { RegistrationsStatusService } from '@services/tuyensinh/registrations-status';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { ParentsService } from '@services/tuyensinh/parents';
 import { TuyensinhStatusService } from '@services/tuyensinh/tuyensinh-status.service';
@@ -67,6 +68,7 @@ describe('FormThongtinDangkyComponent status access', () => {
                 { provide: UserService, useValue: userService },
                 { provide: ParentsService, useValue: {} },
                 { provide: DotXettuyenService, useValue: dotXettuyenService },
+                { provide: RegistrationsStatusService, useValue: {} },
             ],
         });
     });
@@ -121,6 +123,15 @@ describe('FormThongtinDangkyComponent status access', () => {
         const component = createComponent('admin');
 
         expect(component.statusOptions).toEqual(TH_XETTUYEN.map(({ label, value }) => ({ label, value })));
+    });
+
+    it('limits status options to supplementary and approved states for duyet_hoso', () => {
+        const component = createComponent('duyet_hoso');
+
+        expect(component.statusOptions).toEqual([
+            { label: 'Hồ sơ chưa đủ, cần bổ sung', value: 1 },
+            { label: 'Đã duyệt, chờ kết quả xét tuyển', value: 2 },
+        ]);
     });
 
     it('patches the current status when editing a record', () => {

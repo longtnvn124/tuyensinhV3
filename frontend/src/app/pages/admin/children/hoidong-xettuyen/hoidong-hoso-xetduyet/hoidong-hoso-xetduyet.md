@@ -110,7 +110,7 @@ Bảng có các cột:
 | Cột | Nguồn dữ liệu / giá trị mặc định |
 |---|---|
 | Chọn | Checkbox theo `row.id` |
-| STT | Vị trí trong `records()` + 1 |
+| STT | Vị trí trong danh sách đã lọc và sắp xếp theo tên cuối + 1 |
 | Họ và tên | `_hoso.full_name`; mặc định `Hồ sơ #hoso_id` |
 | Mã hồ sơ | `row.hoso_id` |
 | Ngành học | Lookup từ `_hoso.nganh_id`; mặc định `---` |
@@ -135,6 +135,7 @@ Badge trạng thái:
 - Checkbox đầu bảng gọi `toggleAll()` để chọn hoặc bỏ chọn toàn bộ `records()`.
 - Checkbox từng dòng gọi `toggleRow(row.id)`.
 - Dòng đã chọn có class `review-table__row--selected`.
+- `filteredRecords()` sắp xếp bản sao danh sách theo từ cuối của `_hoso.ho_va_ten` bằng thứ tự tiếng Việt A–Z; tên trống xếp cuối, dữ liệu `records()` không bị mutate.
 - Mỗi cập nhật tạo `Set` mới; không mutate `Set` hiện tại.
 - Selection bị reset khi đổi hội đồng, reload hoặc có ít nhất một cập nhật thành công.
 - Checkbox và thao tác selection bị khóa khi `actionLoading()` là `true`.
@@ -142,10 +143,25 @@ Badge trạng thái:
 Thanh selection hiển thị:
 
 ```text
-Đã chọn X / Y hồ sơ                       [⋮] [Xuất dữ liệu]
+Đã chọn X / Y hồ sơ        [Chuyển trạng thái] [⋮] [Xuất dữ liệu]
 ```
 
-## 7. Duyệt và hủy duyệt hàng loạt
+## 7. Chuyển trạng thái hàng loạt
+
+Khi có ít nhất một hồ sơ được chọn, thanh thao tác hiển thị nút `Chuyển trạng thái`. Nút mở modal PrimeNG với số lượng hồ sơ đã chọn và danh sách trạng thái lấy từ `TH_XETTUYEN`.
+
+Danh sách modal chỉ lấy trạng thái có `value >= 4`: `Chưa nhập học`, `Đã nhập học, chưa hoàn thành thủ tục nhập học` và `Đã hoàn thành thủ tục nhập học`. Các trạng thái xét tuyển `-1`, `0`, `1`, `2`, `3` không xuất hiện trong modal; thao tác nhanh `Trúng tuyển`/`Không trúng tuyển` trong menu `⋮` vẫn giữ nguyên.
+
+- `openStatusDialog()` chỉ mở khi có selection và không có batch đang chạy.
+- `closeStatusDialog()` đóng modal, reset trạng thái tạm thời nhưng giữ selection bảng.
+- `confirmStatusChange()` yêu cầu có trạng thái đích, sau đó dùng chung luồng batch update.
+- Nút xác nhận hiển thị số hồ sơ và bị khóa khi chưa chọn trạng thái hoặc đang xử lý.
+
+### Quy tắc ngày duyệt
+
+Modal chỉ chuyển sang `4`, `5`, `6`, nên payload chỉ gồm `status` và giữ nguyên `ngay_duyet`. Hai thao tác nhanh trong menu `⋮` vẫn gửi `ngay_duyet` khi chuyển sang `3` (Trúng tuyển) hoặc `-1` (Không trúng tuyển).
+
+## 8. Duyệt và hủy duyệt hàng loạt
 
 Menu `⋮` gồm:
 
@@ -165,7 +181,7 @@ Hai thao tác bị disable khi selection rỗng hoặc đang xử lý.
 
 1. Lọc `records()` theo `selectedIds`.
 2. Bật `actionLoading` và mở progress bar.
-3. Gọi `RegistrationsService.update(record.hoso_id, { status })` cho từng hồ sơ.
+3. Gọi `RegistrationsService.update(record.tuyensinh_id, { status, ngay_duyet? })` cho từng hồ sơ. Khi mã trạng thái thay đổi, gọi tiếp `RegistrationsStatusService.create(...)` để ghi lịch sử.
 4. `mergeMap(..., 5)` giới hạn tối đa 5 request đồng thời.
 5. Mỗi request tự bắt lỗi để các hồ sơ còn lại tiếp tục xử lý.
 6. `scan()` tổng hợp số thành công, thất bại và lỗi đầu tiên.
@@ -179,7 +195,7 @@ Kết quả:
 - Tất cả thất bại: giữ selection, không reload để người dùng có thể thử lại.
 - Khi một batch đang chạy: không cho khởi chạy batch khác hoặc xuất dữ liệu.
 
-## 8. Xuất dữ liệu
+## 9. Xuất dữ liệu
 
 `onExportData()` chỉ hoạt động khi không có batch đang chạy và input có `hoidong.id` hợp lệ:
 
@@ -189,7 +205,7 @@ this.exportRequested.emit(hoidongId);
 
 Component cha cần bind `(exportRequested)` để thực hiện nghiệp vụ xuất. Template cha hiện chỉ truyền `[hoidong]`, chưa bind output này.
 
-## 9. Giao diện và khả năng truy cập
+## 10. Giao diện và khả năng truy cập
 
 - Shell dùng flex column, `height: 100%`, `min-height: 0`.
 - Vùng bảng dùng `overflow: auto`; bảng có `min-width: 1120px`.
@@ -203,7 +219,7 @@ Component cha cần bind `(exportRequested)` để thực hiện nghiệp vụ x
 - `:focus-visible` có outline rõ.
 - Dưới 600 px, thanh selection tự wrap; nhóm hành động căn phải.
 
-## 10. Test hiện có
+## 11. Test hiện có
 
 `hoidong-hoso-xetduyet.component.spec.ts` kiểm tra:
 
@@ -215,8 +231,13 @@ Component cha cần bind `(exportRequested)` để thực hiện nghiệp vụ x
 - Hiển thị lỗi server cho cập nhật thất bại.
 - Tất cả cập nhật thất bại giữ selection và không reload.
 - Không cho bắt đầu batch mới khi batch hiện tại đang chạy.
+- Nút `Chuyển trạng thái` chỉ xuất hiện khi có selection.
+- Modal mở/đóng không làm mất selection.
+- Danh sách trạng thái trong modal chỉ gồm mã `4`, `5`, `6`.
+- Các thao tác nhanh mã `3/-1` trong menu `⋮` vẫn giữ nguyên.
+- Trạng thái không phải kết quả không ghi đè `ngay_duyet` và vẫn ghi lịch sử tương ứng.
 
-## 11. Phạm vi hiện tại
+## 12. Phạm vi hiện tại
 
 Đã triển khai:
 
@@ -226,18 +247,19 @@ Component cha cần bind `(exportRequested)` để thực hiện nghiệp vụ x
 - Loading, data, empty và error state.
 - Chọn từng dòng, chọn tất cả.
 - Duyệt/hủy duyệt hàng loạt với giới hạn đồng thời, progress và xử lý lỗi từng phần.
+- Chuyển trạng thái hàng loạt qua modal chọn trạng thái; ghi lịch sử trạng thái và chỉ cập nhật ngày duyệt cho kết quả xét tuyển.
 - Phát yêu cầu xuất dữ liệu.
 - Giao diện responsive cơ bản và thuộc tính accessibility.
 
 Chưa nằm trong luồng giao diện hiện tại:
 
-- Dialog xác nhận trước khi duyệt/hủy duyệt.
+- Dialog xác nhận riêng cho thao tác nhanh Trúng tuyển/Không trúng tuyển trong menu `⋮` (modal chuyển trạng thái đã xác nhận riêng).
 - Chỉnh sửa ghi chú trực tiếp.
 - Phân trang hoặc virtual scroll.
 - Component tự tạo file Excel/CSV/PDF từ nút `Xuất dữ liệu`.
 - Binding `(exportRequested)` tại component cha.
 
-## 12. File nguồn đồng bộ
+## 13. File nguồn đồng bộ
 
 ```text
 hoidong-hoso-xetduyet/

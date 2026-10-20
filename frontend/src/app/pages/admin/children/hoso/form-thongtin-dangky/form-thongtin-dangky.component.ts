@@ -142,7 +142,11 @@ export class FormThongtinDangkyComponent implements OnInit {
     readonly listUser = signal<User[]>([]);
     readonly listNganh = signal<IctuDropdownOption<string>[]>([]);
     readonly listChuongtrinh = signal<IctuDropdownOption<number>[]>([]);
-    readonly statusOptions: IctuDropdownOption<number>[] = TH_XETTUYEN.map(({ label, value }) => ({ label, value }));
+    readonly statusOptions: IctuDropdownOption<number>[] = (
+        this.auth.userHasRole(['duyet_hoso'])
+            ? TH_XETTUYEN.filter((item) => item.value === 1 || item.value === 2 || item.value === -1)
+            : TH_XETTUYEN
+    ).map(({ label, value }) => ({ label, value }));
 
     readonly listDotXetTuyen = signal<DotXettuyen[]>([]);
 
@@ -304,7 +308,7 @@ export class FormThongtinDangkyComponent implements OnInit {
             type_diem: null,
             diem_xettuyen: null,
             content: '',
-           
+
             dotxettuyen_id: 0,
             status: 0,
             status_connect: 0,
@@ -347,7 +351,7 @@ export class FormThongtinDangkyComponent implements OnInit {
                 orWhere: 'and',
             })
         }
-        
+
 
         forkJoin({
             tinh: this.locationSvc.queryLocation([], qp, 'regions'),

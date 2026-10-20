@@ -1,175 +1,203 @@
 <section class="council-review-shell">
     @if (hoidong()) {
-        <main class="review-body">
-            @switch (state()) {
-                @case ('loading') {
-                    <div class="review-state review-state--loading" aria-live="polite">
-                        <app-loading-progress heading="Đang tải hồ sơ của hội đồng..." backdropFilter="none" />
-                    </div>
-                }
-                @case ('error') {
-                    <div class="review-state review-state--error" role="alert">
-                        <span class="review-state__icon">
-                            <i class="ti ti-alert-triangle" aria-hidden="true"></i>
-                        </span>
-                        <h3>Không thể tải dữ liệu</h3>
-                        <p>{{ errorMessage() }}</p>
-                        <button type="button" mat-flat-button class="review-reload-button" (click)="reload()">
-                            <i class="ti ti-refresh" aria-hidden="true"></i>
-                            Tải lại dữ liệu
-                        </button>
-                    </div>
-                } 
-                @case ('data') {
-                    @if (records().length) {
-                        <div class="review-selection-bar">
-                            <div class="review-selection-bar__selection">
-                                <span class="review-selection-bar__count">
-                                    Đã chọn <strong>{{ selectedCount() }}</strong> / {{ records().length }} hồ sơ
-                                    @if (searchTerm()) {
-                                        <span>(hiển thị {{ filteredRecords().length }})</span>
-                                    }
-                                </span>
-                            </div>
-
-                            <div class="review-selection-bar__actions">
-                                <div class="review-search-wrap">
-                                    <i class="ti ti-search review-search-icon" aria-hidden="true"></i>
-                                    <input
-                                        type="search"
-                                        class="review-search-input"
-                                        placeholder="CCCD, họ tên, SĐT..."
-                                        aria-label="Tìm kiếm hồ sơ theo CCCD, họ và tên hoặc số điện thoại"
-                                        [value]="searchTerm()"
-                                        (input)="onSearchInput($event)" />
-                                </div>
-                                <button
-                                    type="button"
-                                    class="review-menu-button"
-                                    mat-icon-button
-                                    aria-label="Mở menu thao tác hồ sơ"
-                                    [disabled]="actionLoading()"
-                                    (click)="batchActions.toggle($event)">
-                                    <i class="ti ti-dots-vertical" aria-hidden="true"></i>
-                                     <p-popover #batchActions styleClass="ictu-popover-no-padding">
-                                    <ul class="review-actions-menu">
-                                        <li>
-                                            <button
-                                                type="button"
-                                                class="review-actions-menu__item"
-                                                [disabled]="!hasSelection() || actionLoading()"
-                                                (click)="batchActions.hide(); onApproveSelected()">
-                                                <i class="ti ti-circle-check" aria-hidden="true"></i>
-                                                <span>Trúng tuyển</span>
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button
-                                                type="button"
-                                                class="review-actions-menu__item review-actions-menu__item--danger"
-                                                [disabled]="!hasSelection() || actionLoading()"
-                                                (click)="batchActions.hide(); onCancelApprovalSelected()">
-                                                <i class="ti ti-circle-x" aria-hidden="true"></i>
-                                                <span>Không trúng tuyển</span>
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </p-popover>
-                                </button>
-                               
-                                
-                                <button
-                                    type="button"
-                                    class="review-export-button"
-                                    mat-flat-button
-                                    [disabled]="actionLoading()"
-                                    (click)="onExportData()">
-                                    <i class="ti ti-file-export" aria-hidden="true"></i>
-                                    Xuất dữ liệu
-                                </button>
-                            </div>
-                        </div>
-
-                        @if (filteredRecords().length) {
-                        <div class="review-table-wrap">
-                            <table class="review-table">
-                                <caption class="visually-hidden">Danh sách hồ sơ xét duyệt</caption>
-                                <thead>
-                                    <tr>
-                                        <th class="review-col-check">
-                                            <mat-checkbox
-                                                [checked]="areAllSelected()"
-                                                [indeterminate]="isSelectionIndeterminate()"
-                                                [disabled]="actionLoading()"
-                                                (change)="toggleAll()"
-                                                aria-label="Chọn tất cả hồ sơ" />
-                                        </th>
-                                        <th class="review-col-index">STT</th>
-                                        <th class="review-col-name">Họ và tên</th>
-                                        <th>Ngành học</th>
-                                        <th>Tỉnh</th>
-                                        <th>Ngày sinh</th>
-                                        <th>Số điện thoại</th>
-                                        <th>Số CCCD</th>
-                                        <th>Trạng thái hồ sơ</th>
-                                        <th>Ghi chú</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @for (row of filteredRecords(); track row.id; let index = $index) {
-                                        @let candidate = getCandidate(row);
-                                        <tr [class.review-table__row--selected]="isSelected(row.id)" (click)="openEditRow(row)" [style.cursor]="canEditRow() ? 'pointer' : ''">
-                                            <td class="review-col-check">
-                                                <mat-checkbox
-                                                    [checked]="isSelected(row.id)"
-                                                    [disabled]="actionLoading()"
-                                                    (change)="toggleRow(row.id)"
-                                                    (click)="$event.stopPropagation()"
-                                                    [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id || 'Hồ sơ chưa xác định')" />
-                                            </td>
-                                            <td class="review-col-index">{{ index + 1 }}</td>
-                                            <td class="review-col-name">
-                                                <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id || 'Hồ sơ chưa xác định') }}</strong>
-                                                <small>Mã hồ sơ: {{ row['_hoso'] && row['_hoso']['ma_hoso'] ? row['_hoso']['ma_hoso'] : (row.tuyensinh_id || 'Hồ sơ chưa xác định') }}</small>
-                                            </td>
-                                            <td>{{ candidate?.nganh_dangky}}</td>
-                                            <td>{{ getProvinceLabel(candidate?.dia_chi_tinh) }}</td>
-                                            <td>{{ formatDate(candidate?.ngay_sinh) }}</td>
-                                            <td>{{ candidate?.dien_thoai || '---' }}</td>
-                                            <td>{{ candidate?.cccd || '---' }}</td>
-                                            <td>
-                                                <span class="review-result" [class]="getStatusClass(candidate?.status)">
-                                                    {{ getStatusLabel(candidate?.status) }}
-                                                </span>
-                                            </td>
-                                            <td class="review-col-note">{{ row.ghi_chu || '---' }}</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        } @else {
-                            <div class="review-state review-state--empty" role="status">
-                                <h3>Không tìm thấy hồ sơ</h3>
-                                <p>Thử từ khóa khác hoặc xóa nội dung tìm kiếm.</p>
-                            </div>
-                        }
-                    } @else {
-                        <div class="review-state review-state--empty">
-                            <span class="review-state__icon">
-                                <i class="ti ti-files-off" aria-hidden="true"></i>
-                            </span>
-                            <h3>Chưa có hồ sơ</h3>
-                            <p>Hội đồng chưa có hồ sơ để xét duyệt.</p>
-                        </div>
+    <main class="review-body">
+        @switch (state()) {
+        @case ('loading') {
+        <div class="review-state review-state--loading" aria-live="polite">
+            <app-loading-progress heading="Đang tải hồ sơ của hội đồng..." backdropFilter="none" />
+        </div>
+        }
+        @case ('error') {
+        <div class="review-state review-state--error" role="alert">
+            <span class="review-state__icon">
+                <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+            </span>
+            <h3>Không thể tải dữ liệu</h3>
+            <p>{{ errorMessage() }}</p>
+            <button type="button" mat-flat-button class="review-reload-button" (click)="reload()">
+                <i class="ti ti-refresh" aria-hidden="true"></i>
+                Tải lại dữ liệu
+            </button>
+        </div>
+        }
+        @case ('data') {
+        @if (records().length) {
+        <div class="review-selection-bar">
+            <div class="review-selection-bar__selection">
+                <span class="review-selection-bar__count">
+                    Đã chọn <strong>{{ selectedCount() }}</strong> / {{ records().length }} hồ sơ
+                    @if (searchTerm()) {
+                    <span>(hiển thị {{ filteredRecords().length }})</span>
                     }
-                }
-            }
-        </main>
+                </span>
+            </div>
+
+            <div class="review-selection-bar__actions">
+                <div class="review-search-wrap">
+                    <i class="ti ti-search review-search-icon" aria-hidden="true"></i>
+                    <input type="search" class="review-search-input" placeholder="CCCD, họ tên, SĐT..."
+                        aria-label="Tìm kiếm hồ sơ theo CCCD, họ và tên hoặc số điện thoại" [value]="searchTerm()"
+                        (input)="onSearchInput($event)" />
+                </div>
+                <div style="max-width: 230px;width:100%">
+                    <p-select [style]="{'width':'100%', 'max-width':'250px'}" [options]="majorOptions()"
+                        optionLabel="label" optionValue="value" placeholder="Ngành" [showClear]="true"
+                        [ngModel]="selectedMajor()" (onChange)="onMajorChange($event.value)"></p-select>
+                </div>
+                <div style="max-width: 230px;width:100%">
+                    <p-select [style]="{'width':'100%', 'max-width':'250px'}" [options]="status_xettuyen"
+                        optionLabel="label" optionValue="value" placeholder="Trạng thái" [showClear]="true"
+                        [ngModel]="selectedStatus()" (onChange)="onStatusChange($event.value)"></p-select>
+                </div>
+
+                <button type="button" class="review-menu-button" mat-icon-button aria-label="Mở menu thao tác hồ sơ"
+                    [disabled]="actionLoading()" (click)="batchActions.toggle($event)">
+                    <i class="ti ti-dots-vertical" aria-hidden="true"></i>
+                    <p-popover #batchActions styleClass="ictu-popover-no-padding">
+                        <ul class="review-actions-menu">
+                            <li>
+                                <button type="button" class="review-actions-menu__item"
+                                    [disabled]="!hasSelection() || actionLoading()"
+                                    (click)="batchActions.hide(); onApproveSelected()">
+                                    <i class="ti ti-circle-check" aria-hidden="true"></i>
+                                    <span>Trúng tuyển</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button"
+                                    class="review-actions-menu__item review-actions-menu__item--danger"
+                                    [disabled]="!hasSelection() || actionLoading()"
+                                    (click)="batchActions.hide(); onCancelApprovalSelected()">
+                                    <i class="ti ti-circle-x" aria-hidden="true"></i>
+                                    <span>Không trúng tuyển</span>
+                                </button>
+                            </li>
+
+                            @if(hasSelection()){
+                            <li>
+                                <button type="button" class="review-actions-menu__item"
+                                    [disabled]="actionLoading()" (click)="openStatusDialog()">
+                                    <i class="ti ti-switch-2" aria-hidden="true"></i>
+                                    Chuyển trạng thái
+                                </button>
+
+                            </li>
+
+                            }
+
+                        </ul>
+                    </p-popover>
+                </button>
+
+
+                <button type="button" class="review-export-button" mat-flat-button [disabled]="actionLoading()"
+                    (click)="onExportData()">
+                    <i class="ti ti-file-export" aria-hidden="true"></i>
+                    Xuất dữ liệu
+                </button>
+            </div>
+        </div>
+
+        @if (filteredRecords().length) {
+        <div class="review-table-wrap">
+            <table class="review-table">
+                <caption class="visually-hidden">Danh sách hồ sơ xét duyệt</caption>
+                <thead>
+                    <tr>
+                        <th class="review-col-check">
+                            <mat-checkbox [checked]="areAllSelected()" [indeterminate]="isSelectionIndeterminate()"
+                                [disabled]="actionLoading()" (change)="toggleAll()" aria-label="Chọn tất cả hồ sơ" />
+                        </th>
+                        <th class="review-col-index">STT</th>
+                        <th class="review-col-name">Họ và tên</th>
+                        <th>Ngành học</th>
+                        <th>Tỉnh</th>
+                        <th>Ngày sinh</th>
+                        <th>Số điện thoại</th>
+                        <th>Số CCCD</th>
+                        <th>Trạng thái hồ sơ</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of filteredRecords(); track row.id; let index = $index) {
+                    @let candidate = getCandidate(row);
+                    <tr [class.review-table__row--selected]="isSelected(row.id)" (click)="openEditRow(row)"
+                        [style.cursor]="canEditRow() ? 'pointer' : ''">
+                        <td class="review-col-check">
+                            <mat-checkbox [checked]="isSelected(row.id)" [disabled]="actionLoading()"
+                                (change)="toggleRow(row.id)" (click)="$event.stopPropagation()"
+                                [attr.aria-label]="'Chọn hồ sơ ' + (candidate?.ho_va_ten || row.tuyensinh_id || 'Hồ sơ chưa xác định')" />
+                        </td>
+                        <td class="review-col-index">{{ index + 1 }}</td>
+                        <td class="review-col-name">
+                            <strong>{{ candidate?.ho_va_ten || ('Hồ sơ #' + row.tuyensinh_id || 'Hồ sơ chưa xác định')
+                                }}</strong>
+                            <small>Mã hồ sơ: {{ row['_hoso'] && row['_hoso']['ma_hoso'] ? row['_hoso']['ma_hoso'] :
+                                (row.tuyensinh_id || 'Hồ sơ chưa xác định') }}</small>
+                        </td>
+                        <td>{{ candidate?.nganh_dangky}}</td>
+                        <td>{{ getProvinceLabel(candidate?.dia_chi_tinh) }}</td>
+                        <td>{{ formatDate(candidate?.ngay_sinh) }}</td>
+                        <td>{{ candidate?.dien_thoai || '---' }}</td>
+                        <td>{{ candidate?.cccd || '---' }}</td>
+                        <td>
+                            <span class="review-result" [class]="getStatusClass(candidate?.status)">
+                                {{ getStatusLabel(candidate?.status) }}
+                            </span>
+                        </td>
+                        <td class="review-col-note">{{ row.ghi_chu || '---' }}</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        } @else {
+        <div class="review-state review-state--empty" role="status">
+            <h3>Không tìm thấy hồ sơ</h3>
+            <p>Thử từ khóa khác hoặc xóa nội dung tìm kiếm.</p>
+        </div>
+        }
+        } @else {
+        <div class="review-state review-state--empty">
+            <span class="review-state__icon">
+                <i class="ti ti-files-off" aria-hidden="true"></i>
+            </span>
+            <h3>Chưa có hồ sơ</h3>
+            <p>Hội đồng chưa có hồ sơ để xét duyệt.</p>
+        </div>
+        }
+        }
+        }
+    </main>
     }
 </section>
 
-
+<p-dialog [visible]="statusDialogVisible()" (visibleChange)="!$event && closeStatusDialog()" [modal]="true"
+    [draggable]="false" [resizable]="false" [closable]="!actionLoading()" [closeOnEscape]="!actionLoading()"
+    [dismissableMask]="!actionLoading()" [style]="{ width: '480px', maxWidth: 'calc(100vw - 32px)' }" appendTo="body"
+    header="Chuyển trạng thái hồ sơ" styleClass="review-status-dialog">
+    <div class="review-status-dialog__body">
+        <p>Bạn đang chọn <strong>{{ selectedCount() }}</strong> hồ sơ.</p>
+        <label id="review-batch-status-label" for="review-batch-status">Trạng thái mới <span
+                aria-hidden="true">*</span></label>
+        <p-select inputId="review-batch-status" ariaLabelledBy="review-batch-status-label" [required]="true"
+            [options]="batchStatusOptions" optionLabel="label" optionValue="value" placeholder="Chọn trạng thái"
+            appendTo="body" [ngModel]="selectedBatchStatus()" (onChange)="selectedBatchStatus.set($event.value)"
+            [disabled]="actionLoading()" class="review-status-dialog__select" />
+        <p class="review-status-dialog__hint">Trạng thái sẽ áp dụng cho toàn bộ hồ sơ đã chọn.</p>
+    </div>
+    <ng-template #footer>
+        <div class="review-status-dialog__footer">
+            <button type="button" mat-button [disabled]="actionLoading()" (click)="closeStatusDialog()">Hủy</button>
+            <button type="button" mat-flat-button class="review-export-button"
+                [disabled]="selectedBatchStatus() === null || !hasSelection() || actionLoading()"
+                (click)="confirmStatusChange()">
+                Cập nhật ({{ selectedCount() }})
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
 
 <p-drawer #formEdit [(visible)]="editDrawerVisible" [style]="{'width':'1024px', 'max-width':'100%'}" appendTo="body"
     position="right" (onHide)="editData.set(null)">

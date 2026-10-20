@@ -347,4 +347,126 @@ describe('HosoXettuyenComponent lookup services', () => {
         expect(notificationService.toastError).toHaveBeenCalledWith('Gán cán bộ duyệt thất bại, quá trình đã dừng');
         expect(component.loadData).toHaveBeenCalled();
     });
+
+    it('only renders the round update button when records are selected', () => {
+        authService.userHasRole.and.returnValue(false);
+        const fixture = TestBed.createComponent(HosoXettuyenComponent);
+        fixture.detectChanges();
+        const roundUpdateButton = (): HTMLButtonElement | null =>
+            fixture.nativeElement.querySelector('button[aria-label="Cập nhật đợt xét tuyển"]');
+
+        expect(roundUpdateButton()).toBeNull();
+
+        fixture.componentInstance.dataTable.fillData([{ id: 10 }] as never);
+        fixture.componentInstance.dataTable.selectRow(true);
+        fixture.detectChanges();
+
+        expect(roundUpdateButton()).not.toBeNull();
+        expect(roundUpdateButton()?.textContent?.trim()).toBe('');
+        expect(roundUpdateButton()?.querySelector('.ti-calendar-event')).not.toBeNull();
+    });
+
+    it('opens round update only when records are selected', () => {
+        authService.userHasRole.and.returnValue(false);
+        const component = TestBed.runInInjectionContext(() => new HosoXettuyenComponent());
+
+        component.openRoundUpdate();
+
+        expect(component.roundUpdateVisible()).toBeFalse();
+        expect(notificationService.toastWarning).toHaveBeenCalledWith('Vui lòng chọn ít nhất một hồ sơ');
+
+        component.dataTable.fillData([{ id: 10 }] as never);
+        component.dataTable.selectRow(true);
+        component.selectedRoundId.set(4);
+        component.openRoundUpdate();
+
+        expect(component.roundUpdateVisible()).toBeTrue();
+        expect(component.selectedRoundId()).toBeNull();
+    });
+
+    it('updates selected records sequentially and reports determinate progress', () => {
+        authService.userHasRole.and.returnValue(false);
+        const firstUpdate = new Subject<number>();
+        const secondUpdate = new Subject<number>();
+        registrationsService.updateRegistration.and.callFake((id: number) => id === 10 ? firstUpdate : secondUpdate);
+        const component = TestBed.runInInjectionContext(() => new HosoXettuyenComponent());
+        component.dataTable.fillData([
+            { id: 10, ho_va_ten: 'Nguyễn Văn A' },
+            { id: 11, ho_va_ten: 'Trần Thị B' },
+        ] as never);
+        component.dataTable.selectRow(true);
+        component.dots.set([{ value: 5, label: 'Đợt 5' }]);
+        component.selectedRoundId.set(5);
+        spyOn(component, 'loadData');
+
+        component.saveRoundUpdates();
+
+        expect(component.roundUpdateSaving()).toBeTrue();
+        expect(component.roundUpdateCompleted()).toBe(0);
+        expect(component.roundUpdateTotal()).toBe(2);
+        expect(component.roundUpdatePercent()).toBe(0);
+        expect(registrationsService.updateRegistration).toHaveBeenCalledOnceWith(10, { dotxettuyen_id: 5 });
+
+        firstUpdate.next(1);
+        firstUpdate.complete();
+
+        expect(component.roundUpdateCompleted()).toBe(1);
+        expect(component.roundUpdatePercent()).toBe(50);
+        expect(component.lastCompletedRoundRecord()).toBe('Nguyễn Văn A');
+        expect(registrationsService.updateRegistration).toHaveBeenCalledWith(11, { dotxettuyen_id: 5 });
+
+        secondUpdate.next(1);
+        secondUpdate.complete();
+
+        expect(registrationsService.updateRegistration.calls.allArgs()).toEqual([
+            [10, { dotxettuyen_id: 5 }],
+            [11, { dotxettuyen_id: 5 }],
+        ]);
+        expect(component.roundUpdateCompleted()).toBe(2);
+        expect(component.roundUpdatePercent()).toBe(100);
+        expect(component.lastCompletedRoundRecord()).toBe('Trần Thị B');
+        expect(notificationService.toastSuccess).toHaveBeenCalledWith('Đã cập nhật đợt xét tuyển cho 2 hồ sơ');
+        expect(component.roundUpdateSaving()).toBeFalse();
+        expect(component.roundUpdateVisible()).toBeFalse();
+        expect(component.selectedRoundId()).toBeNull();
+        expect(component.loadData).toHaveBeenCalled();
+    });
+
+    it('does not submit without a known round or selected records', () => {
+        authService.userHasRole.and.returnValue(false);
+        const component = TestBed.runInInjectionContext(() => new HosoXettuyenComponent());
+        component.dataTable.fillData([{ id: 10 }] as never);
+        component.dataTable.selectRow(true);
+
+        component.saveRoundUpdates();
+        component.selectedRoundId.set(999);
+        component.saveRoundUpdates();
+        component.dots.set([{ value: 999, label: 'Đợt kiểm tra' }]);
+        component.dataTable.selectRow(false);
+        component.saveRoundUpdates();
+
+        expect(registrationsService.updateRegistration).not.toHaveBeenCalled();
+    });
+
+    it('stops round updates after the first error and reloads data', () => {
+        authService.userHasRole.and.returnValue(false);
+        registrationsService.updateRegistration.and.callFake((id: number) =>
+            id === 10 ? throwError(() => new Error('failed')) : of(1),
+        );
+        const component = TestBed.runInInjectionContext(() => new HosoXettuyenComponent());
+        component.dataTable.fillData([{ id: 10 }, { id: 11 }] as never);
+        component.dataTable.selectRow(true);
+        component.dots.set([{ value: 5, label: 'Đợt 5' }]);
+        component.selectedRoundId.set(5);
+        spyOn(component, 'loadData');
+
+        component.saveRoundUpdates();
+
+        expect(registrationsService.updateRegistration).toHaveBeenCalledOnceWith(10, { dotxettuyen_id: 5 });
+        expect(notificationService.toastError).toHaveBeenCalledWith('Cập nhật đợt xét tuyển thất bại, quá trình đã dừng');
+        expect(component.roundUpdateCompleted()).toBe(0);
+        expect(component.roundUpdatePercent()).toBe(0);
+        expect(component.roundUpdateSaving()).toBeFalse();
+        expect(component.loadData).toHaveBeenCalled();
+    });
 });

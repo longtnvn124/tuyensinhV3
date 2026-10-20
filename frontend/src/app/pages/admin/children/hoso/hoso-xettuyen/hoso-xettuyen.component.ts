@@ -28,8 +28,10 @@ import { LocationService } from '@app/services/location.service';
 import { Drawer } from 'primeng/drawer';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
+import { Dialog } from 'primeng/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatProgressBar } from '@angular/material/progress-bar';
 import { IctuPaginatorComponent } from '@theme/components/ictu-paginator/ictu-paginator.component';
 import { LoadingProgressComponent } from '@theme/components/loading-progress/loading-progress.component';
 import { EMPTY, forkJoin, from, Observable, of, Subject } from 'rxjs';
@@ -45,7 +47,7 @@ import { RegistrationsStatusService } from '@app/services/tuyensinh/registration
     selector: 'app-hoso-xettuyen',
     imports: [
         Drawer, FormsModule, IctuPaginatorComponent, InputText, LoadingProgressComponent,
-        MatButton, MatCheckbox, ReactiveFormsModule, Select,
+        MatButton, MatCheckbox, MatProgressBar, ReactiveFormsModule, Select, Dialog,
         Popover, FormThongtinDangkyComponent, TuvanTuyensinhComponent
     ],
     templateUrl: './hoso-xettuyen.component.html',
@@ -778,6 +780,74 @@ export class HosoXettuyenComponent implements OnInit, OnDestroy, IctuBasePermiss
     readonly reviewerLoading = signal<boolean>(false);
     readonly reviewerSaving = signal<boolean>(false);
     readonly selectedReviewerRecords = computed<Registrations[]>(() => this.dataTable.getSelectedData());
+    readonly roundUpdateVisible = signal<boolean>(false);
+    readonly selectedRoundId = signal<number | null>(null);
+    readonly roundUpdateSaving = signal<boolean>(false);
+    readonly roundUpdateCompleted = signal<number>(0);
+    readonly roundUpdateTotal = signal<number>(0);
+    readonly lastCompletedRoundRecord = signal<string>('');
+    readonly roundUpdatePercent = computed((): number => {
+        const total = this.roundUpdateTotal();
+        return total ? Math.round((this.roundUpdateCompleted() / total) * 100) : 0;
+    });
+    readonly selectedRoundRecords = computed<Registrations[]>(() => this.dataTable.getSelectedData());
+
+    openRoundUpdate(): void {
+        if (!this.permissionControl().canUpdate || !this.selectedRoundRecords().length) {
+            this.notification.toastWarning('Vui lòng chọn ít nhất một hồ sơ');
+            return;
+        }
+
+        this.selectedRoundId.set(null);
+        this.roundUpdateCompleted.set(0);
+        this.roundUpdateTotal.set(this.selectedRoundRecords().length);
+        this.lastCompletedRoundRecord.set('');
+        this.roundUpdateVisible.set(true);
+    }
+
+    closeRoundUpdate(): void {
+        if (this.roundUpdateSaving()) return;
+        this.roundUpdateVisible.set(false);
+        this.selectedRoundId.set(null);
+    }
+
+    saveRoundUpdates(): void {
+        const roundId: number | null = this.selectedRoundId();
+        const records: Registrations[] = this.selectedRoundRecords();
+        const isKnownRound = this.dots().some((option): boolean => option.value === roundId);
+        if (!this.permissionControl().canUpdate || !roundId || !isKnownRound || !records.length || this.roundUpdateSaving()) return;
+
+        this.roundUpdateCompleted.set(0);
+        this.roundUpdateTotal.set(records.length);
+        this.lastCompletedRoundRecord.set('');
+        this.roundUpdateSaving.set(true);
+        from(records).pipe(
+            concatMap((record: Registrations): Observable<unknown> =>
+                this.registrationsService.updateRegistration(record.id, { dotxettuyen_id: roundId }).pipe(
+                    tap((): void => this.markRoundRecordCompleted(record)),
+                ),
+            ),
+            toArray(),
+            finalize((): void => this.roundUpdateSaving.set(false)),
+            takeUntil(this.onDestroy$),
+        ).subscribe({
+            next: (): void => {
+                this.notification.toastSuccess(`Đã cập nhật đợt xét tuyển cho ${records.length} hồ sơ`);
+                this.roundUpdateVisible.set(false);
+                this.selectedRoundId.set(null);
+                this.loadData(this.temp.paged, false);
+            },
+            error: (): void => {
+                this.notification.toastError('Cập nhật đợt xét tuyển thất bại, quá trình đã dừng');
+                this.loadData(this.temp.paged, false);
+            },
+        });
+    }
+
+    private markRoundRecordCompleted(record: Registrations): void {
+        this.roundUpdateCompleted.update((completed: number): number => completed + 1);
+        this.lastCompletedRoundRecord.set(record.ho_va_ten || `Hồ sơ #${record.id}`);
+    }
 
     openFormDuyet(): void {
         if (!this.selectedReviewerRecords().length) {

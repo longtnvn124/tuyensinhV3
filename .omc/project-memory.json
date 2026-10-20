@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1790239294663,
+  "lastScanned": 1792398112655,
   "projectRoot": "d:\\data\\project\\angular\\v19\\tuyensinh",
   "techStack": {
     "languages": [],
@@ -36,14 +36,14 @@
       "path": "backend",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1790239294635,
+      "lastAccessed": 1792398112592,
       "keyFiles": []
     },
     "frontend": {
       "path": "frontend",
       "purpose": null,
       "fileCount": 12,
-      "lastAccessed": 1790239294636,
+      "lastAccessed": 1792398112593,
       "keyFiles": [
         "angular.json",
         "localhost.crt",
@@ -56,7 +56,7 @@
       "path": "plan",
       "purpose": null,
       "fileCount": 9,
-      "lastAccessed": 1790239294636,
+      "lastAccessed": 1792398112595,
       "keyFiles": [
         "api-outsite.md",
         "chuanhoa-database.md",
@@ -69,7 +69,7 @@
       "path": "plane",
       "purpose": null,
       "fileCount": 1,
-      "lastAccessed": 1790239294637,
+      "lastAccessed": 1792398112595,
       "keyFiles": [
         "cau-truc-21-UPDATE.md"
       ]
@@ -78,39 +78,39 @@
       "path": "frontend\\dist",
       "purpose": "Distribution/build output",
       "fileCount": 0,
-      "lastAccessed": 1790239294638,
+      "lastAccessed": 1792398112596,
       "keyFiles": []
     }
   },
   "hotPaths": [
     {
       "path": "frontend\\src",
-      "accessCount": 403,
-      "lastAccessed": 1790255001702,
+      "accessCount": 423,
+      "lastAccessed": 1792073208057,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app",
-      "accessCount": 366,
-      "lastAccessed": 1789145968988,
+      "accessCount": 379,
+      "lastAccessed": 1792073241701,
       "type": "directory"
     },
     {
       "path": "",
-      "accessCount": 355,
-      "lastAccessed": 1789145994830,
+      "accessCount": 361,
+      "lastAccessed": 1792073030184,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.ts",
-      "accessCount": 275,
-      "lastAccessed": 1788527087731,
+      "accessCount": 279,
+      "lastAccessed": 1792073737084,
       "type": "file"
     },
     {
       "path": "frontend\\src\\app\\pages\\admin\\children\\hoso\\form-thongtin-dangky\\form-thongtin-dangky.component.html",
-      "accessCount": 135,
-      "lastAccessed": 1788527375134,
+      "accessCount": 136,
+      "lastAccessed": 1792073505719,
       "type": "file"
     },
     {
@@ -151,14 +151,14 @@
     },
     {
       "path": "frontend",
-      "accessCount": 40,
-      "lastAccessed": 1789146040448,
+      "accessCount": 43,
+      "lastAccessed": 1792073627451,
       "type": "directory"
     },
     {
       "path": "frontend\\src\\app\\models\\ictu-base-service.class.ts",
-      "accessCount": 38,
-      "lastAccessed": 1787737235151,
+      "accessCount": 41,
+      "lastAccessed": 1792068537736,
       "type": "file"
     },
     {
@@ -270,15 +270,15 @@
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\utilities\\helper.ts",
-      "accessCount": 7,
-      "lastAccessed": 1787133904116,
+      "path": "frontend\\src\\app\\models\\ictu-dropdown-option.ts",
+      "accessCount": 8,
+      "lastAccessed": 1791883423262,
       "type": "file"
     },
     {
-      "path": "frontend\\src\\app\\models\\ictu-dropdown-option.ts",
+      "path": "frontend\\src\\app\\utilities\\helper.ts",
       "accessCount": 7,
-      "lastAccessed": 1788530774850,
+      "lastAccessed": 1787133904116,
       "type": "file"
     },
     {

@@ -11,6 +11,7 @@
     min-height: 0;
     overflow: hidden;
     background: #fff;
+    container-type: inline-size;
 }
 
 .review-export-button,
@@ -19,14 +20,48 @@
     border-radius: 8px;
 }
 
+.review-status-dialog__body {
+    display: grid;
+    gap: 10px;
+    color: var(--accent-700, #334155);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.review-status-dialog__body p {
+    margin: 0;
+}
+
+.review-status-dialog__body label {
+    color: var(--accent-800, #1e293b);
+    font-weight: 600;
+}
+
+.review-status-dialog__body label span {
+    color: var(--red-600, #dc2626);
+}
+
+.review-status-dialog__select {
+    width: 100%;
+}
+
+.review-status-dialog__hint {
+    color: var(--accent-500, #64748b);
+    font-size: 13px;
+}
+
+.review-status-dialog__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .review-search-wrap {
     position: relative;
     display: flex;
     align-items: center;
-    flex: 1 1 320px;
+    width: auto;
     min-width: 0;
-    max-width: 420px;
-    width: 100%;
     height: 40px;
 }
 
@@ -40,6 +75,7 @@
 
 .review-search-input {
     width: 100%;
+    min-width: 0;
     height: 40px;
     padding: 0 12px 0 36px;
     border: 1px solid var(--accent-200, #e2e8f0);
@@ -160,8 +196,16 @@
 }
 
 .review-selection-bar__actions {
+    display: grid;
+    grid-template-columns: minmax(200px, 250px) repeat(2, minmax(160px, 200px)) 40px auto;
+    justify-content: end;
     gap: 8px;
-    flex-shrink: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.review-selection-bar__actions > div:not(.review-search-wrap) {
+    min-width: 0;
 }
 
 .review-selection-bar__actions .review-actions-menu__item i {
@@ -367,9 +411,19 @@ button:focus-visible,
     outline-offset: 2px;
 }
 
-@media (max-width: 600px) {
+@container (max-width: 1100px) {
     .review-selection-bar {
         flex-wrap: wrap;
+    }
+
+    .review-selection-bar__actions {
+        width: 100%;
+        grid-template-columns: minmax(200px, 1fr) repeat(2, minmax(160px, 200px)) 40px auto;
+    }
+}
+
+@container (max-width: 760px) {
+    .review-selection-bar {
         gap: 8px 14px;
         padding-inline: 14px;
     }
@@ -380,12 +434,25 @@ button:focus-visible,
     }
 
     .review-selection-bar__actions {
-        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         margin-left: 0;
     }
 
     .review-search-wrap {
-        max-width: none;
+        grid-column: 1 / -1;
+    }
+
+    .review-menu-button,
+    .review-export-button {
+        justify-self: end;
+    }
+
+    .review-menu-button {
+        grid-column: 1;
+    }
+
+    .review-export-button {
+        grid-column: 2;
     }
 
     .review-state {

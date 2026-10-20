@@ -1,5 +1,6 @@
 import { fakeAsync, flushMicrotasks, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { of, throwError } from 'rxjs';
 
 import { HoidongXettuyen } from '@models/tuyensinh/hoidong-xettuyen';
 import { Registrations } from '@models/tuyensinh/registrations';
@@ -16,6 +17,7 @@ import {
 } from '@services/tuyensinh/exportDlTuyensinhCu.service';
 import { HoidongHosoThisinhService } from '@services/tuyensinh/hoidong-hoso-thisinh.service';
 import { RegistrationsService } from '@services/tuyensinh/registrations.service';
+import { RegistrationsStatusService } from '@services/tuyensinh/registrations-status';
 import { NganhhocService } from '@services/tuyensinh/nganhhoc.service';
 import { UserService } from '@services/user.service';
 import { HoidongHosoXetduyetComponent } from './hoidong-hoso-xetduyet.component';
@@ -30,6 +32,7 @@ describe('HoidongHosoXetduyetComponent', () => {
 
     const assignmentService = jasmine.createSpyObj<HoidongHosoThisinhService>('HoidongHosoThisinhService', ['query']);
     const registrationsService = jasmine.createSpyObj<RegistrationsService>('RegistrationsService', ['query', 'update']);
+    const registrationsStatusService = jasmine.createSpyObj<RegistrationsStatusService>('RegistrationsStatusService', ['create']);
     const dotXettuyenService = jasmine.createSpyObj<DotXettuyenService>('DotXettuyenService', ['get']);
     const nganhHocService = jasmine.createSpyObj<NganhhocService>('NganhhocService', ['load']);
     const locationService = jasmine.createSpyObj<LocationService>('LocationService', ['queryLocation']);
@@ -48,6 +51,7 @@ describe('HoidongHosoXetduyetComponent', () => {
         assignmentService.query.calls.reset();
         registrationsService.query.calls.reset();
         registrationsService.update.calls.reset();
+        registrationsStatusService.create.calls.reset();
         dotXettuyenService.get.calls.reset();
         exportService.exportExcel.calls.reset();
         legacyExportService.exportExcel.calls.reset();
@@ -57,6 +61,8 @@ describe('HoidongHosoXetduyetComponent', () => {
 
         assignmentService.query.and.returnValue(of(emptyResponse));
         registrationsService.query.and.returnValue(of(emptyResponse));
+        registrationsService.update.and.returnValue(of(undefined));
+        registrationsStatusService.create.and.returnValue(of(1));
         dotXettuyenService.get.and.returnValue(of({
             id: 3,
             name: 'Đợt 1',
@@ -78,8 +84,10 @@ describe('HoidongHosoXetduyetComponent', () => {
         TestBed.configureTestingModule({
             imports: [HoidongHosoXetduyetComponent],
             providers: [
+                provideNoopAnimations(),
                 { provide: HoidongHosoThisinhService, useValue: assignmentService },
                 { provide: RegistrationsService, useValue: registrationsService },
+                { provide: RegistrationsStatusService, useValue: registrationsStatusService },
                 { provide: DotXettuyenService, useValue: dotXettuyenService },
                 { provide: NganhhocService, useValue: nganhHocService },
                 { provide: LocationService, useValue: locationService },
@@ -110,7 +118,7 @@ describe('HoidongHosoXetduyetComponent', () => {
         fixture.componentInstance.records.set([{
             id: 1,
             hoidong_id: 8,
-            hoso_id: 21,
+            tuyensinh_id: 21,
             _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A', nganh_id: 12, ctdt_id: 4 },
         } as never]);
         fixture.detectChanges();
@@ -125,7 +133,8 @@ describe('HoidongHosoXetduyetComponent', () => {
         fixture.componentInstance.records.set([{
             id: 1,
             hoidong_id: 8,
-            hoso_id: 21,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, status: 2 },
         } as never]);
         fixture.componentInstance.selectedIds.set(new Set([1]));
         fixture.componentInstance.onApproveSelected();
@@ -142,7 +151,8 @@ describe('HoidongHosoXetduyetComponent', () => {
         fixture.componentInstance.records.set([{
             id: 1,
             hoidong_id: 8,
-            hoso_id: 21,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, status: 2 },
         } as never]);
         fixture.componentInstance.selectedIds.set(new Set([1]));
 
@@ -296,7 +306,7 @@ describe('HoidongHosoXetduyetComponent', () => {
         fixture.componentInstance.records.set([{
             id: 1,
             hoidong_id: 8,
-            hoso_id: 21,
+            tuyensinh_id: 21,
             _hoso: {
                 id: 21,
                 ho_va_ten: 'Nguyễn Văn A',
@@ -575,5 +585,333 @@ describe('HoidongHosoXetduyetComponent', () => {
 
         fixture.componentInstance.searchTerm.set('4321012');
         expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([2]);
+    });
+
+    it('sorts visible records by the final word of the candidate name in Vietnamese order', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        const records = [{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Trần Quốc Bảo' },
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, ho_va_ten: 'Nguyễn Văn An' },
+        }, {
+            id: 3,
+            hoidong_id: 8,
+            tuyensinh_id: 23,
+            _hoso: { id: 23, ho_va_ten: 'Lê Minh Chi' },
+        }] as never;
+        fixture.componentInstance.records.set(records);
+
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([2, 1, 3]);
+        expect(fixture.componentInstance.records()).toBe(records);
+    });
+
+    it('places records without a candidate name after named records', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: null,
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, ho_va_ten: '  Nguyễn   Văn   An  ' },
+        }] as never);
+
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([2, 1]);
+    });
+
+    it('filters local records by major and status and restores them when cleared', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.majorOptions.set([
+            { value: 12, label: 'Công nghệ thông tin' },
+            { value: 13, label: 'Kế toán' },
+        ]);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A', nganh_dangky: 'Công nghệ thông tin', status: 3 },
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, ho_va_ten: 'Trần Thị B', nganh_id: 13, nganh_dangky: 'Kế toán', status: 2 },
+        }, {
+            id: 3,
+            hoidong_id: 8,
+            tuyensinh_id: 23,
+            _hoso: { id: 23, ho_va_ten: 'Lê Văn C', nganh_id: 12, nganh_dangky: 'Công nghệ thông tin', status: 2 },
+        }] as never);
+
+        fixture.componentInstance.onMajorChange(12);
+        fixture.componentInstance.onStatusChange(2);
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([3]);
+
+        fixture.componentInstance.onMajorChange(null);
+        fixture.componentInstance.onStatusChange(null);
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([1, 2, 3]);
+    });
+
+    it('combines the local select filters with the search input', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.majorOptions.set([{ value: 12, label: 'Công nghệ thông tin' }]);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn An', nganh_id: 12, status: 3 },
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, ho_va_ten: 'Trần Văn An', nganh_id: 12, status: 2 },
+        }] as never);
+
+        fixture.componentInstance.searchTerm.set('van an');
+        fixture.componentInstance.onMajorChange(12);
+        fixture.componentInstance.onStatusChange(3);
+
+        expect(fixture.componentInstance.filteredRecords().map((row) => row.id)).toEqual([1]);
+    });
+
+    it('keeps the toolbar layout unchanged when a record is selected', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentRef.setInput('hoidong', { id: 8 });
+        fixture.detectChanges();
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A', status: 0 },
+        }] as never);
+        fixture.detectChanges();
+
+        const selectionBar: HTMLElement = fixture.nativeElement.querySelector('.review-selection-bar');
+        expect(selectionBar.classList.contains('review-selection-bar--with-status')).toBeFalse();
+
+        fixture.componentInstance.toggleRow(1);
+        fixture.detectChanges();
+
+        expect(selectionBar.classList.contains('review-selection-bar--with-status')).toBeFalse();
+        expect(fixture.componentInstance.hasSelection()).toBeTrue();
+    });
+
+    it('opens and resets the batch status dialog without clearing table selection', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.selectedIds.set(new Set([1, 2]));
+
+        fixture.componentInstance.openStatusDialog();
+        expect(fixture.componentInstance.statusDialogVisible()).toBeTrue();
+
+        fixture.componentInstance.selectedBatchStatus.set(4);
+        fixture.componentInstance.closeStatusDialog();
+
+        expect(fixture.componentInstance.statusDialogVisible()).toBeFalse();
+        expect(fixture.componentInstance.selectedBatchStatus()).toBeNull();
+        expect(fixture.componentInstance.selectedCount()).toBe(2);
+    });
+
+    it('does not open the status dialog without a selection', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+
+        fixture.componentInstance.openStatusDialog();
+
+        expect(fixture.componentInstance.statusDialogVisible()).toBeFalse();
+    });
+
+    it('only offers statuses 4 and above in the batch status dialog', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        const options = fixture.componentInstance.batchStatusOptions;
+
+        expect(options.map((option) => option.value)).toEqual([4, 5, 6]);
+        expect(options.every((option) => option.value >= 4)).toBeTrue();
+    });
+
+    it('updates status 4 without overwriting ngay_duyet and writes matching history', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A', status: 0, ngay_duyet: '2026-10-01 08:00:00' },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+        fixture.componentInstance.selectedBatchStatus.set(4);
+
+        fixture.componentInstance.confirmStatusChange();
+
+        expect(registrationsService.update).toHaveBeenCalledOnceWith(21, { status: 4 });
+        expect(registrationsStatusService.create).toHaveBeenCalledOnceWith({
+            registration_id: 21,
+            status_key: 'NHAP_HOC',
+            status_value: 'CHUA_NHAP_HOC',
+            status_name: 'Chưa nhập học',
+            content: '',
+        });
+    });
+
+    for (const status of [4, 5, 6] as const) {
+        it(`keeps ngay_duyet unchanged when moving to status ${status}`, () => {
+            const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+            fixture.componentInstance.records.set([{
+                id: 1,
+                hoidong_id: 8,
+                tuyensinh_id: 21,
+                _hoso: { id: 21, status: 2, ngay_duyet: '2026-10-01 08:00:00' },
+            }] as never);
+            fixture.componentInstance.selectedIds.set(new Set([1]));
+            fixture.componentInstance.selectedBatchStatus.set(status);
+
+            fixture.componentInstance.confirmStatusChange();
+
+            expect(registrationsService.update).toHaveBeenCalledOnceWith(21, { status });
+        });
+    }
+
+    it('does not accept a status below 4 from the batch status dialog', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, status: 2 },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+        fixture.componentInstance.selectedBatchStatus.set(-1);
+
+        fixture.componentInstance.confirmStatusChange();
+
+        expect(registrationsService.update).not.toHaveBeenCalled();
+        expect(registrationsStatusService.create).not.toHaveBeenCalled();
+    });
+
+    it('keeps the quick admission action outside the status dialog', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A', status: 2 },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+
+        fixture.componentInstance.onApproveSelected();
+
+        expect(registrationsService.update).toHaveBeenCalledOnceWith(21, jasmine.objectContaining({ status: 3 }));
+        expect(registrationsService.update.calls.mostRecent().args[1].ngay_duyet)
+            .toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    });
+
+    it('updates every selected record even when filters hide some of them', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, status: 0 },
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, status: 1 },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1, 2]));
+        fixture.componentInstance.onStatusChange(0);
+        fixture.componentInstance.selectedBatchStatus.set(4);
+        expect(fixture.componentInstance.filteredRecords().map((record) => record.id)).toEqual([1]);
+
+        fixture.componentInstance.confirmStatusChange();
+
+        expect(registrationsService.update).toHaveBeenCalledWith(21, { status: 4 });
+        expect(registrationsService.update).toHaveBeenCalledWith(22, { status: 4 });
+    });
+
+    it('continues status updates after one record fails', () => {
+        registrationsService.update.and.callFake((id: number) => id === 21
+            ? throwError(() => new Error('Lỗi hồ sơ 21'))
+            : of(undefined));
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, status: 0 },
+        }, {
+            id: 2,
+            hoidong_id: 8,
+            tuyensinh_id: 22,
+            _hoso: { id: 22, status: 0 },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1, 2]));
+        fixture.componentInstance.selectedBatchStatus.set(4);
+
+        fixture.componentInstance.confirmStatusChange();
+
+        expect(registrationsService.update).toHaveBeenCalledWith(21, { status: 4 });
+        expect(registrationsService.update).toHaveBeenCalledWith(22, { status: 4 });
+        expect(notificationService.toastSuccess).toHaveBeenCalledWith('Đã chuyển trạng thái cho 1 hồ sơ');
+        expect(notificationService.toastError).toHaveBeenCalledWith('1 hồ sơ cập nhật thất bại: Lỗi hồ sơ 21');
+    });
+
+    it('keeps the selection when every status update fails', () => {
+        registrationsService.update.and.returnValue(throwError(() => new Error('Máy chủ không phản hồi')));
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, status: 0 },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+        fixture.componentInstance.selectedBatchStatus.set(4);
+
+        fixture.componentInstance.confirmStatusChange();
+
+        expect(fixture.componentInstance.selectedIds()).toEqual(new Set([1]));
+        expect(notificationService.toastError).toHaveBeenCalledWith(
+            '1 hồ sơ cập nhật thất bại: Máy chủ không phản hồi',
+        );
+    });
+
+    it('does not start another batch while a status update is running', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, status: 0 },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+        fixture.componentInstance.actionLoading.set(true);
+        fixture.componentInstance.selectedBatchStatus.set(4);
+
+        fixture.componentInstance.confirmStatusChange();
+
+        expect(registrationsService.update).not.toHaveBeenCalled();
+        expect(fixture.componentInstance.statusDialogVisible()).toBeFalse();
+    });
+
+    it('does not update records when status confirmation has no selected target', () => {
+        const fixture = TestBed.createComponent(HoidongHosoXetduyetComponent);
+        fixture.componentInstance.records.set([{
+            id: 1,
+            hoidong_id: 8,
+            tuyensinh_id: 21,
+            _hoso: { id: 21, ho_va_ten: 'Nguyễn Văn A', status: 0 },
+        }] as never);
+        fixture.componentInstance.selectedIds.set(new Set([1]));
+
+        fixture.componentInstance.confirmStatusChange();
+
+        expect(registrationsService.update).not.toHaveBeenCalled();
+        expect(fixture.componentInstance.statusDialogVisible()).toBeFalse();
     });
 });

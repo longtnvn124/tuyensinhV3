@@ -378,17 +378,27 @@ export const VBCM = [
     { value: 'Đại học', label: 'Đại học' },
 ];
 
+// export const TH_XETTUYEN = [
+//
+//     { label: 'Chưa nhập học', kyhieu: 'CHUA_NHAP_HOC', value: 4, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
+//     { label: 'Đã nhập học, chưa hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_THIEU', value: 5, status_key: 'NHAP_HOC', content: true, admin: true, show: true },
+//     { label: 'Đã hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_OK', value: 6, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
+//     { label: 'Đã thôi học', kyhieu: 'DA_THOI_HOC', value:8, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
+// ]
+
 export const TH_XETTUYEN = [
-    { label: 'Không đủ đk xét tuyển', kyhieu: 'KHONG_DU_DK_XET_TUYEN', value: -1, status_key: 'XET_TUYEN', content: true, admin: false, show: true },
-    { label: 'Chờ duyệt', kyhieu: 'KHOI_TAO', value: 0, status_key: 'XET_TUYEN', content: false, admin: false, show: false },
-    { label: 'Hồ sơ chưa đủ, cần bổ sung', kyhieu: 'THIEU_HOSO', value: 1, status_key: 'XET_TUYEN', content: true, admin: false, show: true },
-    { label: 'Đã duyệt, chờ kết quả xét tuyển', kyhieu: 'CHOKQ_XET_TUYEN', value: 2, status_key: 'XET_TUYEN', content: false, admin: false, show: true },
-    { label: 'Trúng tuyển', kyhieu: 'TRUNG_TUYEN', value: 3, status_key: 'XET_TUYEN', content: false, admin: true, show: true },
-    { label: 'Không trúng tuyển', kyhieu: 'KHONG_TRUNG_TUYEN', value: -1, status_key: 'XET_TUYEN', content: true, admin: true, show: true },
-    { label: 'Chưa nhập học', kyhieu: 'CHUA_NHAP_HOC', value: 4, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
-    { label: 'Đã nhập học, chưa hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_THIEU', value: 5, status_key: 'NHAP_HOC', content: true, admin: true, show: true },
-    { label: 'Đã hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_OK', value: 6, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
+    { label: 'Không đủ điều kiện xét tuyển', kyhieu: 'KHONG_DU_DK_XET_TUYEN', value: -1, status_key: 'XET_TUYEN', content: true, admin: false, show: true },
+    { label: 'Chờ duyệt', kyhieu: 'KHOI_TAO', value: 0, status_key: 'XET_TUYEN', content: false, admin: false, show: true },
+    { label: 'Hồ sơ thiếu, cần bổ sung', kyhieu: 'THIEU_HOSO', value: 1, status_key: 'THIEU_HOSO', content: true, admin: false, show: true },
+    { label: 'Đã duyệt, chờ kết quả xét tuyển', kyhieu: 'DU_DK_XET_TUYEN', value: 2, status_key: 'DU_DK_XET_TUYEN', content: false, admin: false, show: true },
+    { label: 'Trúng tuyển', kyhieu: 'TRUNG_TUYEN', value: 3, status_key: 'TRUNG_TUYEN', content: false, admin: false, show: true },
+    { label: 'Không trúng tuyển', kyhieu: 'KHONG_TRUNG_TUYEN', value: 4, status_key: 'KHONG_TRUNG_TUYEN', content: true, admin: false, show: true },
+    { label: 'Chưa nhập học', kyhieu: 'CHUA_NHAP_HOC', value: 5, status_key: 'NHAP_HOC', content: false, admin: false, show: true },
+    { label: 'Đã nhập học, chưa hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_THIEU', value: 6, status_key: 'NHAP_HOC', content: true, admin: false, show: true },
+    { label: 'Đã hoàn thành thủ tục nhập học', kyhieu: 'NHAP_HOC_OK', value: 7, status_key: 'NHAP_HOC', content: false, admin: false, show: true },
+    { label: 'Đã thôi học', kyhieu: 'DA_THOI_HOC', value:8, status_key: 'NHAP_HOC', content: false, admin: true, show: true },
 ]
+
 export const TH_CHODUYET =[
     { label: 'Chờ duyệt', kyhieu: 'KHOI_TAO', value: 0, status_key: 'XET_TUYEN', content: false, admin: false, show: true },
     { label: 'Hồ sơ thiếu, cần bổ sung', kyhieu: 'THIEU_HOSO', value: 1, status_key: 'THIEU_HOSO', content: true, admin: false, show: true },

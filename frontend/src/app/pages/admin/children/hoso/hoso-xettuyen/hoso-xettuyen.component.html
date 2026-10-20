@@ -112,6 +112,14 @@
                 </button>
                 }
 
+                @if (isAdmin && dataTable.someItemsChecked()) {
+                <button type="button" mat-flat-button class="btn ictu-badge-btn--primary-reverse"
+                    [disabled]="roundUpdateSaving()" (click)="openRoundUpdate()"
+                    aria-label="Cập nhật đợt xét tuyển" title="Cập nhật đợt xét tuyển">
+                    <i class="ti ti-calendar-event" aria-hidden="true"></i>
+                </button>
+                }
+
                 @if (isAdmin) {
                 <button mat-flat-button class="" (click)="openFormDuyet()">
                     <i class="ti ti-adjustments-horizontal"></i> Chọn cb duyệt
@@ -254,6 +262,48 @@
     </div>
 </section>
 
+<p-dialog [visible]="roundUpdateVisible()" (visibleChange)="!$event && closeRoundUpdate()" [modal]="true"
+    [draggable]="false" [resizable]="false" [closable]="!roundUpdateSaving()"
+    [closeOnEscape]="!roundUpdateSaving()" [dismissableMask]="!roundUpdateSaving()"
+    [style]="{ width: '480px', maxWidth: 'calc(100vw - 32px)' }" appendTo="body"
+    header="Cập nhật đợt xét tuyển">
+    <div class="d-flex flex-column gap-2">
+        @if (roundUpdateSaving()) {
+        <div class="d-flex flex-column gap-2" aria-live="polite">
+            <div class="d-flex justify-content-between align-items-center">
+                <strong>Đang cập nhật {{ roundUpdateCompleted() }}/{{ roundUpdateTotal() }} hồ sơ</strong>
+                <strong>{{ roundUpdatePercent() }}%</strong>
+            </div>
+            <mat-progress-bar mode="determinate" [value]="roundUpdatePercent()" />
+            <small>
+                @if (lastCompletedRoundRecord()) {
+                Đã hoàn thành: {{ lastCompletedRoundRecord() }}
+                } @else {
+                Đang chuẩn bị cập nhật...
+                }
+            </small>
+        </div>
+        }
+        <p>Bạn đang chọn <strong>{{ selectedRoundRecords().length }}</strong> hồ sơ.</p>
+        <label id="round-update-label" for="round-update-select">Đợt xét tuyển <span aria-hidden="true" style="color:red;">*</span></label>
+        <p-select inputId="round-update-select" ariaLabelledBy="round-update-label" [required]="true"
+            [filter]="true" filterBy="label"
+            [options]="dots()" optionLabel="label" optionValue="value" placeholder="Chọn đợt xét tuyển"
+            appendTo="body" [ngModel]="selectedRoundId()" (onChange)="selectedRoundId.set($event.value)"
+            [disabled]="roundUpdateSaving()" class="w-100" />
+        <small>Đợt xét tuyển sẽ được cập nhật cho toàn bộ hồ sơ đã chọn.</small>
+    </div>
+    <ng-template #footer>
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" mat-button [disabled]="roundUpdateSaving()" (click)="closeRoundUpdate()">Hủy</button>
+            <button type="button" mat-flat-button class="btn ictu-badge-btn--primary-reverse"
+                [disabled]="selectedRoundId() === null || !selectedRoundRecords().length || roundUpdateSaving()"
+                (click)="saveRoundUpdates()">
+                Cập nhật ({{ selectedRoundRecords().length }})
+            </button>
+        </div>
+    </ng-template>
+</p-dialog>
 
 <p-drawer #formEdit [(visible)]="editDrawerVisible" [style]="{'width':'1024px', 'max-width':'100%'}" appendTo="body"
     position="right" (onHide)="editData.set(null)">

@@ -61,6 +61,7 @@ import {
 import { TuyensinhStatus } from '@app/models/tuyensinh/tuyensinh-status';
 import { RegistrationsStatusService } from '@app/services/tuyensinh/registrations-status';
 import { Drawer } from "primeng/drawer";
+import { Dialog } from 'primeng/dialog';
 import { FormThongtinDangkyComponent } from "../../hoso/form-thongtin-dangky/form-thongtin-dangky.component";
 import {
     ExportDlTuyensinhCuService,
@@ -68,6 +69,8 @@ import {
     TuyensinhCuExportPayload,
 } from '@app/services/tuyensinh/exportDlTuyensinhCu.service';
 import { STATUS_LABELS } from '@services/tuyensinh/exp-hoso-tuyensinh.service';
+import { Select } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 
 type ReviewDataState = 'loading' | 'data' | 'error';
 
@@ -98,9 +101,17 @@ interface StatusUpdateResult {
 }
 
 interface StatusUpdateConfig {
-    status: 3 | -1;
+    status: RegistrationStatus;
     progressHeading: string;
     successVerb: string;
+}
+
+interface StatusOption {
+    label: string;
+    value: RegistrationStatus;
+    status_key: string;
+    kyhieu: string;
+    content: boolean;
 }
 
 @Component({
@@ -111,8 +122,10 @@ interface StatusUpdateConfig {
     MatCheckbox,
     Popover,
     Drawer,
+    Dialog,
     FormThongtinDangkyComponent,
-
+    Select,
+    FormsModule
 ],
     templateUrl: './hoidong-hoso-xetduyet.component.html',
     styleUrl: './hoidong-hoso-xetduyet.component.css',
@@ -124,25 +137,39 @@ export class HoidongHosoXetduyetComponent {
     readonly state = signal<ReviewDataState>('data');
     readonly actionLoading = signal(false);
     readonly errorMessage = signal('');
-    readonly majorOptions = signal<readonly IctuDropdownOption<number>[]>([]);
+    readonly majorOptions = signal<IctuDropdownOption<number>[]>([]);
     readonly provinceOptions = signal<readonly IctuDropdownOption<number>[]>([]);
     private readonly regions = signal<readonly Locations[]>([]);
     private readonly provinces = signal<readonly Locations[]>([]);
     private readonly users = signal<readonly User[]>([]);
     readonly records = signal<readonly HoidongHosoThisinh[]>([]);
     readonly searchTerm = signal<string>('');
+    readonly selectedMajor = signal<number | null>(null);
+    readonly selectedStatus = signal<RegistrationStatus | null>(null);
+    readonly statusDialogVisible = signal(false);
+    readonly selectedBatchStatus = signal<RegistrationStatus | null>(null);
+    readonly batchStatusOptions: StatusOption[] = TH_XETTUYEN
+        .filter((option) => option.value >= 4)
+        .map((option): StatusOption => ({ ...option, value: option.value as RegistrationStatus }))
+        .sort((left, right) => left.value - right.value);
+    private readonly vietnameseNameCollator = new Intl.Collator('vi', { sensitivity: 'accent' });
 
     readonly filteredRecords = computed((): readonly HoidongHosoThisinh[] => {
         const keyword = this.normalizeSearchText(this.searchTerm());
-        if (!keyword) {
-            return this.records();
-        }
-        return this.records().filter((row: HoidongHosoThisinh): boolean =>
-            this.matchSearchRow(row, keyword),
-        );
+        const majorId = this.selectedMajor();
+        const status = this.selectedStatus();
+        const filteredRecords = this.records().filter((row: HoidongHosoThisinh): boolean => {
+            const matchesKeyword = !keyword || this.matchSearchRow(row, keyword);
+            const matchesMajor = majorId === null || this.matchMajor(row, majorId);
+            const matchesStatus = status === null || this.getCandidate(row)?.status === status;
+
+            return matchesKeyword && matchesMajor && matchesStatus;
+        });
+
+        return [...filteredRecords].sort((left, right) => this.compareRecordsByCandidateName(left, right));
     });
 
-    private readonly majors = signal<readonly Nganhhoc[]>([]);
+    readonly majors = signal<readonly Nganhhoc[]>([]);
     readonly selectedIds = signal<ReadonlySet<number>>(new Set<number>());
     readonly selectedCount = computed((): number => this.selectedIds().size);
     readonly hasSelection = computed((): boolean => this.selectedCount() > 0);
@@ -176,6 +203,11 @@ export class HoidongHosoXetduyetComponent {
     private readonly exportDlTuyensinhCuService = inject(ExportDlTuyensinhCuService);
     private readonly loadRequest$ = new Subject<HoidongXettuyen | null>();
     private readonly progress$ = new Subject<number>();
+
+    readonly status_xettuyen = TH_XETTUYEN.filter(
+        (option, index, options): boolean =>
+            options.findIndex((item) => item.value === option.value) === index,
+    );
 
     constructor() {
         this.loadRequest$.pipe(
@@ -253,9 +285,35 @@ export class HoidongHosoXetduyetComponent {
 
     onCancelApprovalSelected(): void {
         this.updateSelectedStatuses({
-            status: -1,
+            status: 4,
             progressHeading: 'Đang hủy duyệt hồ sơ',
             successVerb: 'hủy duyệt',
+        });
+    }
+
+    openStatusDialog(): void {
+        if (!this.hasSelection() || this.actionLoading()) return;
+        this.selectedBatchStatus.set(null);
+        this.statusDialogVisible.set(true);
+    }
+
+    closeStatusDialog(): void {
+        if (this.actionLoading()) return;
+        this.statusDialogVisible.set(false);
+        this.selectedBatchStatus.set(null);
+    }
+
+    confirmStatusChange(): void {
+        if (!this.hasSelection() || this.actionLoading()) return;
+        const option = this.batchStatusOptions.find((item) => item.value === this.selectedBatchStatus());
+        if (!option) return;
+
+        this.statusDialogVisible.set(false);
+        this.selectedBatchStatus.set(null);
+        this.updateSelectedStatuses({
+            status: option.value,
+            progressHeading: `Đang chuyển sang ${option.label}`,
+            successVerb: 'chuyển trạng thái cho',
         });
     }
 
@@ -296,6 +354,14 @@ export class HoidongHosoXetduyetComponent {
         }
     }
 
+    onMajorChange(majorId: number | null): void {
+        this.selectedMajor.set(majorId);
+    }
+
+    onStatusChange(status: RegistrationStatus | null): void {
+        this.selectedStatus.set(status);
+    }
+
     getMajorLabel(majorId: number | undefined): string {
         return this.lookupLabel(this.majorOptions(), majorId);
     }
@@ -320,6 +386,32 @@ export class HoidongHosoXetduyetComponent {
             .replace(/[^a-z0-9]/g, '');
     }
 
+    private compareRecordsByCandidateName(left: HoidongHosoThisinh, right: HoidongHosoThisinh): number {
+        const leftName = this.getCandidate(left)?.ho_va_ten?.trim().replace(/\s+/g, ' ') ?? '';
+        const rightName = this.getCandidate(right)?.ho_va_ten?.trim().replace(/\s+/g, ' ') ?? '';
+        if (!leftName || !rightName) {
+            if (leftName) return -1;
+            if (rightName) return 1;
+            return left.id - right.id;
+        }
+
+        const leftGivenName = leftName.split(' ').at(-1) ?? '';
+        const rightGivenName = rightName.split(' ').at(-1) ?? '';
+        return this.vietnameseNameCollator.compare(leftGivenName, rightGivenName)
+            || this.vietnameseNameCollator.compare(leftName, rightName)
+            || left.id - right.id;
+    }
+
+    private matchMajor(row: HoidongHosoThisinh, majorId: number): boolean {
+        const candidate = this.getCandidate(row);
+        const majorName = this.majorOptions().find((option) => option.value === majorId)?.label;
+
+        return !!candidate && (
+            candidate.nganh_id === majorId
+            || (!!majorName && this.normalizeSearchText(candidate.nganh_dangky) === this.normalizeSearchText(majorName))
+        );
+    }
+
     private matchSearchRow(row: HoidongHosoThisinh, keyword: string): boolean {
         const candidate = this.getCandidate(row);
         if (!candidate) {
@@ -341,6 +433,7 @@ export class HoidongHosoXetduyetComponent {
     getStatusClass(status: RegistrationStatus | undefined): string {
         if (status === 3) return 'review-result--approved';
         if (status === -1) return 'review-result--rejected';
+        if (status === 4) return 'review-result--rejected';
         return 'review-result--pending';
     }
 
@@ -353,7 +446,11 @@ export class HoidongHosoXetduyetComponent {
 
     private prepareForLoad(hoidong: HoidongXettuyen | null): void {
         this.clearSelection();
+        this.statusDialogVisible.set(false);
+        this.selectedBatchStatus.set(null);
         this.searchTerm.set('');
+        this.selectedMajor.set(null);
+        this.selectedStatus.set(null);
         this.records.set([]);
         this.majors.set([]);
         this.regions.set([]);
@@ -475,6 +572,15 @@ export class HoidongHosoXetduyetComponent {
         return options.find((item: IctuDropdownOption<number>): boolean => item.value === value)?.label ?? fallback;
     }
 
+    private getStatusOption(status: RegistrationStatus): StatusOption | undefined {
+        const option = TH_XETTUYEN.find((item) =>
+            item.value === status && (status !== -1 || item.kyhieu === 'KHONG_TRUNG_TUYEN'),
+        );
+        return option
+            ? { ...option, value: option.value as RegistrationStatus }
+            : undefined;
+    }
+
     private updateSelectedStatuses(config: StatusUpdateConfig): void {
         if (this.actionLoading()) return;
 
@@ -487,18 +593,22 @@ export class HoidongHosoXetduyetComponent {
         if (!selectedRecords.length) return;
 
         const total = selectedRecords.length;
-        const reviewTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        const statusOption = this.getStatusOption(config.status);
 
-        const statuscheck = TH_XETTUYEN.find(
-            item => item.value.toString() === config.status.toString(),
-        );
-
-        if (!statuscheck) {
+        if (!statusOption) {
             this.notification.toastError(
                 `Không tìm thấy trạng thái: ${config.status}`,
             );
             return;
         }
+
+        const shouldUpdateReviewTime = config.status === 3 || config.status === 4;
+        const updatePayload: Partial<Registrations> = {
+            status: config.status,
+            ...(shouldUpdateReviewTime
+                ? { ngay_duyet: dayjs().format('YYYY-MM-DD HH:mm:ss') }
+                : {}),
+        };
 
         this.actionLoading.set(true);
 
@@ -514,22 +624,19 @@ export class HoidongHosoXetduyetComponent {
                 (record: HoidongHosoThisinh): Observable<StatusUpdateItemResult> => {
 
                     // Lưu status cũ trước khi update
-                    const oldStatus = record['_hoso']['status'];
+                    const oldStatus = this.getCandidate(record)?.status;
 
                     const data_status: TuyensinhStatus = {
                         registration_id: record.tuyensinh_id,
-                        status_key: statuscheck.status_key,
-                        status_value: statuscheck.kyhieu,
-                        status_name: statuscheck.label,
+                        status_key: statusOption.status_key,
+                        status_value: statusOption.kyhieu,
+                        status_name: statusOption.label,
                         content: '',
                     };
 
                     return this.registrationsService.update(
                         record.tuyensinh_id,
-                        {
-                            status: config.status,
-                            ngay_duyet: reviewTime,
-                        },
+                        updatePayload,
                     ).pipe(
                         switchMap(() => {
 
